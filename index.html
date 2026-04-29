@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bïrch AI — Your co-pilot for performance marketing</title>
-<meta name="description" content="Birch AI reads your ad accounts, audits your rules, and tells you exactly what to do next — across every platform you run." />
+<title>Bïrch AI Assistant — The chat that opens with what to fix today</title>
+<meta name="description" content="The Bïrch AI Assistant lives in your dashboard. It reads every ad account you've connected and opens with a rule worth shipping — preset in your editor, one click away." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
@@ -141,75 +141,156 @@
     color: white; font-size: 9px;
   }
 
-  /* ============== HERO CHAT MOCK ============== */
-  .chat-card {
-    background: white; border-radius: var(--r-card);
-    padding: 18px; box-shadow:
+  /* ============== BIRCH AI POPUP (real UI) ============== */
+  .ai-popup {
+    background: white; border-radius: 18px;
+    box-shadow:
       0 1px 0 rgba(0,0,0,0.04),
       0 30px 60px -20px rgba(20,20,40,0.18),
       0 10px 20px -10px rgba(20,20,40,0.10);
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.06);
+    display: flex; flex-direction: column;
+    min-height: 520px;
+    overflow: hidden;
     position: relative;
   }
-  .chat-header {
+  .ai-popup-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 4px 6px 14px;
-    border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 14px;
+    padding: 18px 18px 0;
   }
-  .chat-tabs { display: flex; gap: 4px; }
-  .chat-tab {
-    padding: 6px 12px; border-radius: 10px;
-    font-size: 13px; font-weight: 600; color: var(--mid);
+  .ai-popup-header h3 {
+    margin: 0; font-size: 20px; font-weight: 700;
+    letter-spacing: -0.015em;
   }
-  .chat-tab.active { background: var(--black); color: white; }
-  .chat-meta { font-size: 12px; color: var(--mid); font-weight: 600; }
+  .ai-popup-controls { display: flex; gap: 12px; }
+  .ai-popup-controls button {
+    color: var(--black); padding: 4px; line-height: 0; opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .ai-popup-controls button:hover { opacity: 1; }
 
-  .msg-row { display: flex; margin: 12px 0; }
-  .msg-row.user { justify-content: flex-end; }
-  .msg {
-    max-width: 78%; padding: 12px 14px;
-    border-radius: 16px; font-size: 14px; line-height: 1.45;
+  .ai-popup-body {
+    flex: 1; padding: 18px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    gap: 14px;
   }
-  .msg.user {
-    background: var(--yellow); color: var(--black);
-    border-bottom-right-radius: 6px; font-weight: 600;
+  .ai-greeting {
+    font-size: 15px; line-height: 1.45;
+    color: var(--black); font-weight: 500;
   }
-  .msg.ai {
-    background: var(--lavender); color: var(--black);
-    border-bottom-left-radius: 6px; font-weight: 500;
+  .ai-prompts { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .ai-prompt {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: #f3f1ec; color: var(--black);
+    border-radius: var(--r-pill); font-size: 13.5px;
+    font-weight: 500;
+    transition: background 0.15s;
+    text-align: left; cursor: pointer;
   }
-  .msg.ai b { font-weight: 700; }
-  .msg.ai .pill {
-    display: inline-block; font-size: 11px; padding: 2px 8px;
-    background: white; border-radius: var(--r-pill);
-    margin-right: 6px; font-weight: 700;
-  }
-  .msg.ai ul { margin: 8px 0 0; padding-left: 18px; }
-  .msg.ai li { margin: 4px 0; }
+  .ai-prompt:hover { background: #e9e6df; }
+  .ai-prompt .sparkle { color: var(--black); font-size: 14px; }
 
-  .chat-input {
-    margin-top: 12px;
-    border: 1px solid rgba(0,0,0,0.1); border-radius: 14px;
-    padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+  .ai-input-area {
+    margin: 12px; border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 18px; padding: 10px 10px 8px;
     background: white;
   }
-  .chat-input input {
-    flex: 1; border: 0; outline: 0; font: inherit;
-    font-size: 14px; color: var(--black); background: transparent;
+  .ai-input-chips {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 28px;
   }
-  .chat-send {
+  .ai-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border: 1px solid rgba(0,0,0,0.14);
+    border-radius: var(--r-pill); font-size: 12.5px;
+    font-weight: 500; color: var(--black);
+    background: white;
+  }
+  .ai-chip .icon-sparkle, .ai-chip .icon-grid {
+    width: 12px; height: 12px; display: inline-block;
+  }
+  .ai-input-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 4px;
+  }
+  .ai-input-btn {
+    width: 26px; height: 26px; border-radius: 6px;
+    color: var(--black); opacity: 0.55; display: grid; place-items: center;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .ai-input-btn:hover { opacity: 1; background: rgba(0,0,0,0.05); }
+  .ai-input-spacer { flex: 1; }
+  .ai-send {
     width: 32px; height: 32px; border-radius: 50%;
     background: var(--black); color: white; display: grid; place-items: center;
   }
-  .chat-context {
-    display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+
+  /* In-product framing: dim background hint behind the popup */
+  .ai-popup-frame {
+    position: relative;
   }
-  .ctx-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--light); border-radius: var(--r-pill);
-    padding: 5px 10px; font-size: 12px; font-weight: 600; color: var(--dark);
+  .ai-popup-frame::before {
+    content: ""; position: absolute; inset: -28px -120% -28px 28px;
+    background:
+      linear-gradient(180deg, rgba(11,11,11,0.85), rgba(11,11,11,0.6)) border-box,
+      linear-gradient(180deg, #1b1b1d, #0d0d0f);
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0.55;
+    filter: blur(6px);
+    display: none;
   }
-  .ctx-chip .swatch { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* sparkle icon (used in chips and prompts) */
+  .ico-spark {
+    display: inline-block; width: 14px; height: 14px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2 14 9 22 12 14 15 12 22 10 15 2 12 10 9Z'/></svg>") center/contain no-repeat;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2 14 9 22 12 14 15 12 22 10 15 2 12 10 9Z'/></svg>") center/contain no-repeat;
+  }
+
+  /* ============== Conversation cards (used in how-it-works) ============== */
+  .convo {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .convo .row { display: flex; }
+  .convo .row.me { justify-content: flex-end; }
+  .convo .bubble-me {
+    background: #f3f1ec; color: var(--black);
+    padding: 10px 14px; border-radius: 16px;
+    font-size: 13.5px; max-width: 85%;
+    font-weight: 500;
+  }
+  .convo .bubble-ai {
+    background: white; color: var(--black);
+    padding: 4px 0; font-size: 13.5px; max-width: 100%;
+    font-weight: 500; line-height: 1.5;
+  }
+  .convo .rule-card {
+    margin-top: 12px; padding: 14px;
+    border: 1px solid rgba(0,0,0,0.08); border-radius: 14px;
+    background: var(--paper);
+  }
+  .convo .rule-card .rule-title {
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--mid); font-weight: 700; margin-bottom: 8px;
+  }
+  .convo .rule-card .rule-line {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px; line-height: 1.6;
+  }
+  .convo .rule-card .rule-line b { font-weight: 700; }
+  .convo .open-editor-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 12px; padding: 10px 14px;
+    background: var(--yellow); color: var(--black);
+    border-radius: 12px; font-size: 13.5px; font-weight: 700;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .convo .open-editor-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(255,226,67,0.45); }
+  .convo .micro {
+    margin-top: 6px; font-size: 11.5px; color: var(--mid); font-weight: 600;
+  }
 
   /* ============== HERO BACKGROUND DECOR ============== */
   .blob {
@@ -401,6 +482,128 @@
   .quote-meta .who { font-weight: 700; font-size: 15px; }
   .quote-meta .role { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
 
+  /* ============== HARD vs EASY ============== */
+  .hard-easy {
+    background: var(--yellow); border-radius: 32px;
+    padding: 64px 56px;
+    position: relative; overflow: hidden;
+  }
+  .hard-easy h2 {
+    font-size: clamp(36px, 5vw, 60px);
+    margin: 0 0 14px;
+    letter-spacing: -0.035em; line-height: 1.02;
+    font-weight: 800;
+    max-width: 18ch;
+  }
+  .hard-easy h2 em {
+    font-family: var(--serif); font-style: italic;
+    font-weight: 400; color: var(--red);
+  }
+  .hard-easy-sub {
+    margin: 0 0 40px; font-size: 17px;
+    color: rgba(11,11,11,0.7); font-weight: 600;
+    max-width: 56ch;
+  }
+  .hard-easy-grid {
+    display: grid; grid-template-columns: 1.1fr 1fr;
+    gap: 56px; align-items: center;
+  }
+  .hard-list-label, .easy-label-top {
+    display: inline-block;
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; margin-bottom: 16px;
+    background: var(--black); color: var(--paper);
+    padding: 5px 10px; border-radius: var(--r-pill);
+  }
+  .easy-label-top { background: var(--red); color: white; }
+  .hard-list ol {
+    margin: 0; padding: 0; list-style: none;
+    counter-reset: hardstep;
+  }
+  .hard-list li {
+    font-size: clamp(15px, 1.6vw, 19px); font-weight: 600;
+    margin: 6px 0; padding-left: 36px;
+    position: relative; line-height: 1.35;
+    counter-increment: hardstep;
+  }
+  .hard-list li::before {
+    content: counter(hardstep, decimal-leading-zero);
+    position: absolute; left: 0; top: 1px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; font-weight: 700;
+    color: rgba(11,11,11,0.55);
+    background: rgba(11,11,11,0.08);
+    padding: 3px 7px; border-radius: var(--r-pill);
+  }
+  .hard-list .nope {
+    margin-top: 18px; font-size: 14px; font-weight: 700;
+    color: rgba(11,11,11,0.55);
+  }
+
+  .easy-side {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 18px;
+  }
+  .toggle-pill {
+    width: 240px; height: 96px;
+    background: var(--black); border-radius: 999px;
+    display: flex; justify-content: flex-end; align-items: center;
+    padding: 8px;
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.35);
+    position: relative;
+  }
+  .toggle-pill::before {
+    content: ""; position: absolute;
+    inset: 8px auto 8px 14px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    align-self: center; top: 50%; transform: translateY(-50%);
+  }
+  .toggle-knob {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: white;
+    display: grid; place-items: center;
+    font-family: var(--font);
+    font-weight: 800; color: var(--red);
+    font-size: 26px; letter-spacing: -0.04em;
+  }
+  .toggle-knob .dots {
+    position: relative; display: inline-block;
+  }
+  .toggle-knob .dots::before, .toggle-knob .dots::after {
+    content: ""; position: absolute; top: -10px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--red);
+  }
+  .toggle-knob .dots::before { left: 5px; }
+  .toggle-knob .dots::after { left: 17px; }
+
+  .easy-card {
+    background: var(--black); color: var(--paper);
+    border-radius: 18px; padding: 22px;
+    max-width: 360px;
+  }
+  .easy-card h4 {
+    margin: 0 0 6px; font-size: 18px; letter-spacing: -0.01em;
+  }
+  .easy-card p {
+    margin: 0; font-size: 14px;
+    color: rgba(255,255,255,0.7); font-weight: 500;
+  }
+  .easy-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px; padding: 10px 14px;
+    background: var(--yellow); color: var(--black);
+    border-radius: 12px; font-size: 13.5px; font-weight: 700;
+  }
+
+  @media (max-width: 860px) {
+    .hard-easy { padding: 48px 28px; }
+    .hard-easy-grid { grid-template-columns: 1fr; gap: 32px; }
+    .toggle-pill { width: 200px; height: 80px; }
+    .toggle-knob { width: 64px; height: 64px; font-size: 22px; }
+  }
+
   /* ============== CTA ============== */
   .cta-final {
     background: var(--yellow); border-radius: 32px; padding: 72px 48px;
@@ -501,18 +704,19 @@
   <div class="container">
     <div class="hero-grid">
       <div>
-        <span class="eyebrow"><span class="dot"></span> Introducing Bïrch AI · early access</span>
+        <span class="eyebrow"><span class="dot"></span> Bïrch AI Assistant · Live in your dashboard</span>
         <h1 class="hero-title">
-          Stop drowning in dashboards.<br/>
-          Start <em>shipping decisions.</em>
+          Open Bïrch.<br/>
+          <em>It's already thinking.</em>
         </h1>
         <p class="hero-sub">
-          Bïrch AI reads every ad account you run, audits your automation rules,
-          and tells you exactly what to fix next — across Meta, Google, TikTok and beyond.
+          The assistant lives in the corner of your Bïrch dashboard. It reads every ad account
+          you've connected, notices what's drifting today, and drafts the rule —
+          preset and ready in your editor, one click away.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-yellow" href="#cta">Try Bïrch AI free →</a>
-          <a class="btn btn-ghost" href="#how">See it in action</a>
+          <a class="btn btn-yellow" href="#cta">Try the AI Assistant →</a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
         </div>
         <div class="hero-microcopy">
           <span><span class="check">✓</span> 14-day free trial</span>
@@ -521,56 +725,69 @@
         </div>
       </div>
 
-      <!-- Hero chat mock -->
-      <div class="chat-card" aria-label="Birch AI chat preview">
-        <div class="chat-header">
-          <div class="chat-tabs">
-            <span class="chat-tab">Overview</span>
-            <span class="chat-tab">Hub</span>
-            <span class="chat-tab active">AI Assistant</span>
-            <span class="chat-tab">Performance</span>
-          </div>
-          <div class="chat-meta">Bïrch · Marketing</div>
-        </div>
-
-        <div class="msg-row user">
-          <div class="msg user">Audit my rules — anything inefficient or conflicting?</div>
-        </div>
-        <div class="msg-row">
-          <div class="msg ai">
-            <span class="pill">🪲 Found 1 issue</span>
-            <b>Rule "1" — "The Restart Loop"</b>
-            <ul>
-              <li><b>Action:</b> Start (re-enable)</li>
-              <li><b>Condition:</b> <code>Spend (today) &gt; 0</code></li>
-              <li>Filter targets ads that are already <i>active</i> — the rule never fires.</li>
-            </ul>
-          </div>
-        </div>
-        <div class="msg-row user">
-          <div class="msg user">Suggest a fix.</div>
-        </div>
-        <div class="msg-row">
-          <div class="msg ai">
-            Switch the filter to <code>effective_status = PAUSED</code> and lower the spend
-            threshold to <code>$5</code>. Want me to draft the rule?
-            <div style="margin-top:10px" class="typing"><span></span><span></span><span></span></div>
+      <!-- Hero: Birch AI popup (real product UI) -->
+      <div class="ai-popup" aria-label="Birch AI in-product popup">
+        <div class="ai-popup-header">
+          <h3>Birch AI</h3>
+          <div class="ai-popup-controls">
+            <button aria-label="Expand" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+            <button aria-label="Minimize" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div class="chat-input">
-          <input value="Yes, draft it for the Bïrch Marketing account" />
-          <button class="chat-send" aria-label="Send">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v12M2 6l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+        <div class="ai-popup-body">
+          <div class="ai-greeting">
+            Hi Mike<br/>Where should we start?
+          </div>
+          <div class="ai-prompts">
+            <button class="ai-prompt" type="button"><span class="ico-spark"></span> Compare Spend for the last 30 days</button>
+            <button class="ai-prompt" type="button"><span class="ico-spark"></span> Compare Reach in Q1 2026 to Q1 2025</button>
+            <button class="ai-prompt" type="button"><span class="ico-spark"></span> Show Impressions for the last 14 days</button>
+          </div>
         </div>
-        <div class="chat-context">
-          <span class="ctx-chip"><span class="swatch" style="background:var(--blue)"></span>Meta · Bïrch Marketing</span>
-          <span class="ctx-chip"><span class="swatch" style="background:var(--green)"></span>Google · Bïrch.ch</span>
-          <span class="ctx-chip"><span class="swatch" style="background:#000"></span>TikTok · Revealbot</span>
-          <span class="ctx-chip">+ 12 more</span>
+
+        <div class="ai-input-area">
+          <div class="ai-input-chips">
+            <span class="ai-chip"><span class="ico-spark"></span> Pause underperforming ads</span>
+            <span class="ai-chip">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="3" x2="9" y2="21"/>
+              </svg>
+              Adjust test metric
+            </span>
+          </div>
+          <div class="ai-input-row">
+            <button class="ai-input-btn" aria-label="Add" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="ai-input-btn" aria-label="Filters" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="4" y1="6" x2="11" y2="6"/><line x1="15" y1="6" x2="20" y2="6"/>
+                <line x1="4" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="20" y2="14"/>
+                <circle cx="13" cy="6" r="2"/><circle cx="11" cy="14" r="2"/>
+              </svg>
+            </button>
+            <div class="ai-input-spacer"></div>
+            <button class="ai-send" aria-label="Send" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"/>
+                <polyline points="5 12 12 5 19 12"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -592,26 +809,27 @@
   <div class="container">
     <div class="section-head">
       <div class="kicker">What it does</div>
-      <h2>An AI co-pilot that <em>actually knows</em> your ad accounts.</h2>
-      <p>It reads your real data, your rules, your history — then talks like a senior media buyer who happens to never sleep.</p>
+      <h2>An AI assistant that <em>actually knows</em> your ad accounts.</h2>
+      <p>It reads every account you've connected, every rule you've set, and what's changed today — then opens with a suggestion that fits your setup, not a template.</p>
     </div>
 
     <div class="bento">
       <div class="tile tile-yellow">
-        <span class="tag">Rules audit</span>
-        <h3>Find the rules that aren't doing anything.</h3>
-        <p>Bïrch AI inspects every automation rule in your account, flags conflicts, dead filters, and "logical paradoxes" — in plain English.</p>
+        <span class="tag">Proactive chat</span>
+        <h3>It speaks first — with what to fix today.</h3>
+        <p>Open the assistant in the top-right of your Bïrch dashboard. It's already scanned your accounts overnight and surfaced the one thing worth a rule today.</p>
         <div class="v-rule">
-          <span class="lbl">Rule "Restart Loop"</span> · <span class="bad">conflict</span><br/>
-          <span class="lbl">Rule "Burnout pause"</span> · <span class="ok">healthy</span><br/>
-          <span class="lbl">Rule "Boost ROAS &gt;3"</span> · <span class="bad">never fires</span>
+          <span class="lbl">Today's anomalies</span><br/>
+          <span class="lbl">BFCM_Retargeting_v3</span> · <span class="bad">freq 4.8 · CTR -38%</span><br/>
+          <span class="lbl">TopOfFunnel_Q2</span> · <span class="bad">CPM +112%</span><br/>
+          <span class="lbl">DPA_All_Catalog</span> · <span class="ok">stable</span>
         </div>
       </div>
 
       <div class="tile tile-dark">
-        <span class="tag">Cross-platform reporting</span>
-        <h3>One question. Every ad account. Real numbers.</h3>
-        <p>"Give me a breakdown of spend across all my ad accounts for Feb 1–25" — and it just answers, weighted, deduped, sorted.</p>
+        <span class="tag">Full-account context</span>
+        <h3>Every ad account you've connected. As context.</h3>
+        <p>It reads your full Bïrch setup — every connected platform, every ad account, every rule — so its suggestions match your actual portfolio, not a generic playbook.</p>
         <div class="v-chart" aria-hidden="true">
           <svg viewBox="0 0 300 96" preserveAspectRatio="none">
             <defs>
@@ -627,24 +845,24 @@
       </div>
 
       <div class="tile tile-purple">
-        <span class="tag">Strategy profile</span>
-        <h3>Know your style, instantly.</h3>
-        <p>"Efficiency-Driven Scaling." Bïrch AI reads your setup and tells you what kind of buyer you are — and what's missing.</p>
+        <span class="tag">Rule suggestions</span>
+        <h3>From "this looks off" to a draft rule.</h3>
+        <p>It writes the trigger, the condition and the action — based on what just happened in your account, not a template.</p>
       </div>
 
       <div class="tile tile-paper">
-        <span class="tag">Onboarding co-pilot</span>
-        <h3>From zero rules to a strategy in five minutes.</h3>
-        <p>New to Bïrch? It drafts your first three high-impact rules from your real account data.</p>
+        <span class="tag">You stay in control</span>
+        <h3>One click into the rule editor.</h3>
+        <p>It's not an agent — it doesn't ship anything by itself. Click "Open in rule editor" and you land on the normal Bïrch rule page with everything preset. Tweak. Save. Done.</p>
         <div class="v-channels">
           <span class="ch">Meta</span><span class="ch">Google</span><span class="ch">TikTok</span><span class="ch">Snap</span><span class="ch">+8</span>
         </div>
       </div>
 
       <div class="tile tile-blue">
-        <span class="tag">Creative insights</span>
-        <h3>Spot ads about to burn out — before they do.</h3>
-        <p>Frequency creeping, CTR sliding? Bïrch AI surfaces it and proposes a refresh you can ship from chat.</p>
+        <span class="tag">Creative burnout</span>
+        <h3>Catch ads before they cost you.</h3>
+        <p>Frequency creeping, CTR sliding — the assistant calls it out the moment it shows up, with a rule already drafted for your accounts.</p>
       </div>
     </div>
   </div>
@@ -655,35 +873,35 @@
   <div class="container">
     <div class="section-head">
       <div class="kicker">Use cases</div>
-      <h2>Three jobs Bïrch AI does <em>better than you</em> at 2am.</h2>
+      <h2>What the Bïrch AI Assistant <em>actually does</em>.</h2>
       <p>Built from hundreds of conversations with performance teams scaling across Meta, Google, TikTok, Snap and more.</p>
     </div>
 
     <div class="cases">
       <article class="case-card c1">
         <div class="case-num c1">01</div>
-        <h3>Audit and extend my current rules</h3>
-        <p>"Am I using Bïrch at full potential?" Bïrch AI inspects what you have, flags what's broken, and proposes the next 3 rules worth adding.</p>
+        <h3>Suggest a rule from what just happened</h3>
+        <p>The assistant watches every connected ad account. The moment something drifts — a frequency spike, a CPA jump, a winner — it opens with a draft rule built for your setup. One click and you're in the rule editor with everything preset.</p>
         <div class="case-quote">
-          "Your strategy centers on dynamic budget optimization and performance-based scaling. Here are 3 rules that would unlock the next level." — Bïrch AI
+          "BFCM_Retargeting_v3 hit frequency 4.8 with CTR down 38% in 5 days. Want a rule that auto-pauses when freq &gt; 4 and CTR drops 30%? Open in editor →" — Birch AI
         </div>
       </article>
 
       <article class="case-card c2">
         <div class="case-num c2">02</div>
-        <h3>Find rule conflicts before they cost money</h3>
-        <p>Lots of rules and no idea if they fight each other? Bïrch AI checks every condition, filter and trigger for paradoxes and dead logic.</p>
+        <h3>Audit rules across every account</h3>
+        <p>Lots of rules, lots of accounts? The assistant inspects every condition, filter and trigger across your full Bïrch setup — flagging conflicts, dead logic, and rules that haven't fired in months.</p>
         <div class="case-quote">
-          "Rule '1' is a logical paradox: it tries to start ads that are already active. It has never fired in 47 days." — Bïrch AI
+          "Rule 'Restart Loop' tries to start ads that are already active. It hasn't fired in 47 days. Here's the fix — open in editor →" — Birch AI
         </div>
       </article>
 
       <article class="case-card c3">
         <div class="case-num c3">03</div>
-        <h3>Onboard from zero, in minutes</h3>
-        <p>No rules yet? Connect your accounts and ask: "What should I automate first?" Bïrch AI drafts a starter playbook from your live data.</p>
+        <h3>Onboard with rules from your real data</h3>
+        <p>New to Bïrch? Open the assistant — it reads your live accounts and drafts the three rules worth starting with. No template playbook, no blank slate.</p>
         <div class="case-quote">
-          "Google Ads is your strongest performer (ROAS 8.79). TikTok has been inactive for 30 days. Start here…" — Bïrch AI
+          "Google Ads is your strongest performer (ROAS 8.79). TikTok's been inactive 30 days. Start here — three rules ready in your editor." — Birch AI
         </div>
       </article>
     </div>
@@ -695,8 +913,8 @@
   <div class="container">
     <div class="section-head">
       <div class="kicker">How it works</div>
-      <h2>Connect, ask, <em>ship.</em></h2>
-      <p>No new dashboard to learn. Bïrch AI lives where your campaigns already do.</p>
+      <h2>Connect. Open. <em>Ship the rule.</em></h2>
+      <p>No new dashboard. The assistant lives in the corner of the Bïrch product you already use.</p>
     </div>
 
     <div class="how">
@@ -704,39 +922,109 @@
         <div class="step">
           <div class="step-n">1</div>
           <div>
-            <h4>Connect your ad accounts</h4>
-            <p>Meta, Google, TikTok, Snap, LinkedIn — all 14 platforms Bïrch already supports. OAuth, no spreadsheets.</p>
+            <h4>Connect every ad account</h4>
+            <p>Meta, Google, TikTok, Snap, LinkedIn — all 14 platforms Bïrch already supports. OAuth, no spreadsheets. Every account becomes context for the assistant.</p>
           </div>
         </div>
         <div class="step">
           <div class="step-n">2</div>
           <div>
-            <h4>Ask anything in plain English</h4>
-            <p>"Why did CPA jump on Wednesday?" "Which ads are about to burn out?" "Compare ROAS across networks for last 30 days."</p>
+            <h4>Open the popup. It's already noticed.</h4>
+            <p>The chat lives in the top-right of your Bïrch dashboard. When you open it, it leads with what's changed today across your accounts — and offers a rule for it.</p>
           </div>
         </div>
         <div class="step">
           <div class="step-n">3</div>
           <div>
-            <h4>Approve the next move</h4>
-            <p>Bïrch AI drafts the rule, the budget shift, or the creative refresh. You hit Approve. It runs.</p>
+            <h4>Click into the rule editor — preset</h4>
+            <p>You land on the normal Bïrch rule page with the trigger, condition and action filled in. Tweak. Save. Ship. The assistant doesn't run anything itself — you stay in control.</p>
           </div>
         </div>
       </div>
 
-      <div class="how-visual">
-        <h4>A real prompt</h4>
-        <div class="msg-row user">
-          <div class="msg user" style="font-size:13px">Can you check my rules and describe my strategy?</div>
+      <!-- Step-by-step popup: after clicking a prompt, the rule is drafted -->
+      <div class="ai-popup" aria-label="Rule suggestion flow">
+        <div class="ai-popup-header">
+          <h3>Birch AI</h3>
+          <div class="ai-popup-controls">
+            <button aria-label="Expand" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </button>
+            <button aria-label="Close" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="msg-row">
-          <div class="msg ai" style="font-size:13px">
-            I've analyzed your current automation setup. You have <b>three rules</b> configured for your <b>Bïrch Marketing</b> account, though all of them are currently <b>inactive</b>.
-            <br/><br/>
-            Your strategy centers on <b>dynamic budget optimization</b> and <b>performance-based scaling</b>. Here's the breakdown:
-            <br/><br/>
-            🛠 <b>Strategy profile:</b> "Efficiency-Driven Scaling"<br/>
-            Designed to balance protecting your budget and scaling winners based on three primary metrics: <b>ROAS, CTR, and Spend-to-CPA</b>.
+        <div class="ai-popup-body" style="justify-content:flex-start; padding-top:18px;">
+          <div class="convo">
+            <div class="row me">
+              <div class="bubble-me">Compare Spend for the last 30 days</div>
+            </div>
+            <div class="row">
+              <div class="bubble-ai">
+                Across your <b>14 connected accounts</b>, one ad set's worth flagging right now: <b>BFCM_Retargeting_v3</b> on Meta — frequency hit <b>4.8</b>, CTR down <b>38%</b> in 5 days, $4,210 spent in last 24h.
+                <br/><br/>
+                Want a rule that auto-pauses ads when <code>frequency &gt; 4</code> AND <code>CTR drop &gt; 30%</code>?
+                <div class="rule-card">
+                  <div class="rule-title">Rule preview</div>
+                  <div class="rule-line">
+                    <b>IF</b> frequency &gt; 4 <b>AND</b> CTR drop &gt; 30% (5d)<br/>
+                    <b>THEN</b> pause ad · notify #perf-marketing<br/>
+                    <b>SCOPE</b> all 14 accounts
+                  </div>
+                </div>
+                <a href="#" class="open-editor-btn">
+                  <span class="ico-spark"></span> Open in rule editor
+                </a>
+                <div class="micro">Not live until you save it. You stay in control.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== HARD vs EASY =================== -->
+<section class="s" id="diy" style="padding-top: 24px;">
+  <div class="container">
+    <div class="hard-easy">
+      <h2>It's hard without us, <em>but easy with us.</em></h2>
+      <p class="hard-easy-sub">No magic. Just a lot of plumbing — already done. Want to ship a real AI assistant for your ad accounts on your own?</p>
+      <div class="hard-easy-grid">
+        <div class="hard-list">
+          <div class="hard-list-label">Build it yourself</div>
+          <ol>
+            <li>Set up Python and AI tooling on a Mac mini</li>
+            <li>Run a local or hosted LLM (and keep it healthy)</li>
+            <li>Connect every ad platform's marketing data</li>
+            <li>Build the integrations and APIs</li>
+            <li>Define the agent's tasks and guardrails</li>
+            <li>Provide your business context — and keep it fresh</li>
+            <li>Launch the agent. Monitor. Fix. Repeat.</li>
+          </ol>
+          <div class="nope">…or skip all of that.</div>
+        </div>
+
+        <div class="easy-side">
+          <span class="easy-label-top">With Bïrch · One toggle</span>
+          <div class="toggle-pill" aria-hidden="true">
+            <div class="toggle-knob">
+              <span class="dots">Bo</span>
+            </div>
+          </div>
+          <div class="easy-card">
+            <h4>Bïrch AI is already built.</h4>
+            <p>Connected to 14 ad platforms. Trained on real performance-marketing patterns. Living inside the dashboard you already use. Turn it on and ask the first question in under two minutes.</p>
+            <a class="easy-cta" href="#cta"><span class="ico-spark"></span> Turn it on →</a>
           </div>
         </div>
       </div>
@@ -766,10 +1054,10 @@
 <section class="s" id="cta" style="padding-bottom: 56px;">
   <div class="container">
     <div class="cta-final">
-      <h2>Your AI co-pilot is <em>waiting.</em></h2>
-      <p>Connect your first ad account in under two minutes. See what Bïrch AI says about your setup tonight.</p>
+      <h2>Open Bïrch. <em>It's already thinking.</em></h2>
+      <p>Connect your first ad account in under two minutes. The assistant will read your setup and open with the first rule worth shipping today.</p>
       <div class="cta-actions">
-        <a class="btn btn-primary" href="#">Try Bïrch AI free →</a>
+        <a class="btn btn-primary" href="#">Try the AI Assistant free →</a>
         <a class="btn btn-ghost" href="#">Book a demo</a>
       </div>
       <div class="cta-microcopy">14-day trial · No credit card · Cancel anytime</div>
