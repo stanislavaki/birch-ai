@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bïrch AI — Your co-pilot for performance marketing</title>
+<meta name="description" content="Birch AI reads your ad accounts, audits your rules, and tells you exactly what to do next — across every platform you run." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --yellow: #ffe243;
+    --blue: #4551f2;
+    --green: #00cd36;
+    --purple: #5b45cd;
+    --red: #e01e5a;
+    --bg: #161616;
+    --black: #0b0b0b;
+    --dark: #2a2a2a;
+    --light: #edecf2;
+    --mid: #888680;
+    --paper: #f6f5f0;
+    --lavender: #efeaff;
+    --butter: #fff7c2;
+
+    --font: "Inter", "TT Commons Pro Variable", Arial, sans-serif;
+    --serif: "Instrument Serif", Georgia, serif;
+
+    --r-card: 24px;
+    --r-pill: 999px;
+    --r-btn: 14px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font);
+    font-weight: 500;
+    color: var(--black);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.4;
+  }
+  img, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; }
+
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+  /* ============== NAV ============== */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(246,245,240,0.85);
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px;
+  }
+  .logo {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 800; font-size: 22px; letter-spacing: -0.02em;
+  }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--yellow);
+    display: grid; place-items: center;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .logo-mark svg { width: 18px; height: 18px; }
+  .nav-links { display: flex; gap: 28px; font-weight: 600; font-size: 15px; }
+  .nav-links a { opacity: 0.85; }
+  .nav-links a:hover { opacity: 1; }
+  .nav-cta { display: flex; gap: 10px; align-items: center; }
+
+  /* ============== BUTTONS ============== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 18px;
+    border-radius: var(--r-btn);
+    font-weight: 700; font-size: 15px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .btn-primary {
+    background: var(--black); color: var(--paper);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
+  .btn-yellow { background: var(--yellow); color: var(--black); }
+  .btn-yellow:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(255,226,67,0.45); }
+  .btn-ghost { color: var(--black); }
+  .btn-ghost:hover { background: rgba(0,0,0,0.06); }
+
+  /* ============== HERO ============== */
+  .hero { padding: 64px 0 48px; position: relative; overflow: hidden; }
+  .hero-grid {
+    display: grid; grid-template-columns: 1.05fr 0.95fr;
+    gap: 48px; align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--black); color: var(--yellow);
+    padding: 6px 12px; border-radius: var(--r-pill);
+    font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+  }
+  .eyebrow .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(0,205,54,0.18);
+  }
+  h1.hero-title {
+    font-size: clamp(44px, 6.4vw, 88px);
+    line-height: 0.96; letter-spacing: -0.035em;
+    font-weight: 800; margin: 18px 0 22px;
+  }
+  .hero-title em {
+    font-family: var(--serif);
+    font-style: italic; font-weight: 400;
+    color: var(--purple);
+    letter-spacing: -0.02em;
+  }
+  .hero-sub {
+    font-size: clamp(16px, 1.4vw, 19px);
+    color: rgba(11,11,11,0.72);
+    max-width: 540px; margin: 0 0 32px;
+    font-weight: 500;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-microcopy {
+    display: flex; gap: 18px; margin-top: 18px;
+    font-size: 13px; color: var(--mid); font-weight: 600;
+  }
+  .hero-microcopy span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-microcopy .check {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--green); display: inline-grid; place-items: center;
+    color: white; font-size: 9px;
+  }
+
+  /* ============== HERO CHAT MOCK ============== */
+  .chat-card {
+    background: white; border-radius: var(--r-card);
+    padding: 18px; box-shadow:
+      0 1px 0 rgba(0,0,0,0.04),
+      0 30px 60px -20px rgba(20,20,40,0.18),
+      0 10px 20px -10px rgba(20,20,40,0.10);
+    border: 1px solid rgba(0,0,0,0.05);
+    position: relative;
+  }
+  .chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 6px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.06); margin-bottom: 14px;
+  }
+  .chat-tabs { display: flex; gap: 4px; }
+  .chat-tab {
+    padding: 6px 12px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: var(--mid);
+  }
+  .chat-tab.active { background: var(--black); color: white; }
+  .chat-meta { font-size: 12px; color: var(--mid); font-weight: 600; }
+
+  .msg-row { display: flex; margin: 12px 0; }
+  .msg-row.user { justify-content: flex-end; }
+  .msg {
+    max-width: 78%; padding: 12px 14px;
+    border-radius: 16px; font-size: 14px; line-height: 1.45;
+  }
+  .msg.user {
+    background: var(--yellow); color: var(--black);
+    border-bottom-right-radius: 6px; font-weight: 600;
+  }
+  .msg.ai {
+    background: var(--lavender); color: var(--black);
+    border-bottom-left-radius: 6px; font-weight: 500;
+  }
+  .msg.ai b { font-weight: 700; }
+  .msg.ai .pill {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    background: white; border-radius: var(--r-pill);
+    margin-right: 6px; font-weight: 700;
+  }
+  .msg.ai ul { margin: 8px 0 0; padding-left: 18px; }
+  .msg.ai li { margin: 4px 0; }
+
+  .chat-input {
+    margin-top: 12px;
+    border: 1px solid rgba(0,0,0,0.1); border-radius: 14px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+    background: white;
+  }
+  .chat-input input {
+    flex: 1; border: 0; outline: 0; font: inherit;
+    font-size: 14px; color: var(--black); background: transparent;
+  }
+  .chat-send {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--black); color: white; display: grid; place-items: center;
+  }
+  .chat-context {
+    display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .ctx-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--light); border-radius: var(--r-pill);
+    padding: 5px 10px; font-size: 12px; font-weight: 600; color: var(--dark);
+  }
+  .ctx-chip .swatch { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ============== HERO BACKGROUND DECOR ============== */
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
+    pointer-events: none; z-index: 0;
+  }
+  .blob-1 { width: 480px; height: 480px; background: var(--yellow); top: -120px; left: -120px; }
+  .blob-2 { width: 420px; height: 420px; background: var(--lavender); bottom: -160px; right: -100px; opacity: 0.85; }
+  .hero .container { position: relative; z-index: 1; }
+
+  /* ============== STATS ============== */
+  .stats {
+    border-top: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 28px 0; background: var(--paper);
+  }
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 24px; align-items: center;
+  }
+  .stat .num {
+    font-size: clamp(28px, 3vw, 40px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1;
+  }
+  .stat .lbl { font-size: 13px; color: var(--mid); font-weight: 600; margin-top: 6px; }
+  .stat-mini {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--mid);
+  }
+
+  /* ============== SECTION ============== */
+  section.s { padding: 96px 0; }
+  .section-head {
+    max-width: 760px; margin: 0 auto 56px; text-align: center;
+  }
+  .section-head .kicker {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--purple);
+  }
+  .section-head h2 {
+    font-size: clamp(34px, 4.4vw, 56px);
+    line-height: 1.02; letter-spacing: -0.03em;
+    margin: 12px 0 16px; font-weight: 800;
+  }
+  .section-head h2 em {
+    font-family: var(--serif); font-style: italic;
+    font-weight: 400; color: var(--purple);
+  }
+  .section-head p {
+    font-size: 18px; color: rgba(11,11,11,0.68);
+    margin: 0; font-weight: 500;
+  }
+
+  /* ============== BENTO ============== */
+  .bento {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: minmax(220px, auto); gap: 18px;
+  }
+  .tile {
+    border-radius: var(--r-card); padding: 28px;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .tile h3 {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.015em;
+    margin: 0 0 8px; line-height: 1.1;
+  }
+  .tile p {
+    margin: 0; font-size: 15px; line-height: 1.45;
+    color: rgba(11,11,11,0.72); font-weight: 500;
+    max-width: 36ch;
+  }
+  .tile .tag {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; opacity: 0.7;
+  }
+  .tile .visual { margin-top: auto; }
+
+  .tile-yellow { background: var(--yellow); grid-column: span 3; }
+  .tile-dark { background: var(--bg); color: var(--paper); grid-column: span 3; }
+  .tile-dark p { color: rgba(255,255,255,0.7); }
+  .tile-dark .tag { color: var(--yellow); opacity: 1; }
+  .tile-purple { background: var(--purple); color: white; grid-column: span 2; }
+  .tile-purple p { color: rgba(255,255,255,0.85); }
+  .tile-paper { background: white; grid-column: span 2; border: 1px solid rgba(0,0,0,0.06); }
+  .tile-blue { background: var(--blue); color: white; grid-column: span 2; }
+  .tile-blue p { color: rgba(255,255,255,0.85); }
+
+  /* mini visuals inside tiles */
+  .v-rule {
+    background: rgba(0,0,0,0.06); border-radius: 12px; padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+    color: var(--black); margin-top: 18px;
+  }
+  .v-rule .ok { color: #008f26; font-weight: 700; }
+  .v-rule .bad { color: var(--red); font-weight: 700; }
+  .v-rule .lbl { color: var(--mid); font-weight: 700; }
+
+  .v-chart {
+    margin-top: 18px; height: 96px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+    border-radius: 12px; position: relative;
+  }
+  .v-chart svg { width: 100%; height: 100%; }
+
+  .v-channels { display: flex; gap: 6px; margin-top: 18px; flex-wrap: wrap; }
+  .v-channels .ch {
+    font-size: 11px; font-weight: 700;
+    padding: 5px 10px; border-radius: var(--r-pill);
+    background: rgba(255,255,255,0.18); color: inherit;
+    backdrop-filter: blur(2px);
+  }
+  .tile-paper .v-channels .ch { background: var(--light); color: var(--dark); }
+
+  /* ============== USE CASES ============== */
+  .cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .case-card {
+    background: white; border-radius: var(--r-card); padding: 28px;
+    border: 1px solid rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .case-num {
+    width: 36px; height: 36px; border-radius: 12px;
+    display: grid; place-items: center; font-weight: 800; font-size: 16px;
+  }
+  .case-num.c1 { background: var(--yellow); }
+  .case-num.c2 { background: var(--lavender); color: var(--purple); }
+  .case-num.c3 { background: var(--butter); }
+  .case-card h3 { font-size: 22px; margin: 0; line-height: 1.15; letter-spacing: -0.015em; }
+  .case-card p { margin: 0; color: rgba(11,11,11,0.7); font-size: 15px; }
+  .case-quote {
+    margin-top: auto;
+    padding: 14px; border-radius: 14px; background: var(--paper);
+    font-size: 13px; font-weight: 600; color: var(--dark);
+    border-left: 3px solid var(--yellow);
+  }
+  .case-card.c2 .case-quote { border-left-color: var(--purple); }
+  .case-card.c3 .case-quote { border-left-color: var(--blue); }
+
+  /* ============== HOW IT WORKS ============== */
+  .how { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .how-steps { display: grid; gap: 14px; }
+  .step {
+    display: grid; grid-template-columns: 44px 1fr; gap: 16px;
+    padding: 18px; border-radius: 18px;
+    background: white; border: 1px solid rgba(0,0,0,0.06);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .step:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -16px rgba(0,0,0,0.15); }
+  .step-n {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--black); color: var(--yellow);
+    display: grid; place-items: center; font-weight: 800;
+    font-family: var(--serif); font-style: italic; font-size: 22px;
+  }
+  .step h4 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+  .step p { margin: 4px 0 0; font-size: 14px; color: rgba(11,11,11,0.65); }
+
+  .how-visual {
+    background: white; border-radius: var(--r-card); padding: 24px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 30px 60px -30px rgba(20,20,40,0.18);
+  }
+  .how-visual .msg { font-size: 13px; }
+  .how-visual h4 {
+    margin: 0 0 10px; font-size: 14px; font-weight: 700;
+    color: var(--mid); text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* ============== TESTIMONIAL ============== */
+  .quote-strip {
+    background: var(--black); color: var(--paper); border-radius: var(--r-card);
+    padding: 56px; display: grid; grid-template-columns: 1fr auto;
+    gap: 48px; align-items: center;
+  }
+  .quote-strip blockquote {
+    margin: 0; font-size: clamp(22px, 2.4vw, 32px);
+    font-family: var(--serif); font-style: italic; line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .quote-strip blockquote .hl { color: var(--yellow); font-style: italic; }
+  .quote-meta { display: flex; align-items: center; gap: 14px; }
+  .avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--yellow), var(--purple));
+    display: grid; place-items: center;
+    color: var(--black); font-weight: 800; font-size: 18px;
+  }
+  .quote-meta .who { font-weight: 700; font-size: 15px; }
+  .quote-meta .role { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
+
+  /* ============== CTA ============== */
+  .cta-final {
+    background: var(--yellow); border-radius: 32px; padding: 72px 48px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-final h2 {
+    font-size: clamp(36px, 5vw, 64px); margin: 0 0 16px;
+    letter-spacing: -0.035em; line-height: 1; font-weight: 800;
+  }
+  .cta-final h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+  .cta-final p { font-size: 18px; color: rgba(11,11,11,0.7); margin: 0 0 28px; font-weight: 500; }
+  .cta-actions { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .cta-microcopy {
+    margin-top: 18px; font-size: 13px; color: rgba(11,11,11,0.6);
+    font-weight: 600;
+  }
+
+  /* ============== FOOTER ============== */
+  footer { padding: 56px 0 36px; }
+  .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px; flex-wrap: wrap;
+    color: var(--mid); font-size: 13px; font-weight: 600;
+  }
+  .foot-links { display: flex; gap: 18px; }
+  .foot-links a:hover { color: var(--black); }
+
+  /* ============== RESPONSIVE ============== */
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); row-gap: 32px; }
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .tile-yellow, .tile-dark, .tile-purple, .tile-paper, .tile-blue { grid-column: span 2; }
+    .cases { grid-template-columns: 1fr; }
+    .how { grid-template-columns: 1fr; gap: 32px; }
+    .quote-strip { grid-template-columns: 1fr; padding: 40px; }
+    section.s { padding: 72px 0; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 540px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .bento { grid-template-columns: 1fr; }
+    .tile-yellow, .tile-dark, .tile-purple, .tile-paper, .tile-blue { grid-column: span 1; }
+    .cta-final { padding: 56px 24px; }
+    .quote-strip { padding: 28px; }
+  }
+
+  /* small breath animations */
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .hero-title em { display: inline-block; }
+
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.25; }
+    30% { opacity: 1; }
+  }
+  .typing { display: inline-flex; gap: 4px; align-items: center; }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--purple);
+    animation: typing 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- =================== NAV =================== -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="logo" href="#">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 4h7a5 5 0 0 1 0 10H8v6H5V4Zm3 3v4h4a2 2 0 1 0 0-4H8Z" fill="#0b0b0b"/>
+        </svg>
+      </span>
+      Bïrch
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#cases">Use cases</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="#">Sign in</a>
+      <a class="btn btn-primary" href="#cta">Book demo →</a>
+    </div>
+  </div>
+</header>
+
+<!-- =================== HERO =================== -->
+<section class="hero">
+  <span class="blob blob-1"></span>
+  <span class="blob blob-2"></span>
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Introducing Bïrch AI · early access</span>
+        <h1 class="hero-title">
+          Stop drowning in dashboards.<br/>
+          Start <em>shipping decisions.</em>
+        </h1>
+        <p class="hero-sub">
+          Bïrch AI reads every ad account you run, audits your automation rules,
+          and tells you exactly what to fix next — across Meta, Google, TikTok and beyond.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-yellow" href="#cta">Try Bïrch AI free →</a>
+          <a class="btn btn-ghost" href="#how">See it in action</a>
+        </div>
+        <div class="hero-microcopy">
+          <span><span class="check">✓</span> 14-day free trial</span>
+          <span><span class="check">✓</span> No credit card</span>
+          <span><span class="check">✓</span> Connects in &lt; 2 min</span>
+        </div>
+      </div>
+
+      <!-- Hero chat mock -->
+      <div class="chat-card" aria-label="Birch AI chat preview">
+        <div class="chat-header">
+          <div class="chat-tabs">
+            <span class="chat-tab">Overview</span>
+            <span class="chat-tab">Hub</span>
+            <span class="chat-tab active">AI Assistant</span>
+            <span class="chat-tab">Performance</span>
+          </div>
+          <div class="chat-meta">Bïrch · Marketing</div>
+        </div>
+
+        <div class="msg-row user">
+          <div class="msg user">Audit my rules — anything inefficient or conflicting?</div>
+        </div>
+        <div class="msg-row">
+          <div class="msg ai">
+            <span class="pill">🪲 Found 1 issue</span>
+            <b>Rule "1" — "The Restart Loop"</b>
+            <ul>
+              <li><b>Action:</b> Start (re-enable)</li>
+              <li><b>Condition:</b> <code>Spend (today) &gt; 0</code></li>
+              <li>Filter targets ads that are already <i>active</i> — the rule never fires.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="msg-row user">
+          <div class="msg user">Suggest a fix.</div>
+        </div>
+        <div class="msg-row">
+          <div class="msg ai">
+            Switch the filter to <code>effective_status = PAUSED</code> and lower the spend
+            threshold to <code>$5</code>. Want me to draft the rule?
+            <div style="margin-top:10px" class="typing"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <input value="Yes, draft it for the Bïrch Marketing account" />
+          <button class="chat-send" aria-label="Send">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1v12M2 6l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="chat-context">
+          <span class="ctx-chip"><span class="swatch" style="background:var(--blue)"></span>Meta · Bïrch Marketing</span>
+          <span class="ctx-chip"><span class="swatch" style="background:var(--green)"></span>Google · Bïrch.ch</span>
+          <span class="ctx-chip"><span class="swatch" style="background:#000"></span>TikTok · Revealbot</span>
+          <span class="ctx-chip">+ 12 more</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== STATS =================== -->
+<section class="stats">
+  <div class="container stats-row">
+    <div class="stat-mini">Trusted by performance teams managing</div>
+    <div class="stat"><div class="num">$2B</div><div class="lbl">Annual ad spend</div></div>
+    <div class="stat"><div class="num">240M</div><div class="lbl">Automated actions / yr</div></div>
+    <div class="stat"><div class="num">15K</div><div class="lbl">Ad accounts connected</div></div>
+  </div>
+</section>
+
+<!-- =================== BENTO FEATURES =================== -->
+<section class="s" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">What it does</div>
+      <h2>An AI co-pilot that <em>actually knows</em> your ad accounts.</h2>
+      <p>It reads your real data, your rules, your history — then talks like a senior media buyer who happens to never sleep.</p>
+    </div>
+
+    <div class="bento">
+      <div class="tile tile-yellow">
+        <span class="tag">Rules audit</span>
+        <h3>Find the rules that aren't doing anything.</h3>
+        <p>Bïrch AI inspects every automation rule in your account, flags conflicts, dead filters, and "logical paradoxes" — in plain English.</p>
+        <div class="v-rule">
+          <span class="lbl">Rule "Restart Loop"</span> · <span class="bad">conflict</span><br/>
+          <span class="lbl">Rule "Burnout pause"</span> · <span class="ok">healthy</span><br/>
+          <span class="lbl">Rule "Boost ROAS &gt;3"</span> · <span class="bad">never fires</span>
+        </div>
+      </div>
+
+      <div class="tile tile-dark">
+        <span class="tag">Cross-platform reporting</span>
+        <h3>One question. Every ad account. Real numbers.</h3>
+        <p>"Give me a breakdown of spend across all my ad accounts for Feb 1–25" — and it just answers, weighted, deduped, sorted.</p>
+        <div class="v-chart" aria-hidden="true">
+          <svg viewBox="0 0 300 96" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#ffe243" stop-opacity="0.6"/>
+                <stop offset="100%" stop-color="#ffe243" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,70 L30,60 L60,64 L90,40 L120,46 L150,30 L180,34 L210,18 L240,22 L270,10 L300,14 L300,96 L0,96 Z" fill="url(#g1)"/>
+            <path d="M0,70 L30,60 L60,64 L90,40 L120,46 L150,30 L180,34 L210,18 L240,22 L270,10 L300,14" stroke="#ffe243" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="tile tile-purple">
+        <span class="tag">Strategy profile</span>
+        <h3>Know your style, instantly.</h3>
+        <p>"Efficiency-Driven Scaling." Bïrch AI reads your setup and tells you what kind of buyer you are — and what's missing.</p>
+      </div>
+
+      <div class="tile tile-paper">
+        <span class="tag">Onboarding co-pilot</span>
+        <h3>From zero rules to a strategy in five minutes.</h3>
+        <p>New to Bïrch? It drafts your first three high-impact rules from your real account data.</p>
+        <div class="v-channels">
+          <span class="ch">Meta</span><span class="ch">Google</span><span class="ch">TikTok</span><span class="ch">Snap</span><span class="ch">+8</span>
+        </div>
+      </div>
+
+      <div class="tile tile-blue">
+        <span class="tag">Creative insights</span>
+        <h3>Spot ads about to burn out — before they do.</h3>
+        <p>Frequency creeping, CTR sliding? Bïrch AI surfaces it and proposes a refresh you can ship from chat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== USE CASES =================== -->
+<section class="s" id="cases" style="background: white; border-top: 1px solid rgba(0,0,0,0.06); border-bottom: 1px solid rgba(0,0,0,0.06);">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">Use cases</div>
+      <h2>Three jobs Bïrch AI does <em>better than you</em> at 2am.</h2>
+      <p>Built from hundreds of conversations with performance teams scaling across Meta, Google, TikTok, Snap and more.</p>
+    </div>
+
+    <div class="cases">
+      <article class="case-card c1">
+        <div class="case-num c1">01</div>
+        <h3>Audit and extend my current rules</h3>
+        <p>"Am I using Bïrch at full potential?" Bïrch AI inspects what you have, flags what's broken, and proposes the next 3 rules worth adding.</p>
+        <div class="case-quote">
+          "Your strategy centers on dynamic budget optimization and performance-based scaling. Here are 3 rules that would unlock the next level." — Bïrch AI
+        </div>
+      </article>
+
+      <article class="case-card c2">
+        <div class="case-num c2">02</div>
+        <h3>Find rule conflicts before they cost money</h3>
+        <p>Lots of rules and no idea if they fight each other? Bïrch AI checks every condition, filter and trigger for paradoxes and dead logic.</p>
+        <div class="case-quote">
+          "Rule '1' is a logical paradox: it tries to start ads that are already active. It has never fired in 47 days." — Bïrch AI
+        </div>
+      </article>
+
+      <article class="case-card c3">
+        <div class="case-num c3">03</div>
+        <h3>Onboard from zero, in minutes</h3>
+        <p>No rules yet? Connect your accounts and ask: "What should I automate first?" Bïrch AI drafts a starter playbook from your live data.</p>
+        <div class="case-quote">
+          "Google Ads is your strongest performer (ROAS 8.79). TikTok has been inactive for 30 days. Start here…" — Bïrch AI
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- =================== HOW IT WORKS =================== -->
+<section class="s" id="how">
+  <div class="container">
+    <div class="section-head">
+      <div class="kicker">How it works</div>
+      <h2>Connect, ask, <em>ship.</em></h2>
+      <p>No new dashboard to learn. Bïrch AI lives where your campaigns already do.</p>
+    </div>
+
+    <div class="how">
+      <div class="how-steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div>
+            <h4>Connect your ad accounts</h4>
+            <p>Meta, Google, TikTok, Snap, LinkedIn — all 14 platforms Bïrch already supports. OAuth, no spreadsheets.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div>
+            <h4>Ask anything in plain English</h4>
+            <p>"Why did CPA jump on Wednesday?" "Which ads are about to burn out?" "Compare ROAS across networks for last 30 days."</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div>
+            <h4>Approve the next move</h4>
+            <p>Bïrch AI drafts the rule, the budget shift, or the creative refresh. You hit Approve. It runs.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="how-visual">
+        <h4>A real prompt</h4>
+        <div class="msg-row user">
+          <div class="msg user" style="font-size:13px">Can you check my rules and describe my strategy?</div>
+        </div>
+        <div class="msg-row">
+          <div class="msg ai" style="font-size:13px">
+            I've analyzed your current automation setup. You have <b>three rules</b> configured for your <b>Bïrch Marketing</b> account, though all of them are currently <b>inactive</b>.
+            <br/><br/>
+            Your strategy centers on <b>dynamic budget optimization</b> and <b>performance-based scaling</b>. Here's the breakdown:
+            <br/><br/>
+            🛠 <b>Strategy profile:</b> "Efficiency-Driven Scaling"<br/>
+            Designed to balance protecting your budget and scaling winners based on three primary metrics: <b>ROAS, CTR, and Spend-to-CPA</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== TESTIMONIAL =================== -->
+<section class="s" style="padding-top: 24px;">
+  <div class="container">
+    <div class="quote-strip">
+      <blockquote>
+        "With Bïrch our marketing team spends <span class="hl">30% less time managing ads</span> — and our rules finally do what we thought they did."
+      </blockquote>
+      <div class="quote-meta">
+        <div class="avatar">DB</div>
+        <div>
+          <div class="who">Daryna Bondar</div>
+          <div class="role">Head of Growth, Keiki</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FINAL CTA =================== -->
+<section class="s" id="cta" style="padding-bottom: 56px;">
+  <div class="container">
+    <div class="cta-final">
+      <h2>Your AI co-pilot is <em>waiting.</em></h2>
+      <p>Connect your first ad account in under two minutes. See what Bïrch AI says about your setup tonight.</p>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="#">Try Bïrch AI free →</a>
+        <a class="btn btn-ghost" href="#">Book a demo</a>
+      </div>
+      <div class="cta-microcopy">14-day trial · No credit card · Cancel anytime</div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== FOOTER =================== -->
+<footer>
+  <div class="container foot">
+    <div>© 2026 Bïrch (Revealbot). Performance marketing, automated.</div>
+    <div class="foot-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Status</a>
+      <a href="#">Careers</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
