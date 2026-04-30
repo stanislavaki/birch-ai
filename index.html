@@ -102,9 +102,9 @@
   .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
   .btn-yellow {
     background: #f2fd9c;
-    color: var(--blue);
+    color: var(--black);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 22px;
     width: 200px;
     height: 72px;
     padding: 0;
@@ -122,10 +122,10 @@
     gap: 48px; align-items: center;
   }
   .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--black); color: var(--yellow);
-    padding: 6px 12px; border-radius: var(--r-pill);
-    font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+    display: inline-block;
+    background: transparent; color: rgba(246,245,240,0.72);
+    padding: 0 0 80px;
+    font-size: 22px; font-weight: 500; letter-spacing: 0;
   }
   .eyebrow .dot {
     width: 7px; height: 7px; border-radius: 50%;
@@ -154,11 +154,13 @@
     align-items: center;
     justify-content: center;
     font-size: clamp(36px, 5.6vw, 76px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    font-weight: 700;
+    letter-spacing: -1px;
     line-height: 1;
-    padding: 14px 28px;
-    border-radius: 18px;
+    /* Asymmetric vertical padding for optical centering — bold display
+       text reads low when centered geometrically; lift content ~3px */
+    padding: 11px 28px 17px;
+    border-radius: 9999px;
     white-space: nowrap;
     font-family: var(--font);
   }
@@ -167,45 +169,71 @@
   .hero-pill-lavender {
     background: transparent;
     color: var(--blue);
-    border-top: 4px dotted var(--blue);
-    border-left: 4px dotted var(--blue);
-    border-right: 4px dotted transparent;
-    border-bottom: 4px dotted transparent;
     position: relative;
+    border: 4px solid transparent;
   }
-  .hero-pill-lavender::after {
-    content: '';
+  .hero-pill-border-svg {
     position: absolute;
-    left: 4px;
-    bottom: -4px;
-    width: 72px;
-    height: 4px;
-    background-image: radial-gradient(circle 2px at center, var(--blue) 100%, transparent 100%);
-    background-size: 8px 4px;
-    background-repeat: repeat-x;
+    inset: -4px;
     pointer-events: none;
+    overflow: visible;
+    color: var(--blue);
   }
   .hero-pill-yellow   { background: var(--yellow);   color: var(--black); }
   .hero-pill-purple   { background: var(--purple);   color: var(--paper); }
+  /* Chevron width — was 28px, +40% → ~39px (rounded to 40 for clean math) */
+  .hero-pill-arrow,
+  .hero-pill-red { --chev: 40px; }
+
   .hero-pill-red {
-    background: var(--red);
+    background: #AF00C3;
     color: var(--paper);
-    padding-left: 56px;
-    padding-right: 36px;
+    /* All four text-to-edge paddings = 14px (chev side adds the chevron width); right side gets +16px extra */
+    padding: 14px 30px 14px calc(var(--chev) + 14px);
     border-radius: 0 18px 18px 0;
-    margin-left: -28px;
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 100%,
-      0 100%,
-      28px 50%
-    );
+    margin-left: calc(var(--chev) * -1);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--chev) 50%);
+    animation: knowsChevron 10s cubic-bezier(0.7, 0, 0.2, 1) infinite;
   }
   .hero-pill-arrow {
-    padding-right: 60px;
-    clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 50%, calc(100% - 28px) 100%, 0 100%);
+    padding: 14px calc(var(--chev) + 14px) 14px 30px;
+    clip-path: polygon(0 0, calc(100% - var(--chev)) 0, 100% 50%, calc(100% - var(--chev)) 100%, 0 100%);
     border-radius: 18px 0 0 18px;
+    animation: birchChevron 10s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+  }
+  /* Cycle: hold A 4s → flip to B 1s → hold B 4s → flip to A 1s. Easing applied per-segment.
+     Sharp chevron tip / notch vertex (5-vertex polygon).
+     Padding stays static — text translation animation handles the "escape" motion. */
+  @keyframes birchChevron {
+    0%, 40%   { clip-path: polygon(0 0, calc(100% - var(--chev)) 0, 100% 50%, calc(100% - var(--chev)) 100%, 0 100%); }
+    50%, 90%  { clip-path: polygon(0 0, 100% 0, calc(100% - var(--chev)) 50%, 100% 100%, 0 100%); }
+    100%      { clip-path: polygon(0 0, calc(100% - var(--chev)) 0, 100% 50%, calc(100% - var(--chev)) 100%, 0 100%); }
+  }
+  @keyframes knowsChevron {
+    0%, 40%   { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--chev) 50%); }
+    50%, 90%  { clip-path: polygon(var(--chev) 0, 100% 0, 100% 100%, var(--chev) 100%, 0 50%); }
+    100%      { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, var(--chev) 50%); }
+  }
+  /* Text inside Birch and Knows shifts laterally to "escape" the chevron poke from the other pill.
+     Birch is poked from the right in state B → text shifts left.
+     Knows is poked from the left in state A → text shifts right. */
+  .hero-pill-arrow .hero-pill-text {
+    display: inline-block;
+    animation: birchTextShift 10s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+  }
+  .hero-pill-red .hero-pill-text {
+    display: inline-block;
+    animation: knowsTextShift 10s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+  }
+  @keyframes birchTextShift {
+    0%, 40%   { transform: translateX(0); }
+    50%, 90%  { transform: translateX(-10px); }
+    100%      { transform: translateX(0); }
+  }
+  @keyframes knowsTextShift {
+    0%, 40%   { transform: translateX(10px); }
+    50%, 90%  { transform: translateX(0); }
+    100%      { transform: translateX(10px); }
   }
   .hero-sub {
     font-size: 22px;
@@ -259,6 +287,10 @@
     gap: 14px;
   }
   .ai-greeting {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    text-align: left;
     font-size: 15px; line-height: 1.45;
     color: var(--black); font-weight: 500;
   }
@@ -349,6 +381,7 @@
     background: white; color: var(--black);
     padding: 4px 0; font-size: 13.5px; max-width: 100%;
     font-weight: 500; line-height: 1.5;
+    text-align: left;
   }
   .convo .rule-card {
     margin-top: 12px; padding: 14px;
@@ -895,12 +928,12 @@
     <span class="eyebrow">Introducing Bïrch AI Assistant</span>
     <h1 class="hero-title">
       <span class="hero-title-row">
-        <span class="hero-pill hero-pill-paper">Generic AI</span>
+        <span class="hero-pill hero-pill-paper">External AI</span>
         <span class="hero-pill hero-pill-lavender">guesses</span>
       </span>
       <span class="hero-title-row">
-        <span class="hero-pill hero-pill-yellow hero-pill-arrow">Bïrch</span>
-        <span class="hero-pill hero-pill-red">knows</span>
+        <span class="hero-pill hero-pill-yellow hero-pill-arrow"><span class="hero-pill-text">Bïrch</span></span>
+        <span class="hero-pill hero-pill-red"><span class="hero-pill-text">knows</span></span>
       </span>
     </h1>
   </div>
@@ -1366,6 +1399,146 @@
     init();
   }
 })();
+</script>
+<script>
+  /* ---------- Lavender "guesses" pill: SVG dotted border ---------- */
+  (function () {
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const SPACING = 8;
+    const RADIUS = 2;
+
+    function dottedPath(svg, x1, y1, x2, y2, opts) {
+      const len = Math.hypot(x2 - x1, y2 - y1);
+      const n = (opts && opts.n) || Math.max(2, Math.round(len / SPACING) + 1);
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+      path.setAttribute('pathLength', n - 1);
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', RADIUS * 2);
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-dasharray', '0 1');
+      path.setAttribute('fill', 'none');
+      if (opts && opts.clipPath) path.setAttribute('clip-path', opts.clipPath);
+      svg.appendChild(path);
+      return n;
+    }
+
+    function paintBorder(pill) {
+      const w = pill.offsetWidth;
+      const h = pill.offsetHeight;
+      if (!w || !h) return;
+
+      let svg = pill.querySelector(':scope > svg.hero-pill-border-svg');
+      if (!svg) {
+        svg = document.createElementNS(SVG_NS, 'svg');
+        svg.classList.add('hero-pill-border-svg');
+        svg.setAttribute('aria-hidden', 'true');
+        pill.insertBefore(svg, pill.firstChild);
+      }
+
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', h);
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      const ix = RADIUS;          // inset on x axis
+      const iy = RADIUS;          // inset on y axis
+      const xR = w - RADIUS;
+      const yB = h - RADIUS;
+      const mx = Math.round(w / 2);
+      // Capsule corners: stroke centerline radius = h/2 - inset, so the outer dot edges
+      // trace a curve of radius h/2 (which matches the pill's full-round border-radius).
+      const cr = h / 2 - RADIUS;
+
+      // Static path (CCW from bottom-mid): bottom-left half → left semicircle (2 quarter arcs)
+      // → top edge → top-right quarter arc → SHORT straight right side line (drops just a little
+      // below right-mid, with a clear gap before the bottom edge — does not connect to it).
+      const RIGHT_LINE = 20;
+      const staticD = [
+        `M ${mx} ${yB}`,
+        `L ${ix + cr} ${yB}`,
+        `A ${cr} ${cr} 0 0 1 ${ix} ${yB - cr}`,    // bottom-left arc (outward bulge)
+        `A ${cr} ${cr} 0 0 1 ${ix + cr} ${iy}`,    // top-left arc
+        `L ${xR - cr} ${iy}`,                       // top edge
+        `A ${cr} ${cr} 0 0 1 ${xR} ${iy + cr}`,    // top-right arc, ending at right-mid
+        `L ${xR} ${iy + cr + RIGHT_LINE}`,          // SHORT static right side line
+      ].join(' ');
+      const quarter = (Math.PI * cr) / 2;
+      const staticLen =
+        (mx - (ix + cr)) +     // bottom-left half edge
+        2 * quarter +          // left semicircle (2 quarter arcs)
+        ((xR - cr) - (ix + cr)) + // top edge
+        quarter +              // top-right quarter arc
+        RIGHT_LINE;            // short right side line
+      const staticDots = Math.max(2, Math.round(staticLen / SPACING) + 1);
+
+      const staticPath = document.createElementNS(SVG_NS, 'path');
+      staticPath.setAttribute('d', staticD);
+      staticPath.setAttribute('pathLength', staticDots - 1);
+      staticPath.setAttribute('stroke', 'currentColor');
+      staticPath.setAttribute('stroke-width', RADIUS * 2);
+      staticPath.setAttribute('stroke-linecap', 'round');
+      staticPath.setAttribute('stroke-dasharray', '0 1');
+      staticPath.setAttribute('fill', 'none');
+      svg.appendChild(staticPath);
+
+      // Animated portion: straight drop from right-mid down to bottom-right corner,
+      // then along bottom edge back to bottom-mid (no bottom-right rounding).
+      const animId = 'lav-anim-' + Math.random().toString(36).slice(2, 9);
+      const defs = document.createElementNS(SVG_NS, 'defs');
+      const clip = document.createElementNS(SVG_NS, 'clipPath');
+      clip.setAttribute('id', animId);
+      const rect = document.createElementNS(SVG_NS, 'rect');
+      rect.setAttribute('x', mx);
+      rect.setAttribute('y', 0);
+      rect.setAttribute('width', 0);
+      rect.setAttribute('height', h);
+      const maxW = xR - mx + RADIUS;
+      const animateW = document.createElementNS(SVG_NS, 'animate');
+      animateW.setAttribute('attributeName', 'width');
+      animateW.setAttribute('values', `0;${maxW};${maxW}`);
+      animateW.setAttribute('keyTimes', '0;0.7;1');
+      animateW.setAttribute('dur', '2.4s');
+      animateW.setAttribute('calcMode', 'linear');
+      animateW.setAttribute('repeatCount', 'indefinite');
+      rect.appendChild(animateW);
+      clip.appendChild(rect);
+      defs.appendChild(clip);
+      svg.appendChild(defs);
+
+      const animD = `M ${mx} ${yB} L ${xR} ${yB}`;
+      const animLen = xR - mx;
+      const animDots = Math.max(2, Math.round(animLen / SPACING) + 1);
+      const animPath = document.createElementNS(SVG_NS, 'path');
+      animPath.setAttribute('d', animD);
+      animPath.setAttribute('pathLength', animDots - 1);
+      animPath.setAttribute('stroke', 'currentColor');
+      animPath.setAttribute('stroke-width', RADIUS * 2);
+      animPath.setAttribute('stroke-linecap', 'round');
+      animPath.setAttribute('stroke-dasharray', '0 1');
+      animPath.setAttribute('fill', 'none');
+      animPath.setAttribute('clip-path', `url(#${animId})`);
+      svg.appendChild(animPath);
+    }
+
+    function paintAll() {
+      document.querySelectorAll('.hero-pill-lavender').forEach(paintBorder);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', paintAll);
+    } else {
+      paintAll();
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(paintAll);
+    }
+    let raf;
+    window.addEventListener('resize', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(paintAll);
+    });
+  })();
 </script>
 <script src="./g-toolset.js" defer></script>
 </body>
