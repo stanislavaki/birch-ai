@@ -9,6 +9,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet" />
 <style>
+  @font-face {
+    font-family: "TT Commons Pro Variable";
+    src: url("./fonts/TT_Commons_Pro_Variable.woff2") format("woff2-variations"),
+         url("./fonts/TT_Commons_Pro_Variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
     --yellow: #ffe243;
     --blue: #4551f2;
@@ -23,8 +32,9 @@
     --paper: #f6f5f0;
     --lavender: #efeaff;
     --butter: #fff7c2;
+    --surface-1: #1a1a1a;
 
-    --font: "Inter", "TT Commons Pro Variable", Arial, sans-serif;
+    --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
     --serif: var(--font);
 
     --r-card: 24px;
@@ -90,8 +100,18 @@
     background: var(--black); color: var(--paper);
   }
   .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
-  .btn-yellow { background: var(--yellow); color: var(--black); }
-  .btn-yellow:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(255,226,67,0.45); }
+  .btn-yellow {
+    background: #f2fd9c;
+    color: var(--blue);
+    font-weight: 600;
+    font-size: 14px;
+    width: 200px;
+    height: 72px;
+    padding: 0;
+    border-radius: 16px;
+    justify-content: center;
+  }
+  .btn-yellow:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(242,253,156,0.45); }
   .btn-ghost { color: var(--black); }
   .btn-ghost:hover { background: rgba(0,0,0,0.06); }
 
@@ -113,20 +133,84 @@
     box-shadow: 0 0 0 4px rgba(0,205,54,0.18);
   }
   h1.hero-title {
-    font-size: clamp(44px, 6.4vw, 88px);
-    line-height: 0.96; letter-spacing: -0.035em;
-    font-weight: 800; margin: 18px 0 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 18px 0 26px;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: 0;
+    line-height: 1;
   }
-  .hero-title em {
-    font-family: var(--serif);
-    font-style: italic; font-weight: 400;
-    color: var(--purple);
-    letter-spacing: -0.02em;
+  .hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(36px, 5.6vw, 76px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    padding: 14px 28px;
+    border-radius: 18px;
+    white-space: nowrap;
+    font-family: var(--font);
+  }
+  .hero-pill-paper    { background: var(--blue);     color: var(--black); }
+  .hero-pill-green    { background: var(--green);    color: var(--black); }
+  .hero-pill-lavender {
+    background: transparent;
+    color: var(--blue);
+    border-top: 4px dotted var(--blue);
+    border-left: 4px dotted var(--blue);
+    border-right: 4px dotted transparent;
+    border-bottom: 4px dotted transparent;
+    position: relative;
+  }
+  .hero-pill-lavender::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    bottom: -4px;
+    width: 72px;
+    height: 4px;
+    background-image: radial-gradient(circle 2px at center, var(--blue) 100%, transparent 100%);
+    background-size: 8px 4px;
+    background-repeat: repeat-x;
+    pointer-events: none;
+  }
+  .hero-pill-yellow   { background: var(--yellow);   color: var(--black); }
+  .hero-pill-purple   { background: var(--purple);   color: var(--paper); }
+  .hero-pill-red {
+    background: var(--red);
+    color: var(--paper);
+    padding-left: 56px;
+    padding-right: 36px;
+    border-radius: 0 18px 18px 0;
+    margin-left: -28px;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      28px 50%
+    );
+  }
+  .hero-pill-arrow {
+    padding-right: 60px;
+    clip-path: polygon(0 0, calc(100% - 28px) 0, 100% 50%, calc(100% - 28px) 100%, 0 100%);
+    border-radius: 18px 0 0 18px;
   }
   .hero-sub {
-    font-size: clamp(16px, 1.4vw, 19px);
+    font-size: 22px;
     color: rgba(11,11,11,0.72);
-    max-width: 540px; margin: 0 0 32px;
+    max-width: 640px; margin: 0 0 32px;
     font-weight: 500;
   }
   .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
@@ -150,7 +234,7 @@
       0 10px 20px -10px rgba(20,20,40,0.10);
     border: 1px solid rgba(0,0,0,0.06);
     display: flex; flex-direction: column;
-    min-height: 520px;
+    min-height: 420px;
     overflow: hidden;
     position: relative;
   }
@@ -291,15 +375,6 @@
   .convo .micro {
     margin-top: 6px; font-size: 11.5px; color: var(--mid); font-weight: 600;
   }
-
-  /* ============== HERO BACKGROUND DECOR ============== */
-  .blob {
-    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
-    pointer-events: none; z-index: 0;
-  }
-  .blob-1 { width: 480px; height: 480px; background: var(--yellow); top: -120px; left: -120px; }
-  .blob-2 { width: 420px; height: 420px; background: var(--lavender); bottom: -160px; right: -100px; opacity: 0.85; }
-  .hero .container { position: relative; z-index: 1; }
 
   /* ============== STATS ============== */
   .stats {
@@ -669,59 +744,174 @@
   }
   .typing span:nth-child(2) { animation-delay: 0.15s; }
   .typing span:nth-child(3) { animation-delay: 0.3s; }
+
+  /* ============== DARK THEME ============== */
+  html { background: var(--black); }
+  body { background: transparent; color: var(--paper); }
+
+  /* fixed pulsating purple gradient — sits behind every section */
+  .bg-pulse {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 35% at 20% 30%, rgba(91, 69, 205, 0.42), transparent 70%),
+      radial-gradient(50% 40% at 80% 70%, rgba(91, 69, 205, 0.32), transparent 70%),
+      radial-gradient(35% 30% at 50% 110%, rgba(91, 69, 205, 0.25), transparent 70%);
+    background-size: 140% 140%, 130% 130%, 150% 150%;
+    animation: bgpulse 22s ease-in-out infinite alternate;
+  }
+  @keyframes bgpulse {
+    0% {
+      background-position: -10% -5%, 110% 105%, 50% 110%;
+      background-size: 130% 130%, 120% 120%, 140% 140%;
+    }
+    50% {
+      background-position: 20% 15%, 75% 80%, 60% 100%;
+      background-size: 165% 165%, 150% 150%, 175% 175%;
+    }
+    100% {
+      background-position: 5% -10%, 100% 110%, 40% 120%;
+      background-size: 145% 145%, 135% 135%, 160% 160%;
+    }
+  }
+
+  /* buttons */
+  .btn-primary { background: var(--paper); color: var(--black); }
+  .btn-primary:hover { box-shadow: 0 8px 22px rgba(246,245,240,0.18); }
+  .btn-ghost { color: var(--paper); }
+  .btn-ghost:hover { background: rgba(246,245,240,0.08); }
+
+  /* hero copy */
+  .hero-sub { color: rgba(246,245,240,0.72); }
+
+  /* section heads */
+  .section-head p { color: rgba(246,245,240,0.68); }
+
+  /* bento — flip the lone light tile to dark */
+  .tile-paper { background: var(--surface-1); border-color: rgba(255,255,255,0.08); }
+  .tile-paper p { color: rgba(246,245,240,0.7); }
+  .tile-paper .v-channels .ch { background: rgba(255,255,255,0.1); color: var(--paper); }
+
+  /* use cases — override inline white background; let bg-pulse show through */
+  section#cases {
+    background: transparent !important;
+    border-top-color: rgba(255,255,255,0.06) !important;
+    border-bottom-color: rgba(255,255,255,0.06) !important;
+  }
+  .case-card { background: var(--surface-1); border-color: rgba(255,255,255,0.08); }
+  .case-card p { color: rgba(246,245,240,0.7); }
+  .case-quote { background: rgba(255,255,255,0.05); color: var(--paper); }
+
+  /* how it works */
+  .step { background: var(--surface-1); border-color: rgba(255,255,255,0.08); }
+  .step:hover { box-shadow: 0 14px 30px -16px rgba(0,0,0,0.6); }
+  .step p { color: rgba(246,245,240,0.65); }
+  .how-visual { background: var(--surface-1); border-color: rgba(255,255,255,0.08); }
+
+  /* testimonial — lift to a clearly elevated surface so it reads as a card */
+  .quote-strip { background: var(--dark); }
+
+  /* footer */
+  .foot-links a:hover { color: var(--paper); }
+
+  /* keep button contrast inside the yellow CTA card */
+  .cta-final .btn-primary { background: var(--black); color: var(--paper); }
+  .cta-final .btn-ghost { color: var(--black); }
+  .cta-final .btn-ghost:hover { background: rgba(0,0,0,0.06); }
+
+  /* standalone popup, sitting below the hero */
+  .hero-popup-section { padding: 0 0 64px; }
+  .hero-popup-section .ai-popup { max-width: 560px; margin: 0 auto; }
+  .hero-popup-section .hero-actions { justify-content: center; margin-top: 36px; }
+
+  /* eyebrow — transparent, paper-white text */
+  .eyebrow { background: transparent; color: var(--paper); padding-left: 0; padding-right: 0; }
+
+  /* hero popup interactive demo */
+  .ai-input-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 4px 8px;
+    font: 13px/1.4 var(--font);
+    color: var(--black);
+    white-space: pre;
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    overflow: hidden;
+  }
+  .ai-input-text.is-typing::after {
+    content: '';
+    display: inline-block;
+    width: 1.5px; height: 14px;
+    background: var(--black);
+    margin-left: 2px;
+    animation: caretBlink 0.9s steps(2, start) infinite;
+  }
+  @keyframes caretBlink { to { opacity: 0; } }
+
+  .ai-popup .convo .bubble-me,
+  .ai-popup .convo .bubble-ai { animation: bubbleIn 0.35s ease-out; }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ai-thinking { padding: 4px 0; }
+
+  .convo-chart {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f3f1ec;
+    border-radius: 12px;
+    height: 130px;
+  }
+  .convo-chart svg { width: 100%; height: 100%; display: block; }
+  .convo-chart-line { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .convo-chart-area { opacity: 0; }
+
+  .ai-send.is-firing { transform: scale(0.92); transition: transform 0.15s ease-out; }
+
+  /* center the hero content */
+  .hero .container,
+  .hero-popup-section .container { text-align: center; }
+  .hero h1.hero-title { align-items: center; }
+  .hero .hero-title-row { justify-content: center; }
+  .hero .hero-actions { justify-content: center; }
+  .hero .hero-microcopy { justify-content: center; }
+  .hero-sub { margin-left: auto; margin-right: auto; }
+  .hero-popup-section .hero-sub { margin-top: 32px; margin-bottom: 0; }
 </style>
 </head>
 <body>
 
+<div class="bg-pulse" aria-hidden="true"></div>
+
 <!-- =================== HERO =================== -->
 <section class="hero">
-  <span class="blob blob-1"></span>
-  <span class="blob blob-2"></span>
   <div class="container">
-    <div class="hero-grid">
-      <div>
-        <h1 class="hero-title">
-          Open Bïrch.<br/>
-          <em>It's already thinking.</em>
-        </h1>
-        <p class="hero-sub">
-          The assistant lives in the corner of your Bïrch dashboard. It reads every ad account
-          you've connected, notices what's drifting today, and drafts the rule —
-          preset and ready in your editor, one click away.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-yellow" href="#cta">Try the AI Assistant →</a>
-          <a class="btn btn-ghost" href="#how">See how it works</a>
-        </div>
-        <div class="hero-microcopy">
-          <span><span class="check">✓</span> 14-day free trial</span>
-          <span><span class="check">✓</span> No credit card</span>
-          <span><span class="check">✓</span> Connects in &lt; 2 min</span>
-        </div>
-      </div>
+    <span class="eyebrow">Introducing Bïrch AI Assistant</span>
+    <h1 class="hero-title">
+      <span class="hero-title-row">
+        <span class="hero-pill hero-pill-paper">Generic AI</span>
+        <span class="hero-pill hero-pill-lavender">guesses</span>
+      </span>
+      <span class="hero-title-row">
+        <span class="hero-pill hero-pill-yellow hero-pill-arrow">Bïrch</span>
+        <span class="hero-pill hero-pill-red">knows</span>
+      </span>
+    </h1>
+  </div>
+</section>
 
-      <!-- Hero: Birch AI popup (real product UI) -->
-      <div class="ai-popup" aria-label="Birch AI in-product popup">
-        <div class="ai-popup-header">
-          <h3>Birch AI</h3>
-          <div class="ai-popup-controls">
-            <button aria-label="Expand" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <polyline points="9 21 3 21 3 15"></polyline>
-                <line x1="21" y1="3" x2="14" y2="10"></line>
-                <line x1="3" y1="21" x2="10" y2="14"></line>
-              </svg>
-            </button>
-            <button aria-label="Minimize" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="ai-popup-body">
+<!-- =================== HERO POPUP =================== -->
+<section class="hero-popup-section">
+  <div class="container">
+    <div class="ai-popup" aria-label="Birch AI in-product popup">
+      <div class="ai-popup-body">
+        <div class="ai-stage ai-stage-intro">
           <div class="ai-greeting">
             Hi Mike<br/>Where should we start?
           </div>
@@ -732,39 +922,75 @@
           </div>
         </div>
 
-        <div class="ai-input-area">
-          <div class="ai-input-chips">
-            <span class="ai-chip"><span class="ico-spark"></span> Pause underperforming ads</span>
-            <span class="ai-chip">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <line x1="3" y1="9" x2="21" y2="9"/>
-                <line x1="9" y1="3" x2="9" y2="21"/>
-              </svg>
-              Adjust test metric
-            </span>
-          </div>
-          <div class="ai-input-row">
-            <button class="ai-input-btn" aria-label="Add" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-            <button class="ai-input-btn" aria-label="Filters" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <line x1="4" y1="6" x2="11" y2="6"/><line x1="15" y1="6" x2="20" y2="6"/>
-                <line x1="4" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="20" y2="14"/>
-                <circle cx="13" cy="6" r="2"/><circle cx="11" cy="14" r="2"/>
-              </svg>
-            </button>
-            <div class="ai-input-spacer"></div>
-            <button class="ai-send" aria-label="Send" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"/>
-                <polyline points="5 12 12 5 19 12"/>
-              </svg>
-            </button>
+        <div class="ai-stage ai-stage-convo" hidden>
+          <div class="convo">
+            <div class="row me">
+              <div class="bubble-me">Compare Spend for the last 30 days</div>
+            </div>
+            <div class="row">
+              <div class="bubble-ai">
+                <div class="ai-thinking">
+                  <span class="typing"><span></span><span></span><span></span></span>
+                </div>
+                <div class="ai-answer" hidden>
+                  Across your <b>14 connected accounts</b>, total spend for the last 30 days is <b>$382,140</b> — up <b>18%</b> vs the prior period.
+                  <div class="convo-chart">
+                    <svg viewBox="0 0 360 110" preserveAspectRatio="none" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="convoChartGrad" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stop-color="#5b45cd" stop-opacity="0.45"/>
+                          <stop offset="100%" stop-color="#5b45cd" stop-opacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <path class="convo-chart-area" d="M0,80 L40,72 L80,76 L120,58 L160,62 L200,40 L240,46 L280,28 L320,32 L360,18 L360,110 L0,110 Z" fill="url(#convoChartGrad)"/>
+                      <path class="convo-chart-line" d="M0,80 L40,72 L80,76 L120,58 L160,62 L200,40 L240,46 L280,28 L320,32 L360,18" stroke="#5b45cd" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="ai-input-area">
+        <div class="ai-input-chips">
+          <span class="ai-chip"><span class="ico-spark"></span> Pause underperforming ads</span>
+          <span class="ai-chip">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+            Adjust test metric
+          </span>
+        </div>
+        <div class="ai-input-row">
+          <button class="ai-input-btn" aria-label="Add" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <button class="ai-input-btn" aria-label="Filters" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="4" y1="6" x2="11" y2="6"/><line x1="15" y1="6" x2="20" y2="6"/>
+              <line x1="4" y1="14" x2="9" y2="14"/><line x1="13" y1="14" x2="20" y2="14"/>
+              <circle cx="13" cy="6" r="2"/><circle cx="11" cy="14" r="2"/>
+            </svg>
+          </button>
+          <span class="ai-input-text" aria-hidden="true"></span>
+          <button class="ai-send" aria-label="Send" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"/>
+              <polyline points="5 12 12 5 19 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <p class="hero-sub">
+      Unlike any external AI, Bïrch AI knows your full setup — every connected account, campaign, rule and metric. Bïrch AI watches what shifts overnight and opens with the rule worth shipping today, preset in your editor, one click from live.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-yellow" href="#cta">Get started</a>
     </div>
   </div>
 </section>
@@ -1043,5 +1269,104 @@
   </div>
 </footer>
 
+<script>
+(() => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  function startChartAnimation(popup) {
+    const line = popup.querySelector('.convo-chart-line');
+    const area = popup.querySelector('.convo-chart-area');
+    if (!line || !area) return;
+    const len = line.getTotalLength();
+    line.style.transition = 'none';
+    line.style.strokeDasharray = len;
+    line.style.strokeDashoffset = len;
+    area.style.transition = 'none';
+    area.style.opacity = '0';
+    line.getBoundingClientRect();
+    line.style.transition = 'stroke-dashoffset 1.8s ease-out';
+    line.style.strokeDashoffset = '0';
+    setTimeout(() => {
+      area.style.transition = 'opacity 0.9s ease-out';
+      area.style.opacity = '1';
+    }, 700);
+  }
+
+  function init() {
+    const popup = document.querySelector('.hero-popup-section .ai-popup');
+    if (!popup) return;
+    const intro = popup.querySelector('.ai-stage-intro');
+    const convo = popup.querySelector('.ai-stage-convo');
+    const inputText = popup.querySelector('.ai-input-text');
+    const sendBtn = popup.querySelector('.ai-send');
+    const thinking = popup.querySelector('.ai-thinking');
+    const answer = popup.querySelector('.ai-answer');
+    if (!intro || !convo || !inputText || !sendBtn || !thinking || !answer) return;
+    const message = 'Compare Spend for the last 30 days';
+
+    function typeIntoField(text) {
+      return new Promise(resolve => {
+        inputText.textContent = '';
+        inputText.classList.add('is-typing');
+        let i = 0;
+        const tick = () => {
+          i += 1 + Math.floor(Math.random() * 2);
+          if (i >= text.length) {
+            inputText.textContent = text;
+            resolve();
+            return;
+          }
+          inputText.textContent = text.slice(0, i);
+          setTimeout(tick, 38);
+        };
+        setTimeout(tick, 38);
+      });
+    }
+
+    async function run() {
+      while (true) {
+        intro.hidden = false;
+        convo.hidden = true;
+        inputText.textContent = '';
+        inputText.classList.remove('is-typing');
+        thinking.hidden = false;
+        answer.hidden = true;
+
+        await wait(1300);
+
+        await typeIntoField(message);
+
+        await wait(380);
+        inputText.classList.remove('is-typing');
+
+        sendBtn.classList.add('is-firing');
+        await wait(180);
+        sendBtn.classList.remove('is-firing');
+
+        inputText.textContent = '';
+        intro.hidden = true;
+        convo.hidden = false;
+
+        await wait(1300);
+
+        thinking.hidden = true;
+        answer.hidden = false;
+        startChartAnimation(popup);
+
+        await wait(6500);
+      }
+    }
+
+    run();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<script src="./g-toolset.js" defer></script>
 </body>
 </html>
