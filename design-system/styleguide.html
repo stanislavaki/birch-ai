@@ -982,10 +982,23 @@
         }
 
         activate(0);
-        setInterval(function () {
+
+        var timer = setInterval(advance, 6000);
+
+        function advance() {
           current = (current + 1) % items.length;
           activate(current);
-        }, 6000);
+        }
+
+        items.forEach(function (item, i) {
+          item.addEventListener('click', function () {
+            if (i === current) return;
+            current = i;
+            activate(current);
+            clearInterval(timer);
+            timer = setInterval(advance, 6000);
+          });
+        });
       })();
     </script>
 
@@ -1045,6 +1058,12 @@
 </div>
 
 <script>
+  document.querySelectorAll('.card-accordion:not(.card-accordion--auto)').forEach(function(el) {
+    el.addEventListener('click', function() {
+      el.classList.toggle('is-closed');
+    });
+  });
+
   function switchTab(name, btn) {
     document.getElementById('tab-tokens').style.display     = name === 'tokens'     ? '' : 'none';
     document.getElementById('tab-components').style.display = name === 'components' ? '' : 'none';
