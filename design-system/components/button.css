@@ -1,0 +1,49 @@
+/* ============================================================
+   BUTTON
+   Requires: tokens.css
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: var(--text-btn-size);
+  font-weight: 600;
+  line-height: var(--text-btn-lh);
+  letter-spacing: var(--text-btn-ls);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  white-space: nowrap;
+  padding-inline: 3rem;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+.btn:hover { opacity: 0.85; }
+
+/* Size variants — Figma heights: L=160px, M=140px, S=100px */
+.btn-l { min-height: 10rem; }
+.btn-m { min-height: 8.75rem; }
+.btn-s { min-height: 6.25rem; }
+
+/* Style variants */
+.btn-default {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  border: 5px solid transparent;
+}
+.btn-default:hover {
+  opacity: 1;
+  background: var(--color-accent-indigo);
+  color: var(--color-text);
+}
+.btn-stroke {
+  background: transparent;
+  color: var(--color-text);
+  border: 5px dotted var(--color-text);
+}
+.btn-stroke:hover {
+  opacity: 1;
+  background: var(--color-accent-purple);
+  border-color: var(--color-accent-purple);
+}

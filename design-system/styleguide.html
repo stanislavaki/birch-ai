@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Birch Design System — Styleguide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./tokens.css" />
+<link rel="stylesheet" href="./components/button.css" />
+<link rel="stylesheet" href="./components/card-accordion.css" />
+<style>
+  html { background: var(--color-bg); }
+  body {
+    font-family: var(--font);
+    font-size: var(--text-para-sm-size);
+    line-height: var(--text-para-sm-lh);
+    font-weight: 500;
+    color: var(--color-text);
+    background: transparent;
+    margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ---- Styleguide chrome ---- */
+  .sg-header {
+    background: #1c1c1c;
+    padding: 2rem var(--pad-horizontal) 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .sg-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: var(--text-h4-size);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .sg-header p {
+    margin: 0;
+    font-size: var(--text-para-sm-size);
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+  }
+
+  .sg-body { padding: 3rem var(--pad-horizontal); max-width: 1440px; margin: 0 auto; }
+
+  .sg-section { margin-bottom: 4rem; }
+  .sg-section-label { scroll-margin-top: 14.5rem; }
+
+  .sg-section-label {
+    display: inline-block;
+    background: rgba(102,102,255,0.15);
+    color: #6666ff;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3125rem 0.625rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .sg-section-label.green { background: rgba(4,222,0,0.12); color: #04DE00; }
+  .sg-section-label.orange { background: rgba(255,119,0,0.15); color: #FF7700; }
+
+  .sg-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 0 0 1.5rem;
+  }
+
+  /* ---- Color swatches ---- */
+  .sg-swatches { display: flex; flex-wrap: wrap; gap: 1rem; }
+  .sg-swatch { width: 140px; flex-shrink: 0; }
+  .sg-swatch-box {
+    height: 88px;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.625rem;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .sg-swatch-name  { font-size: 0.8125rem; font-weight: 600; margin-bottom: 0.125rem; }
+  .sg-swatch-token { font-size: 0.6875rem; color: rgba(255,255,255,0.4); font-weight: 400; margin-bottom: 0.125rem; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .sg-swatch-hex   { font-size: 0.6875rem; color: rgba(255,255,255,0.4); font-weight: 400; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+
+  /* ---- Typography rows ---- */
+  .sg-type-table { width: 100%; border-collapse: collapse; }
+  .sg-type-table tr { border-top: 1px solid rgba(255,255,255,0.08); }
+  .sg-type-table td { padding: 1rem 0; vertical-align: middle; }
+  .sg-type-table td:first-child { width: 45%; padding-right: 3rem; }
+  .sg-type-table td:last-child { width: 55%; }
+  .sg-type-meta { font-size: 0.8125rem; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 0.25rem; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .sg-type-class { font-size: 0.6875rem; color: #6666ff; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; font-weight: 700; margin-bottom: 0.25rem; }
+
+  /* ---- Spacing ---- */
+  .sg-spacing-row { display: flex; gap: 2rem; align-items: flex-end; flex-wrap: wrap; }
+  .sg-space-item { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .sg-space-box-purple { background: rgba(102,102,255,0.7); border-radius: 2px; }
+  .sg-space-box-green  { background: rgba(4,222,0,0.6); border-radius: 2px; }
+  .sg-space-label { font-size: 0.8125rem; font-weight: 600; }
+  .sg-space-val   { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+
+  /* ---- Radius ---- */
+  .sg-radius-row { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+  .sg-radius-item { display: flex; flex-direction: column; gap: 0.625rem; align-items: flex-start; }
+  .sg-radius-box {
+    width: 88px; height: 88px;
+    background: rgba(102,102,255,0.2);
+    border: 1px solid rgba(102,102,255,0.4);
+  }
+  .sg-radius-label { font-size: 0.8125rem; font-weight: 600; color: #6666ff; }
+  .sg-radius-val   { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+
+  /* ---- Breakpoints ---- */
+  .sg-bp-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .sg-bp-card {
+    background: #292929;
+    border-radius: var(--radius-md);
+    padding: 0 1rem 1rem;
+    min-width: 200px;
+    overflow: hidden;
+  }
+  .sg-bp-bar { height: 4px; border-radius: 4px; margin-bottom: 0.75rem; width: calc(100% + 2rem); margin-left: -1rem; }
+  .sg-bp-name { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .sg-bp-range { font-size: 0.875rem; color: rgba(255,255,255,0.4); }
+
+  /* ---- Containers ---- */
+  .sg-container-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+  .sg-container-bar-wrap { position: relative; height: 36px; }
+  .sg-container-bar {
+    position: absolute; left: 0; top: 0; height: 36px;
+    background: rgba(102,102,255,0.15);
+    border-radius: 4px;
+    border-left: 4px solid rgba(102,102,255,0.8);
+  }
+  .sg-container-name { position: absolute; left: 12px; top: 9px; font-size: 0.875rem; font-weight: 600; color: #6666ff; }
+  .sg-container-val  { position: absolute; left: 86px; top: 9px; font-size: 0.875rem; color: rgba(255,255,255,0.4); }
+
+  /* ---- Padding table ---- */
+  .sg-pad-table { width: 100%; border-collapse: collapse; }
+  .sg-pad-table th, .sg-pad-table td { padding: 1rem 0.75rem 1rem 0; font-size: 0.875rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: left; }
+  .sg-pad-table th { font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.25); border-top: none; font-weight: 700; }
+  .sg-pad-table td:first-child { color: rgba(255,255,255,0.9); font-weight: 500; }
+  .sg-pad-table .muted { color: rgba(255,255,255,0.5); }
+  .sg-pad-table .accent { color: #FF7700; }
+
+  /* ---- Grid demo ---- */
+  .sg-grid-demo { margin-top: 1rem; }
+  .sg-grid-demo .grid { background: rgba(255,255,255,0.02); padding: 0; }
+  .sg-grid-col {
+    background: rgba(102,102,255,0.15);
+    border: 1px solid rgba(102,102,255,0.25);
+    border-radius: 4px;
+    height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6875rem; font-weight: 700; color: rgba(102,102,255,0.8);
+  }
+  .sg-grid-demo-label { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 0.5rem; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .sg-grid-examples { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .sg-grid-eg-col {
+    background: rgba(4,222,0,0.1);
+    border: 1px solid rgba(4,222,0,0.2);
+    border-radius: 4px;
+    height: 48px;
+    display: flex; align-items: center; padding: 0 0.75rem;
+    font-size: 0.75rem; font-weight: 600; color: rgba(4,222,0,0.8);
+  }
+
+  /* ---- Tabs ---- */
+  .sg-tabs {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+  .sg-tab {
+    padding: 0 0 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: var(--font);
+    font-size: var(--text-h5-size);
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .sg-tab:hover { color: rgba(255,255,255,0.65); }
+  .sg-tab.is-active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
+  }
+
+  /* ---- Anchor nav ---- */
+  .sg-anchors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    padding: 0.625rem 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 0.25rem;
+  }
+  .sg-anchors a {
+    font-family: var(--font);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.12s ease;
+  }
+  .sg-anchors a:hover { color: rgba(255,255,255,0.75); }
+
+  /* ---- Accordion autoplay ---- */
+  @keyframes acc-bar {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+  .card-accordion--auto.is-active .card-accordion__bar-fill {
+    animation: acc-bar 6s linear forwards;
+  }
+</style>
+</head>
+<body>
+
+<div class="sg-header">
+  <h1>Birch Design System — Styleguide</h1>
+  <p>Visual reference for all tokens in <code>tokens.css</code> · Source: Figma "Birch website styleguide"</p>
+  <div class="sg-tabs">
+    <button class="sg-tab is-active" onclick="switchTab('tokens', this)">Tokens</button>
+    <button class="sg-tab" onclick="switchTab('components', this)">Components</button>
+  </div>
+  <nav class="sg-anchors" id="anchors-tokens">
+    <a href="#s-typeface">Typeface</a>
+    <a href="#s-colors-primary">Colors — Primary</a>
+    <a href="#s-colors-accent">Colors — Accent</a>
+    <a href="#s-colors-bg">Colors — BG &amp; Text</a>
+    <a href="#s-type-desktop">Typography Desktop</a>
+    <a href="#s-type-mobile">Typography Mobile</a>
+    <a href="#s-spacing">Spacing &amp; Gaps</a>
+    <a href="#s-radius">Border Radius</a>
+    <a href="#s-containers">Containers</a>
+    <a href="#s-padding">Padding</a>
+    <a href="#s-breakpoints">Breakpoints</a>
+    <a href="#s-grid">Grid</a>
+  </nav>
+  <nav class="sg-anchors" id="anchors-components" style="display:none">
+    <a href="#s-buttons">Buttons</a>
+    <a href="#s-accordion">Card Accordion</a>
+    <a href="#s-live">Live Usage Demo</a>
+  </nav>
+</div>
+
+<div class="sg-body">
+
+  <div id="tab-tokens">
+  <!-- ============ FONT ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-typeface">Typeface</div>
+    <hr class="sg-divider" />
+
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <!-- Font name + meta -->
+      <div style="display: flex; align-items: baseline; gap: 2rem; flex-wrap: wrap;">
+        <div>
+          <div style="font-size: var(--text-h4-size); font-weight: 700; letter-spacing: -0.02em; font-family: var(--font); line-height: 1.2;">TT Commons Pro Variable</div>
+          <div style="font-size: var(--text-para-sm-size); color: rgba(255,255,255,0.35); margin-top: 0.25rem; font-family: ui-monospace, monospace;">var(--font) · TT Commons Pro Variable, Inter, Arial, sans-serif</div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span style="padding: 0.25rem 0.625rem; border-radius: var(--radius-pill); background: rgba(102,102,255,0.25); color: #6666ff; font-size: 0.75rem; font-weight: 600; font-family: ui-monospace, monospace;">600 · all styles (DemiBold per Figma)</span>
+        </div>
+      </div>
+
+      <!-- Alphabet specimen — SemiBold (600) -->
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
+        <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; margin-bottom: 0.75rem;">SemiBold / 600 — all styles</div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: 2.5rem; line-height: 1.15; letter-spacing: -0.02em; color: #fff;">
+          Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm
+        </div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: 2.5rem; line-height: 1.15; letter-spacing: -0.02em; color: #fff;">
+          Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz
+        </div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: 2rem; line-height: 1.3; letter-spacing: -0.01em; color: rgba(255,255,255,0.5); margin-top: 0.5rem;">
+          0 1 2 3 4 5 6 7 8 9 &nbsp; ! ? @ # & ( ) € $ %
+        </div>
+      </div>
+
+      <!-- Sentence specimen at display size -->
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
+        <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; margin-bottom: 0.75rem;">Display specimen — 600</div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: var(--text-h2-size); line-height: var(--text-h2-lh); letter-spacing: var(--text-h2-ls); color: #fff;">
+          Birch knows your data.
+        </div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: var(--text-h2-size); line-height: var(--text-h2-lh); letter-spacing: var(--text-h2-ls); color: var(--color-primary);">
+          External AI guesses.
+        </div>
+      </div>
+
+      <!-- Weight specimen — 600 only -->
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.25rem;">
+        <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; margin-bottom: 0.5rem;">SemiBold / 600 · all styles</div>
+        <div style="font-family: var(--font); font-weight: 600; font-size: var(--text-para-lg-size); color: #fff;">The quick brown fox jumps over the lazy dog</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COLORS ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-colors-primary">Colors — Primary</div>
+    <hr class="sg-divider" />
+    <div class="sg-swatches">
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-primary);"></div>
+        <div class="sg-swatch-name">Primary</div>
+        <div class="sg-swatch-token">--color-primary</div>
+        <div class="sg-swatch-hex">#FFE243</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-colors-accent">Colors — Accent</div>
+    <hr class="sg-divider" />
+    <div class="sg-swatches">
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-red);"></div>
+        <div class="sg-swatch-name">Red</div>
+        <div class="sg-swatch-token">--color-accent-red</div>
+        <div class="sg-swatch-hex">#FF4747</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-green);"></div>
+        <div class="sg-swatch-name">Green</div>
+        <div class="sg-swatch-token">--color-accent-green</div>
+        <div class="sg-swatch-hex">#04DE00</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-pink);"></div>
+        <div class="sg-swatch-name">Pink</div>
+        <div class="sg-swatch-token">--color-accent-pink</div>
+        <div class="sg-swatch-hex">#FF21A6</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-blue);"></div>
+        <div class="sg-swatch-name">Blue</div>
+        <div class="sg-swatch-token">--color-accent-blue</div>
+        <div class="sg-swatch-hex">#1877F2</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-light-blue);"></div>
+        <div class="sg-swatch-name">Light Blue</div>
+        <div class="sg-swatch-token">--color-accent-light-blue</div>
+        <div class="sg-swatch-hex">#59DBFF</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-orange);"></div>
+        <div class="sg-swatch-name">Orange</div>
+        <div class="sg-swatch-token">--color-accent-orange</div>
+        <div class="sg-swatch-hex">#FF7700</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-purple);"></div>
+        <div class="sg-swatch-name">Purple</div>
+        <div class="sg-swatch-token">--color-accent-purple</div>
+        <div class="sg-swatch-hex">#5B45CD</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-accent-indigo);"></div>
+        <div class="sg-swatch-name">Indigo</div>
+        <div class="sg-swatch-token">--color-accent-indigo</div>
+        <div class="sg-swatch-hex">#4450F2</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-colors-bg">Colors — Background &amp; Text</div>
+    <hr class="sg-divider" />
+    <div class="sg-swatches">
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-bg); border-color: rgba(255,255,255,0.15);"></div>
+        <div class="sg-swatch-name">BG Black</div>
+        <div class="sg-swatch-token">--color-bg</div>
+        <div class="sg-swatch-hex">#0D0D12</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-bg-grey);"></div>
+        <div class="sg-swatch-name">BG Grey</div>
+        <div class="sg-swatch-token">--color-bg-grey</div>
+        <div class="sg-swatch-hex">#2A2A2A</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-text);"></div>
+        <div class="sg-swatch-name">Text Base</div>
+        <div class="sg-swatch-token">--color-text</div>
+        <div class="sg-swatch-hex">#FFFFFF</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-text-inverted);"></div>
+        <div class="sg-swatch-name">Text Inverted</div>
+        <div class="sg-swatch-token">--color-text-inverted</div>
+        <div class="sg-swatch-hex">#000000</div>
+      </div>
+      <div class="sg-swatch">
+        <div class="sg-swatch-box" style="background: var(--color-text-grey);"></div>
+        <div class="sg-swatch-name">Text Grey</div>
+        <div class="sg-swatch-token">--color-text-grey</div>
+        <div class="sg-swatch-hex">#909090</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TYPOGRAPHY ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-type-desktop">Typography — Desktop Scale</div>
+    <hr class="sg-divider" />
+    <table class="sg-type-table">
+      <tbody>
+        <tr>
+          <td>
+            <div class="t-h1" style="color: white;">H1</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h1</div>
+            <div class="t-h1" style="color: #6666ff;">H1</div>
+            <div class="sg-type-meta">96px · 6rem · LH 1.0 · LS −2% · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-h2" style="color: white;">H2</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h2</div>
+            <div class="t-h2" style="color: #6666ff;">H2</div>
+            <div class="sg-type-meta">60.8px · 3.8rem · LH 1.1 · LS −2% · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-h3" style="color: white;">H3</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h3</div>
+            <div class="t-h3" style="color: #6666ff;">H3</div>
+            <div class="sg-type-meta">32px · 2rem · LH 1.0 · LS −2% · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-h4" style="color: white;">H4</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h4</div>
+            <div class="t-h4" style="color: #6666ff;">H4</div>
+            <div class="sg-type-meta">24px · 1.5rem · LH 1.4 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-h5" style="color: white;">H5</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h5</div>
+            <div class="t-h5" style="color: #6666ff;">H5</div>
+            <div class="sg-type-meta">19.2px · 1.2rem · LH 1.4 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-h6" style="color: white;">H6</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-h6</div>
+            <div class="t-h6" style="color: #6666ff;">H6</div>
+            <div class="sg-type-meta">16px · 1rem · LH 1.4 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-para-xl" style="color: white;">Paragraph XL</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-para-xl</div>
+            <div class="t-para-xl" style="color: #6666ff;">Paragraph XL</div>
+            <div class="sg-type-meta">24px · 1.5rem · LH 1.1 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-para-lg" style="color: white;">Paragraph LG</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-para-lg</div>
+            <div class="t-para-lg" style="color: #6666ff;">Paragraph LG</div>
+            <div class="sg-type-meta">20px · 1.25rem · LH 1.1 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-body" style="color: white;">Body</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-body</div>
+            <div class="t-body" style="color: #6666ff;">Body</div>
+            <div class="sg-type-meta">14.4px · 0.9rem · LH 1.2 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-para-sm" style="color: white;">Paragraph SM</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-para-sm</div>
+            <div class="t-para-sm" style="color: #6666ff;">Paragraph SM</div>
+            <div class="sg-type-meta">14px · 0.875rem · LH 1.3 · LS 0 · 600</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-eyebrow" style="color: white;">Eyebrow</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-eyebrow</div>
+            <div class="t-eyebrow" style="color: #6666ff;">Eyebrow</div>
+            <div class="sg-type-meta">12.8px · 0.8rem · LH 1.2 · LS 10% · 600 · uppercase</div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="t-btn" style="color: white;">Button</div>
+          </td>
+          <td>
+            <div class="sg-type-class">.t-btn</div>
+            <div class="t-btn" style="color: #6666ff;">Button</div>
+            <div class="sg-type-meta">24px · 1.5rem · LH 1.0 · LS −2% · 600</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="sg-section">
+    <div class="sg-section-label green" id="s-type-mobile">Typography — Mobile Scale (≤ 767px)</div>
+    <hr class="sg-divider" />
+    <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin: 0 0 1rem;">
+      These values are applied automatically via <code>tokens.css</code> media query at <code>max-width: 47.9375rem</code>.
+      Resize your browser window below 768px to see them in effect.
+    </p>
+    <table class="sg-type-table">
+      <tbody>
+        <tr>
+          <td><div class="sg-type-class">H1 (Mobile)</div></td>
+          <td><div class="sg-type-meta">44.8px · 2.8rem · LH 1.0 · LS −2%</div></td>
+        </tr>
+        <tr>
+          <td><div class="sg-type-class">H2 (Mobile)</div></td>
+          <td><div class="sg-type-meta">32px · 2rem · LH 1.1 · LS −2%</div></td>
+        </tr>
+        <tr>
+          <td><div class="sg-type-class">H3 (Mobile)</div></td>
+          <td><div class="sg-type-meta">24px · 1.5rem · LH 1.0 · LS −2%</div></td>
+        </tr>
+        <tr>
+          <td><div class="sg-type-class">Para XL (Mobile)</div></td>
+          <td><div class="sg-type-meta">19.2px · 1.2rem · LH 1.1</div></td>
+        </tr>
+        <tr>
+          <td><div class="sg-type-class">Para LG (Mobile)</div></td>
+          <td><div class="sg-type-meta">17.6px · 1.1rem · LH 1.1</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ SPACING ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-spacing">Spacing &amp; Gaps</div>
+    <hr class="sg-divider" />
+
+    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.35); margin: 0 0 1.25rem; font-family: ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase;">MARGINS</p>
+    <div class="sg-spacing-row" style="margin-bottom: 2.5rem;">
+      <div class="sg-space-item">
+        <div class="sg-space-box-purple" style="width: var(--space-xs); height: var(--space-xs);"></div>
+        <div class="sg-space-label" style="color: #6666ff;">Margin XS</div>
+        <div class="sg-space-val">--space-xs · 0.5rem / 8px</div>
+      </div>
+      <div class="sg-space-item">
+        <div class="sg-space-box-purple" style="width: var(--space-sm); height: var(--space-sm);"></div>
+        <div class="sg-space-label" style="color: #6666ff;">Margin SM</div>
+        <div class="sg-space-val">--space-sm · 1rem / 16px</div>
+      </div>
+      <div class="sg-space-item">
+        <div class="sg-space-box-purple" style="width: var(--space-md); height: var(--space-md);"></div>
+        <div class="sg-space-label" style="color: #6666ff;">Margin MD</div>
+        <div class="sg-space-val">--space-md · 2rem / 32px</div>
+      </div>
+      <div class="sg-space-item">
+        <div class="sg-space-box-purple" style="width: var(--space-lg); height: var(--space-lg);"></div>
+        <div class="sg-space-label" style="color: #6666ff;">Margin LG</div>
+        <div class="sg-space-val">--space-lg · 3rem / 48px</div>
+      </div>
+    </div>
+
+    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.35); margin: 0 0 1.25rem; font-family: ui-monospace, monospace; letter-spacing: 0.06em; text-transform: uppercase;">GAPS</p>
+    <div class="sg-spacing-row">
+      <div class="sg-space-item">
+        <div class="sg-space-box-green" style="width: var(--gap-sm); height: var(--gap-sm);"></div>
+        <div class="sg-space-label" style="color: #04DE00;">Gap SM</div>
+        <div class="sg-space-val">--gap-sm · 0.5rem / 8px</div>
+      </div>
+      <div class="sg-space-item">
+        <div class="sg-space-box-green" style="width: var(--gap-main); height: var(--gap-main);"></div>
+        <div class="sg-space-label" style="color: #04DE00;">Gap Main</div>
+        <div class="sg-space-val">--gap-main · 1rem / 16px</div>
+      </div>
+      <div class="sg-space-item">
+        <div class="sg-space-box-green" style="width: var(--gap-md); height: var(--gap-md);"></div>
+        <div class="sg-space-label" style="color: #04DE00;">Gap MD</div>
+        <div class="sg-space-val">--gap-md · 1.5rem / 24px</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RADIUS ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-radius">Border Radius</div>
+    <hr class="sg-divider" />
+    <div class="sg-radius-row">
+      <div class="sg-radius-item">
+        <div class="sg-radius-box" style="border-radius: var(--radius-sm);"></div>
+        <div class="sg-radius-label">Radius SM</div>
+        <div class="sg-radius-val">--radius-sm · 0.5rem / 8px</div>
+      </div>
+      <div class="sg-radius-item">
+        <div class="sg-radius-box" style="border-radius: var(--radius-md);"></div>
+        <div class="sg-radius-label">Radius MD</div>
+        <div class="sg-radius-val">--radius-md · 0.75rem / 12px</div>
+      </div>
+      <div class="sg-radius-item">
+        <div class="sg-radius-box" style="border-radius: var(--radius-lg);"></div>
+        <div class="sg-radius-label">Radius LG</div>
+        <div class="sg-radius-val">--radius-lg · 1rem / 16px</div>
+      </div>
+      <div class="sg-radius-item">
+        <div class="sg-radius-box" style="border-radius: var(--radius-lg);"></div>
+        <div class="sg-radius-label">Radius XL</div>
+        <div class="sg-radius-val">--radius-xl · 1.5rem / 24px</div>
+      </div>
+      <div class="sg-radius-item">
+        <div class="sg-radius-box" style="border-radius: var(--radius-pill); width: 160px;"></div>
+        <div class="sg-radius-label">Pill</div>
+        <div class="sg-radius-val">--radius-pill · 9999px</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTAINERS ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-containers">Container Max-widths</div>
+    <hr class="sg-divider" />
+    <div class="sg-container-bars">
+      <div class="sg-container-bar-wrap" style="height: 36px;">
+        <div class="sg-container-bar" style="width: 100%;">
+          <span class="sg-container-name">Large</span>
+          <span class="sg-container-val">--container-lg · 100rem / 1600px</span>
+        </div>
+      </div>
+      <div class="sg-container-bar-wrap" style="height: 36px;">
+        <div class="sg-container-bar" style="width: 80%;">
+          <span class="sg-container-name">Medium</span>
+          <span class="sg-container-val">--container-md · 80rem / 1280px</span>
+        </div>
+      </div>
+      <div class="sg-container-bar-wrap" style="height: 36px;">
+        <div class="sg-container-bar" style="width: 64%;">
+          <span class="sg-container-name">Small</span>
+          <span class="sg-container-val">--container-sm · 64rem / 1024px</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PADDING SYSTEM ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-padding">Padding System</div>
+    <hr class="sg-divider" />
+    <table class="sg-pad-table">
+      <thead>
+        <tr>
+          <th>TOKEN</th>
+          <th>DESKTOP</th>
+          <th>LARGE</th>
+          <th>TABLET</th>
+          <th>MOBILE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Section Padding</td>
+          <td class="muted">1rem / 16px</td>
+          <td>1rem / 16px</td>
+          <td>1rem / 16px</td>
+          <td>1rem / 16px</td>
+        </tr>
+        <tr>
+          <td>Horizontal Padding</td>
+          <td class="muted">1.5rem / 24px</td>
+          <td class="accent">1.25rem / 20px</td>
+          <td class="accent">1rem / 16px</td>
+          <td class="accent">1rem / 16px</td>
+        </tr>
+        <tr>
+          <td>Card Padding</td>
+          <td class="muted">1.5rem / 24px</td>
+          <td>1.5rem / 24px</td>
+          <td>1.5rem / 24px</td>
+          <td>1.5rem / 24px</td>
+        </tr>
+        <tr>
+          <td>Container Gutter</td>
+          <td class="muted">1.5rem / 24px</td>
+          <td>1.5rem / 24px</td>
+          <td class="accent">1rem / 16px</td>
+          <td class="accent">1rem / 16px</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 0.75rem 0 0;">
+      <span style="color: #FF7700;">Orange</span> = responsive override. Token <code>--pad-horizontal</code> and <code>--pad-gutter</code> are updated in the media queries automatically.
+    </p>
+  </section>
+
+  <!-- ============ BREAKPOINTS ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-breakpoints">Breakpoints</div>
+    <hr class="sg-divider" />
+    <div class="sg-bp-row">
+      <div class="sg-bp-card">
+        <div class="sg-bp-bar" style="background: #6666ff;"></div>
+        <div class="sg-bp-name">Desktop</div>
+        <div class="sg-bp-range">≥ 1280px</div>
+      </div>
+      <div class="sg-bp-card">
+        <div class="sg-bp-bar" style="background: #04DE00;"></div>
+        <div class="sg-bp-name">Large</div>
+        <div class="sg-bp-range">992 – 1279px</div>
+      </div>
+      <div class="sg-bp-card">
+        <div class="sg-bp-bar" style="background: #FF7700;"></div>
+        <div class="sg-bp-name">Tablet</div>
+        <div class="sg-bp-range">768 – 991px</div>
+      </div>
+      <div class="sg-bp-card">
+        <div class="sg-bp-bar" style="background: #FF4747;"></div>
+        <div class="sg-bp-name">Mobile</div>
+        <div class="sg-bp-range">≤ 767px</div>
+      </div>
+    </div>
+    <p style="font-size: 0.75rem; color: rgba(255,255,255,0.3); margin: 1rem 0 0; font-family: ui-monospace, monospace;">
+      In media queries: 1279px · 991px · 767px
+    </p>
+  </section>
+
+  <!-- ============ 12-COL GRID ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-grid">12-Column Grid</div>
+    <hr class="sg-divider" />
+
+    <div class="sg-grid-demo">
+      <!-- All 12 columns -->
+      <div class="grid">
+        <div class="sg-grid-col col-1">1</div>
+        <div class="sg-grid-col col-1">2</div>
+        <div class="sg-grid-col col-1">3</div>
+        <div class="sg-grid-col col-1">4</div>
+        <div class="sg-grid-col col-1">5</div>
+        <div class="sg-grid-col col-1">6</div>
+        <div class="sg-grid-col col-1">7</div>
+        <div class="sg-grid-col col-1">8</div>
+        <div class="sg-grid-col col-1">9</div>
+        <div class="sg-grid-col col-1">10</div>
+        <div class="sg-grid-col col-1">11</div>
+        <div class="sg-grid-col col-1">12</div>
+      </div>
+      <div class="sg-grid-demo-label">12 × .col-1 · gap: var(--grid-gap) = --gap-main = 1rem / 16px (all breakpoints)</div>
+    </div>
+
+    <div class="sg-grid-examples">
+      <!-- 6 + 6 -->
+      <div class="grid">
+        <div class="sg-grid-eg-col col-6">.col-6</div>
+        <div class="sg-grid-eg-col col-6">.col-6</div>
+      </div>
+      <!-- 4 + 4 + 4 -->
+      <div class="grid">
+        <div class="sg-grid-eg-col col-4">.col-4</div>
+        <div class="sg-grid-eg-col col-4">.col-4</div>
+        <div class="sg-grid-eg-col col-4">.col-4</div>
+      </div>
+      <!-- 3 + 3 + 3 + 3 -->
+      <div class="grid">
+        <div class="sg-grid-eg-col col-3">.col-3</div>
+        <div class="sg-grid-eg-col col-3">.col-3</div>
+        <div class="sg-grid-eg-col col-3">.col-3</div>
+        <div class="sg-grid-eg-col col-3">.col-3</div>
+      </div>
+      <!-- 8 + 4 (content + sidebar) -->
+      <div class="grid">
+        <div class="sg-grid-eg-col col-8">.col-8 (content)</div>
+        <div class="sg-grid-eg-col col-4">.col-4 (sidebar)</div>
+      </div>
+      <!-- Full width -->
+      <div class="grid">
+        <div class="sg-grid-eg-col col-12">.col-12</div>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /tab-tokens -->
+
+  <div id="tab-components" style="display: none;">
+  <!-- ============ BUTTONS ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-buttons">Buttons</div>
+    <hr class="sg-divider" />
+
+    <!-- Size labels -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 860px;">
+      <!-- Header row -->
+      <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Default · .btn-default</div>
+      <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Stroke · .btn-stroke</div>
+
+      <!-- L -->
+      <button class="btn btn-l btn-default">Try Bïrch</button>
+      <button class="btn btn-l btn-stroke">Try Bïrch</button>
+
+      <!-- M -->
+      <button class="btn btn-m btn-default">Try Bïrch</button>
+      <button class="btn btn-m btn-stroke">Try Bïrch</button>
+
+      <!-- S -->
+      <button class="btn btn-s btn-default">Try Bïrch</button>
+      <button class="btn btn-s btn-stroke">Try Bïrch</button>
+    </div>
+
+    <!-- Spec table -->
+    <table class="sg-pad-table" style="max-width: 860px; margin-top: 2rem;">
+      <thead>
+        <tr>
+          <th>VARIANT</th>
+          <th>CLASS</th>
+          <th>HEIGHT</th>
+          <th>FONT</th>
+          <th>RADIUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Large</td>
+          <td class="muted">.btn .btn-l</td>
+          <td class="muted">10rem / 160px</td>
+          <td class="muted">1.5rem · 600 · −0.02em</td>
+          <td class="muted">--radius-lg / 16px</td>
+        </tr>
+        <tr>
+          <td>Medium</td>
+          <td class="muted">.btn .btn-m</td>
+          <td class="muted">8.75rem / 140px</td>
+          <td class="muted">1.5rem · 600 · −0.02em</td>
+          <td class="muted">--radius-lg / 16px</td>
+        </tr>
+        <tr>
+          <td>Small</td>
+          <td class="muted">.btn .btn-s</td>
+          <td class="muted">6.25rem / 100px</td>
+          <td class="muted">1.5rem · 600 · −0.02em</td>
+          <td class="muted">--radius-lg / 16px</td>
+        </tr>
+        <tr>
+          <td>Default style</td>
+          <td class="muted">.btn-default</td>
+          <td colspan="3" class="muted">bg: --color-primary (#FFE243) · color: --color-text-inverted (#000)</td>
+        </tr>
+        <tr>
+          <td>Stroke style</td>
+          <td class="muted">.btn-stroke</td>
+          <td colspan="3" class="muted">border: 5px dotted --color-text (#fff) · bg: transparent · color: --color-text</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ CARD ACCORDION ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-accordion">Card Accordion</div>
+    <hr class="sg-divider" />
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 860px;">
+      <!-- Labels -->
+      <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Default (open)</div>
+      <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Closed</div>
+
+      <!-- Open state -->
+      <div class="card-accordion">
+        <p class="t-h4" style="margin: 0;">Get rule suggestions</p>
+        <div class="card-accordion__body">
+          <p class="t-para-lg" style="color: var(--color-text-grey); margin: 0;">Ask about optimization opportunities and get a draft rule instantly — tailored to your current performance data</p>
+          <div class="card-accordion__bar">
+            <div class="card-accordion__bar-fill" style="width: 82%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Closed state -->
+      <div class="card-accordion is-closed">
+        <p class="t-h4" style="margin: 0;">Get rule suggestions</p>
+        <div class="card-accordion__body">
+          <p class="t-para-lg" style="color: var(--color-text-grey); margin: 0;">Ask about optimization opportunities and get a draft rule instantly — tailored to your current performance data</p>
+          <div class="card-accordion__bar">
+            <div class="card-accordion__bar-fill" style="width: 82%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive demo -->
+    <div style="margin-top: 2rem;">
+      <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; margin-bottom: 0.75rem;">Interactive — auto-plays every 3 s</div>
+      <div id="acc-autoplay" style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 420px;">
+        <div class="card-accordion card-accordion--auto is-active">
+          <p class="t-h4" style="margin: 0;">Get rule suggestions</p>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color: var(--color-text-grey); margin: 0;">Ask about optimization opportunities and get a draft rule instantly — tailored to your current performance data</p>
+            <div class="card-accordion__bar">
+              <div class="card-accordion__bar-fill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-accordion card-accordion--auto is-closed">
+          <p class="t-h4" style="margin: 0;">Analyze audience segments</p>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color: var(--color-text-grey); margin: 0;">Break down your campaigns by audience and get instant performance comparisons across segments.</p>
+            <div class="card-accordion__bar">
+              <div class="card-accordion__bar-fill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-accordion card-accordion--auto is-closed">
+          <p class="t-h4" style="margin: 0;">Review budget pacing</p>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color: var(--color-text-grey); margin: 0;">See how each campaign is tracking against its budget and get recommendations to reallocate spend.</p>
+            <div class="card-accordion__bar">
+              <div class="card-accordion__bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var items = document.querySelectorAll('#acc-autoplay .card-accordion--auto');
+        var current = 0;
+
+        function activate(index) {
+          items.forEach(function (item, i) {
+            var fill = item.querySelector('.card-accordion__bar-fill');
+            if (i === index) {
+              item.classList.remove('is-closed');
+              item.classList.add('is-active');
+              // restart animation
+              fill.style.animation = 'none';
+              fill.offsetHeight;
+              fill.style.animation = '';
+            } else {
+              item.classList.add('is-closed');
+              item.classList.remove('is-active');
+              fill.style.animation = 'none';
+            }
+          });
+        }
+
+        activate(0);
+        setInterval(function () {
+          current = (current + 1) % items.length;
+          activate(current);
+        }, 6000);
+      })();
+    </script>
+
+    <!-- Spec -->
+    <table class="sg-pad-table" style="max-width: 860px; margin-top: 2rem;">
+      <thead>
+        <tr><th>ELEMENT</th><th>TOKEN / VALUE</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Background</td><td class="muted">--color-bg (#0D0D12)</td></tr>
+        <tr><td>Border radius</td><td class="muted">--radius-lg / 16px</td></tr>
+        <tr><td>Padding</td><td class="muted">--pad-card / 1.5rem</td></tr>
+        <tr><td>Gap (inner)</td><td class="muted">--space-sm / 1rem</td></tr>
+        <tr><td>Title</td><td class="muted">.t-h4 · 24px · 600 · LH 1.2</td></tr>
+        <tr><td>Description</td><td class="muted">.t-para-lg · 20px · 600 · LH 1.1 · --color-text-grey</td></tr>
+        <tr><td>Progress track</td><td class="muted">4px · --radius-sm · rgba(255,255,255,0.15)</td></tr>
+        <tr><td>Progress fill</td><td class="muted">4px · --radius-sm · --color-accent-green</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ LIVE USAGE DEMO ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label orange" id="s-live">Live Usage Demo</div>
+    <hr class="sg-divider" />
+    <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin: 0 0 2rem;">
+      A sample card layout built entirely with <code>tokens.css</code> tokens.
+    </p>
+
+    <div class="grid">
+      <div class="col-8" style="background: var(--color-bg-grey); border-radius: var(--radius-lg); padding: var(--pad-card); display: flex; flex-direction: column; gap: var(--gap-main);">
+        <div class="t-eyebrow" style="color: var(--color-accent-green);">On-demand chat</div>
+        <h2 class="t-h3" style="margin: 0;">Get answers from your actual data.</h2>
+        <p class="t-para-sm" style="color: var(--color-text-grey); margin: 0;">
+          It reads every account you've connected, every rule you've set, and your current performance — then answers your questions with context that fits your setup.
+        </p>
+        <button class="btn btn-s btn-default">Get started →</button>
+      </div>
+
+      <div class="col-4" style="display: flex; flex-direction: column; gap: var(--gap-md);">
+        <div style="background: var(--color-bg-grey); border-radius: var(--radius-lg); padding: var(--pad-card); flex: 1; border-top: 3px solid var(--color-accent-blue);">
+          <div class="t-eyebrow" style="color: var(--color-accent-blue); margin-bottom: var(--gap-sm);">Stat</div>
+          <div class="t-h3" style="color: var(--color-text);">14</div>
+          <div class="t-para-sm" style="color: var(--color-text-grey);">Ad platforms connected</div>
+        </div>
+        <div style="background: var(--color-bg-grey); border-radius: var(--radius-lg); padding: var(--pad-card); flex: 1; border-top: 3px solid var(--color-accent-green);">
+          <div class="t-eyebrow" style="color: var(--color-accent-green); margin-bottom: var(--gap-sm);">Stat</div>
+          <div class="t-h3" style="color: var(--color-text);">3.4×</div>
+          <div class="t-para-sm" style="color: var(--color-text-grey);">ROAS this week</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /tab-components -->
+
+</div>
+
+<script>
+  function switchTab(name, btn) {
+    document.getElementById('tab-tokens').style.display     = name === 'tokens'     ? '' : 'none';
+    document.getElementById('tab-components').style.display = name === 'components' ? '' : 'none';
+    document.getElementById('anchors-tokens').style.display     = name === 'tokens'     ? '' : 'none';
+    document.getElementById('anchors-components').style.display = name === 'components' ? '' : 'none';
+    document.querySelectorAll('.sg-tab').forEach(function(t) { t.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    window.scrollTo({ top: 0 });
+  }
+</script>
+</body>
+</html>
