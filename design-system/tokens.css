@@ -8,8 +8,8 @@
 /* ============ FONT FACE ============ */
 @font-face {
   font-family: "TT Commons Pro Variable";
-  src: url("./fonts/TT_Commons_Pro_Variable.woff2") format("woff2-variations"),
-       url("./fonts/TT_Commons_Pro_Variable.woff2") format("woff2");
+  src: url("../fonts/TT_Commons_Pro_Variable.woff2") format("woff2-variations"),
+       url("../fonts/TT_Commons_Pro_Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
