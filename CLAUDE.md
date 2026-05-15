@@ -1,0 +1,57 @@
+# Birch AI — Claude Instructions
+
+## Meta rules
+
+- **CLAUDE.md updates** — whenever a global pattern or rule is established (e.g. a new CSS convention, a layout approach, a naming rule), always ask the user: "Should I add this to CLAUDE.md for future pages?" before ending the task.
+
+## Design system
+
+All UI work in this project uses the Birch Design System located in `design-system/`.
+
+### Rules for building pages and components
+
+- **Tokens only** — use CSS custom properties from `design-system/tokens.css` exclusively. Never hardcode colors, font sizes, spacing, border-radius, or any other value that exists as a token.
+- **Type classes** — always apply utility classes (`.t-h1`, `.t-h2`, `.t-para-xl`, etc.) directly on HTML elements instead of repeating font-size/line-height/letter-spacing in component CSS. This ensures a single source of truth: changing a token in `tokens.css` propagates everywhere.
+- **No px** — never use `px` units in CSS or inline styles. Use `rem` for all fixed sizes (spacing, radius, font sizes), `%` for widths relative to a parent container, and `vw`/`vh` for viewport-relative sizes. Convert Figma px values: divide by 16 for rem (e.g. 24px → 1.5rem). For elements inside a fixed-width container, express widths as `elementPx / containerPx * 100%`.
+- **JS animations** — never hardcode pixel offsets in animation scripts. Compute them from the rendered element size (e.g. `el.offsetWidth * ratio`) so they scale when the container resizes.
+- **Component classes only** — use classes from `design-system/components/` for any UI pattern that has a component file. Don't rewrite styles that are already defined there.
+- **No new values** — if a value you need doesn't exist in `tokens.css`, ask the user before inventing one. The right answer is usually to add it to Figma first, then sync it with `/figma-sync`.
+- **Styleguide is the reference** — check `design-system/styleguide.html` to see all available tokens, utility classes, and components before writing any CSS.
+- **Grid** — always use the 12-column grid system from `tokens.css` for layout. Use `.container` to center content, `.grid` for column layouts, and `.col-{n}` span helpers. Use `--gap-main`, `--pad-horizontal`, and `--pad-gutter` tokens for spacing — never hardcode gutters or margins. On mobile (≤767px) the grid collapses to a single column automatically.
+- **Fluid scaling with clamp()** — visual containers should scale across screen widths using `clamp(min, preferred, max)` rather than a single fixed width. The preferred value should be a `vw` unit calibrated to the designed width (e.g. if the design is 1280px and the container is 1120px wide, use `87.5vw`). Always pair with `max-width: calc(100vw - 3rem)` as overflow protection on small screens. Use `aspect-ratio` instead of a fixed height so the container grows proportionally. Example: `width: clamp(56.25rem, 87.5vw, 90rem); max-width: calc(100vw - 3rem); aspect-ratio: 16 / 10;`
+
+### File structure
+
+```
+design-system/
+  tokens.css               ← all design tokens (colors, type, spacing, radius, grid)
+  components/
+    button.css             ← .btn, .btn-default, .btn-stroke, .btn-l/m/s
+    card-accordion.css     ← .card-accordion, .card-accordion__body, etc.
+  styleguide.html          ← living visual reference
+fonts/
+  TT_Commons_Pro_Variable.woff2
+```
+
+### Adding to the design system
+
+Use the `/figma-sync` skill whenever something new is created or changed in Figma.
+
+**figma-sync conversion rules:**
+- All Figma px values → `rem` (divide by 16). Example: Figma `spacing/24` = `1.5rem`.
+- Widths/heights that are fractions of a parent frame → `%` of parent.
+- Never output raw `px` values into `tokens.css` or component CSS.
+
+
+
+```
+/figma-sync all                          ← detect and sync all changes
+/figma-sync color "Accent/Teal"          ← add a specific new color
+/figma-sync text-style "Label Small"     ← add a specific new text style
+/figma-sync component "Tooltip"          ← add a specific new component
+/figma-sync update color "Primary"       ← update an existing token
+```
+
+### Figma source
+
+File key: `1tkZCzPxmdkHToeE32cUIz`

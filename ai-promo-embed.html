@@ -1,0 +1,360 @@
+<!-- ╔═══════════════════════════════════════════════════════════╗
+     ║  BIRCH — AI Rules Promo  |  Webflow Embed                ║
+     ╠═══════════════════════════════════════════════════════════╣
+     ║  SETUP (do this before pasting):                         ║
+     ║  1. Upload chat-01.png, chat-02.png, workspace.png       ║
+     ║     to Webflow Assets                                     ║
+     ║  2. Replace the three IMAGE_URL_* placeholders below     ║
+     ║     with the CDN URLs from Webflow Assets panel          ║
+     ║                                                          ║
+     ║  IMPORTANT: sticky scroll requires no parent element     ║
+     ║  to have overflow:hidden. In Webflow, check the          ║
+     ║  Section and any wrapper Divs — set overflow to          ║
+     ║  "Visible" if sticky doesn't work.                       ║
+     ╚═══════════════════════════════════════════════════════════╝ -->
+
+<style>
+  /* ── Scoped design tokens ── */
+  .bp {
+    --bp-font:         "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+    --bp-color:        #FFFFFF;
+    --bp-green:        #04DE00;
+    --bp-h2-size:      3.8rem;
+    --bp-h2-lh:        1.1;
+    --bp-h2-ls:       -0.02em;
+    --bp-sub-size:     1.5rem;
+    --bp-sub-lh:       1.1;
+    --bp-radius:       1.5rem;
+  }
+
+  @media (max-width: 767px) {
+    .bp {
+      --bp-h2-size:  2rem;
+      --bp-sub-size: 1.2rem;
+    }
+  }
+
+  /* ── Section: 300vh scroll track ── */
+  .bp {
+    height: 300vh;
+    font-family: var(--bp-font);
+    color: var(--bp-color);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ── Sticky viewport ── */
+  .bp__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4.5rem 1.5rem 0;
+    overflow: hidden;
+  }
+
+  /* ── Headline ── */
+  .bp__headline {
+    font-family: var(--bp-font);
+    font-size: var(--bp-h2-size);
+    line-height: var(--bp-h2-lh);
+    letter-spacing: var(--bp-h2-ls);
+    font-weight: 600;
+    color: var(--bp-color);
+    text-align: center;
+    margin: 0 0 1.25rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Subtitle container ── */
+  .bp__subtitle {
+    width: 100%;
+    max-width: 68.75rem;
+    margin-bottom: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Inline flex row: static text + animated clips */
+  .bp__sub-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-family: var(--bp-font);
+    font-size: var(--bp-sub-size);
+    line-height: var(--bp-sub-lh);
+    font-weight: 600;
+    color: var(--bp-color);
+  }
+
+  /* Clip: masks one chunk, height = 1 line */
+  .bp__clip {
+    display: inline-flex;
+    overflow: hidden;
+    height: calc(var(--bp-sub-size) * var(--bp-sub-lh));
+    vertical-align: bottom;
+  }
+
+  /* Inner span starts below the clip, slides up */
+  .bp__clip > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    transform: translateY(110%);
+    will-change: transform;
+    white-space: nowrap;
+  }
+
+  .bp__arrow { color: var(--bp-green); }
+
+  /* Mobile clip hidden on desktop */
+  .bp__clip--m { display: none; }
+
+  /* ── Visual area ── */
+  .bp__visual {
+    position: relative;
+    width: clamp(56.25rem, 87.5vw, 90rem);
+    max-width: calc(100vw - 3rem);
+    aspect-ratio: 900 / 560;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  /* Chat images stacked */
+  .bp__chat-stack {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: top center;
+    width: 41.11%;
+    z-index: 2;
+    will-change: transform;
+  }
+
+  .bp__chat-base {
+    width: 100%;
+    border-radius: var(--bp-radius);
+  }
+
+  .bp__chat-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: var(--bp-radius);
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  /* Workspace slides up from below */
+  .bp__workspace {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 1;
+    transform: translateX(-50%) translateY(0);
+    width: 83.22%;
+    opacity: 0;
+    border-radius: 0.875rem;
+    overflow: hidden;
+    will-change: opacity, transform;
+  }
+
+  .bp__workspace img {
+    width: 100%;
+    display: block;
+  }
+
+  /* ── Mobile ≤767px ── */
+  @media (max-width: 767px) {
+
+    .bp {
+      height: 200vh;
+    }
+
+    .bp__sticky {
+      padding: 3rem 1rem 0;
+    }
+
+    .bp__subtitle {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bp__sub-line {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Hide desktop clips */
+    .bp__clip--d { display: none; }
+
+    /* Mobile clip: collapsed, JS grows it */
+    .bp__clip--m {
+      display: flex;
+      overflow: hidden;
+      height: 0;
+      min-height: 0;
+      justify-content: center;
+    }
+
+    .bp__clip--m > span {
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .bp__m-arrow {
+      color: var(--bp-green);
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .bp__m-text {
+      white-space: normal;
+      text-align: center;
+    }
+
+    .bp__visual {
+      width: calc(100vw - 2rem);
+      aspect-ratio: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    .bp__chat-stack {
+      position: relative;
+      left: auto;
+      transform: none;
+      width: calc(100% - 2.5rem);
+      margin: 0 auto;
+    }
+
+    .bp__workspace {
+      display: none !important;
+    }
+  }
+</style>
+
+<section class="bp">
+  <div class="bp__sticky">
+
+    <h2 class="bp__headline">Birch flips the way you create rules</h2>
+
+    <div class="bp__subtitle">
+      <div class="bp__sub-line">
+        <span>Describe in the chat</span>
+        <!-- desktop: two clips slide in separately -->
+        <span class="bp__clip bp__clip--d" id="bpClip2"><span><span class="bp__arrow">→</span> The rule draft is ready</span></span>
+        <span class="bp__clip bp__clip--d" id="bpClip3"><span>, right where you work</span></span>
+        <!-- mobile: single clip, arrow on own line -->
+        <span class="bp__clip bp__clip--m" id="bpClipM"><span>
+          <span class="bp__m-arrow">↓</span>
+          <span class="bp__m-text">The rule draft is ready, right where you work</span>
+        </span></span>
+      </div>
+    </div>
+
+    <div class="bp__visual">
+
+      <div class="bp__chat-stack" id="bpChatStack">
+        <img
+          src="IMAGE_URL_CHAT_01"
+          class="bp__chat-base"
+          alt="Chat: user describes the rule"
+        />
+        <img
+          src="IMAGE_URL_CHAT_02"
+          class="bp__chat-overlay"
+          id="bpChatOverlay"
+          alt="Birch AI responds with the drafted rule"
+        />
+      </div>
+
+      <div class="bp__workspace" id="bpWorkspace">
+        <img
+          src="IMAGE_URL_WORKSPACE"
+          alt="Rule ready inside Birch workspace"
+        />
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  (function () {
+    var section     = document.querySelector('.bp');
+    var visual      = section.querySelector('.bp__visual');
+    var chatStack   = section.querySelector('#bpChatStack');
+    var chatOverlay = section.querySelector('#bpChatOverlay');
+    var workspace   = section.querySelector('#bpWorkspace');
+    var subLine     = section.querySelector('.bp__sub-line');
+    var clip2El     = section.querySelector('#bpClip2');
+    var clip3El     = section.querySelector('#bpClip3');
+    var clip2       = clip2El.querySelector('span');
+    var clip3       = clip3El.querySelector('span');
+    var clipMEl     = section.querySelector('#bpClipM');
+    var clipM       = clipMEl ? clipMEl.querySelector('span') : null;
+
+    function progress() {
+      var top = section.getBoundingClientRect().top;
+      var scrollable = section.offsetHeight - window.innerHeight;
+      return Math.max(0, Math.min(1, -top / scrollable));
+    }
+
+    function remap(p, lo, hi) {
+      return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
+    }
+
+    function tick() {
+      var mobile = window.innerWidth <= 767;
+      var p  = progress();
+      var p2 = remap(p, 0.28, 0.52);
+
+      chatOverlay.style.opacity = p2;
+
+      if (!mobile) {
+        var p3 = remap(p, 0.64, 0.86);
+
+        var chatScale  = 1 - p3 * 0.40;
+        var chatShiftX = p3 * visual.offsetWidth * 0.293;
+        chatStack.style.transform = 'translateX(calc(-50% + ' + chatShiftX + 'px)) scale(' + chatScale + ')';
+
+        var slideY = visual.offsetHeight * 0.143;
+        workspace.style.opacity   = p3;
+        workspace.style.transform = 'translateX(-50%) translateY(' + ((1 - p3) * slideY) + 'px)';
+
+        var t12 = remap(p, 0.28, 0.52);
+        var t23 = remap(p, 0.64, 0.86);
+        clip2.style.transform = 'translateY(' + ((1 - t12) * 110) + '%)';
+        clip3.style.transform = 'translateY(' + ((1 - t23) * 110) + '%)';
+        var c2 = clip2El.offsetWidth;
+        var c3 = clip3El.offsetWidth;
+        subLine.style.transform = 'translateX(' + ((c2 * (1 - t12) + c3 * (1 - t23)) / 2) + 'px)';
+
+      } else {
+        chatStack.style.transform = '';
+        subLine.style.transform   = '';
+        var t12m = remap(p, 0.28, 0.50);
+        if (clipMEl && clipM) {
+          clipMEl.style.height  = (t12m * clipMEl.scrollHeight) + 'px';
+          clipM.style.transform = 'translateY(' + ((1 - t12m) * 110) + '%)';
+        }
+      }
+    }
+
+    window.addEventListener('scroll', tick, { passive: true });
+    tick();
+  })();
+</script>
