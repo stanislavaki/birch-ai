@@ -121,6 +121,19 @@
     will-change: opacity;
   }
 
+  /* AI response — slides up from viewport bottom
+     Lives inside chat-stack → inherits its shrink/shift transform in state 3 */
+  .promo__chat-response {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: var(--radius-xl);
+    opacity: 0;
+    z-index: 1;
+    will-change: opacity, transform;
+  }
+
   /* Workspace — slides up from below into top of visual container */
   .promo__workspace {
     position: absolute;
@@ -246,15 +259,24 @@
     <div class="promo__visual">
 
       <div class="promo__chat-stack" id="chatStack">
+        <!-- 01_0 — empty chat, always visible, sets container height -->
         <img
-          src="images/chat-01.png"
+          src="images/chat-empty.png"
           class="promo__chat-base"
-          alt="Chat: user describes the rule"
+          alt="Empty chat window"
         />
+        <!-- 01_1 — user message: fades in quickly -->
         <img
-          src="images/chat-02.png"
+          src="images/chat-msg.png"
           class="promo__chat-overlay"
-          id="chatOverlay"
+          id="chatMsg"
+          alt="User message in chat"
+        />
+        <!-- 02 — AI response: slides up from viewport bottom -->
+        <img
+          src="images/chat-response.png"
+          class="promo__chat-response"
+          id="chatResponse"
           alt="Birch AI responds with the drafted rule"
         />
       </div>
@@ -272,11 +294,12 @@
 </section>
 
 <script>
-  const section     = document.querySelector('.promo');
-  const visual      = document.querySelector('.promo__visual');
-  const chatStack   = document.getElementById('chatStack');
-  const chatOverlay = document.getElementById('chatOverlay');
-  const workspace   = document.getElementById('workspace');
+  const section      = document.querySelector('.promo');
+  const visual       = document.querySelector('.promo__visual');
+  const chatStack    = document.getElementById('chatStack');
+  const chatMsg      = document.getElementById('chatMsg');       /* 01_1 fade */
+  const chatResponse = document.getElementById('chatResponse');  /* 02 slide  */
+  const workspace    = document.getElementById('workspace');
   const subLine    = document.querySelector('.promo__sub-line');
   const subClip2El = document.getElementById('subClip2');
   const subClip3El = document.getElementById('subClip3');
@@ -284,6 +307,7 @@
   const clip3      = subClip3El.querySelector('span');
   const subClipMEl = document.getElementById('subClipM');
   const clipM      = subClipMEl ? subClipMEl.querySelector('span') : null;
+  const remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
   /* ── Scroll progress ── */
   function scrollProgress() {
@@ -297,9 +321,9 @@
   }
 
   /* ── Lerp smoothing ── */
-  let targetP    = 0;   /* raw scroll position            */
-  let currentP   = 0;   /* smoothed — chat, text, overlay */
-  let currentPws = 0;   /* smoothed — workspace only      */
+  let targetP    = 0;   /* raw scroll position               */
+  let currentP   = 0;   /* smoothed — chat-msg fade + text   */
+  let currentPws = 0;   /* smoothed — chat-response + workspace (snappier) */
 
   window.LERP      = 0.15; /* chat + text + overlay  · 0.05 slow → 0.2 snappy */
   window.LERP_WS   = 0.4;  /* workspace              · 0.05 slow → 0.2 snappy */
@@ -329,31 +353,34 @@
   /* ── Render at smoothed position ── */
   function tick(p, pws) {
     const mobile = window.innerWidth <= 767;
-    const p2 = remap(p, 0.28, 0.52);
 
-    /* Chat overlay — both desktop and mobile */
-    chatOverlay.style.opacity = p2;
+    /* ── State 1→2a: user message — fade + float up 4rem ── */
+    const t01 = easeFn(remap(p, 0.28, 0.38));
+    chatMsg.style.opacity   = t01;
+    chatMsg.style.transform = `translateY(${(1 - t01) * 4 * remPx}px)`;
+
+    /* ── State 1→2b: AI response — same: fade + float up 4rem (delayed) ── */
+    const t02 = easeFn(remap(pws, 0.48, 0.58));
+    chatResponse.style.opacity   = t02;
+    chatResponse.style.transform = `translateY(${(1 - t02) * 4 * remPx}px)`;
 
     if (!mobile) {
-      const p3 = easeFn(remap(p, 0.64, 0.86));   /* chat: bezier eased  */
-      const p4 = remap(p, 0.70, 0.86);          /* workspace: faster   */
-
-      /* State 3: chat shrinks + shifts to top-right corner */
+      /* ── State 2→3: entire chat-stack (incl. response) shrinks + shifts right ── */
+      const p3 = easeFn(remap(p, 0.64, 0.86));
       const chatScale  = 1 - p3 * 0.40;
       const chatShiftX = p3 * visual.offsetWidth * 0.293;
       chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) scale(${chatScale})`;
 
-      /* Workspace slides up from viewport bottom — own lerp (LERP_WS) */
-      const p4ws  = easeFn(remap(pws, 0.70, 0.86));
+      /* ── State 2→3: workspace slides up from viewport bottom ── */
+      const p4ws = easeFn(remap(pws, 0.70, 0.86));
       const fromViewportBottom = window.innerHeight - visual.getBoundingClientRect().top;
       workspace.style.transform = `translateX(-50%) translateY(${(1 - p4ws) * fromViewportBottom}px)`;
 
-      /* Subtitle: new chunks slide in from below; line shifts to stay centered */
+      /* ── Subtitle: new chunks slide in from below; line compensates for width ── */
       const t12 = remap(p, 0.28, 0.52);
       const t23 = remap(p, 0.64, 0.86);
       clip2.style.transform = `translateY(${(1 - t12) * 110}%)`;
       clip3.style.transform = `translateY(${(1 - t23) * 110}%)`;
-      /* Compensate for invisible clips taking layout space */
       const c2 = subClip2El.offsetWidth;
       const c3 = subClip3El.offsetWidth;
       subLine.style.transform = `translateX(${(c2 * (1 - t12) + c3 * (1 - t23)) / 2}px)`;
