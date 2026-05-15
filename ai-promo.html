@@ -584,6 +584,16 @@
     border-radius: 3px; color: #ccc; padding: 2px 4px; font: 10px monospace;
   }
   .bez-inp:focus { outline: none; border-color: #444; color: #fff; }
+
+  /* ── LERP sliders ── */
+  #lerp-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; display: flex; flex-direction: column; gap: 5px; }
+  .lerp-row { display: flex; align-items: center; gap: 0.5rem; }
+  .lerp-lbl  { color: #555; font-size: 10px; width: 5rem; flex-shrink: 0; }
+  .lerp-range {
+    flex: 1; height: 3px; cursor: pointer;
+    accent-color: #04DE00;
+  }
+  .lerp-val  { color: #04DE00; font-size: 10px; width: 2.5rem; text-align: right; }
 </style>
 
 <div id="dbg">
@@ -608,6 +618,18 @@
       <div id="bez-row">
         <svg id="bez-svg" width="130" height="130" viewBox="-15 -15 130 130"></svg>
         <div id="bez-inputs"></div>
+      </div>
+    </div>
+    <div id="lerp-section">
+      <div class="lerp-row">
+        <span class="lerp-lbl">LERP (slow)</span>
+        <input type="range" class="lerp-range" id="lerp-slow" min="0.01" max="0.5" step="0.01" />
+        <span class="lerp-val" id="lerp-slow-val"></span>
+      </div>
+      <div class="lerp-row">
+        <span class="lerp-lbl">LERP_WS (fast)</span>
+        <input type="range" class="lerp-range" id="lerp-fast" min="0.01" max="0.99" step="0.01" />
+        <span class="lerp-val" id="lerp-fast-val"></span>
       </div>
     </div>
     <button id="dbg-copy">Copy final values</button>
@@ -912,6 +934,23 @@
     }
 
     requestAnimationFrame(loop);
+  })();
+
+  /* ── LERP sliders ── */
+  (function () {
+    const sliders = [
+      { id: 'lerp-slow', valId: 'lerp-slow-val', get: () => window.LERP,    set: v => { window.LERP    = v; } },
+      { id: 'lerp-fast', valId: 'lerp-fast-val', get: () => window.LERP_WS, set: v => { window.LERP_WS = v; } },
+    ];
+    sliders.forEach(({ id, valId, get, set }) => {
+      const inp = document.getElementById(id);
+      const lbl = document.getElementById(valId);
+      const sync = () => { inp.value = get(); lbl.textContent = get().toFixed(2); };
+      sync();
+      inp.addEventListener('input', () => { set(parseFloat(inp.value)); lbl.textContent = parseFloat(inp.value).toFixed(2); });
+      /* keep display in sync if value changes from console */
+      setInterval(sync, 500);
+    });
   })();
 
   /* Toggle */
