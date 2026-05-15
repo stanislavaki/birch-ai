@@ -286,6 +286,7 @@
   const subClipMEl = document.getElementById('subClipM');
   const clipM      = subClipMEl ? subClipMEl.querySelector('span') : null;
 
+  /* ── Scroll progress ── */
   function scrollProgress() {
     const { top } = section.getBoundingClientRect();
     const scrollable = section.offsetHeight - window.innerHeight;
@@ -296,9 +297,18 @@
     return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
   }
 
-  function tick() {
+  /* ── Lerp smoothing ── */
+  let targetP  = 0;  /* raw scroll position  */
+  let currentP = 0;  /* smoothed position    */
+  const LERP   = 0.09; /* 0.05 = very slow · 0.2 = snappy */
+
+  window.addEventListener('scroll', () => {
+    targetP = scrollProgress();
+  }, { passive: true });
+
+  /* ── Render at smoothed position ── */
+  function tick(p) {
     const mobile = window.innerWidth <= 767;
-    const p  = scrollProgress();
     const p2 = remap(p, 0.28, 0.52);
 
     /* Chat overlay — both desktop and mobile */
@@ -338,8 +348,12 @@
     }
   }
 
-  window.addEventListener('scroll', tick, { passive: true });
-  tick();
+  /* ── rAF loop — lerp currentP → targetP each frame ── */
+  (function loop() {
+    currentP += (targetP - currentP) * LERP;
+    tick(currentP);
+    requestAnimationFrame(loop);
+  })();
 </script>
 
 </body>

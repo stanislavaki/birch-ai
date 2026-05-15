@@ -317,9 +317,17 @@
       return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
     }
 
-    function tick() {
+    /* Lerp smoothing */
+    var targetP  = 0;
+    var currentP = 0;
+    var LERP     = 0.09;
+
+    window.addEventListener('scroll', function() {
+      targetP = progress();
+    }, { passive: true });
+
+    function tick(p) {
       var mobile = window.innerWidth <= 767;
-      var p  = progress();
       var p2 = remap(p, 0.28, 0.52);
 
       chatOverlay.style.opacity = p2;
@@ -354,7 +362,11 @@
       }
     }
 
-    window.addEventListener('scroll', tick, { passive: true });
-    tick();
+    /* rAF loop */
+    (function loop() {
+      currentP += (targetP - currentP) * LERP;
+      tick(currentP);
+      requestAnimationFrame(loop);
+    })();
   })();
 </script>
