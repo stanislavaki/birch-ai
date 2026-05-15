@@ -15,6 +15,17 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* ── Test blocks ── */
+  .test-block {
+    height: 75rem; /* 1200px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
   /* ─────────────────────────────────────────
      PROMO SECTION
   ───────────────────────────────────────── */
@@ -237,6 +248,8 @@
 </head>
 <body>
 
+<div class="test-block t-para-lg">Block before — 1200px</div>
+
 <section class="promo">
   <div class="promo__sticky">
 
@@ -293,6 +306,8 @@
   </div>
 </section>
 
+<div class="test-block t-para-lg">Block after — 1200px</div>
+
 <script>
   const section      = document.querySelector('.promo');
   const visual       = document.querySelector('.promo__visual');
@@ -313,6 +328,11 @@
   function scrollProgress() {
     const { top } = section.getBoundingClientRect();
     const scrollable = section.offsetHeight - window.innerHeight;
+    if (top > 0) {
+      /* Pre-sticky: section scrolling into view from below.
+         Returns -1 (section bottom at viewport edge) → 0 (sticky kicks in) */
+      return Math.max(-1, -(top / window.innerHeight));
+    }
     return Math.max(0, Math.min(1, -top / scrollable));
   }
 
@@ -320,13 +340,30 @@
     return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
   }
 
-  /* ── Lerp smoothing ── */
-  let targetP    = 0;   /* raw scroll position               */
-  let currentP   = 0;   /* smoothed — chat-msg fade + text   */
-  let currentPws = 0;   /* smoothed — chat-response + workspace (snappier) */
+  /* ── Config — all timing params in one place ── */
+  window.C = {
+    entryStart:  -0.85, entryEnd:    0.24,  entryDist:   0.3,
+    msg1Start:   -0.05, msg1MoveDur: 0.18,  msg1FadeDur: 0.05,  msg1Float: 4,
+    msg2Start:    0.07, msg2MoveDur: 0.17,  msg2FadeDur: 0.05,  msg2Float: 4,
+    s3Start:      0.35, s3Dur:       0.26,
+    wsStart:      0.35, wsDur:       0.53,
+    /* per-track cubic-bezier: [x1, y1, x2, y2] */
+    eases: {
+      entry: [0.02, 0.22, 0.43, 1.02],
+      msg1:  [0.02, 0.22, 0.43, 1.02],
+      msg2:  [0.02, 0.22, 0.43, 1.02],
+      s3:    [0.34, 0.05, 0.00, 1.01],
+      ws:    [0.31, 0.01, 0.00, 1.05],
+    },
+  };
 
-  window.LERP      = 0.15; /* chat + text + overlay  · 0.05 slow → 0.2 snappy */
-  window.LERP_WS   = 0.4;  /* workspace              · 0.05 slow → 0.2 snappy */
+  /* ── Lerp smoothing ── */
+  let targetP    = scrollProgress();
+  let currentP   = targetP;
+  let currentPws = targetP;
+
+  window.LERP      = 0.15;
+  window.LERP_WS   = 0.4;
   /* cubic-bezier solver — same as CSS cubic-bezier() */
   function makeBezier(x1, y1, x2, y2) {
     return function(p) {
@@ -346,37 +383,55 @@
   /* cubic-bezier(.02,.22,.43,1.02) — slight overshoot at the end */
   let easeFn = makeBezier(0.02, 0.22, 0.43, 1.02);
 
+  /* Per-track ease — creates + caches a bezier fn when coefficients change */
+  const _easeCache = {};
+  function trackEase(name) {
+    const [x1, y1, x2, y2] = window.C.eases[name];
+    const key = `${x1},${y1},${x2},${y2}`;
+    if (!_easeCache[name] || _easeCache[name].key !== key) {
+      _easeCache[name] = { key, fn: makeBezier(x1, y1, x2, y2) };
+    }
+    return _easeCache[name].fn;
+  }
+
   window.addEventListener('scroll', () => {
     targetP = scrollProgress();
   }, { passive: true });
 
   /* ── Render at smoothed position ── */
   function tick(p, pws) {
+    const C      = window.C;
     const mobile = window.innerWidth <= 767;
 
-    /* ── State 1→2a: user message — fade + float up 4rem ── */
-    const t01 = easeFn(remap(p, 0.28, 0.38));
-    chatMsg.style.opacity   = t01;
-    chatMsg.style.transform = `translateY(${(1 - t01) * 4 * remPx}px)`;
+    /* Entry */
+    const t00       = trackEase('entry')(remap(p, C.entryStart, C.entryEnd));
+    const chatInitY = (1 - t00) * window.innerHeight * C.entryDist;
 
-    /* ── State 1→2b: AI response — same: fade + float up 4rem (delayed) ── */
-    const t02 = easeFn(remap(pws, 0.48, 0.58));
-    chatResponse.style.opacity   = t02;
-    chatResponse.style.transform = `translateY(${(1 - t02) * 4 * remPx}px)`;
+    /* Msg 1 */
+    const t01move = trackEase('msg1')(remap(p, C.msg1Start, C.msg1Start + C.msg1MoveDur));
+    const t01fade = remap(p, C.msg1Start, C.msg1Start + C.msg1FadeDur);
+    chatMsg.style.opacity   = t01fade;
+    chatMsg.style.transform = `translateY(${(1 - t01move) * C.msg1Float * remPx}px)`;
+
+    /* Msg 2 */
+    const t02move = trackEase('msg2')(remap(pws, C.msg2Start, C.msg2Start + C.msg2MoveDur));
+    const t02fade = remap(pws, C.msg2Start, C.msg2Start + C.msg2FadeDur);
+    chatResponse.style.opacity   = t02fade;
+    chatResponse.style.transform = `translateY(${(1 - t02move) * C.msg2Float * remPx}px)`;
 
     if (!mobile) {
-      /* ── State 2→3: entire chat-stack (incl. response) shrinks + shifts right ── */
-      const p3 = easeFn(remap(p, 0.64, 0.86));
+      /* State 3 — chat shrinks + shifts */
+      const p3 = trackEase('s3')(remap(p, C.s3Start, C.s3Start + C.s3Dur));
       const chatScale  = 1 - p3 * 0.40;
       const chatShiftX = p3 * visual.offsetWidth * 0.293;
-      chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) scale(${chatScale})`;
+      chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) translateY(${chatInitY}px) scale(${chatScale})`;
 
-      /* ── State 2→3: workspace slides up from viewport bottom ── */
-      const p4ws = easeFn(remap(pws, 0.70, 0.86));
+      /* Workspace */
+      const p4ws = trackEase('ws')(remap(pws, C.wsStart, C.wsStart + C.wsDur));
       const fromViewportBottom = window.innerHeight - visual.getBoundingClientRect().top;
       workspace.style.transform = `translateX(-50%) translateY(${(1 - p4ws) * fromViewportBottom}px)`;
 
-      /* ── Subtitle: new chunks slide in from below; line compensates for width ── */
+      /* Subtitle */
       const t12 = remap(p, 0.28, 0.52);
       const t23 = remap(p, 0.64, 0.86);
       clip2.style.transform = `translateY(${(1 - t12) * 110}%)`;
@@ -386,8 +441,7 @@
       subLine.style.transform = `translateX(${(c2 * (1 - t12) + c3 * (1 - t23)) / 2}px)`;
 
     } else {
-      /* Mobile: single combined clip slides in, no X compensation needed */
-      chatStack.style.transform = '';
+      chatStack.style.transform = `translateY(${chatInitY}px)`;
       subLine.style.transform = '';
       const t12m = remap(p, 0.28, 0.50);
       if (subClipMEl && clipM) {
@@ -401,9 +455,497 @@
   (function loop() {
     currentP   += (targetP - currentP)   * window.LERP;
     currentPws += (targetP - currentPws) * window.LERP_WS;
+    window._dbgP   = currentP;
+    window._dbgPws = currentPws;
     tick(currentP, currentPws);
     requestAnimationFrame(loop);
   })();
+</script>
+
+<!-- ╔══════════════════════════════╗
+     ║  DEBUG TIMELINE             ║
+     ╚══════════════════════════════╝ -->
+<style>
+  #dbg {
+    position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;
+    width: 30rem;
+    background: rgba(10,10,10,0.96);
+    border: 1px solid #2a2a2a;
+    border-radius: 0.75rem;
+    font: 11px/1.4 monospace;
+    color: #ccc;
+    user-select: none;
+    backdrop-filter: blur(8px);
+  }
+  #dbg-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+  }
+  #dbg-header .title { color: #04DE00; font-weight: bold; }
+  #dbg.collapsed #dbg-body { display: none; }
+  #dbg-body { padding: 0.5rem 0.75rem 0.6rem; }
+
+  /* Timeline grid */
+  #tl-grid { display: flex; gap: 0; }
+  #tl-labels { width: 4.2rem; flex-shrink: 0; }
+  #tl-rows   { flex: 1; position: relative; border: 1px solid #1e1e1e; border-radius: 0.3rem; overflow: hidden; }
+
+  .tl-label-cell {
+    height: 1.8rem; display: flex; align-items: center;
+    color: #555; font-size: 10px; padding-right: 0.4rem;
+    justify-content: flex-end;
+  }
+  .tl-label-cell.ruler { height: 1.4rem; color: #333; }
+
+  /* Ruler row */
+  #tl-ruler {
+    height: 1.4rem; position: relative;
+    border-bottom: 1px solid #1e1e1e;
+    background: #0d0d0d;
+  }
+  .tl-tick {
+    position: absolute; top: 0; bottom: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    transform: translateX(-50%);
+    color: #333; font-size: 9px; padding-bottom: 2px;
+  }
+  .tl-tick::before {
+    content: ''; position: absolute; top: 0;
+    width: 1px; height: 6px; background: #2a2a2a;
+  }
+  .tl-tick.zero { color: #04DE00; }
+  .tl-tick.zero::before { background: rgba(4,222,0,0.4); height: 100%; }
+
+  /* Track rows */
+  .tl-track-row { height: 1.8rem; position: relative; border-bottom: 1px solid #111; }
+  .tl-track-row:last-child { border-bottom: none; }
+
+  /* Pre-sticky shading */
+  #tl-presticky {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    width: 50%; /* maps to p = -1 → 0 */
+    background: rgba(255,255,255,0.018);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Cursor line */
+  #tl-cursor {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: #04DE00; opacity: 0.9;
+    pointer-events: none; z-index: 10;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Bar */
+  .tl-bar {
+    position: absolute; top: 20%; height: 60%;
+    display: flex; align-items: stretch;
+    border-radius: 3px; z-index: 2;
+    cursor: grab; min-width: 6px;
+  }
+  .tl-bar:active { cursor: grabbing; }
+  .tl-bar-inner {
+    flex: 1; border-radius: 3px 0 0 3px;
+    min-width: 3px;
+  }
+  .tl-bar-handle {
+    width: 5px; border-radius: 0 3px 3px 0;
+    background: rgba(255,255,255,0.25);
+    cursor: ew-resize; flex-shrink: 0;
+  }
+
+  /* Copy button */
+  #dbg-copy {
+    margin-top: 0.5rem; width: 100%; padding: 0.3rem;
+    background: #04DE00; color: #000;
+    border: none; border-radius: 0.3rem;
+    font: bold 11px monospace; cursor: pointer;
+  }
+  #dbg-copy:active { opacity: 0.7; }
+
+  /* ── Bezier editor ── */
+  #bez-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; }
+  #bez-tabs    { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .bez-tab {
+    padding: 2px 7px; background: #111; border: 1px solid #222;
+    border-radius: 3px; cursor: pointer; font: bold 10px monospace; color: #444;
+  }
+  .bez-tab.active { color: #000; border-color: transparent; }
+  #bez-row   { display: flex; gap: 0.75rem; align-items: flex-start; }
+  #bez-svg   { display: block; overflow: visible; }
+  #bez-inputs { display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
+  .bez-inp-row { display: flex; align-items: center; gap: 4px; }
+  .bez-inp-lbl { color: #555; font-size: 10px; width: 1.6rem; text-align: right; }
+  .bez-inp {
+    width: 3.2rem; background: #0d0d0d; border: 1px solid #2a2a2a;
+    border-radius: 3px; color: #ccc; padding: 2px 4px; font: 10px monospace;
+  }
+  .bez-inp:focus { outline: none; border-color: #444; color: #fff; }
+</style>
+
+<div id="dbg">
+  <div id="dbg-header">
+    <span class="title">▸ Timeline</span>
+    <span style="color:#555;font-size:10px">p: <span id="dbg-pval" style="color:#04DE00">0.00</span> &nbsp;·&nbsp; click to toggle</span>
+  </div>
+  <div id="dbg-body">
+    <div id="tl-grid">
+      <div id="tl-labels">
+        <!-- label cells injected by JS -->
+      </div>
+      <div id="tl-rows">
+        <div id="tl-presticky"></div>
+        <div id="tl-cursor"></div>
+        <div id="tl-ruler"></div>
+        <!-- track rows injected by JS -->
+      </div>
+    </div>
+    <div id="bez-section">
+      <div id="bez-tabs"></div>
+      <div id="bez-row">
+        <svg id="bez-svg" width="130" height="130" viewBox="-15 -15 130 130"></svg>
+        <div id="bez-inputs"></div>
+      </div>
+    </div>
+    <button id="dbg-copy">Copy final values</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ── Range: p = -1 → 1 ── */
+  const P_MIN = -1, P_MAX = 1, P_RANGE = 2;
+
+  const toX   = p   => ((p - P_MIN) / P_RANGE * 100).toFixed(2) + '%';
+  const toPct = dur => (dur / P_RANGE * 100).toFixed(2) + '%';
+  const xToP  = (clientX, rowEl) => {
+    const r = rowEl.getBoundingClientRect();
+    return P_MIN + (clientX - r.left) / r.width * P_RANGE;
+  };
+
+  function r2(v) { return Math.round(v * 100) / 100; }
+
+  /* ── Timeline tracks ── */
+  const C = () => window.C;
+  const TRACKS = [
+    { key: 'entry', label: 'Entry',   color: '#59DBFF',
+      getS: () => C().entryStart,  getE: () => C().entryEnd,
+      setS: v  => { C().entryStart = r2(v); },
+      setE: v  => { C().entryEnd   = r2(v); } },
+    { key: 'msg1',  label: 'Msg 1',   color: '#04DE00',
+      getS: () => C().msg1Start,   getE: () => C().msg1Start + C().msg1MoveDur,
+      setS: v  => { C().msg1Start   = r2(v); },
+      setE: v  => { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); } },
+    { key: 'msg2',  label: 'Msg 2',   color: '#04DE0099',
+      getS: () => C().msg2Start,   getE: () => C().msg2Start + C().msg2MoveDur,
+      setS: v  => { C().msg2Start   = r2(v); },
+      setE: v  => { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); } },
+    { key: 's3',    label: 'State 3', color: '#FFE243',
+      getS: () => C().s3Start,     getE: () => C().s3Start + C().s3Dur,
+      setS: v  => { C().s3Start = r2(v); },
+      setE: v  => { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); } },
+    { key: 'ws',    label: 'WS',      color: '#FF7700',
+      getS: () => C().wsStart,     getE: () => C().wsStart + C().wsDur,
+      setS: v  => { C().wsStart = r2(v); },
+      setE: v  => { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); } },
+  ];
+
+  /* ── Bezier track config — ease keys + progress remap per track ── */
+  const BTRACKS = [
+    { label: 'Entry',   key: 'entry', color: '#59DBFF',
+      inP: p => remap(p, C().entryStart, C().entryEnd) },
+    { label: 'Msg 1',   key: 'msg1',  color: '#04DE00',
+      inP: p => remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur) },
+    { label: 'Msg 2',   key: 'msg2',  color: '#55DD44',
+      inP: () => remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur) },
+    { label: 'State 3', key: 's3',    color: '#FFE243',
+      inP: p => remap(p, C().s3Start, C().s3Start + C().s3Dur) },
+    { label: 'WS',      key: 'ws',    color: '#FF7700',
+      inP: () => remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur) },
+  ];
+
+  /* Switch bezier editor to a given track key */
+  function selectBezTab(key) {
+    if (key === selTrack) return;
+    selTrack = key;
+    /* tabs may not exist yet during initial build — guard */
+    if (bezTabsEl) {
+      bezTabsEl.querySelectorAll('.bez-tab').forEach((t, i) => {
+        const on = BTRACKS[i].key === key;
+        t.classList.toggle('active', on);
+        t.style.background = on ? BTRACKS[i].color : '';
+      });
+      renderBez();
+    }
+  }
+
+  /* ── DOM refs ── */
+  const labelsEl = document.getElementById('tl-labels');
+  const rowsEl   = document.getElementById('tl-rows');
+  const ruler    = document.getElementById('tl-ruler');
+  const cursor   = document.getElementById('tl-cursor');
+  const pval     = document.getElementById('dbg-pval');
+
+  /* Ruler ticks */
+  labelsEl.insertAdjacentHTML('beforeend', '<div class="tl-label-cell ruler"></div>');
+  [-1, -0.5, 0, 0.5, 1].forEach(p => {
+    const t = document.createElement('div');
+    t.className = 'tl-tick' + (p === 0 ? ' zero' : '');
+    t.style.left = toX(p);
+    t.textContent = p === 0 ? '0 sticky' : p;
+    ruler.appendChild(t);
+  });
+
+  /* Build timeline track rows */
+  TRACKS.forEach(track => {
+    const lc = document.createElement('div');
+    lc.className = 'tl-label-cell';
+    lc.textContent = track.label;
+    labelsEl.appendChild(lc);
+
+    const row = document.createElement('div');
+    row.className = 'tl-track-row';
+    const bar    = document.createElement('div');
+    bar.className = 'tl-bar';
+    const inner  = document.createElement('div');
+    inner.className = 'tl-bar-inner';
+    inner.style.background = track.color;
+    const handle = document.createElement('div');
+    handle.className = 'tl-bar-handle';
+    bar.appendChild(inner);
+    bar.appendChild(handle);
+    row.appendChild(bar);
+    rowsEl.appendChild(row);
+
+    function syncBar() {
+      bar.style.left  = toX(track.getS());
+      bar.style.width = toPct(track.getE() - track.getS());
+    }
+    track.sync = syncBar;
+    syncBar();
+
+    inner.addEventListener('mousedown', e => {
+      e.preventDefault();
+      selectBezTab(track.key);
+      const s0 = track.getS(), dur = track.getE() - track.getS(), x0 = e.clientX;
+      const move = ev => {
+        const dx = (ev.clientX - x0) / row.getBoundingClientRect().width * P_RANGE;
+        const ns = Math.max(P_MIN, Math.min(P_MAX - dur, s0 + dx));
+        track.setS(ns); track.setE(ns + dur); syncBar();
+      };
+      const up = () => { removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
+      addEventListener('mousemove', move); addEventListener('mouseup', up);
+    });
+
+    handle.addEventListener('mousedown', e => {
+      e.preventDefault(); e.stopPropagation();
+      selectBezTab(track.key);
+      const move = ev => {
+        track.setE(Math.min(P_MAX, Math.max(track.getS() + 0.01, xToP(ev.clientX, row))));
+        syncBar();
+      };
+      const up = () => { removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
+      addEventListener('mousemove', move); addEventListener('mouseup', up);
+    });
+  });
+
+  /* ══════════════════════════════════════════
+     BEZIER EDITOR
+  ══════════════════════════════════════════ */
+  let selTrack = 'entry';
+
+  const bezTabsEl   = document.getElementById('bez-tabs');
+  const bezSvgEl    = document.getElementById('bez-svg');
+  const bezInputsEl = document.getElementById('bez-inputs');
+  const NS          = 'http://www.w3.org/2000/svg';
+
+  function mkSVG(tag, attrs) {
+    const el = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+    return el;
+  }
+
+  /* Static: grid + diagonal + border */
+  [0, 25, 50, 75, 100].forEach(v => {
+    bezSvgEl.appendChild(mkSVG('line', { x1: v, y1: 0,   x2: v,   y2: 100, stroke: '#1e1e1e', 'stroke-width': 0.5 }));
+    bezSvgEl.appendChild(mkSVG('line', { x1: 0, y1: v,   x2: 100, y2: v,   stroke: '#1e1e1e', 'stroke-width': 0.5 }));
+  });
+  bezSvgEl.appendChild(mkSVG('line', { x1: 0, y1: 100, x2: 100, y2: 0, stroke: '#2e2e2e', 'stroke-width': 0.5, 'stroke-dasharray': '3 3' }));
+  bezSvgEl.appendChild(mkSVG('rect', { x: 0, y: 0, width: 100, height: 100, fill: 'none', stroke: '#2a2a2a', 'stroke-width': 0.5 }));
+
+  /* Dynamic SVG elements (order = painter's order) */
+  const bezTan1  = mkSVG('line',   { stroke: '#333', 'stroke-width': 1 });
+  const bezTan2  = mkSVG('line',   { stroke: '#333', 'stroke-width': 1 });
+  const bezCurve = mkSVG('path',   { fill: 'none', 'stroke-width': 1.8, 'stroke-linecap': 'round' });
+  const bezP0    = mkSVG('circle', { cx: 0,   cy: 100, r: 3,   fill: '#555' });
+  const bezP3    = mkSVG('circle', { cx: 100, cy: 0,   r: 3,   fill: '#555' });
+  const bezH1    = mkSVG('circle', { r: 5.5, fill: '#1a1a1a', 'stroke-width': 1.5, cursor: 'grab' });
+  const bezH2    = mkSVG('circle', { r: 5.5, fill: '#1a1a1a', 'stroke-width': 1.5, cursor: 'grab' });
+  const bezIndic = mkSVG('circle', { r: 4,   fill: '#fff', opacity: 0.9, 'pointer-events': 'none' });
+  [bezTan1, bezTan2, bezCurve, bezP0, bezP3, bezH1, bezH2, bezIndic].forEach(el => bezSvgEl.appendChild(el));
+
+  /* Coord helpers: bezier ↔ SVG (Y-flipped, scale ×100) */
+  const toSvg   = (bx, by) => ({ x: bx * 100,  y: (1 - by) * 100 });
+  const fromSvg = (sx, sy) => ({ x: sx / 100,   y: 1 - sy / 100 });
+
+  /* Tabs */
+  BTRACKS.forEach(bt => {
+    const tab = document.createElement('div');
+    tab.className = 'bez-tab' + (bt.key === selTrack ? ' active' : '');
+    tab.textContent = bt.label;
+    if (bt.key === selTrack) tab.style.background = bt.color;
+    tab.addEventListener('click', () => {
+      selTrack = bt.key;
+      bezTabsEl.querySelectorAll('.bez-tab').forEach((t, i) => {
+        const on = BTRACKS[i].key === bt.key;
+        t.classList.toggle('active', on);
+        t.style.background = on ? BTRACKS[i].color : '';
+      });
+      renderBez();
+    });
+    bezTabsEl.appendChild(tab);
+  });
+
+  /* Inputs x1 y1 x2 y2 */
+  const PNAMES = ['x1', 'y1', 'x2', 'y2'];
+  const bezInps = {};
+  PNAMES.forEach((pn, i) => {
+    const row = document.createElement('div');
+    row.className = 'bez-inp-row';
+    const lbl = document.createElement('span');
+    lbl.className = 'bez-inp-lbl';
+    lbl.textContent = pn + ':';
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = '0.01'; inp.className = 'bez-inp';
+    inp.addEventListener('change', () => {
+      const v = parseFloat(inp.value);
+      if (!isNaN(v)) window.C.eases[selTrack][i] = Math.round(v * 100) / 100;
+      renderBez();
+    });
+    row.appendChild(lbl); row.appendChild(inp);
+    bezInputsEl.appendChild(row);
+    bezInps[pn] = inp;
+  });
+
+  function renderBez() {
+    const [x1, y1, x2, y2] = window.C.eases[selTrack];
+    const bt  = BTRACKS.find(t => t.key === selTrack);
+    const col = bt ? bt.color : '#fff';
+
+    bezCurve.setAttribute('stroke', col);
+    bezH1.setAttribute('stroke', col);
+    bezH2.setAttribute('stroke', col);
+
+    const p1 = toSvg(x1, y1), p2 = toSvg(x2, y2);
+
+    bezTan1.setAttribute('x1', 0);    bezTan1.setAttribute('y1', 100);
+    bezTan1.setAttribute('x2', p1.x); bezTan1.setAttribute('y2', p1.y);
+    bezTan2.setAttribute('x1', 100);  bezTan2.setAttribute('y1', 0);
+    bezTan2.setAttribute('x2', p2.x); bezTan2.setAttribute('y2', p2.y);
+
+    bezCurve.setAttribute('d', `M 0,100 C ${p1.x},${p1.y} ${p2.x},${p2.y} 100,0`);
+
+    bezH1.setAttribute('cx', p1.x); bezH1.setAttribute('cy', p1.y);
+    bezH2.setAttribute('cx', p2.x); bezH2.setAttribute('cy', p2.y);
+
+    bezInps.x1.value = x1; bezInps.y1.value = y1;
+    bezInps.x2.value = x2; bezInps.y2.value = y2;
+  }
+
+  /* Drag control-point handles */
+  function mkDrag(hdl, xi, yi) {
+    hdl.addEventListener('mousedown', ev => {
+      ev.preventDefault();
+      hdl.style.cursor = 'grabbing';
+      const move = e => {
+        const r  = bezSvgEl.getBoundingClientRect();
+        /* viewBox "-15 -15 130 130" across r.width × r.height pixels */
+        const sx = (e.clientX - r.left)  / r.width  * 130 - 15;
+        const sy = (e.clientY - r.top)   / r.height * 130 - 15;
+        const b  = fromSvg(sx, sy);
+        window.C.eases[selTrack][xi] = Math.round(Math.max(0, Math.min(1, b.x)) * 100) / 100;
+        window.C.eases[selTrack][yi] = Math.round(b.y * 100) / 100;
+        renderBez();
+      };
+      const up = () => { hdl.style.cursor = 'grab'; removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
+      addEventListener('mousemove', move); addEventListener('mouseup', up);
+    });
+  }
+  mkDrag(bezH1, 0, 1);  /* P1 → x1, y1 */
+  mkDrag(bezH2, 2, 3);  /* P2 → x2, y2 */
+
+  renderBez();
+
+  /* Inline bezier evaluator (mirrors makeBezier but avoids a closure per call) */
+  function evalBez(e, inP) {
+    if (inP <= 0) return 0;
+    if (inP >= 1) return 1;
+    const [x1, y1, x2, y2] = e;
+    let t = inP, lo = 0, hi = 1;
+    for (let i = 0; i < 14; i++) {
+      const bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
+      if (Math.abs(bx - inP) < 0.0001) break;
+      if (bx < inP) lo = t; else hi = t;
+      t = (lo + hi) / 2;
+    }
+    return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
+  }
+
+  /* ── rAF: timeline cursor + bezier progress indicator ── */
+  (function loop() {
+    const p = window._dbgP || 0;
+    cursor.style.left = toX(p);
+    pval.textContent  = p.toFixed(2);
+    TRACKS.forEach(t => t.sync && t.sync());
+
+    /* Dot on the curve showing current scroll progress */
+    const bt = BTRACKS.find(t => t.key === selTrack);
+    if (bt) {
+      const inP  = Math.max(0, Math.min(1, bt.inP(p)));
+      const outP = evalBez(window.C.eases[selTrack], inP);
+      const pos  = toSvg(inP, outP);
+      bezIndic.setAttribute('cx', pos.x);
+      bezIndic.setAttribute('cy', pos.y);
+    }
+
+    requestAnimationFrame(loop);
+  })();
+
+  /* Toggle */
+  document.getElementById('dbg-header').addEventListener('click', () =>
+    document.getElementById('dbg').classList.toggle('collapsed'));
+
+  /* Copy — includes eases */
+  document.getElementById('dbg-copy').addEventListener('click', () => {
+    const Cv = window.C;
+    const E  = Cv.eases;
+    const fe = e => `[${e.map(v => +v.toFixed(2)).join(', ')}]`;
+    const out =
+`window.C = {
+  entryStart: ${Cv.entryStart},  entryEnd: ${Cv.entryEnd},  entryDist: ${Cv.entryDist},
+  msg1Start: ${Cv.msg1Start},  msg1MoveDur: ${Cv.msg1MoveDur},  msg1FadeDur: ${Cv.msg1FadeDur},  msg1Float: ${Cv.msg1Float},
+  msg2Start: ${Cv.msg2Start},  msg2MoveDur: ${Cv.msg2MoveDur},  msg2FadeDur: ${Cv.msg2FadeDur},  msg2Float: ${Cv.msg2Float},
+  s3Start: ${Cv.s3Start},  s3Dur: ${Cv.s3Dur},  wsStart: ${Cv.wsStart},  wsDur: ${Cv.wsDur},
+  eases: {
+    entry: ${fe(E.entry)},
+    msg1:  ${fe(E.msg1)},
+    msg2:  ${fe(E.msg2)},
+    s3:    ${fe(E.s3)},
+    ws:    ${fe(E.ws)},
+  },
+};
+window.LERP    = ${window.LERP};
+window.LERP_WS = ${window.LERP_WS};`;
+    console.log(out);
+    navigator.clipboard.writeText(out).catch(() => {});
+    const btn = document.getElementById('dbg-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy final values'; }, 1500);
+  });
+})();
 </script>
 
 
