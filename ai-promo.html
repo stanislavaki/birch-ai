@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bïrch — AI Rules Promo</title>
 <link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="debug/panel.css" />
 <style>
   html, body { margin: 0; padding: 0; }
   body {
@@ -343,11 +344,11 @@
   /* ── Config — all timing params in one place ── */
   window.C = {
     entryStart:  -0.85, entryEnd:    0.24,  entryDist:   0.3,
-    msg1Start:   -0.05, msg1MoveDur: 0.18,  msg1FadeDur: 0.05,  msg1Float: 4,
-    msg2Start:    0.07, msg2MoveDur: 0.17,  msg2FadeDur: 0.05,  msg2Float: 4,
-    s3Start:      0.35, s3Dur:       0.62,
-    wsStart:      0.35, wsDur:       0.61,
-    scrollLength: 3,
+    msg1Start:   -0.05, msg1MoveDur: 0.25,  msg1FadeDur: 0.05,  msg1Float: 4,
+    msg2Start:    0.17, msg2MoveDur: 0.25,  msg2FadeDur: 0.05,  msg2Float: 4,
+    s3Start:      0.35, s3Dur:       0.5,
+    wsStart:      0.35, wsDur:       0.5,
+    scrollLength: 2.5,
     /* per-track cubic-bezier: [x1, y1, x2, y2] */
     eases: {
       entry: [0.02, 0.22, 0.43, 1.02],
@@ -469,533 +470,110 @@
   })();
 </script>
 
-<!-- ╔══════════════════════════════╗
-     ║  DEBUG TIMELINE             ║
-     ╚══════════════════════════════╝ -->
-<style>
-  #dbg {
-    position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;
-    width: 30rem;
-    background: rgba(10,10,10,0.96);
-    border: 1px solid #2a2a2a;
-    border-radius: 0.75rem;
-    font: 11px/1.4 monospace;
-    color: #ccc;
-    user-select: none;
-    backdrop-filter: blur(8px);
-  }
-  #dbg-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #222;
-    cursor: pointer;
-  }
-  #dbg-header .title { color: #04DE00; font-weight: bold; }
-  #dbg.collapsed #dbg-body { display: none; }
-  #dbg-body { padding: 0.5rem 0.75rem 0.6rem; }
-
-  /* Timeline grid */
-  #tl-grid { display: flex; gap: 0; }
-  #tl-labels { width: 4.2rem; flex-shrink: 0; }
-  #tl-rows   { flex: 1; position: relative; border: 1px solid #1e1e1e; border-radius: 0.3rem; overflow: hidden; }
-
-  .tl-label-cell {
-    height: 1.8rem; display: flex; align-items: center;
-    color: #555; font-size: 10px; padding-right: 0.4rem;
-    justify-content: flex-end;
-  }
-  .tl-label-cell.ruler { height: 1.4rem; color: #333; }
-
-  /* Ruler row */
-  #tl-ruler {
-    height: 1.4rem; position: relative;
-    border-bottom: 1px solid #1e1e1e;
-    background: #0d0d0d;
-  }
-  .tl-tick {
-    position: absolute; top: 0; bottom: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-    transform: translateX(-50%);
-    color: #333; font-size: 9px; padding-bottom: 2px;
-  }
-  .tl-tick::before {
-    content: ''; position: absolute; top: 0;
-    width: 1px; height: 6px; background: #2a2a2a;
-  }
-  .tl-tick.zero { color: #04DE00; }
-  .tl-tick.zero::before { background: rgba(4,222,0,0.4); height: 100%; }
-
-  /* Track rows */
-  .tl-track-row { height: 1.8rem; position: relative; border-bottom: 1px solid #111; }
-  .tl-track-row:last-child { border-bottom: none; }
-
-  /* Pre-sticky shading */
-  #tl-presticky {
-    position: absolute; top: 0; bottom: 0; left: 0;
-    width: 50%; /* maps to p = -1 → 0 */
-    background: rgba(255,255,255,0.018);
-    pointer-events: none; z-index: 0;
-  }
-
-  /* Cursor line */
-  #tl-cursor {
-    position: absolute; top: 0; bottom: 0; width: 2px;
-    background: #04DE00; opacity: 0.9;
-    pointer-events: none; z-index: 10;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  /* Bar */
-  .tl-bar {
-    position: absolute; top: 20%; height: 60%;
-    display: flex; align-items: stretch;
-    border-radius: 3px; z-index: 2;
-    cursor: grab; min-width: 6px;
-  }
-  .tl-bar:active { cursor: grabbing; }
-  .tl-bar-inner {
-    flex: 1; border-radius: 3px 0 0 3px;
-    min-width: 3px;
-  }
-  .tl-bar-handle {
-    width: 5px; border-radius: 0 3px 3px 0;
-    background: rgba(255,255,255,0.25);
-    cursor: ew-resize; flex-shrink: 0;
-  }
-
-  /* Copy button */
-  #dbg-copy {
-    margin-top: 0.5rem; width: 100%; padding: 0.3rem;
-    background: #04DE00; color: #000;
-    border: none; border-radius: 0.3rem;
-    font: bold 11px monospace; cursor: pointer;
-  }
-  #dbg-copy:active { opacity: 0.7; }
-
-  /* ── Bezier editor ── */
-  #bez-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; }
-  #bez-tabs    { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
-  .bez-tab {
-    padding: 2px 7px; background: #111; border: 1px solid #222;
-    border-radius: 3px; cursor: pointer; font: bold 10px monospace; color: #444;
-  }
-  .bez-tab.active { color: #000; border-color: transparent; }
-  #bez-row   { display: flex; gap: 0.75rem; align-items: flex-start; }
-  #bez-svg   { display: block; overflow: visible; }
-  #bez-inputs { display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
-  .bez-inp-row { display: flex; align-items: center; gap: 4px; }
-  .bez-inp-lbl { color: #555; font-size: 10px; width: 1.6rem; text-align: right; }
-  .bez-inp {
-    width: 3.2rem; background: #0d0d0d; border: 1px solid #2a2a2a;
-    border-radius: 3px; color: #ccc; padding: 2px 4px; font: 10px monospace;
-  }
-  .bez-inp:focus { outline: none; border-color: #444; color: #fff; }
-
-  /* ── LERP sliders ── */
-  #lerp-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; display: flex; flex-direction: column; gap: 5px; }
-  .lerp-row { display: flex; align-items: center; gap: 0.5rem; }
-  .lerp-lbl  { color: #555; font-size: 10px; width: 5rem; flex-shrink: 0; }
-  .lerp-range {
-    flex: 1; height: 3px; cursor: pointer;
-    accent-color: #04DE00;
-  }
-  .lerp-val  { color: #04DE00; font-size: 10px; width: 2.5rem; text-align: right; }
-</style>
-
-<div id="dbg">
-  <div id="dbg-header">
-    <span class="title">▸ Timeline</span>
-    <span style="color:#555;font-size:10px">p: <span id="dbg-pval" style="color:#04DE00">0.00</span> &nbsp;·&nbsp; click to toggle</span>
-  </div>
-  <div id="dbg-body">
-    <div id="tl-grid">
-      <div id="tl-labels">
-        <!-- label cells injected by JS -->
-      </div>
-      <div id="tl-rows">
-        <div id="tl-presticky"></div>
-        <div id="tl-cursor"></div>
-        <div id="tl-ruler"></div>
-        <!-- track rows injected by JS -->
-      </div>
-    </div>
-    <div id="bez-section">
-      <div id="bez-tabs"></div>
-      <div id="bez-row">
-        <svg id="bez-svg" width="130" height="130" viewBox="-15 -15 130 130"></svg>
-        <div id="bez-inputs"></div>
-      </div>
-    </div>
-    <div id="lerp-section">
-      <div class="lerp-row">
-        <span class="lerp-lbl">LERP (slow)</span>
-        <input type="range" class="lerp-range" id="lerp-slow" min="0.01" max="0.5" step="0.01" />
-        <span class="lerp-val" id="lerp-slow-val"></span>
-      </div>
-      <div class="lerp-row">
-        <span class="lerp-lbl">LERP_WS (fast)</span>
-        <input type="range" class="lerp-range" id="lerp-fast" min="0.01" max="0.99" step="0.01" />
-        <span class="lerp-val" id="lerp-fast-val"></span>
-      </div>
-      <div class="lerp-row">
-        <span class="lerp-lbl">Scroll length</span>
-        <input type="range" class="lerp-range" id="lerp-scroll" min="1.5" max="6" step="0.1" />
-        <span class="lerp-val" id="lerp-scroll-val"></span>
-      </div>
-    </div>
-    <button id="dbg-copy">Copy final values</button>
-  </div>
-</div>
-
+<!-- ╔═══════════════════════════════════════╗
+     ║  DEBUG PANEL  (dev only, not in embed) ║
+     ╚═══════════════════════════════════════╝ -->
+<script src="debug/panel.js"></script>
 <script>
+/* styles now in debug/panel.css, logic in debug/panel.js */
 (function () {
-  /* ── Range: p = -1 → 1 ── */
-  const P_MIN = -1, P_MAX = 1, P_RANGE = 2;
+  var C  = function () { return window.C; };
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
 
-  const toX   = p   => ((p - P_MIN) / P_RANGE * 100).toFixed(2) + '%';
-  const toPct = dur => (dur / P_RANGE * 100).toFixed(2) + '%';
-  const xToP  = (clientX, rowEl) => {
-    const r = rowEl.getBoundingClientRect();
-    return P_MIN + (clientX - r.left) / r.width * P_RANGE;
-  };
+  DebugPanel.init({
+    getP:   function () { return window._dbgP   || 0; },
+    getPws: function () { return window._dbgPws || 0; },
 
-  function r2(v) { return Math.round(v * 100) / 100; }
+    tracks: [
+      /* ── Entry ── */
+      { key: 'entry', label: 'Entry', color: '#59DBFF',
+        getS: function () { return C().entryStart; },
+        getE: function () { return C().entryEnd; },
+        setS: function (v) { C().entryStart = r2(v); },
+        setE: function (v) { C().entryEnd   = r2(v); },
+        ease:    function () { return C().eases.entry; },
+        setEase: function (e) { C().eases.entry = e; },
+        inP: function (p) { return remap(p, C().entryStart, C().entryEnd); } },
 
-  /* ── Timeline tracks ── */
-  const C = () => window.C;
-  const TRACKS = [
-    { key: 'entry', label: 'Entry',   color: '#59DBFF',
-      getS: () => C().entryStart,  getE: () => C().entryEnd,
-      setS: v  => { C().entryStart = r2(v); },
-      setE: v  => { C().entryEnd   = r2(v); } },
-    { key: 'msg1',  label: 'Msg 1',   color: '#04DE00',
-      getS: () => C().msg1Start,   getE: () => C().msg1Start + C().msg1MoveDur,
-      setS: v  => { C().msg1Start   = r2(v); },
-      setE: v  => { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); } },
-    { key: 'msg2',  label: 'Msg 2',   color: '#04DE0099',
-      getS: () => C().msg2Start,   getE: () => C().msg2Start + C().msg2MoveDur,
-      setS: v  => { C().msg2Start   = r2(v); },
-      setE: v  => { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); } },
-    { key: 's3',    label: 'State 3', color: '#FFE243',
-      getS: () => C().s3Start,     getE: () => C().s3Start + C().s3Dur,
-      setS: v  => { C().s3Start = r2(v); },
-      setE: v  => { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); } },
-    { key: 'ws',    label: 'WS',      color: '#FF7700',
-      getS: () => C().wsStart,     getE: () => C().wsStart + C().wsDur,
-      setS: v  => { C().wsStart = r2(v); },
-      setE: v  => { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); } },
-  ];
+      /* ── Msg 1 move ── */
+      { key: 'msg1', label: 'Msg 1', color: '#04DE00',
+        getS: function () { return C().msg1Start; },
+        getE: function () { return C().msg1Start + C().msg1MoveDur; },
+        setS: function (v) { C().msg1Start   = r2(v); },
+        setE: function (v) { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); },
+        ease:    function () { return C().eases.msg1; },
+        setEase: function (e) { C().eases.msg1 = e; },
+        inP: function (p) { return remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur); } },
 
-  /* ── Bezier track config — ease keys + progress remap per track ── */
-  const BTRACKS = [
-    { label: 'Entry',   key: 'entry', color: '#59DBFF',
-      inP: p => remap(p, C().entryStart, C().entryEnd) },
-    { label: 'Msg 1',   key: 'msg1',  color: '#04DE00',
-      inP: p => remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur) },
-    { label: 'Msg 2',   key: 'msg2',  color: '#55DD44',
-      inP: () => remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur) },
-    { label: 'State 3', key: 's3',    color: '#FFE243',
-      inP: p => remap(p, C().s3Start, C().s3Start + C().s3Dur) },
-    { label: 'WS',      key: 'ws',    color: '#FF7700',
-      inP: () => remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur) },
-  ];
+      /* ── Msg 1 fade (opacity only, no bezier tab) ── */
+      { key: 'msg1fade', label: 'Fade 1', color: '#04DE0044', bodyDrag: false,
+        getS: function () { return C().msg1Start; },
+        getE: function () { return C().msg1Start + C().msg1FadeDur; },
+        setS: function () {},
+        setE: function (v) { C().msg1FadeDur = r2(Math.max(0.005, v - C().msg1Start)); } },
 
-  /* Switch bezier editor to a given track key */
-  function selectBezTab(key) {
-    if (key === selTrack) return;
-    selTrack = key;
-    /* tabs may not exist yet during initial build — guard */
-    if (bezTabsEl) {
-      bezTabsEl.querySelectorAll('.bez-tab').forEach((t, i) => {
-        const on = BTRACKS[i].key === key;
-        t.classList.toggle('active', on);
-        t.style.background = on ? BTRACKS[i].color : '';
-      });
-      renderBez();
-    }
-  }
+      /* ── Msg 2 move ── */
+      { key: 'msg2', label: 'Msg 2', color: '#04DE0099',
+        getS: function () { return C().msg2Start; },
+        getE: function () { return C().msg2Start + C().msg2MoveDur; },
+        setS: function (v) { C().msg2Start   = r2(v); },
+        setE: function (v) { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); },
+        ease:    function () { return C().eases.msg2; },
+        setEase: function (e) { C().eases.msg2 = e; },
+        inP: function () { return remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur); } },
 
-  /* ── DOM refs ── */
-  const labelsEl = document.getElementById('tl-labels');
-  const rowsEl   = document.getElementById('tl-rows');
-  const ruler    = document.getElementById('tl-ruler');
-  const cursor   = document.getElementById('tl-cursor');
-  const pval     = document.getElementById('dbg-pval');
+      /* ── Msg 2 fade ── */
+      { key: 'msg2fade', label: 'Fade 2', color: '#04DE0044', bodyDrag: false,
+        getS: function () { return C().msg2Start; },
+        getE: function () { return C().msg2Start + C().msg2FadeDur; },
+        setS: function () {},
+        setE: function (v) { C().msg2FadeDur = r2(Math.max(0.005, v - C().msg2Start)); } },
 
-  /* Ruler ticks */
-  labelsEl.insertAdjacentHTML('beforeend', '<div class="tl-label-cell ruler"></div>');
-  [-1, -0.5, 0, 0.5, 1].forEach(p => {
-    const t = document.createElement('div');
-    t.className = 'tl-tick' + (p === 0 ? ' zero' : '');
-    t.style.left = toX(p);
-    t.textContent = p === 0 ? '0 sticky' : p;
-    ruler.appendChild(t);
-  });
+      /* ── State 3 ── */
+      { key: 's3', label: 'State 3', color: '#FFE243',
+        getS: function () { return C().s3Start; },
+        getE: function () { return C().s3Start + C().s3Dur; },
+        setS: function (v) { C().s3Start = r2(v); },
+        setE: function (v) { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); },
+        ease:    function () { return C().eases.s3; },
+        setEase: function (e) { C().eases.s3 = e; },
+        inP: function (p) { return remap(p, C().s3Start, C().s3Start + C().s3Dur); } },
 
-  /* Build timeline track rows */
-  TRACKS.forEach(track => {
-    const lc = document.createElement('div');
-    lc.className = 'tl-label-cell';
-    lc.textContent = track.label;
-    labelsEl.appendChild(lc);
+      /* ── Workspace ── */
+      { key: 'ws', label: 'WS', color: '#FF7700',
+        getS: function () { return C().wsStart; },
+        getE: function () { return C().wsStart + C().wsDur; },
+        setS: function (v) { C().wsStart = r2(v); },
+        setE: function (v) { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); },
+        ease:    function () { return C().eases.ws; },
+        setEase: function (e) { C().eases.ws = e; },
+        inP: function () { return remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur); } },
+    ],
 
-    const row = document.createElement('div');
-    row.className = 'tl-track-row';
-    const bar    = document.createElement('div');
-    bar.className = 'tl-bar';
-    const inner  = document.createElement('div');
-    inner.className = 'tl-bar-inner';
-    inner.style.background = track.color;
-    const handle = document.createElement('div');
-    handle.className = 'tl-bar-handle';
-    bar.appendChild(inner);
-    bar.appendChild(handle);
-    row.appendChild(bar);
-    rowsEl.appendChild(row);
+    sliders: [
+      { label: 'LERP (slow)', get: function () { return window.LERP; },            set: function (v) { window.LERP    = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+      { label: 'LERP_WS',    get: function () { return window.LERP_WS; },          set: function (v) { window.LERP_WS = v; }, min: 0.01, max: 0.99, step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+      { label: 'Scroll ×',   get: function () { return C().scrollLength; }, set: function (v) { C().scrollLength = v; window.applyScrollLength(); }, min: 1.5, max: 6, step: 0.1, fmt: function (v) { return v.toFixed(1) + '×'; } },
+    ],
 
-    function syncBar() {
-      bar.style.left  = toX(track.getS());
-      bar.style.width = toPct(track.getE() - track.getS());
-    }
-    track.sync = syncBar;
-    syncBar();
-
-    inner.addEventListener('mousedown', e => {
-      e.preventDefault();
-      selectBezTab(track.key);
-      const s0 = track.getS(), dur = track.getE() - track.getS(), x0 = e.clientX;
-      const move = ev => {
-        const dx = (ev.clientX - x0) / row.getBoundingClientRect().width * P_RANGE;
-        const ns = Math.max(P_MIN, Math.min(P_MAX - dur, s0 + dx));
-        track.setS(ns); track.setE(ns + dur); syncBar();
-      };
-      const up = () => { removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
-      addEventListener('mousemove', move); addEventListener('mouseup', up);
-    });
-
-    handle.addEventListener('mousedown', e => {
-      e.preventDefault(); e.stopPropagation();
-      selectBezTab(track.key);
-      const move = ev => {
-        track.setE(Math.min(P_MAX, Math.max(track.getS() + 0.01, xToP(ev.clientX, row))));
-        syncBar();
-      };
-      const up = () => { removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
-      addEventListener('mousemove', move); addEventListener('mouseup', up);
-    });
-  });
-
-  /* ══════════════════════════════════════════
-     BEZIER EDITOR
-  ══════════════════════════════════════════ */
-  let selTrack = 'entry';
-
-  const bezTabsEl   = document.getElementById('bez-tabs');
-  const bezSvgEl    = document.getElementById('bez-svg');
-  const bezInputsEl = document.getElementById('bez-inputs');
-  const NS          = 'http://www.w3.org/2000/svg';
-
-  function mkSVG(tag, attrs) {
-    const el = document.createElementNS(NS, tag);
-    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
-    return el;
-  }
-
-  /* Static: grid + diagonal + border */
-  [0, 25, 50, 75, 100].forEach(v => {
-    bezSvgEl.appendChild(mkSVG('line', { x1: v, y1: 0,   x2: v,   y2: 100, stroke: '#1e1e1e', 'stroke-width': 0.5 }));
-    bezSvgEl.appendChild(mkSVG('line', { x1: 0, y1: v,   x2: 100, y2: v,   stroke: '#1e1e1e', 'stroke-width': 0.5 }));
-  });
-  bezSvgEl.appendChild(mkSVG('line', { x1: 0, y1: 100, x2: 100, y2: 0, stroke: '#2e2e2e', 'stroke-width': 0.5, 'stroke-dasharray': '3 3' }));
-  bezSvgEl.appendChild(mkSVG('rect', { x: 0, y: 0, width: 100, height: 100, fill: 'none', stroke: '#2a2a2a', 'stroke-width': 0.5 }));
-
-  /* Dynamic SVG elements (order = painter's order) */
-  const bezTan1  = mkSVG('line',   { stroke: '#333', 'stroke-width': 1 });
-  const bezTan2  = mkSVG('line',   { stroke: '#333', 'stroke-width': 1 });
-  const bezCurve = mkSVG('path',   { fill: 'none', 'stroke-width': 1.8, 'stroke-linecap': 'round' });
-  const bezP0    = mkSVG('circle', { cx: 0,   cy: 100, r: 3,   fill: '#555' });
-  const bezP3    = mkSVG('circle', { cx: 100, cy: 0,   r: 3,   fill: '#555' });
-  const bezH1    = mkSVG('circle', { r: 5.5, fill: '#1a1a1a', 'stroke-width': 1.5, cursor: 'grab' });
-  const bezH2    = mkSVG('circle', { r: 5.5, fill: '#1a1a1a', 'stroke-width': 1.5, cursor: 'grab' });
-  const bezIndic = mkSVG('circle', { r: 4,   fill: '#fff', opacity: 0.9, 'pointer-events': 'none' });
-  [bezTan1, bezTan2, bezCurve, bezP0, bezP3, bezH1, bezH2, bezIndic].forEach(el => bezSvgEl.appendChild(el));
-
-  /* Coord helpers: bezier ↔ SVG (Y-flipped, scale ×100) */
-  const toSvg   = (bx, by) => ({ x: bx * 100,  y: (1 - by) * 100 });
-  const fromSvg = (sx, sy) => ({ x: sx / 100,   y: 1 - sy / 100 });
-
-  /* Tabs */
-  BTRACKS.forEach(bt => {
-    const tab = document.createElement('div');
-    tab.className = 'bez-tab' + (bt.key === selTrack ? ' active' : '');
-    tab.textContent = bt.label;
-    if (bt.key === selTrack) tab.style.background = bt.color;
-    tab.addEventListener('click', () => {
-      selTrack = bt.key;
-      bezTabsEl.querySelectorAll('.bez-tab').forEach((t, i) => {
-        const on = BTRACKS[i].key === bt.key;
-        t.classList.toggle('active', on);
-        t.style.background = on ? BTRACKS[i].color : '';
-      });
-      renderBez();
-    });
-    bezTabsEl.appendChild(tab);
-  });
-
-  /* Inputs x1 y1 x2 y2 */
-  const PNAMES = ['x1', 'y1', 'x2', 'y2'];
-  const bezInps = {};
-  PNAMES.forEach((pn, i) => {
-    const row = document.createElement('div');
-    row.className = 'bez-inp-row';
-    const lbl = document.createElement('span');
-    lbl.className = 'bez-inp-lbl';
-    lbl.textContent = pn + ':';
-    const inp = document.createElement('input');
-    inp.type = 'number'; inp.step = '0.01'; inp.className = 'bez-inp';
-    inp.addEventListener('change', () => {
-      const v = parseFloat(inp.value);
-      if (!isNaN(v)) window.C.eases[selTrack][i] = Math.round(v * 100) / 100;
-      renderBez();
-    });
-    row.appendChild(lbl); row.appendChild(inp);
-    bezInputsEl.appendChild(row);
-    bezInps[pn] = inp;
-  });
-
-  function renderBez() {
-    const [x1, y1, x2, y2] = window.C.eases[selTrack];
-    const bt  = BTRACKS.find(t => t.key === selTrack);
-    const col = bt ? bt.color : '#fff';
-
-    bezCurve.setAttribute('stroke', col);
-    bezH1.setAttribute('stroke', col);
-    bezH2.setAttribute('stroke', col);
-
-    const p1 = toSvg(x1, y1), p2 = toSvg(x2, y2);
-
-    bezTan1.setAttribute('x1', 0);    bezTan1.setAttribute('y1', 100);
-    bezTan1.setAttribute('x2', p1.x); bezTan1.setAttribute('y2', p1.y);
-    bezTan2.setAttribute('x1', 100);  bezTan2.setAttribute('y1', 0);
-    bezTan2.setAttribute('x2', p2.x); bezTan2.setAttribute('y2', p2.y);
-
-    bezCurve.setAttribute('d', `M 0,100 C ${p1.x},${p1.y} ${p2.x},${p2.y} 100,0`);
-
-    bezH1.setAttribute('cx', p1.x); bezH1.setAttribute('cy', p1.y);
-    bezH2.setAttribute('cx', p2.x); bezH2.setAttribute('cy', p2.y);
-
-    bezInps.x1.value = x1; bezInps.y1.value = y1;
-    bezInps.x2.value = x2; bezInps.y2.value = y2;
-  }
-
-  /* Drag control-point handles */
-  function mkDrag(hdl, xi, yi) {
-    hdl.addEventListener('mousedown', ev => {
-      ev.preventDefault();
-      hdl.style.cursor = 'grabbing';
-      const move = e => {
-        const r  = bezSvgEl.getBoundingClientRect();
-        /* viewBox "-15 -15 130 130" across r.width × r.height pixels */
-        const sx = (e.clientX - r.left)  / r.width  * 130 - 15;
-        const sy = (e.clientY - r.top)   / r.height * 130 - 15;
-        const b  = fromSvg(sx, sy);
-        window.C.eases[selTrack][xi] = Math.round(Math.max(0, Math.min(1, b.x)) * 100) / 100;
-        window.C.eases[selTrack][yi] = Math.round(b.y * 100) / 100;
-        renderBez();
-      };
-      const up = () => { hdl.style.cursor = 'grab'; removeEventListener('mousemove', move); removeEventListener('mouseup', up); };
-      addEventListener('mousemove', move); addEventListener('mouseup', up);
-    });
-  }
-  mkDrag(bezH1, 0, 1);  /* P1 → x1, y1 */
-  mkDrag(bezH2, 2, 3);  /* P2 → x2, y2 */
-
-  renderBez();
-
-  /* Inline bezier evaluator (mirrors makeBezier but avoids a closure per call) */
-  function evalBez(e, inP) {
-    if (inP <= 0) return 0;
-    if (inP >= 1) return 1;
-    const [x1, y1, x2, y2] = e;
-    let t = inP, lo = 0, hi = 1;
-    for (let i = 0; i < 14; i++) {
-      const bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
-      if (Math.abs(bx - inP) < 0.0001) break;
-      if (bx < inP) lo = t; else hi = t;
-      t = (lo + hi) / 2;
-    }
-    return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
-  }
-
-  /* ── rAF: timeline cursor + bezier progress indicator ── */
-  (function loop() {
-    const p = window._dbgP || 0;
-    cursor.style.left = toX(p);
-    pval.textContent  = p.toFixed(2);
-    TRACKS.forEach(t => t.sync && t.sync());
-
-    /* Dot on the curve showing current scroll progress */
-    const bt = BTRACKS.find(t => t.key === selTrack);
-    if (bt) {
-      const inP  = Math.max(0, Math.min(1, bt.inP(p)));
-      const outP = evalBez(window.C.eases[selTrack], inP);
-      const pos  = toSvg(inP, outP);
-      bezIndic.setAttribute('cx', pos.x);
-      bezIndic.setAttribute('cy', pos.y);
-    }
-
-    requestAnimationFrame(loop);
-  })();
-
-  /* ── LERP sliders ── */
-  (function () {
-    const sliders = [
-      { id: 'lerp-slow',   valId: 'lerp-slow-val',   fmt: v => v.toFixed(2), get: () => window.LERP,              set: v => { window.LERP    = v; } },
-      { id: 'lerp-fast',   valId: 'lerp-fast-val',   fmt: v => v.toFixed(2), get: () => window.LERP_WS,           set: v => { window.LERP_WS = v; } },
-      { id: 'lerp-scroll', valId: 'lerp-scroll-val', fmt: v => v.toFixed(1) + '×', get: () => window.C.scrollLength, set: v => { window.C.scrollLength = v; window.applyScrollLength(); } },
-    ];
-    sliders.forEach(({ id, valId, fmt, get, set }) => {
-      const inp = document.getElementById(id);
-      const lbl = document.getElementById(valId);
-      const sync = () => { inp.value = get(); lbl.textContent = fmt(get()); };
-      sync();
-      inp.addEventListener('input', () => { const v = parseFloat(inp.value); set(v); lbl.textContent = fmt(v); });
-      /* keep display in sync if value changes from console */
-      setInterval(sync, 500);
-    });
-  })();
-
-  /* Toggle */
-  document.getElementById('dbg-header').addEventListener('click', () =>
-    document.getElementById('dbg').classList.toggle('collapsed'));
-
-  /* Copy — includes eases */
-  document.getElementById('dbg-copy').addEventListener('click', () => {
-    const Cv = window.C;
-    const E  = Cv.eases;
-    const fe = e => `[${e.map(v => +v.toFixed(2)).join(', ')}]`;
-    const out =
-`window.C = {
-  entryStart: ${Cv.entryStart},  entryEnd: ${Cv.entryEnd},  entryDist: ${Cv.entryDist},
-  msg1Start: ${Cv.msg1Start},  msg1MoveDur: ${Cv.msg1MoveDur},  msg1FadeDur: ${Cv.msg1FadeDur},  msg1Float: ${Cv.msg1Float},
-  msg2Start: ${Cv.msg2Start},  msg2MoveDur: ${Cv.msg2MoveDur},  msg2FadeDur: ${Cv.msg2FadeDur},  msg2Float: ${Cv.msg2Float},
-  s3Start: ${Cv.s3Start},  s3Dur: ${Cv.s3Dur},  wsStart: ${Cv.wsStart},  wsDur: ${Cv.wsDur},  scrollLength: ${Cv.scrollLength},
-  eases: {
-    entry: ${fe(E.entry)},
-    msg1:  ${fe(E.msg1)},
-    msg2:  ${fe(E.msg2)},
-    s3:    ${fe(E.s3)},
-    ws:    ${fe(E.ws)},
-  },
-};
-window.LERP    = ${window.LERP};
-window.LERP_WS = ${window.LERP_WS};`;
-    console.log(out);
-    navigator.clipboard.writeText(out).catch(() => {});
-    const btn = document.getElementById('dbg-copy');
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = 'Copy final values'; }, 1500);
+    onCopy: function () {
+      var Cv = window.C, E = Cv.eases;
+      var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+      return 'window.C = {\n' +
+        '  entryStart: ' + Cv.entryStart + ',  entryEnd: ' + Cv.entryEnd + ',  entryDist: ' + Cv.entryDist + ',\n' +
+        '  msg1Start: ' + Cv.msg1Start + ',  msg1MoveDur: ' + Cv.msg1MoveDur + ',  msg1FadeDur: ' + Cv.msg1FadeDur + ',  msg1Float: ' + Cv.msg1Float + ',\n' +
+        '  msg2Start: ' + Cv.msg2Start + ',  msg2MoveDur: ' + Cv.msg2MoveDur + ',  msg2FadeDur: ' + Cv.msg2FadeDur + ',  msg2Float: ' + Cv.msg2Float + ',\n' +
+        '  s3Start: ' + Cv.s3Start + ',  s3Dur: ' + Cv.s3Dur + ',  wsStart: ' + Cv.wsStart + ',  wsDur: ' + Cv.wsDur + ',  scrollLength: ' + Cv.scrollLength + ',\n' +
+        '  eases: {\n' +
+        '    entry: ' + fe(E.entry) + ',\n' +
+        '    msg1:  ' + fe(E.msg1) + ',\n' +
+        '    msg2:  ' + fe(E.msg2) + ',\n' +
+        '    s3:    ' + fe(E.s3) + ',\n' +
+        '    ws:    ' + fe(E.ws) + ',\n' +
+        '  },\n};\n' +
+        'window.LERP    = ' + window.LERP + ';\n' +
+        'window.LERP_WS = ' + window.LERP_WS + ';';
+    },
   });
 })();
 </script>

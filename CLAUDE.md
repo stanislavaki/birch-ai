@@ -55,3 +55,67 @@ Use the `/figma-sync` skill whenever something new is created or changed in Figm
 ### Figma source
 
 File key: `1tkZCzPxmdkHToeE32cUIz`
+
+---
+
+## Debug Panel for scroll-driven animations
+
+Reusable debug panel for tuning animations. Lives in `debug/` — **never include in Webflow embeds**.
+
+### File structure
+```
+debug/
+  panel.js    ← DebugPanel module (timeline, bezier editor, sliders, copy)
+  panel.css   ← all panel styles
+```
+
+### How to add to a new dev page
+```html
+<head>
+  <link rel="stylesheet" href="debug/panel.css" />
+</head>
+<body>
+  <!-- animation HTML -->
+
+  <script src="debug/panel.js"></script>
+  <script>
+  DebugPanel.init({
+    getP:    () => window._dbgP,      // current lerp-smoothed progress (-1..1)
+    getPws:  () => window._dbgPws,    // optional second lerp channel
+    pRange:  [-1, 1],                 // optional, default [-1, 1]
+    tracks:  [ ...trackDefs ],        // see track shape below
+    sliders: [ ...sliderDefs ],       // LERP, scroll length, etc.
+    onCopy:  () => stringToCopy,      // formats and returns the config string
+  });
+  </script>
+</body>
+```
+
+### Track shape
+```js
+{
+  key:      'entry',          // unique key, matches C.eases key if bezier is used
+  label:    'Entry',          // shown in timeline and bezier tabs
+  color:    '#59DBFF',        // hex (8-char alpha hex is fine for timeline, stripped for SVG)
+  getS:     () => C.start,   // timeline bar start → p value
+  getE:     () => C.end,     // timeline bar end → p value
+  setS:     v  => C.start = v,
+  setE:     v  => C.end   = v,
+  ease:     () => C.eases.entry,      // omit → no bezier tab for this track
+  setEase:  e  => C.eases.entry = e,
+  inP:      p  => remap(p, C.start, C.end),  // 0-1 for live bezier dot; omit if no bezier
+  bodyDrag: true,             // set false to disable body drag (resize-only)
+}
+```
+
+### Slider shape
+```js
+{ label: 'LERP', get: () => window.LERP, set: v => window.LERP = v,
+  min: 0.01, max: 0.5, step: 0.01, fmt: v => v.toFixed(2) }
+```
+
+### Main script requirements
+The animation script must expose:
+- `window._dbgP`   — current lerp progress (set in rAF loop)
+- `window._dbgPws` — second lerp channel (if used)
+- `remap(p, lo, hi)` — global function (used in `inP` callbacks)
