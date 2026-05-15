@@ -89,6 +89,17 @@ const DebugPanel = (function () {
             <div id="tl-ruler"></div>
           </div>
         </div>
+        <div id="tl-edit">
+          <span id="tl-edit-label" style="color:#333">—</span>
+          <span class="tl-edit-field">
+            <span class="tl-edit-lbl">start</span>
+            <input type="number" class="tl-edit-inp" id="tl-inp-s" step="0.01" />
+          </span>
+          <span class="tl-edit-field">
+            <span class="tl-edit-lbl">end</span>
+            <input type="number" class="tl-edit-inp" id="tl-inp-e" step="0.01" />
+          </span>
+        </div>
         <div id="bez-section">
           <div id="bez-tabs"></div>
           <div id="bez-row">
@@ -138,9 +149,10 @@ const DebugPanel = (function () {
     presticky.style.width = toX(0);
 
     /* ── Timeline track rows ────────────────────────────────── */
-    /* selectBezTab is defined after bezier section is built.
-       We use a late-binding reference so drag handlers can call it. */
-    let _selectBezTab = () => {};
+    /* Both selectBezTab and selectEditTrack are defined after their sections.
+       Use late-binding references so drag handlers can call them. */
+    let _selectBezTab    = () => {};
+    let _selectEditTrack = () => {};
 
     const tracks = cfg.tracks || [];
     tracks.forEach(track => {
@@ -172,6 +184,7 @@ const DebugPanel = (function () {
         inner.addEventListener('mousedown', e => {
           e.preventDefault();
           _selectBezTab(track.key);
+          _selectEditTrack(track);
           const s0 = track.getS(), dur = track.getE() - track.getS(), x0 = e.clientX;
           const move = ev => {
             const dx = (ev.clientX - x0) / row.getBoundingClientRect().width * P_RANGE;
@@ -186,6 +199,7 @@ const DebugPanel = (function () {
       handle.addEventListener('mousedown', e => {
         e.preventDefault(); e.stopPropagation();
         _selectBezTab(track.key);
+        _selectEditTrack(track);
         const move = ev => {
           track.setE(r2(Math.min(P_MAX, Math.max(track.getS() + 0.01, xToP(ev.clientX, row)))));
           syncBar();
@@ -324,6 +338,41 @@ const DebugPanel = (function () {
       mkDrag(bezH1, 0, 1); mkDrag(bezH2, 2, 3);
       renderBez();
     }
+
+    /* ── Timeline quick-edit inputs ────────────────────────────── */
+    const editLabel = document.getElementById('tl-edit-label');
+    const inpS      = document.getElementById('tl-inp-s');
+    const inpE      = document.getElementById('tl-inp-e');
+    let editTrack   = null;
+
+    function selectEditTrack(track) {
+      editTrack = track;
+      editLabel.textContent  = track.label;
+      editLabel.style.color  = solidColor(track.color);
+      inpS.value = r2(track.getS());
+      inpE.value = r2(track.getE());
+    }
+
+    inpS.addEventListener('change', () => {
+      if (!editTrack) return;
+      const v = parseFloat(inpS.value);
+      if (isNaN(v)) return;
+      const dur = editTrack.getE() - editTrack.getS();
+      editTrack.setS(r2(v));
+      editTrack.setE(r2(v + dur));
+      inpE.value = r2(editTrack.getE()); // reflect any clamping
+    });
+
+    inpE.addEventListener('change', () => {
+      if (!editTrack) return;
+      const v = parseFloat(inpE.value);
+      if (isNaN(v)) return;
+      editTrack.setE(r2(v));
+      inpE.value = r2(editTrack.getE());
+    });
+
+    /* Wire up the late-binding reference */
+    _selectEditTrack = selectEditTrack;
 
     /* Now assign real selectBezTab (bezTracks + renderBez are defined) */
     _selectBezTab = function (key) {

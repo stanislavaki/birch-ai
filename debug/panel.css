@@ -81,6 +81,25 @@
 .tl-bar-inner  { flex: 1; border-radius: 3px 0 0 3px; min-width: 3px; }
 .tl-bar-handle { width: 5px; border-radius: 0 3px 3px 0; background: rgba(255,255,255,0.25); cursor: ew-resize; flex-shrink: 0; }
 
+/* ── Timeline quick-edit row ── */
+#tl-edit {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.35rem; min-height: 1.4rem;
+  font-size: 10px;
+}
+#tl-edit-label {
+  width: 4.2rem; flex-shrink: 0; text-align: right;
+  padding-right: 0.4rem; font-weight: bold;
+}
+.tl-edit-field { display: flex; align-items: center; gap: 3px; }
+.tl-edit-lbl { color: #444; }
+.tl-edit-inp {
+  width: 3rem; background: #0d0d0d; border: 1px solid #2a2a2a;
+  border-radius: 3px; color: #ccc; padding: 1px 4px;
+  font: 10px monospace;
+}
+.tl-edit-inp:focus { outline: none; border-color: #04DE00; color: #fff; }
+
 /* ── Bezier editor ── */
 #bez-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; }
 #bez-tabs    { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
