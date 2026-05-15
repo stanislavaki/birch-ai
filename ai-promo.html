@@ -31,7 +31,7 @@
   ───────────────────────────────────────── */
 
   .promo {
-    height: 300vh;
+    /* height set by JS via window.C.scrollLength */
   }
 
   .promo__sticky {
@@ -345,8 +345,9 @@
     entryStart:  -0.85, entryEnd:    0.24,  entryDist:   0.3,
     msg1Start:   -0.05, msg1MoveDur: 0.18,  msg1FadeDur: 0.05,  msg1Float: 4,
     msg2Start:    0.07, msg2MoveDur: 0.17,  msg2FadeDur: 0.05,  msg2Float: 4,
-    s3Start:      0.35, s3Dur:       0.26,
-    wsStart:      0.35, wsDur:       0.53,
+    s3Start:      0.35, s3Dur:       0.62,
+    wsStart:      0.35, wsDur:       0.61,
+    scrollLength: 3,
     /* per-track cubic-bezier: [x1, y1, x2, y2] */
     eases: {
       entry: [0.02, 0.22, 0.43, 1.02],
@@ -362,8 +363,14 @@
   let currentP   = targetP;
   let currentPws = targetP;
 
-  window.LERP      = 0.15;
-  window.LERP_WS   = 0.4;
+  window.LERP      = 0.04;
+  window.LERP_WS   = 0.07;
+
+  /* Apply scrollLength → section height (also exposed for debug panel) */
+  window.applyScrollLength = function () {
+    section.style.height = (window.C.scrollLength * 100) + 'vh';
+  };
+  window.applyScrollLength();
   /* cubic-bezier solver — same as CSS cubic-bezier() */
   function makeBezier(x1, y1, x2, y2) {
     return function(p) {
@@ -630,6 +637,11 @@
         <span class="lerp-lbl">LERP_WS (fast)</span>
         <input type="range" class="lerp-range" id="lerp-fast" min="0.01" max="0.99" step="0.01" />
         <span class="lerp-val" id="lerp-fast-val"></span>
+      </div>
+      <div class="lerp-row">
+        <span class="lerp-lbl">Scroll length</span>
+        <input type="range" class="lerp-range" id="lerp-scroll" min="1.5" max="6" step="0.1" />
+        <span class="lerp-val" id="lerp-scroll-val"></span>
       </div>
     </div>
     <button id="dbg-copy">Copy final values</button>
@@ -939,15 +951,16 @@
   /* ── LERP sliders ── */
   (function () {
     const sliders = [
-      { id: 'lerp-slow', valId: 'lerp-slow-val', get: () => window.LERP,    set: v => { window.LERP    = v; } },
-      { id: 'lerp-fast', valId: 'lerp-fast-val', get: () => window.LERP_WS, set: v => { window.LERP_WS = v; } },
+      { id: 'lerp-slow',   valId: 'lerp-slow-val',   fmt: v => v.toFixed(2), get: () => window.LERP,              set: v => { window.LERP    = v; } },
+      { id: 'lerp-fast',   valId: 'lerp-fast-val',   fmt: v => v.toFixed(2), get: () => window.LERP_WS,           set: v => { window.LERP_WS = v; } },
+      { id: 'lerp-scroll', valId: 'lerp-scroll-val', fmt: v => v.toFixed(1) + '×', get: () => window.C.scrollLength, set: v => { window.C.scrollLength = v; window.applyScrollLength(); } },
     ];
-    sliders.forEach(({ id, valId, get, set }) => {
+    sliders.forEach(({ id, valId, fmt, get, set }) => {
       const inp = document.getElementById(id);
       const lbl = document.getElementById(valId);
-      const sync = () => { inp.value = get(); lbl.textContent = get().toFixed(2); };
+      const sync = () => { inp.value = get(); lbl.textContent = fmt(get()); };
       sync();
-      inp.addEventListener('input', () => { set(parseFloat(inp.value)); lbl.textContent = parseFloat(inp.value).toFixed(2); });
+      inp.addEventListener('input', () => { const v = parseFloat(inp.value); set(v); lbl.textContent = fmt(v); });
       /* keep display in sync if value changes from console */
       setInterval(sync, 500);
     });
@@ -967,7 +980,7 @@
   entryStart: ${Cv.entryStart},  entryEnd: ${Cv.entryEnd},  entryDist: ${Cv.entryDist},
   msg1Start: ${Cv.msg1Start},  msg1MoveDur: ${Cv.msg1MoveDur},  msg1FadeDur: ${Cv.msg1FadeDur},  msg1Float: ${Cv.msg1Float},
   msg2Start: ${Cv.msg2Start},  msg2MoveDur: ${Cv.msg2MoveDur},  msg2FadeDur: ${Cv.msg2FadeDur},  msg2Float: ${Cv.msg2Float},
-  s3Start: ${Cv.s3Start},  s3Dur: ${Cv.s3Dur},  wsStart: ${Cv.wsStart},  wsDur: ${Cv.wsDur},
+  s3Start: ${Cv.s3Start},  s3Dur: ${Cv.s3Dur},  wsStart: ${Cv.wsStart},  wsDur: ${Cv.wsDur},  scrollLength: ${Cv.scrollLength},
   eases: {
     entry: ${fe(E.entry)},
     msg1:  ${fe(E.msg1)},
