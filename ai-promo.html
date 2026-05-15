@@ -91,7 +91,7 @@
     max-width: calc(100vw - 3rem);       /* safety: never overflows viewport */
     aspect-ratio: 900 / 560;            /* height follows width proportionally */
     flex-shrink: 0;
-    overflow: hidden;
+    overflow: visible; /* workspace slides from viewport bottom, clipped by sticky */
   }
 
   /* Chat images stacked, centered */
@@ -127,12 +127,11 @@
     top: 0;
     left: 50%;
     z-index: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(100%);
     width: 83.22%;                      /* 749/900 */
-    opacity: 0;
     border-radius: 0.875rem;            /* 14px */
     overflow: hidden;
-    will-change: opacity, transform;
+    will-change: transform;
   }
 
   .promo__workspace img {
@@ -298,16 +297,37 @@
   }
 
   /* ── Lerp smoothing ── */
-  let targetP  = 0;  /* raw scroll position  */
-  let currentP = 0;  /* smoothed position    */
-  const LERP   = 0.09; /* 0.05 = very slow · 0.2 = snappy */
+  let targetP    = 0;   /* raw scroll position            */
+  let currentP   = 0;   /* smoothed — chat, text, overlay */
+  let currentPws = 0;   /* smoothed — workspace only      */
+
+  window.LERP      = 0.15; /* chat + text + overlay  · 0.05 slow → 0.2 snappy */
+  window.LERP_WS   = 0.4;  /* workspace              · 0.05 slow → 0.2 snappy */
+  /* cubic-bezier solver — same as CSS cubic-bezier() */
+  function makeBezier(x1, y1, x2, y2) {
+    return function(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      let t = p, lo = 0, hi = 1;
+      for (let i = 0; i < 14; i++) {
+        const bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
+        if (Math.abs(bx - p) < 0.0001) break;
+        if (bx < p) lo = t; else hi = t;
+        t = (lo + hi) / 2;
+      }
+      return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
+    };
+  }
+
+  /* cubic-bezier(.02,.22,.43,1.02) — slight overshoot at the end */
+  let easeFn = makeBezier(0.02, 0.22, 0.43, 1.02);
 
   window.addEventListener('scroll', () => {
     targetP = scrollProgress();
   }, { passive: true });
 
   /* ── Render at smoothed position ── */
-  function tick(p) {
+  function tick(p, pws) {
     const mobile = window.innerWidth <= 767;
     const p2 = remap(p, 0.28, 0.52);
 
@@ -315,16 +335,18 @@
     chatOverlay.style.opacity = p2;
 
     if (!mobile) {
-      const p3 = remap(p, 0.64, 0.86);
+      const p3 = easeFn(remap(p, 0.64, 0.86));   /* chat: bezier eased  */
+      const p4 = remap(p, 0.70, 0.86);          /* workspace: faster   */
 
-      /* State 3: chat shrinks + shifts to top-right corner; workspace slides up */
+      /* State 3: chat shrinks + shifts to top-right corner */
       const chatScale  = 1 - p3 * 0.40;
       const chatShiftX = p3 * visual.offsetWidth * 0.293;
       chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) scale(${chatScale})`;
 
-      const slideY = visual.offsetHeight * 0.143;
-      workspace.style.opacity   = p3;
-      workspace.style.transform = `translateX(-50%) translateY(${(1 - p3) * slideY}px)`;
+      /* Workspace slides up from viewport bottom — own lerp (LERP_WS) */
+      const p4ws  = easeFn(remap(pws, 0.70, 0.86));
+      const fromViewportBottom = window.innerHeight - visual.getBoundingClientRect().top;
+      workspace.style.transform = `translateX(-50%) translateY(${(1 - p4ws) * fromViewportBottom}px)`;
 
       /* Subtitle: new chunks slide in from below; line shifts to stay centered */
       const t12 = remap(p, 0.28, 0.52);
@@ -348,13 +370,15 @@
     }
   }
 
-  /* ── rAF loop — lerp currentP → targetP each frame ── */
+  /* ── rAF loop — lerp both currentP values each frame ── */
   (function loop() {
-    currentP += (targetP - currentP) * LERP;
-    tick(currentP);
+    currentP   += (targetP - currentP)   * window.LERP;
+    currentPws += (targetP - currentPws) * window.LERP_WS;
+    tick(currentP, currentPws);
     requestAnimationFrame(loop);
   })();
 </script>
+
 
 </body>
 </html>
