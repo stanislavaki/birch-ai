@@ -1,6 +1,10 @@
 /* ============================================================
    CARD ACCORDION
    Requires: tokens.css
+
+   Open state (default):  flex: 1 — fills available space in a flex container.
+                          Title at top, body (description + bar) at bottom.
+   Closed state:         flex: 0 0 auto — hugs title height only.
    ============================================================ */
 
 .card-accordion {
@@ -9,37 +13,61 @@
   padding: var(--pad-card);
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  justify-content: space-between;
   cursor: pointer;
   user-select: none;
+  /* Open: fill available flex space */
+  flex: 1 1 0;
 }
 
+/* Closed: hug content */
+.card-accordion.is-closed {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+
+/* Title — reset browser default heading margins */
+.card-accordion h1,
+.card-accordion h2,
+.card-accordion h3,
+.card-accordion h4,
+.card-accordion h5,
+.card-accordion h6 {
+  margin: 0;
+}
+
+/* Body — sits at the bottom of the open card */
 .card-accordion__body {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  max-height: 400px;
+  padding-top: var(--space-sm);
   overflow: hidden;
   opacity: 1;
-  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity     0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Collapsed body — zero height, invisible */
 .card-accordion.is-closed .card-accordion__body {
-  max-height: 0;
+  height: 0;
+  padding-top: 0;
   opacity: 0;
+  pointer-events: none;
 }
 
+/* Progress bar track */
 .card-accordion__bar {
   position: relative;
   height: 4px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
 }
 
 .card-accordion__bar-fill {
   position: absolute;
   inset: 0;
   border-radius: var(--radius-sm);
-  background: var(--color-accent-green);
+  background: var(--acc-color, var(--color-accent-green));
 }

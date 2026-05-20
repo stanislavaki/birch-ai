@@ -1,0 +1,139 @@
+/* ══════════════════════════════════════════
+   Birch Debug Panel — panel.css
+   Drop this + panel.js into any dev HTML.
+   Never ship to production / Webflow embeds.
+══════════════════════════════════════════ */
+
+#dbg {
+  position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;
+  width: 30rem;
+  background: rgba(10,10,10,0.96);
+  border: 1px solid #2a2a2a;
+  border-radius: 0.75rem;
+  font: 11px/1.4 monospace;
+  color: #ccc;
+  user-select: none;
+  backdrop-filter: blur(8px);
+}
+#dbg-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #222;
+  cursor: pointer;
+}
+#dbg-header .title { color: #04DE00; font-weight: bold; }
+#dbg.collapsed #dbg-body { display: none; }
+#dbg-body { padding: 0.5rem 0.75rem 0.6rem; }
+
+/* ── Timeline ── */
+#tl-grid   { display: flex; gap: 0; }
+#tl-labels { width: 4.2rem; flex-shrink: 0; }
+#tl-rows   { flex: 1; position: relative; border: 1px solid #1e1e1e; border-radius: 0.3rem; overflow: hidden; }
+
+.tl-label-cell {
+  height: 1.8rem; display: flex; align-items: center;
+  color: #555; font-size: 10px; padding-right: 0.4rem;
+  justify-content: flex-end;
+}
+.tl-label-cell.clickable { cursor: pointer; }
+.tl-label-cell.clickable:hover { color: #aaa; }
+.tl-label-cell.selected { color: #fff; }
+.tl-label-cell.ruler { height: 1.4rem; color: #333; }
+
+#tl-ruler {
+  height: 1.4rem; position: relative;
+  border-bottom: 1px solid #1e1e1e;
+  background: #0d0d0d;
+}
+.tl-tick {
+  position: absolute; top: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  transform: translateX(-50%);
+  color: #333; font-size: 9px; padding-bottom: 2px;
+}
+.tl-tick::before {
+  content: ''; position: absolute; top: 0;
+  width: 1px; height: 6px; background: #2a2a2a;
+}
+.tl-tick.zero { color: #04DE00; }
+.tl-tick.zero::before { background: rgba(4,222,0,0.4); height: 100%; }
+
+.tl-track-row { height: 1.8rem; position: relative; border-bottom: 1px solid #111; }
+.tl-track-row:last-child { border-bottom: none; }
+
+#tl-presticky {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 50%;
+  background: rgba(255,255,255,0.018);
+  pointer-events: none; z-index: 0;
+}
+#tl-cursor {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: #04DE00; opacity: 0.9;
+  pointer-events: none; z-index: 10;
+  left: 50%; transform: translateX(-50%);
+}
+
+.tl-bar {
+  position: absolute; top: 20%; height: 60%;
+  display: flex; align-items: stretch;
+  border-radius: 3px; z-index: 2;
+  cursor: grab; min-width: 6px;
+}
+.tl-bar:active { cursor: grabbing; }
+.tl-bar-inner  { flex: 1; border-radius: 3px 0 0 3px; min-width: 3px; }
+.tl-bar-handle { width: 5px; border-radius: 0 3px 3px 0; background: rgba(255,255,255,0.25); cursor: ew-resize; flex-shrink: 0; }
+
+/* ── Timeline quick-edit row ── */
+#tl-edit {
+  display: flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.35rem; height: 1.4rem;
+  font-size: 10px; overflow: hidden;
+  visibility: hidden;
+}
+#tl-edit.visible { visibility: visible; }
+#tl-edit-label {
+  width: 4.2rem; flex-shrink: 0; text-align: right;
+  padding-right: 0.4rem; font-weight: bold;
+}
+.tl-edit-field { display: flex; align-items: center; gap: 3px; }
+.tl-edit-lbl { color: #777; }
+.tl-edit-inp {
+  width: 3.8rem; background: #0d0d0d; border: 1px solid #2a2a2a;
+  border-radius: 3px; color: #ccc; padding: 1px 4px;
+  font: 10px monospace;
+}
+.tl-edit-inp:focus { outline: none; border-color: #04DE00; color: #fff; }
+.tl-edit-inp:disabled { color: #777; border-color: #333; cursor: not-allowed; background: #0d0d0d; }
+.tl-edit-lbl--locked { color: #777; cursor: not-allowed; }
+#tl-edit-note { color: #444; font-size: 9px; font-style: italic; margin-left: 0.2rem; align-self: center; min-width: 1px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Bezier editor ── */
+#bez-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; }
+#bez-section.bez-inactive { opacity: 0.25; pointer-events: none; }
+#bez-row    { display: flex; gap: 0.75rem; align-items: flex-start; }
+#bez-svg    { display: block; overflow: visible; }
+#bez-inputs { display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
+.bez-inp-row { display: flex; align-items: center; gap: 4px; }
+.bez-inp-lbl { color: #555; font-size: 10px; width: 1.6rem; text-align: right; }
+.bez-inp {
+  width: 3.2rem; background: #0d0d0d; border: 1px solid #2a2a2a;
+  border-radius: 3px; color: #ccc; padding: 2px 4px; font: 10px monospace;
+}
+.bez-inp:focus { outline: none; border-color: #444; color: #fff; }
+
+/* ── Sliders (LERP, scalars) ── */
+#lerp-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; display: flex; flex-direction: column; gap: 5px; }
+.lerp-row  { display: flex; align-items: center; gap: 0.5rem; }
+.lerp-lbl  { color: #555; font-size: 10px; width: 5rem; flex-shrink: 0; }
+.lerp-range { flex: 1; height: 3px; cursor: pointer; accent-color: #04DE00; }
+.lerp-val  { color: #04DE00; font-size: 10px; width: 2.5rem; text-align: right; }
+
+/* ── Copy button ── */
+#dbg-copy {
+  margin-top: 0.5rem; width: 100%; padding: 0.3rem;
+  background: #04DE00; color: #000;
+  border: none; border-radius: 0.3rem;
+  font: bold 11px monospace; cursor: pointer;
+}
+#dbg-copy:active { opacity: 0.7; }

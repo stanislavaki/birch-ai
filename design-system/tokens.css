@@ -268,7 +268,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; padding
 /* Container — centers content with responsive horizontal padding */
 .container {
   width: 100%;
-  max-width: var(--container-md); /* 1280px default */
+  max-width: var(--container-lg); /* 1600px */
   margin-inline: auto;
   padding-inline: var(--pad-horizontal);
 }
