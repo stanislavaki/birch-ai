@@ -468,10 +468,6 @@
     .acc__box {
       aspect-ratio: auto;
     }
-    .chat-card-wrap {
-      width: 100%;
-      aspect-ratio: auto;
-    }
   }
 
   /* ─────────────────────────────────────────
@@ -739,7 +735,13 @@
     var eyebrowH = eyebrow.offsetHeight;
     var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap)
                    + parseFloat(getComputedStyle(eyebrow).marginBottom);
-    var minH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+    var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+
+    /* Chat card natural height: right col width × (600/400) aspect ratio */
+    var accRight   = box.querySelector('.acc__right');
+    var chatMinH   = boxPadV + accRight.offsetWidth * (600 / 400);
+
+    var minH = Math.max(leftColMinH, chatMinH);
 
     /* On tablet (≤991px): fix height so switching cards doesn't cause jumps.
        On desktop: keep as min-height so aspect-ratio can control proportions. */
