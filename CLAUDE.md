@@ -4,6 +4,13 @@
 
 - **CLAUDE.md updates** — whenever a global pattern or rule is established (e.g. a new CSS convention, a layout approach, a naming rule), always ask the user: "Should I add this to CLAUDE.md for future pages?" before ending the task.
 
+- **Брифинг перед версткой** — когда пользователь присылает новый блок или страницу для верстки, сначала открой макет через Figma MCP и задай все уточняющие вопросы. Не приступай к верстке пока не получены ответы. Вопросы по категориям:
+  - **Layout**: что диктует высоту блока — какой элемент главный? Как колонки связаны по высоте?
+  - **Адаптив**: есть ли таблетный/мобильный макет в Figma? Что меняется в layout?
+  - **Анимация**: есть ли анимация, как триггерится (скролл/клик/авто), меняется ли высота блока между состояниями?
+  - **Контент**: динамический или статичный, сколько состояний?
+  - **Неясности**: любые значения или поведения которые не очевидны из макета
+
 ## Design system
 
 All UI work in this project uses the Birch Design System located in `design-system/`.
