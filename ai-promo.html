@@ -199,8 +199,8 @@
   .acc__right {
     flex: 1;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: center;
   }
 
   .acc__eyebrow {
@@ -222,6 +222,256 @@
     aspect-ratio: 463 / 592;
     background: rgba(0, 0, 0, 0.15);
     border-radius: var(--radius-xl);
+  }
+
+  /* ─────────────────────────────────────────
+     CHAT CARD
+  ───────────────────────────────────────── */
+
+  /* Wrapper owns the sizing — enables container queries for the card */
+  .chat-card-wrap {
+    height: 100%;
+    width: auto;
+    aspect-ratio: 400 / 600;
+    container-type: inline-size;
+  }
+
+  .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.172vw, 1.172rem); /* fallback */
+    font-size: 3.8cqi;                              /* 15px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Body */
+  .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE/Edge */
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-card__body::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  /* Feed — wraps all exchanges */
+  .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+
+  /* Messages group */
+  .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+
+  /* User bubble */
+  .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* AI response area — fades + floats in after send */
+  .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__response.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Inner content — base text styles for AI responses */
+  .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .chat-card__response-content p {
+    margin: 0 0 0.4em;
+  }
+  .chat-card__response-content p:last-child { margin-bottom: 0; }
+  .chat-card__response-content strong { font-weight: 700; }
+  .chat-card__response-content ul {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+  }
+  .chat-card__response-content li { margin-bottom: 0.2em; }
+
+  /* "Review rule" link — card 0 only */
+  .chat-card__review-link {
+    display: block;
+    color: #0067ed;
+    line-height: 1.467;
+    margin-top: 0.375em;
+    cursor: pointer;
+  }
+
+  /* ── Performance table (card 1 response) ── */
+  .chat-card__table {
+    width: 100%;
+    margin-bottom: 0.625em;
+  }
+  .chat-card__table-header,
+  .chat-card__table-row {
+    display: flex;
+    align-items: center;
+  }
+  .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-card__table-col:first-child { padding-left: 0.875em; }
+  .chat-card__table-col:last-child  { flex: 0 0 5em; }
+  .chat-card__table-header .chat-card__table-col {
+    color: #636363;
+    font-weight: 500;
+  }
+  .chat-card__table-row {
+    border-radius: 0.75em;
+  }
+  .chat-card__table-row--alt { background: #fafafa; }
+
+  /* Input area */
+  .chat-card__input-area {
+    flex-shrink: 0;
+    padding: 1em;
+    position: relative;
+  }
+  /* Fade gradient above input */
+  .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .chat-card__text-flow {
+    flex: 1;
+    min-width: 0;
+    line-height: inherit;
+  }
+  .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    /* visibility toggled via inline style in JS — no display:none here */
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .chat-card__cursor.is-blinking {
+    animation: cursorBlink 0.9s step-end infinite;
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  /* Send button — inside the textarea, absolute.
+     bottom = (padding-top + line-height + padding-bottom - button-height) / 2
+            = (0.9 + 1.4 + 0.9 - 2) / 2 = 0.6em  → centers in single-line input,
+     stays pinned to bottom when input grows to multiple lines. */
+  .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .chat-card__send.is-active {
+    background: #161616;
+    cursor: pointer;
+  }
+  .chat-card__send svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* ─────────────────────────────────────────
+     TABLET  768–991px
+  ───────────────────────────────────────── */
+  @media (max-width: 991px) {
+    .acc__box {
+      aspect-ratio: auto;
+    }
+    .chat-card-wrap {
+      width: 100%;
+      aspect-ratio: auto;
+    }
   }
 
   /* ─────────────────────────────────────────
@@ -333,43 +583,55 @@
           <div class="acc__cards">
 
             <div class="card-accordion" data-index="0">
-              <h4 class="t-h4">Rule creation</h4>
+              <h4 class="t-h4">Get rules suggestion</h4>
               <div class="card-accordion__body">
-                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Type your condition. Get a configured rule in the chat, ready to set live</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Describe a goal. Co-pilot proposes a rule, explains the logic, and drops a draft into the Birch editor. You review and decide.</p>
                 <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar0"></div></div>
               </div>
             </div>
 
             <div class="card-accordion is-closed" data-index="1">
-              <h4 class="t-h4">Rule suggestion</h4>
+              <h4 class="t-h4">Analyze your performance</h4>
               <div class="card-accordion__body">
-                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Birch looks at what you already run and surfaces what's missing. No rules yet? It'll tell you where to start</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard. AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
                 <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar1"></div></div>
               </div>
             </div>
 
             <div class="card-accordion is-closed" data-index="2">
-              <h4 class="t-h4">Analyse existing rule setup</h4>
+              <h4 class="t-h4">Analyze impact of rules</h4>
               <div class="card-accordion__body">
-                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Birch reads your current rules and flags the issues — wrong filters, conflicting conditions, logic gaps — so you can fix them before they run</p>
+                <p class="t-eyebrow" style="color:var(--color-text-grey);margin:0">Coming soon</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0;margin-top:0.5rem">See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
                 <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
-              </div>
-            </div>
-
-            <div class="card-accordion is-closed" data-index="3">
-              <h4 class="t-h4">Analytics check</h4>
-              <div class="card-accordion__body">
-                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about budgets, reach, or ROAS across any connected account. Birch pulls the numbers and responds in the chat as plain text</p>
-                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar3"></div></div>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Right: Birch AI placeholder (same aspect ratio as the real window) -->
+        <!-- Right: Birch AI chat card -->
         <div class="acc__right">
-          <div class="acc__placeholder"></div>
+          <!-- Chat card -->
+          <div class="chat-card-wrap">
+          <div class="chat-card">
+            <!-- Messages area -->
+            <div class="chat-card__body" id="chatBody">
+              <div class="chat-card__feed" id="chatFeed"></div>
+            </div>
+            <!-- Input area -->
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="chatPlaceholder">Ask anything</span><span class="chat-card__typed" id="chatTyped"></span><span class="chat-card__cursor" id="chatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="chatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div><!-- /.chat-card-wrap -->
         </div>
 
       </div>
@@ -387,9 +649,8 @@
     token('--color-accent-green'),       /* card 0 */
     token('--color-accent-pink'),        /* card 1 */
     token('--color-accent-light-blue'),  /* card 2 */
-    token('--color-accent-orange'),      /* card 3 */
   ];
-  var DURATION = 4000; /* ms each card stays active */
+  var DURATION = 5500; /* ms each card stays active — must cover the longest chat cycle */
 
   var box   = document.getElementById('accBox');
   var cards = Array.prototype.slice.call(box.querySelectorAll('.card-accordion'));
@@ -408,6 +669,8 @@
     bars.forEach(function (b) { b.style.width = '0%'; });
     active  = idx;
     startMs = null; /* reset on next rAF tick */
+    /* Notify chat animation — guard: chat script loads after this one */
+    if (window.switchChat) window.switchChat(idx);
   }
 
   /* ── rAF loop: drives the progress bar and auto-advance ── */
@@ -469,7 +732,7 @@
     /* 6. Restore transitions */
     animated.forEach(function (el) { if (el) el.style.transition = ''; });
 
-    /* 7. Compute and apply min-height
+    /* 7. Compute and apply height
           box padding (V) + eyebrow height + gap (flex gap + eyebrow margin-bottom) + cards */
     var cs       = getComputedStyle(box);
     var boxPadV  = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
@@ -477,11 +740,277 @@
     var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap)
                    + parseFloat(getComputedStyle(eyebrow).marginBottom);
     var minH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
-    box.style.minHeight = minH + 'px';
+
+    /* On tablet (≤991px): fix height so switching cards doesn't cause jumps.
+       On desktop: keep as min-height so aspect-ratio can control proportions. */
+    if (window.innerWidth <= 991) {
+      box.style.minHeight = '';
+      box.style.height    = minH + 'px';
+    } else {
+      box.style.height    = '';
+      box.style.minHeight = minH + 'px';
+    }
   }
 
   sizeAccBox();
   window.addEventListener('resize', sizeAccBox);
+
+})();
+</script>
+
+<!-- ── Chat animation: type → send → bubble → AI response → loop ── -->
+<script>
+(function () {
+
+  /* ══════════════════════════════════════════════════════════
+     CHATS — content for each accordion tab (0 / 1 / 2)
+  ══════════════════════════════════════════════════════════ */
+  var CHATS = [
+    /* 0 — Get rules suggestion */
+    {
+      userMsg: 'My target ROAS is 2.5. Share new ideas I could try to extend my current Birch rules setup',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p>I recommend moving to proactive growth and budget management:</p>',
+          '<p><strong>The "Soft Landing" (Budget Protection)</strong><br>',
+          'Logic: If ROAS is below your target but above your "dead-zone" ',
+          '(e.g., target 2.5, current 1.8) — decrease daily budget by 20%.<br>',
+          'Benefit: Protects spend during temporary dips while keeping ad sets in learning phase.</p>',
+        '</div>',
+        '<a class="chat-card__review-link">Review rule</a>'
+      ].join('')
+    },
+    /* 1 — Analyze performance */
+    {
+      userMsg: 'Analyze my performance by platform for the last week',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<div class="chat-card__table">',
+            '<div class="chat-card__table-header">',
+              '<span class="chat-card__table-col">Platform</span>',
+              '<span class="chat-card__table-col">Ad Account</span>',
+              '<span class="chat-card__table-col">Spend</span>',
+            '</div>',
+            '<div class="chat-card__table-row chat-card__table-row--alt">',
+              '<span class="chat-card__table-col">Google Ads</span>',
+              '<span class="chat-card__table-col">Birch</span>',
+              '<span class="chat-card__table-col">🟢 $3.94M</span>',
+            '</div>',
+            '<div class="chat-card__table-row">',
+              '<span class="chat-card__table-col">Meta Ads</span>',
+              '<span class="chat-card__table-col">Bir.ch Marketing</span>',
+              '<span class="chat-card__table-col">🔴 $5K</span>',
+            '</div>',
+            '<div class="chat-card__table-row chat-card__table-row--alt">',
+              '<span class="chat-card__table-col">TikTok Ads</span>',
+              '<span class="chat-card__table-col">Bir.ch Tiktok</span>',
+              '<span class="chat-card__table-col">⚪ $40.6K</span>',
+            '</div>',
+          '</div>',
+          '<p>🔍 <strong>Key Findings</strong></p>',
+          '<p>Google Ads Efficiency 🟢</p>',
+          '<ul>',
+            '<li>Performance: With a ROAS of 35.72, Google Ads is exceptionally profitable.</li>',
+            '<li>Insight: Your search or shopping campaigns are capturing high-intent traffic that converts at a very low cost relative to revenue.</li>',
+          '</ul>',
+        '</div>'
+      ].join('')
+    },
+    /* 2 — Analyze impact of rules */
+    {
+      userMsg: 'Can you check if my rules need any fixes in the setup?',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p>🛠 <strong>Critical Fix – Add Spend/Impression Thresholds</strong><br>',
+          'Without a minimum volume floor, low-spend ad sets will trigger false ROAS alerts. ',
+          'Add Spend (last 24h) &gt; [avg CPA] or Impressions &gt; 500.</p>',
+          '<p>📈 <strong>Optimization – Tighten the CPM Trigger</strong><br>',
+          'Your 1.5x CPM threshold may miss early warning signs. Drop to 1.3x to catch competition spikes sooner.</p>',
+        '</div>'
+      ].join('')
+    }
+  ];
+
+  /* ══════════════════════════════════════════════════════════
+     TIMING
+  ══════════════════════════════════════════════════════════ */
+  if (window.CHAT_TYPING_MS === undefined) window.CHAT_TYPING_MS = 15;
+  var PAUSE_SEND   = 500;
+  var RESP_DELAY   = 700;
+  var FULL_PAUSE   = 1800;
+  var FADE_MS      = 350;
+  var IDLE_PAUSE   = 400;
+  var INIT_DELAY   = 1400;
+
+  /* ══════════════════════════════════════════════════════════
+     ELEMENTS
+  ══════════════════════════════════════════════════════════ */
+  var chatBody    = document.getElementById('chatBody');
+  var chatFeed    = document.getElementById('chatFeed');
+  var placeholder = document.getElementById('chatPlaceholder');
+  var typedEl     = document.getElementById('chatTyped');
+  var inputCursor = document.getElementById('chatCursor');
+  var sendBtn     = document.getElementById('chatSendBtn');
+
+  /* Hide typed span initially (CSS no longer does this) */
+  typedEl.style.display = 'none';
+
+  /* ══════════════════════════════════════════════════════════
+     STATE
+  ══════════════════════════════════════════════════════════ */
+  var currentIdx      = 0;
+  var pendingTimers   = [];
+  var currentBubbleEl = null;
+  var currentRespEl   = null;
+  var phase = 'idle';
+
+  /* ══════════════════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════════════════ */
+  function addTimer(fn, ms) {
+    var t = setTimeout(fn, ms);
+    pendingTimers.push(t);
+    return t;
+  }
+  function cancelTimers() {
+    pendingTimers.forEach(function (t) { clearTimeout(t); });
+    pendingTimers = [];
+  }
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent    = '';
+    typedEl.style.display  = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     DOM FACTORY
+  ══════════════════════════════════════════════════════════ */
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     RESET — fade out everything and start fresh
+  ══════════════════════════════════════════════════════════ */
+  function resetChat(nextIdx) {
+    phase           = 'clearing';
+    currentIdx      = nextIdx;
+    currentBubbleEl = null;
+    currentRespEl   = null;
+    clearInput();
+
+    /* Fade out any visible bubbles / responses */
+    var els = chatFeed.querySelectorAll('.chat-card__bubble, .chat-card__response');
+    els.forEach(function (el) { el.classList.remove('is-visible'); });
+
+    /* After fade completes, clear feed and start typing immediately */
+    addTimer(function () {
+      chatFeed.innerHTML = '';
+      phase = 'idle';
+      type(0);
+    }, FADE_MS + 50);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 1 — User types in the input field
+  ══════════════════════════════════════════════════════════ */
+  function type(charIdx) {
+    phase = 'typing';
+    var msg = CHATS[currentIdx].userMsg;
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display     = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = msg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+
+    if (charIdx < msg.length) {
+      addTimer(function () { type(charIdx + 1); }, window.CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      phase = 'sending';
+      addTimer(doSend, PAUSE_SEND);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 2 — Send: input clears, bubble floats in
+  ══════════════════════════════════════════════════════════ */
+  function doSend() {
+    clearInput();
+    currentBubbleEl = createBubble(CHATS[currentIdx].userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentBubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    phase = 'responding';
+    addTimer(startResponse, RESP_DELAY);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 3 — AI response appears (fade + float)
+  ══════════════════════════════════════════════════════════ */
+  function startResponse() {
+    currentRespEl = createResponse(CHATS[currentIdx].aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentRespEl.classList.add('is-visible');
+        scrollToBottom();
+        phase = 'viewing';
+        addTimer(onExchangeComplete, FULL_PAUSE);
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 4 — Exchange done
+  ══════════════════════════════════════════════════════════ */
+  function onExchangeComplete() {
+    phase = 'idle';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PUBLIC — called by accordion on every tab switch
+  ══════════════════════════════════════════════════════════ */
+  window.switchChat = function (nextIdx) {
+    cancelTimers();
+    resetChat(nextIdx);
+  };
+
+  /* ── Kick off first exchange after page settles ── */
+  addTimer(function () { type(0); }, INIT_DELAY);
 
 })();
 </script>
