@@ -12,7 +12,7 @@
   html, body { margin: 0; padding: 0; }
   body {
     font-family: var(--font);
-    background: #161616;
+    background: var(--color-bg);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -67,9 +67,11 @@
     left: calc(100% + 0.375rem);
     top: 0;
     color: var(--color-text-grey);
-    white-space: normal;
-    line-height: 1.2;
+    white-space: nowrap;
+    line-height: 1;
+    padding-right: 0.5rem;
   }
+
 
   /* Main: wraps h1 + subtitle — used for mobile vertical centering */
   .hero__main {
@@ -82,7 +84,7 @@
   /* H1 composition */
   .hero__h1 {
     /* --ps = pill size: scales from 2rem at ~490px up to 3.25rem (52px) at 1280px */
-    --ps: clamp(2rem, 4.0625vw, 3.25rem);
+    --ps: clamp(2rem, 5vw, 4rem);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -158,19 +160,20 @@
   }
 
   /* ── Decorative bars (Row 2) ──
-     Three horizontal capsules of decreasing width, top to bottom (state A).
-     Light-blue and red swap widths on loop; pink stays medium. */
+     Three horizontal capsules. Animation: A (left-aligned) → center → B (left-aligned, widths swapped).
+     Fixed gap keeps spacing equal regardless of bar width. */
   .hero__deco-bars {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.058em;             /* 1.694px / 29.365px — Figma proportion */
     flex-shrink: 0;
     font-size: var(--ps);
-    width:  1.654em;  /* 86 / 52 */
-    height: 1.462em;  /* 76 / 52 */
+    width:  1.654em;          /* 86 / 52 */
+    height: 1.462em;          /* 76 / 52 */
   }
   .hero__bar {
-    height: 0.423em;          /* ≈ 22px — each bar fills roughly ⅓ of height */
+    height: 0.449em;          /* (1.462 - 2×0.058) / 3 — fills container evenly with gap */
     border-radius: var(--radius-pill);
   }
   .hero__bar--lb {
@@ -179,22 +182,33 @@
     animation:  hero-bar-lb 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
   }
   .hero__bar--pink {
-    width:      67.4%; /* 58 / 86 — stays medium */
+    width:      67.4%;        /* 58 / 86 — stays medium, only shifts for center state */
     background: var(--color-accent-pink);
+    animation:  hero-bar-pink 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.075s;
   }
   .hero__bar--red {
-    width:      34.9%; /* 30 / 86 — narrowest in state A */
+    width:      34.9%;        /* 30 / 86 — narrowest in state A */
     background: var(--color-accent-red);
     animation:  hero-bar-red 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
     animation-delay: 0.15s;
   }
+  /* State A (0%): left-aligned, widths far apart.
+     State mid (50%): all bars 67.4%, centered — natural crossing point where lb=red=pink.
+     State B (100%): left-aligned, widths swapped. */
   @keyframes hero-bar-lb {
-    from { width: 100%;  }
-    to   { width: 34.9%; }
+    0%   { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    100% { width: 34.9%;  margin-left: 0; }
+  }
+  @keyframes hero-bar-pink {
+    0%,  100% { margin-left: 0;     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%        { margin-left: 16.3%; }
   }
   @keyframes hero-bar-red {
-    from { width: 34.9%; }
-    to   { width: 100%;  }
+    0%   { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    100% { width: 100%;   margin-left: 0; }
   }
 
   .hero__subtitle {
@@ -215,7 +229,7 @@
     .hero {
       height: 100svh;
       min-height: unset;
-      padding-top: 5rem;
+      padding-top: var(--space-xl);
       padding-bottom: var(--space-md);
       justify-content: flex-start;
       gap: 0;
@@ -225,11 +239,11 @@
     .hero__logo-name { font-size: 1.25rem; }  /* 20px vs 32px desktop */
     .hero__logo-icon { height: 1.875rem; }    /* 30px vs 45px desktop */
 
-    /* h1 + subtitle centered in the space between logo and button */
+    /* h1 fills available space (centering itself), subtitle pinned to bottom above button */
     .hero__main {
       flex: 1;
-      justify-content: center;
-      gap: var(--space-sm);
+      justify-content: flex-start;
+      gap: 0;
     }
 
     /* Desktop H1 hidden; mobile staircase shown */
@@ -238,9 +252,10 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.625rem;          /* ~10px — matches Figma step spacing */
+      justify-content: center;  /* centers staircase vertically in remaining space */
+      flex: 1;                  /* takes all space above subtitle */
+      gap: 0.625rem;
       width: 100%;
-      /* --ps scales freely with viewport — steps are %-based so staircase is self-similar */
       --ps: clamp(1.5rem, 9.18vw, 5rem);
     }
     .hero__step {
@@ -260,12 +275,135 @@
       margin-right: 4%;
     }
 
+    .hero__subtitle {
+      padding-bottom: 2rem; /* gap to button */
+      text-align: center;
+    }
+
     .hero__btn {
       width: 100%;
       min-height: 3.75rem;          /* 60px on mobile */
       border-radius: var(--radius-md); /* 12px on mobile per Figma */
       font-size: 1.125rem;          /* 18px on mobile */
     }
+  }
+
+  /* ─────────────────────────────────────────
+     PROVEPOINTS SECTION  (Figma 330:1455)
+  ───────────────────────────────────────── */
+
+  .provepoints {
+    padding: var(--space-xl) 0 var(--space-lg);
+    background: var(--color-bg);
+  }
+
+  .provepoints__heading {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+  }
+
+  /* Card */
+  .provepoints__card {
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-lg);
+    padding: 2rem var(--pad-card);
+    display: flex;
+    flex-direction: column;
+    min-height: 30.5rem; /* 488px */
+  }
+
+  .provepoints__card-title {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0;
+    flex-shrink: 0;
+    /* Reserve 2-line height so all titles align regardless of length */
+    min-height: calc(2 * var(--text-h3-size)); /* 2 × 2rem = 4rem (lh=1) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Middle image area — fills space between title and description */
+  .provepoints__media {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad-card) 0;
+    min-height: 0;
+  }
+
+  .provepoints__media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Subgrid: align title / media / desc rows across all three cards */
+  @media (min-width: 768px) {
+    .provepoints .grid {
+      grid-template-rows: auto 1fr auto;
+    }
+    .provepoints__card {
+      grid-row: span 3;
+      display: grid;
+      grid-template-rows: subgrid;
+      min-height: unset;
+      align-content: start;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      align-self: start;
+    }
+    .provepoints__media {
+      flex: unset;
+      align-self: center;
+    }
+    .provepoints__desc {
+      align-self: end;
+    }
+  }
+
+  /* Mobile: content-driven height, bigger images */
+  @media (max-width: 767px) {
+    .provepoints__card {
+      min-height: unset;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      display: block;
+    }
+    .provepoints__media {
+      flex: none;
+      min-height: 15rem;
+      padding: var(--space-md) 0;
+      margin: var(--space-lg) 0;
+    }
+  }
+
+  /* Card 02: yellow square wrap for rule icon */
+  .provepoints__rule-wrap {
+    background: var(--color-primary);
+    border-radius: var(--radius-xl);
+    width: clamp(8rem, 70%, 12.3rem);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .provepoints__rule-wrap img {
+    width: 66%;
+  }
+
+  /* Description — grey, centered */
+  .provepoints__desc {
+    text-align: center;
+    color: var(--color-text-grey);
+    margin: 0;
+    flex-shrink: 0;
   }
 
   /* ── Test blocks ── */
@@ -284,6 +422,7 @@
   ───────────────────────────────────────── */
 
   .promo {
+    padding-top: var(--space-xl);
     /* height set by JS via window.C.scrollLength */
   }
 
@@ -410,7 +549,7 @@
   ───────────────────────────────────────── */
 
   .acc {
-    padding: 2rem 0 4rem;
+    padding: var(--space-xl) 0 4rem;
   }
 
   .acc__title {
@@ -426,6 +565,8 @@
     border-radius: var(--radius-lg);
     padding: 2rem;
     overflow: hidden;
+    contain: layout;            /* internal layout changes don't affect elements outside */
+    overflow-anchor: none;      /* prevent browser scroll-anchoring from compensating */
     transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -715,7 +856,7 @@
   ───────────────────────────────────────── */
 
   .prompts {
-    padding: var(--space-lg) 0;
+    padding: var(--space-xl) 0 var(--space-lg);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -792,6 +933,100 @@
   }
 
   /* ─────────────────────────────────────────
+     VISION
+  ───────────────────────────────────────── */
+  .vision {
+    padding-top: var(--space-xl);
+    padding-bottom: var(--space-xl);
+  }
+
+  .vision .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .vision__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+  .vision__cards {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    overflow: clip;
+  }
+
+  .vision__copilot {
+    background: var(--color-accent-orange);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text-inverted);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transform-origin: top center;
+    will-change: transform;
+  }
+
+  .vision__copilot h2 { margin: 0; }
+
+  .vision__copilot-icon {
+    width: 15.5625rem;   /* 249px */
+    height: 15.0625rem;  /* 241px */
+    flex-shrink: 0;
+  }
+
+  .vision__copilot-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .vision__agent {
+    background: #004195;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;                /* sits above copilot */
+    will-change: transform;
+  }
+
+  .vision__agent h2 { margin: 0; }
+
+  .vision__agent-desc {
+    max-width: 50rem;   /* 800px */
+    text-align: center;
+    margin: 0;
+  }
+
+  .vision__agent-ill {
+    width: 100%;
+  }
+
+  .vision__agent-ill img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* ─────────────────────────────────────────
      TABLET  768–991px
   ───────────────────────────────────────── */
   @media (max-width: 991px) {
@@ -859,7 +1094,7 @@
       <span class="hero__logo-name">Bïrch</span>
       <img src="images/icon ai.svg" class="hero__logo-icon" alt="" />
       <span class="hero__logo-name">AI</span>
-      <span class="hero__beta t-body">closed<br>beta</span>
+      <span class="hero__beta t-body">closed beta</span>
     </div>
   </div>
 
@@ -943,12 +1178,53 @@
 
 </section>
 
-<div class="test-block t-para-lg">Block before — 1200px</div>
+<!-- ─────────────────────────────────────────
+     PROVEPOINTS  "It works because…"
+───────────────────────────────────────── -->
+<section class="provepoints">
+  <div class="container">
+
+    <h2 class="t-h2 provepoints__heading">It works because it knows your context</h2>
+
+    <div class="grid">
+
+      <!-- Card 01: Your ad accounts -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your ad accounts</h3>
+        <div class="provepoints__media">
+          <img src="images/platforms.svg" alt="Meta, Google, TikTok, Snap platform logos" />
+        </div>
+        <p class="t-para-lg provepoints__desc">Meta, Google, TikTok, Snap. Performance data, structure, naming — all read directly</p>
+      </div>
+
+      <!-- Card 02: Your rule library -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your rule library</h3>
+        <div class="provepoints__media">
+          <div class="provepoints__rule-wrap">
+            <img src="images/rule-icon.svg" alt="" aria-hidden="true" />
+          </div>
+        </div>
+        <p class="t-para-lg provepoints__desc">Existing rules are part of the context</p>
+      </div>
+
+      <!-- Card 03: Your workspace, your data -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your workspace,<br>your data</h3>
+        <div class="provepoints__media">
+          <img src="images/ws-promo-ai.svg" alt="" aria-hidden="true" />
+        </div>
+        <p class="t-para-lg provepoints__desc">No external sharing. No training on your account.</p>
+      </div>
+
+    </div><!-- /.grid -->
+  </div><!-- /.container -->
+</section>
 
 <section class="acc">
   <div class="container">
 
-    <h2 class="acc__title t-h2">It builds from words,<br>reviews your setup and suggests</h2>
+    <h2 class="acc__title t-h2">It works because it knows your context</h2>
 
     <div class="acc__box" id="accBox">
       <div class="acc__layout">
@@ -1124,10 +1400,13 @@
     var minH = Math.max(leftColMinH, chatMinH);
 
     /* All breakpoints: fix height so switching cards doesn't cause jumps */
-    box.style.height = minH + 'px';
+    box.style.minHeight = minH + 'px';
+    box.style.height    = minH + 'px';
   }
 
   sizeAccBox();
+  /* Re-measure after fonts render — custom font metrics differ from fallback */
+  document.fonts.ready.then(function () { sizeAccBox(); });
   window.addEventListener('resize', sizeAccBox);
 
 })();
@@ -1475,6 +1754,28 @@
   </div>
 </section>
 
+<!-- ===================== VISION ===================== -->
+<section class="vision">
+  <div class="container">
+    <p class="vision__subtitle t-para-lg">The first step toward a bigger vision</p>
+    <div class="vision__cards" id="visionCards">
+      <div class="vision__copilot" id="visionCopilot">
+        <h2 class="t-h2">Today's co-pilot</h2>
+        <div class="vision__copilot-icon">
+          <img src="images/icon ai.svg" alt="AI cursor icon">
+        </div>
+      </div>
+      <div class="vision__agent" id="visionAgent">
+        <h2 class="t-h2">Tomorrow's agent</h2>
+        <p class="t-para-xl vision__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
+        <div class="vision__agent-ill">
+          <img src="images/agent-ill.svg" alt="Agent illustration">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <script>
   const section      = document.querySelector('.promo');
   const visual       = document.querySelector('.promo__visual');
@@ -1715,120 +2016,270 @@
   var r2 = function (v) { return Math.round(v * 100) / 100; };
 
   DebugPanel.init({
-    getP:   function () { return window._dbgP   || 0; },
-    getPws: function () { return window._dbgPws || 0; },
+    blocks: [
 
-    tracks: [
-      /* ── Entry ── */
-      { key: 'entry', label: 'Entry', color: '#59DBFF',
-        getS: function () { return C().entryStart; },
-        getE: function () { return C().entryEnd; },
-        setS: function (v) { C().entryStart = r2(v); },
-        setE: function (v) { C().entryEnd   = r2(v); },
-        ease:    function () { return C().eases.entry; },
-        setEase: function (e) { C().eases.entry = e; },
-        inP: function (p) { return remap(p, C().entryStart, C().entryEnd); } },
+      /* ══════════════════════════════════════════
+         BLOCK 1 — Promo (scroll animation)
+      ══════════════════════════════════════════ */
+      {
+        label: 'Promo',
+        getP:   function () { return window._dbgP   || 0; },
+        getPws: function () { return window._dbgPws || 0; },
 
-      /* ── Msg 1 move ── */
-      { key: 'msg1', label: 'Msg 1', color: '#04DE00',
-        getS: function () { return C().msg1Start; },
-        getE: function () { return C().msg1Start + C().msg1MoveDur; },
-        setS: function (v) { C().msg1Start   = r2(v); },
-        setE: function (v) { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); },
-        ease:    function () { return C().eases.msg1; },
-        setEase: function (e) { C().eases.msg1 = e; },
-        inP: function (p) { return remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur); } },
+        tracks: [
+          /* ── Entry ── */
+          { key: 'entry', label: 'Entry', color: '#59DBFF',
+            getS: function () { return C().entryStart; },
+            getE: function () { return C().entryEnd; },
+            setS: function (v) { C().entryStart = r2(v); },
+            setE: function (v) { C().entryEnd   = r2(v); },
+            ease:    function () { return C().eases.entry; },
+            setEase: function (e) { C().eases.entry = e; },
+            inP: function (p) { return remap(p, C().entryStart, C().entryEnd); } },
 
-      /* ── Msg 1 fade (opacity only, no bezier tab) ── */
-      { key: 'msg1fade', label: 'Fade 1', color: '#04DE0044', bodyDrag: false,
-        readonlyS: true, hintS: 'locked to msg1Start',
-        note: 'opacity only · start = Msg 1 start',
-        getS: function () { return C().msg1Start; },
-        getE: function () { return C().msg1Start + C().msg1FadeDur; },
-        setS: function () {},
-        setE: function (v) { C().msg1FadeDur = r2(Math.max(0.005, v - C().msg1Start)); } },
+          /* ── Msg 1 move ── */
+          { key: 'msg1', label: 'Msg 1', color: '#04DE00',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1MoveDur; },
+            setS: function (v) { C().msg1Start   = r2(v); },
+            setE: function (v) { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); },
+            ease:    function () { return C().eases.msg1; },
+            setEase: function (e) { C().eases.msg1 = e; },
+            inP: function (p) { return remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur); } },
 
-      /* ── Msg 2 move ── */
-      { key: 'msg2', label: 'Msg 2', color: '#04DE0099',
-        getS: function () { return C().msg2Start; },
-        getE: function () { return C().msg2Start + C().msg2MoveDur; },
-        setS: function (v) { C().msg2Start   = r2(v); },
-        setE: function (v) { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); },
-        ease:    function () { return C().eases.msg2; },
-        setEase: function (e) { C().eases.msg2 = e; },
-        inP: function () { return remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur); } },
+          /* ── Msg 1 fade ── */
+          { key: 'msg1fade', label: 'Fade 1', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg1Start',
+            note: 'opacity only · start = Msg 1 start',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg1FadeDur = r2(Math.max(0.005, v - C().msg1Start)); } },
 
-      /* ── Msg 2 fade ── */
-      { key: 'msg2fade', label: 'Fade 2', color: '#04DE0044', bodyDrag: false,
-        readonlyS: true, hintS: 'locked to msg2Start',
-        note: 'opacity only · start = Msg 2 start',
-        getS: function () { return C().msg2Start; },
-        getE: function () { return C().msg2Start + C().msg2FadeDur; },
-        setS: function () {},
-        setE: function (v) { C().msg2FadeDur = r2(Math.max(0.005, v - C().msg2Start)); } },
+          /* ── Msg 2 move ── */
+          { key: 'msg2', label: 'Msg 2', color: '#04DE0099',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2MoveDur; },
+            setS: function (v) { C().msg2Start   = r2(v); },
+            setE: function (v) { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); },
+            ease:    function () { return C().eases.msg2; },
+            setEase: function (e) { C().eases.msg2 = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur); } },
 
-      /* ── State 3 ── */
-      { key: 's3', label: 'State 3', color: '#FFE243',
-        getS: function () { return C().s3Start; },
-        getE: function () { return C().s3Start + C().s3Dur; },
-        setS: function (v) { C().s3Start = r2(v); },
-        setE: function (v) { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); },
-        ease:    function () { return C().eases.s3; },
-        setEase: function (e) { C().eases.s3 = e; },
-        inP: function (p) { return remap(p, C().s3Start, C().s3Start + C().s3Dur); } },
+          /* ── Msg 2 fade ── */
+          { key: 'msg2fade', label: 'Fade 2', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg2Start',
+            note: 'opacity only · start = Msg 2 start',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg2FadeDur = r2(Math.max(0.005, v - C().msg2Start)); } },
 
-      /* ── Workspace ── */
-      { key: 'ws', label: 'WS', color: '#FF7700',
-        getS: function () { return C().wsStart; },
-        getE: function () { return C().wsStart + C().wsDur; },
-        setS: function (v) { C().wsStart = r2(v); },
-        setE: function (v) { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); },
-        ease:    function () { return C().eases.ws; },
-        setEase: function (e) { C().eases.ws = e; },
-        inP: function () { return remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur); } },
+          /* ── State 3 ── */
+          { key: 's3', label: 'State 3', color: '#FFE243',
+            getS: function () { return C().s3Start; },
+            getE: function () { return C().s3Start + C().s3Dur; },
+            setS: function (v) { C().s3Start = r2(v); },
+            setE: function (v) { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); },
+            ease:    function () { return C().eases.s3; },
+            setEase: function (e) { C().eases.s3 = e; },
+            inP: function (p) { return remap(p, C().s3Start, C().s3Start + C().s3Dur); } },
 
-      /* ── Title swap ── */
-      { key: 'titleSwap', label: 'Title', color: '#E879F9',
-        getS: function () { return C().titleSwapStart; },
-        getE: function () { return C().titleSwapStart + C().titleSwapDur; },
-        setS: function (v) { C().titleSwapStart = r2(v); },
-        setE: function (v) { C().titleSwapDur = r2(Math.max(0.01, v - C().titleSwapStart)); },
-        ease:    function () { return C().eases.titleSwap; },
-        setEase: function (e) { C().eases.titleSwap = e; },
-        inP: function (p) { return remap(p, C().titleSwapStart, C().titleSwapStart + C().titleSwapDur); } },
-    ],
+          /* ── Workspace ── */
+          { key: 'ws', label: 'WS', color: '#FF7700',
+            getS: function () { return C().wsStart; },
+            getE: function () { return C().wsStart + C().wsDur; },
+            setS: function (v) { C().wsStart = r2(v); },
+            setE: function (v) { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); },
+            ease:    function () { return C().eases.ws; },
+            setEase: function (e) { C().eases.ws = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur); } },
 
-    sliders: [
-      { label: 'LERP (slow)', get: function () { return window.LERP; },            set: function (v) { window.LERP    = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
-      { label: 'LERP_WS',    get: function () { return window.LERP_WS; },          set: function (v) { window.LERP_WS = v; }, min: 0.01, max: 0.99, step: 0.01, fmt: function (v) { return v.toFixed(2); } },
-      { label: 'Scroll ×',   get: function () { return C().scrollLength; }, set: function (v) { C().scrollLength = v; window.applyScrollLength(); }, min: 1.5, max: 6, step: 0.1, fmt: function (v) { return v.toFixed(1) + '×'; } },
-    ],
+          /* ── Title swap ── */
+          { key: 'titleSwap', label: 'Title', color: '#E879F9',
+            getS: function () { return C().titleSwapStart; },
+            getE: function () { return C().titleSwapStart + C().titleSwapDur; },
+            setS: function (v) { C().titleSwapStart = r2(v); },
+            setE: function (v) { C().titleSwapDur = r2(Math.max(0.01, v - C().titleSwapStart)); },
+            ease:    function () { return C().eases.titleSwap; },
+            setEase: function (e) { C().eases.titleSwap = e; },
+            inP: function (p) { return remap(p, C().titleSwapStart, C().titleSwapStart + C().titleSwapDur); } },
+        ],
 
-    onCopy: function () {
-      var Cv = window.C, E = Cv.eases;
-      var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
-      return 'window.C = {\n' +
-        '  entryStart: ' + Cv.entryStart + ',  entryEnd: ' + Cv.entryEnd + ',  entryDist: ' + Cv.entryDist + ',\n' +
-        '  msg1Start: ' + Cv.msg1Start + ',  msg1MoveDur: ' + Cv.msg1MoveDur + ',  msg1FadeDur: ' + Cv.msg1FadeDur + ',  msg1Float: ' + Cv.msg1Float + ',\n' +
-        '  msg2Start: ' + Cv.msg2Start + ',  msg2MoveDur: ' + Cv.msg2MoveDur + ',  msg2FadeDur: ' + Cv.msg2FadeDur + ',  msg2Float: ' + Cv.msg2Float + ',\n' +
-        '  s3Start: ' + Cv.s3Start + ',  s3Dur: ' + Cv.s3Dur + ',  wsStart: ' + Cv.wsStart + ',  wsDur: ' + Cv.wsDur + ',\n' +
-        '  titleSwapStart: ' + Cv.titleSwapStart + ',  titleSwapDur: ' + Cv.titleSwapDur + ',  scrollLength: ' + Cv.scrollLength + ',\n' +
-        '  eases: {\n' +
-        '    entry:     ' + fe(E.entry) + ',\n' +
-        '    msg1:      ' + fe(E.msg1) + ',\n' +
-        '    msg2:      ' + fe(E.msg2) + ',\n' +
-        '    s3:        ' + fe(E.s3) + ',\n' +
-        '    ws:        ' + fe(E.ws) + ',\n' +
-        '    titleSwap: ' + fe(E.titleSwap) + ',\n' +
-        '  },\n};\n' +
-        'window.LERP    = ' + window.LERP + ';\n' +
-        'window.LERP_WS = ' + window.LERP_WS + ';';
-    },
+        sliders: [
+          { label: 'LERP (slow)', get: function () { return window.LERP; },   set: function (v) { window.LERP    = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'LERP_WS',    get: function () { return window.LERP_WS; }, set: function (v) { window.LERP_WS = v; }, min: 0.01, max: 0.99, step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'Scroll ×',   get: function () { return C().scrollLength; }, set: function (v) { C().scrollLength = v; window.applyScrollLength(); }, min: 1.5, max: 6, step: 0.1, fmt: function (v) { return v.toFixed(1) + '×'; } },
+        ],
+
+        onCopy: function () {
+          var Cv = window.C, E = Cv.eases;
+          var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+          return 'window.C = {\n' +
+            '  entryStart: ' + Cv.entryStart + ',  entryEnd: ' + Cv.entryEnd + ',  entryDist: ' + Cv.entryDist + ',\n' +
+            '  msg1Start: ' + Cv.msg1Start + ',  msg1MoveDur: ' + Cv.msg1MoveDur + ',  msg1FadeDur: ' + Cv.msg1FadeDur + ',  msg1Float: ' + Cv.msg1Float + ',\n' +
+            '  msg2Start: ' + Cv.msg2Start + ',  msg2MoveDur: ' + Cv.msg2MoveDur + ',  msg2FadeDur: ' + Cv.msg2FadeDur + ',  msg2Float: ' + Cv.msg2Float + ',\n' +
+            '  s3Start: ' + Cv.s3Start + ',  s3Dur: ' + Cv.s3Dur + ',  wsStart: ' + Cv.wsStart + ',  wsDur: ' + Cv.wsDur + ',\n' +
+            '  titleSwapStart: ' + Cv.titleSwapStart + ',  titleSwapDur: ' + Cv.titleSwapDur + ',  scrollLength: ' + Cv.scrollLength + ',\n' +
+            '  eases: {\n' +
+            '    entry:     ' + fe(E.entry) + ',\n' +
+            '    msg1:      ' + fe(E.msg1) + ',\n' +
+            '    msg2:      ' + fe(E.msg2) + ',\n' +
+            '    s3:        ' + fe(E.s3) + ',\n' +
+            '    ws:        ' + fe(E.ws) + ',\n' +
+            '    titleSwap: ' + fe(E.titleSwap) + ',\n' +
+            '  },\n};\n' +
+            'window.LERP    = ' + window.LERP + ';\n' +
+            'window.LERP_WS = ' + window.LERP_WS + ';';
+        },
+      },
+
+      /* ══════════════════════════════════════════
+         BLOCK 2 — Vision (card overlap animation)
+      ══════════════════════════════════════════ */
+      {
+        label:  'Vision',
+        getP:   function () { return window._visionP || 0; },
+        pRange: [0, 1],
+
+        tracks: [
+          /* ── Agent slide ── */
+          { key: 'agent', label: 'Agent', color: '#FF7700',
+            getS: function () { return window.VC.agentS; },
+            getE: function () { return window.VC.agentE; },
+            setS: function (v) { window.VC.agentS = Math.round(v * 100) / 100; },
+            setE: function (v) { window.VC.agentE = Math.round(v * 100) / 100; },
+            ease:    function () { return window.VC.eases.agent; },
+            setEase: function (e) { window.VC.eases.agent = e; },
+            inP: function (p) { return window.visionEase('agent')(remap(p, window.VC.agentS, window.VC.agentE)); } },
+
+          /* ── Copilot scale ── */
+          { key: 'scale', label: 'Scale', color: '#59DBFF',
+            getS: function () { return window.VC.scaleS; },
+            getE: function () { return window.VC.scaleE; },
+            setS: function (v) { window.VC.scaleS = Math.round(v * 100) / 100; },
+            setE: function (v) { window.VC.scaleE = Math.round(v * 100) / 100; },
+            ease:    function () { return window.VC.eases.scale; },
+            setEase: function (e) { window.VC.eases.scale = e; },
+            inP: function (p) { return window.visionEase('scale')(remap(p, window.VC.scaleS, window.VC.scaleE)); } },
+        ],
+
+        sliders: [
+          { label: 'Scale end',    get: function () { return window.VC.scaleEnd; },    set: function (v) { window.VC.scaleEnd    = v; }, min: 0.5,  max: 1.0,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'Overlap %',    get: function () { return window.VC.overlapFrac; }, set: function (v) { window.VC.overlapFrac = v; window.visionMeasure && window.visionMeasure(); }, min: 0, max: 1.5, step: 0.05, fmt: function (v) { return Math.round(v * 100) + '%'; } },
+          { label: 'Peek px',      get: function () { return window.VC.peekPx; },      set: function (v) { window.VC.peekPx      = v; window.visionMeasure && window.visionMeasure(); }, min: 0,    max: 200,  step: 4,    fmt: function (v) { return Math.round(v) + 'px'; } },
+          { label: 'Scroll start', get: function () { return window.VC.scrollStart; }, set: function (v) { window.VC.scrollStart = v; }, min: 0,    max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'Scroll range', get: function () { return window.VC.scrollRange; }, set: function (v) { window.VC.scrollRange = v; }, min: 0.1,  max: 2.0,  step: 0.05, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'LERP',         get: function () { return window.VC.lerp; },        set: function (v) { window.VC.lerp        = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+        ],
+
+        onCopy: function () {
+          var V  = window.VC;
+          var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+          return 'window.VC = {\n' +
+            '  scrollStart:  ' + V.scrollStart  + ',\n' +
+            '  scrollRange:  ' + V.scrollRange  + ',\n' +
+            '  scaleEnd:     ' + V.scaleEnd     + ',\n' +
+            '  overlapFrac:  ' + V.overlapFrac  + ',\n' +
+            '  peekPx:       ' + V.peekPx       + ',\n' +
+            '  lerp:         ' + V.lerp         + ',\n' +
+            '  agentS: ' + V.agentS + ',  agentE: ' + V.agentE + ',\n' +
+            '  scaleS: ' + V.scaleS + ',  scaleE: ' + V.scaleE + ',\n' +
+            '  eases: {\n' +
+            '    agent: ' + fe(V.eases.agent) + ',\n' +
+            '    scale: ' + fe(V.eases.scale) + ',\n' +
+            '  },\n' +
+            '};';
+        },
+      },
+
+    ], /* end blocks */
   });
   document.getElementById('dbg').classList.add('collapsed');
 })();
 </script>
 
+<!-- ── Vision scroll animation ── -->
+<script>
+/* Tuneable config — live-editable via Debug Panel "Vision" block */
+window.VC = {
+  scrollStart:  0.35,  /* fraction of vh where animation begins (section top at N*vh) */
+  scrollRange:  0.85,  /* fraction of vh over which animation plays */
+  scaleEnd:     0.83,  /* copilot scale when agent fully overlaps (~1032/1232 from Figma) */
+  overlapFrac:  0.7,   /* how much of copilotH the agent overlaps at end (0–1) */
+  peekPx:       200,   /* px of agent visible at the bottom before animation starts */
+  lerp:         0.07,  /* LERP smoothing */
+  /* per-track timeline positions within 0..1 progress */
+  agentS: 0.08, agentE: 0.72,  /* agent slide window */
+  scaleS: 0.3,  scaleE: 0.88,  /* copilot shrink window */
+  /* per-track cubic-bezier [x1, y1, x2, y2] */
+  eases: {
+    agent: [0.4, 0, 0.2, 1],
+    scale: [0.4, 0, 0.2, 1],
+  },
+};
+(function () {
+  var copilot  = document.getElementById('visionCopilot');
+  var agent    = document.getElementById('visionAgent');
+  var section  = document.querySelector('.vision');
+  if (!copilot || !agent || !section) return;
+
+  var agentInitTY = 0;
+  var agentEndTY  = 0;
+  var currentP    = 0;
+  var _rafReady   = false;
+
+  /* Per-track bezier cache — reuses global makeBezier() from promo script */
+  var _vEaseCache = {};
+  window.visionEase = function (name) {
+    var e   = window.VC.eases[name];
+    var key = e[0] + ',' + e[1] + ',' + e[2] + ',' + e[3];
+    if (!_vEaseCache[name] || _vEaseCache[name].key !== key) {
+      _vEaseCache[name] = { key: key, fn: makeBezier(e[0], e[1], e[2], e[3]) };
+    }
+    return _vEaseCache[name].fn;
+  };
+
+  function measure() {
+    var copilotH = copilot.offsetHeight;
+    var agentH   = agent.offsetHeight;
+    agentInitTY  = agentH - window.VC.peekPx;
+    agentEndTY   = -(copilotH * window.VC.overlapFrac + 24); /* 24px = --space = 1.5rem */
+  }
+  /* Exposed so debug panel sliders can trigger remeasure when overlapFrac / peekPx change */
+  window.visionMeasure = measure;
+
+  function getProgress() {
+    var rect  = section.getBoundingClientRect();
+    var vh    = window.innerHeight;
+    var start = vh * window.VC.scrollStart;
+    var range = vh * window.VC.scrollRange;
+    return Math.max(0, Math.min(1, (start - rect.top) / range));
+  }
+
+  function tick(p) {
+    var tAgent = window.visionEase('agent')(remap(p, window.VC.agentS, window.VC.agentE));
+    var tScale = window.visionEase('scale')(remap(p, window.VC.scaleS, window.VC.scaleE));
+    var ty     = agentInitTY + (agentEndTY - agentInitTY) * tAgent;
+    var scale  = 1 - (1 - window.VC.scaleEnd) * tScale;
+    agent.style.transform   = 'translateY(' + ty + 'px)';
+    copilot.style.transform = 'scale(' + scale + ')';
+  }
+
+  measure();
+
+  (function loop() {
+    var target = getProgress();
+    if (!_rafReady) { currentP = target; _rafReady = true; }
+    currentP += (target - currentP) * window.VC.lerp;
+    window._visionP = currentP;
+    tick(currentP);
+    requestAnimationFrame(loop);
+  })();
+
+  window.addEventListener('resize', measure);
+})();
+</script>
 
 </body>
 </html>

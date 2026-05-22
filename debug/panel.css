@@ -129,6 +129,28 @@
 .lerp-range { flex: 1; height: 3px; cursor: pointer; accent-color: #04DE00; }
 .lerp-val  { color: #04DE00; font-size: 10px; width: 2.5rem; text-align: right; }
 
+/* ── Block tabs ── */
+#dbg-tabs {
+  display: flex; gap: 0.25rem; align-items: center;
+}
+.dbg-tab {
+  padding: 0.15rem 0.5rem;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  border-radius: 0.25rem;
+  color: #555;
+  font: 10px monospace;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.dbg-tab:hover { color: #aaa; border-color: #444; }
+.dbg-tab.active {
+  background: #04DE00;
+  border-color: #04DE00;
+  color: #000;
+  font-weight: bold;
+}
+
 /* ── Copy button ── */
 #dbg-copy {
   margin-top: 0.5rem; width: 100%; padding: 0.3rem;

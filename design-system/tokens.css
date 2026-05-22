@@ -93,11 +93,14 @@
   --text-btn-lh:   1.0;
   --text-btn-ls:  -0.02em;
 
-  /* ---- Spacing (margins) ---- */
-  --space-xs: 0.5rem;   /*  8px */
-  --space-sm: 1rem;     /* 16px */
-  --space-md: 2rem;     /* 32px */
-  --space-lg: 3rem;     /* 48px */
+  /* ---- Spacing — mirrors Figma "Spacing/*" variables ---- */
+  --space-xxs: 0.25rem;  /*  4px — Spacing XXS */
+  --space-xs:  0.5rem;   /*  8px — Spacing XS  */
+  --space-sm:  1rem;     /* 16px — Spacing SM  */
+  --space:     1.5rem;   /* 24px — Spacing     */
+  --space-md:  2rem;     /* 32px — Spacing MD  */
+  --space-lg:  3rem;     /* 48px — Spacing L   */
+  --space-xl:  5rem;     /* 80px — Spacing XL  */
 
   /* ---- Gaps (column / flex gaps) ---- */
   --gap-sm:   0.5rem;   /*  8px */
@@ -120,6 +123,7 @@
   --radius-md:   0.75rem;  /* 12px */
   --radius-lg:   1rem;     /* 16px */
   --radius-xl:   1.5rem;   /* 24px */
+  --radius-2xl:  3.75rem;  /* 60px */
   --radius-pill: 9999px;
 
   /* ---- Grid ---- */
