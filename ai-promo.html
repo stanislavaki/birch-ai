@@ -174,7 +174,6 @@
     background-color: var(--color-accent-green);
     border-radius: var(--radius-lg);
     padding: 2rem;
-    aspect-ratio: 1232 / 656;
     overflow: hidden;
     transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -182,7 +181,6 @@
   .acc__layout {
     display: flex;
     align-items: stretch;
-    height: 100%;
     gap: var(--gap-main);
   }
 
@@ -230,8 +228,7 @@
 
   /* Wrapper owns the sizing — enables container queries for the card */
   .chat-card-wrap {
-    height: 100%;
-    max-height: min(80vh, 45rem); /* 45rem = 720px */
+    height: min(80vh, 45rem); /* 45rem = 720px */
     width: auto;
     aspect-ratio: 400 / 600;
     container-type: inline-size;
@@ -768,8 +765,8 @@
 
   /* ── Size acc__box: ensure all open-card states fit without clipping ──
      For each card scenario (card i open, others closed), measure the natural
-     cards-column height. Set min-height on the box so aspect-ratio stays in
-     control on large screens but the box grows on small ones.               */
+     cards-column height. Set min-height (desktop) or height (tablet) on the
+     box to prevent jumps when switching cards.                               */
   var accCards = box.querySelector('.acc__cards');
   var accLeft  = box.querySelector('.acc__left');
   var eyebrow  = box.querySelector('.acc__eyebrow');
@@ -817,21 +814,14 @@
                    + parseFloat(getComputedStyle(eyebrow).marginBottom);
     var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
 
-    /* Chat card natural height: right col width × (600/400) aspect ratio */
-    var accRight   = box.querySelector('.acc__right');
-    var chatMinH   = boxPadV + accRight.offsetWidth * (600 / 400);
+    /* Chat card rendered height (CSS clamps it to min(80vh, 45rem)) */
+    var chatWrap   = box.querySelector('.chat-card-wrap');
+    var chatMinH   = boxPadV + chatWrap.offsetHeight;
 
     var minH = Math.max(leftColMinH, chatMinH);
 
-    /* On tablet (≤991px): fix height so switching cards doesn't cause jumps.
-       On desktop: keep as min-height so aspect-ratio can control proportions. */
-    if (window.innerWidth <= 991) {
-      box.style.minHeight = '';
-      box.style.height    = minH + 'px';
-    } else {
-      box.style.height    = '';
-      box.style.minHeight = minH + 'px';
-    }
+    /* All breakpoints: fix height so switching cards doesn't cause jumps */
+    box.style.height = minH + 'px';
   }
 
   sizeAccBox();
