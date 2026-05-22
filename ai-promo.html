@@ -6,6 +6,7 @@
 <title>Bïrch — AI Rules Promo</title>
 <link rel="stylesheet" href="design-system/tokens.css" />
 <link rel="stylesheet" href="design-system/components/card-accordion.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
 <link rel="stylesheet" href="debug/panel.css" />
 <style>
   html, body { margin: 0; padding: 0; }
@@ -15,6 +16,226 @@
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* ─────────────────────────────────────────
+     HERO SECTION
+  ───────────────────────────────────────── */
+
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) var(--pad-horizontal);
+    gap: var(--space-md);
+    background: var(--color-bg);
+  }
+
+  /* Logo: "Bïrch [icon] AI  closed beta" */
+  .hero__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+  }
+
+  .hero__logo-name {
+    font-family: var(--font);
+    font-size: var(--text-h3-size);
+    font-weight: 600;
+    line-height: var(--text-h3-lh);
+    letter-spacing: var(--text-h3-ls);
+    color: var(--color-text);
+  }
+
+  .hero__logo-icon {
+    height: 2.8125rem; /* 45px */
+    width: auto;
+  }
+
+  .hero__beta {
+    color: var(--color-text-grey);
+    align-self: flex-start;
+    margin-top: 0.125rem;
+  }
+
+  /* Main: wraps h1 + subtitle — used for mobile vertical centering */
+  .hero__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  /* H1 composition */
+  .hero__h1 {
+    /* --ps = pill size: scales from 2rem at ~490px up to 3.25rem (52px) at 1280px */
+    --ps: clamp(2rem, 4.0625vw, 3.25rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-md); /* 24px ≈ Figma 23px */
+  }
+
+  .hero__row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm); /* 8px ≈ Figma 10px */
+  }
+
+  /* Word pills */
+  .hero__pill {
+    display: block;
+    /* Optical compensation: TT Commons cap-height sits high → extra bottom padding balances visually */
+    padding: 0.1875rem 1.5rem 0.5rem; /* pt=3px  px=24px  pb=8px */
+    font-family: var(--font);
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--color-text-inverted); /* dark text by default */
+  }
+  .hero__pill--sq   { border-radius: var(--radius-lg); }
+  .hero__pill--pill { border-radius: var(--radius-pill); }
+
+  .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+  .hero__pill--blue       { background: var(--color-accent-blue);   color: var(--color-text); }
+  .hero__pill--green      { background: var(--color-accent-green);  }
+  .hero__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+  /* ── Decorative columns (Row 1) ──
+     Two columns, bottom-aligned, that swap heights on a gentle loop.
+     Sized in em relative to --ps so they scale proportionally with the pills. */
+  .hero__deco-cols {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-size: var(--ps);   /* sets em reference for children */
+    width:  1.596em;        /* 83 / 52 */
+    height: 1.462em;        /* 76 / 52 */
+  }
+  .hero__col {
+    position: absolute;
+    bottom: 0;
+    width:         0.769em;  /* 40 / 52 */
+    border-radius: 0.199em;  /* 10.34 / 52 */
+  }
+  .hero__col--purple {
+    left:       0;
+    height:     78.9%;   /* 60/76 — shorter in state A */
+    background: var(--color-accent-purple);
+    animation:  hero-col-purple 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+  }
+  .hero__col--blue {
+    left:       0.827em;  /* 43 / 52 */
+    height:     100%;     /* full height in state A */
+    background: var(--color-accent-blue);
+    animation:  hero-col-blue 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.15s;
+  }
+  @keyframes hero-col-purple {
+    from { height: 78.9%; }
+    to   { height: 100%;  }
+  }
+  @keyframes hero-col-blue {
+    from { height: 100%;  }
+    to   { height: 78.9%; }
+  }
+
+  /* ── Decorative bars (Row 2) ──
+     Three horizontal capsules of decreasing width, top to bottom (state A).
+     Light-blue and red swap widths on loop; pink stays medium. */
+  .hero__deco-bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    font-size: var(--ps);
+    width:  1.654em;  /* 86 / 52 */
+    height: 1.462em;  /* 76 / 52 */
+  }
+  .hero__bar {
+    height: 0.423em;          /* ≈ 22px — each bar fills roughly ⅓ of height */
+    border-radius: var(--radius-pill);
+  }
+  .hero__bar--lb {
+    width:      100%;
+    background: var(--color-accent-light-blue);
+    animation:  hero-bar-lb 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+  }
+  .hero__bar--pink {
+    width:      67.4%; /* 58 / 86 — stays medium */
+    background: var(--color-accent-pink);
+  }
+  .hero__bar--red {
+    width:      34.9%; /* 30 / 86 — narrowest in state A */
+    background: var(--color-accent-red);
+    animation:  hero-bar-red 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.15s;
+  }
+  @keyframes hero-bar-lb {
+    from { width: 100%;  }
+    to   { width: 34.9%; }
+  }
+  @keyframes hero-bar-red {
+    from { width: 34.9%; }
+    to   { width: 100%;  }
+  }
+
+  .hero__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+    max-width: 40rem; /* prevents very long lines on wide screens */
+  }
+
+  /* CTA — 4 of 12 cols ≈ 400px at 1280px */
+  .hero__btn {
+    width: clamp(17.5rem, 31.25vw, 25rem);
+  }
+
+  /* ─────────────────────────────────────────
+     HERO — MOBILE ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero {
+      height: 100svh;
+      min-height: unset;
+      padding-top: 5rem;
+      padding-bottom: var(--space-md);
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    /* h1 + subtitle centered in the space between logo and button */
+    .hero__main {
+      flex: 1;
+      justify-content: center;
+      gap: var(--space-sm);
+    }
+
+    /* Staircase: row 1 left-aligned, row 2 right-aligned */
+    .hero__h1 {
+      align-items: flex-start;
+      gap: var(--gap-sm);
+    }
+    .hero__row--1 {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+    .hero__row--2 {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-self: flex-end;
+    }
+
+    .hero__btn {
+      width: 100%;
+      min-height: 3.75rem;   /* 60px on mobile */
+      border-radius: var(--radius-md); /* 12px on mobile per Figma */
+    }
   }
 
   /* ── Test blocks ── */
@@ -514,16 +735,18 @@
   /* Row 2 starts visually offset — achieved via JS translateX on init */
 
   .prompts__chip {
-    display: inline-flex;
-    align-items: center;
+    /* display: block so it's a block-level flex item — text nodes inside are in normal
+       inline formatting context, which preserves spaces around <em> keywords.
+       display: inline-flex strips boundary whitespace from anonymous flex items. */
+    display: block;
     height: 3.5rem;              /* 56px */
-    padding-inline: var(--space-md); /* 32px — nearest token to 33/22px */
+    line-height: 3.5rem;         /* vertically centers single-line text */
+    padding-inline: var(--space-md); /* 32px */
     background: var(--color-bg-grey);
     border-radius: var(--radius-xl);
     font-family: var(--font);
     font-size: var(--text-h6-size);
     font-weight: 600;
-    line-height: var(--text-h6-lh);
     color: var(--color-text);
     white-space: nowrap;
     font-style: normal;
@@ -595,52 +818,61 @@
 </head>
 <body>
 
-<div class="test-block t-para-lg">Block before — 1200px</div>
+<!-- ─────────────────────────────────────────
+     HERO SECTION
+───────────────────────────────────────── -->
+<section class="hero">
 
-<section class="promo">
-  <div class="promo__sticky">
-
-    <div class="promo__sub-swap" id="subSwap">
-      <div class="promo__sub-text t-h2" id="subText0">Describe in the chat</div>
-      <div class="promo__sub-text promo__sub-text--1 t-h2" id="subText1">The rule draft is ready, <span style="white-space:nowrap">right where you work</span></div>
-    </div>
-
-    <div class="promo__visual">
-
-      <div class="promo__chat-stack" id="chatStack">
-        <!-- 01_0 — empty chat, always visible, sets container height -->
-        <img
-          src="images/chat-empty.png"
-          class="promo__chat-base"
-          alt="Empty chat window"
-        />
-        <!-- 01_1 — user message: fades in quickly -->
-        <img
-          src="images/chat-msg.png"
-          class="promo__chat-overlay"
-          id="chatMsg"
-          alt="User message in chat"
-        />
-        <!-- 02 — AI response: slides up from viewport bottom -->
-        <img
-          src="images/chat-response.png"
-          class="promo__chat-response"
-          id="chatResponse"
-          alt="Birch AI responds with the drafted rule"
-        />
-      </div>
-
-      <div class="promo__workspace" id="workspace">
-        <img
-          src="images/workspace.png"
-          alt="Rule ready inside Birch workspace"
-        />
-      </div>
-
-    </div>
-
+  <!-- Logo: Bïrch [cursor] AI  closed beta -->
+  <div class="hero__logo">
+    <span class="hero__logo-name">Bïrch</span>
+    <img src="images/icon ai.svg" class="hero__logo-icon" alt="" />
+    <span class="hero__logo-name">AI</span>
+    <span class="hero__beta t-body">closed beta</span>
   </div>
+
+  <!-- H1 + subtitle — centered on mobile via flex:1 wrapper -->
+  <div class="hero__main">
+
+    <!-- H1 composition: two rows of word-pills with decorative elements -->
+    <div class="hero__h1">
+
+      <!-- Row 1: Built [columns] with a  performance -->
+      <div class="hero__row hero__row--1">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <!-- Decorative columns: purple + blue, heights swap on loop -->
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+
+      <!-- Row 2: marketing  [bars]  mindset -->
+      <div class="hero__row hero__row--2">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+        <!-- Decorative bars: lb / pink / red widths swap on loop -->
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
+
+    </div><!-- /.hero__h1 -->
+
+    <p class="hero__subtitle t-para-lg">Built on your data. Sharper decisions across every channel – analyze, strategize, automate.</p>
+
+  </div><!-- /.hero__main -->
+
+  <!-- CTA -->
+  <a href="#" class="btn btn-default btn-s hero__btn">Apply now</a>
+
 </section>
+
+<div class="test-block t-para-lg">Block before — 1200px</div>
 
 <section class="acc">
   <div class="container">
@@ -1087,8 +1319,6 @@
 })();
 </script>
 
-<div class="test-block t-para-lg">Block after — 1200px</div>
-
 <!-- ─────────────────────────────────────────
      PROMPTS SECTION
 ───────────────────────────────────────── -->
@@ -1128,10 +1358,49 @@
       </div>
     </div>
 
+    <!-- Row 3 — scrolls left (staggered) -->
+    <div class="prompts__track prompts__track--3">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Pause ad sets with <em class="prompts__kw prompts__kw--red">CPA</em> above $50 for the last 3 days</span>
+        <span class="prompts__chip">Create a budget protection rule when <em class="prompts__kw prompts__kw--pink">Spend</em> exceeds the daily cap</span>
+        <span class="prompts__chip">Scale budgets for ad sets with <em class="prompts__kw prompts__kw--green">ROAS</em> above 4x this week</span>
+        <span class="prompts__chip">Which campaigns have the lowest <em class="prompts__kw prompts__kw--green">CTR</em> on Google Ads last month?</span>
+        <span class="prompts__chip">Pause ad sets with <em class="prompts__kw prompts__kw--red">CPA</em> above $50 for the last 3 days</span>
+        <span class="prompts__chip">Create a budget protection rule when <em class="prompts__kw prompts__kw--pink">Spend</em> exceeds the daily cap</span>
+        <span class="prompts__chip">Scale budgets for ad sets with <em class="prompts__kw prompts__kw--green">ROAS</em> above 4x this week</span>
+        <span class="prompts__chip">Which campaigns have the lowest <em class="prompts__kw prompts__kw--green">CTR</em> on Google Ads last month?</span>
+      </div>
+    </div>
+
   </div>
 
   <div class="prompts__cta">
     <a href="#" class="btn btn-stroke btn-s">See our prompt library</a>
+  </div>
+</section>
+
+<section class="promo">
+  <div class="promo__sticky">
+
+    <div class="promo__sub-swap" id="subSwap">
+      <div class="promo__sub-text t-h2" id="subText0">Describe in the chat</div>
+      <div class="promo__sub-text promo__sub-text--1 t-h2" id="subText1">The rule draft is ready, <span style="white-space:nowrap">right where you work</span></div>
+    </div>
+
+    <div class="promo__visual">
+
+      <div class="promo__chat-stack" id="chatStack">
+        <img src="images/chat-empty.png" class="promo__chat-base" alt="Empty chat window" />
+        <img src="images/chat-msg.png" class="promo__chat-overlay" id="chatMsg" alt="User message in chat" />
+        <img src="images/chat-response.png" class="promo__chat-response" id="chatResponse" alt="Birch AI responds with the drafted rule" />
+      </div>
+
+      <div class="promo__workspace" id="workspace">
+        <img src="images/workspace.png" alt="Rule ready inside Birch workspace" />
+      </div>
+
+    </div>
+
   </div>
 </section>
 
@@ -1147,8 +1416,6 @@
   const subText1 = document.getElementById('subText1');
   const remPx    = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
-  const accSection = document.querySelector('.acc');
-
   /* Set container height = tallest of the two texts so mask never clips */
   function sizeSwapContainer() {
     subText1.classList.add('promo__sub-text--measuring');
@@ -1157,21 +1424,7 @@
   }
   sizeSwapContainer();
 
-  /* Position acc so its top is exactly 6rem below workspace bottom edge,
-     measured at the moment workspace bottom reaches the viewport bottom.
-     Formula: acc.marginTop = visual.offsetTop + workspace.offsetHeight + 6rem - 100vh */
-  function positionAcc() {
-    const wsBottom = visual.offsetTop + workspace.offsetHeight;
-    accSection.style.marginTop = (wsBottom + 6 * remPx - window.innerHeight) + 'px';
-  }
-
-  const wsImg = workspace.querySelector('img');
-  if (wsImg.complete) { positionAcc(); } else { wsImg.addEventListener('load', positionAcc); }
-
-  window.addEventListener('resize', function () {
-    sizeSwapContainer();
-    positionAcc();
-  });
+  window.addEventListener('resize', sizeSwapContainer);
 
   /* ── Scroll progress ── */
   function scrollProgress() {
@@ -1318,57 +1571,61 @@
   })();
 </script>
 
+<div class="test-block t-para-lg">Block after — 1200px</div>
+
 <!-- ─── PROMPTS MARQUEE ─── -->
 <script>
 (function () {
-  var BASE_SPEED = 0.4;        /* px per frame at rest */
-  var SCROLL_BOOST = 0.08;     /* extra speed per px/frame of scroll velocity */
-  var ROW2_OFFSET = 0.4;       /* row 2 starts 40% of belt width to the right */
+  /* Each .prompts__belt has 8 chips = 4 unique + 4 duplicate (see HTML).
+     halfWidth = half the belt = width of one full non-repeating set.
+     Rows alternate direction: LEFT / RIGHT / LEFT
+     Wrap logic:
+       LEFT  → pos decreasing; when pos <= -halfWidth: pos += halfWidth
+       RIGHT → pos increasing; when pos >= 0:          pos -= halfWidth  */
+
+  var BASE_SPEED   = 0.25;  /* px per frame at rest */
+  var SCROLL_BOOST = 0.3;   /* extra speed per px of scroll velocity */
+
+  /* Direction per row: -1 = left, +1 = right */
+  var DIRS    = [-1, 1, -1];
+  /* Starting offset as fraction of halfWidth (visual stagger so rows show different chips) */
+  var OFFSETS = [0, 0.6, 0.35];
 
   var tracks = Array.from(document.querySelectorAll('.prompts__track'));
   var belts  = tracks.map(function (t) { return t.querySelector('.prompts__belt'); });
 
-  /* Clone belts for seamless loop */
-  belts.forEach(function (belt) {
-    var clone = belt.cloneNode(true);
-    belt.parentNode.appendChild(clone);
-  });
+  /* Measure after layout */
+  var halfWidths = belts.map(function (b) { return b.offsetWidth / 2; });
 
   /* Init positions */
-  var positions = belts.map(function (belt, i) {
-    /* Row 2 starts offset by ROW2_OFFSET of belt width */
-    return i === 1 ? belt.offsetWidth * ROW2_OFFSET : 0;
+  var positions = belts.map(function (_, i) {
+    /* LEFT rows start at negative offset; RIGHT row starts at -(hw - offset) so it
+       scrolls rightward toward 0 and wraps correctly */
+    return DIRS[i] === -1
+      ? -(halfWidths[i] * OFFSETS[i])   /* left row: 0 or partway into the set */
+      : -(halfWidths[i] * OFFSETS[i]);  /* right row: same formula, wraps at 0 */
   });
 
-  /* Scroll velocity tracking */
-  var lastScrollY  = window.scrollY;
-  var scrollVel    = 0;
+  var lastScrollY = window.scrollY;
+  var scrollVel   = 0;
 
-  /* rAF loop */
-  var _ready = false;
   (function loop() {
-    var sy  = window.scrollY;
-    scrollVel = sy - lastScrollY;
+    var sy   = window.scrollY;
+    scrollVel   = sy - lastScrollY;
     lastScrollY = sy;
 
     var boost = Math.abs(scrollVel) * SCROLL_BOOST;
     var speed = BASE_SPEED + boost;
 
     belts.forEach(function (belt, i) {
-      var w = belt.offsetWidth;
-      /* Row 1: left (negative), Row 2: right (positive) */
-      var dir = i === 0 ? -1 : 1;
-      positions[i] += dir * speed;
+      var hw  = halfWidths[i];
+      positions[i] += DIRS[i] * speed;
 
-      /* Wrap: when scrolled a full belt width, reset to 0 */
-      if (positions[i] <= -w) positions[i] += w;
-      if (positions[i] >= w)  positions[i] -= w;
+      /* Seamless wrap */
+      if (DIRS[i] === -1 && positions[i] <= -hw) positions[i] += hw;  /* left */
+      if (DIRS[i] ===  1 && positions[i] >= 0)   positions[i] -= hw;  /* right */
 
-      /* Apply to both original + clone via parent */
-      var children = Array.from(belt.parentNode.children);
-      children.forEach(function (child) {
-        child.style.transform = 'translateX(' + positions[i] + 'px)';
-      });
+      belt.style.transform = 'translateX(' + positions[i] + 'px)';
     });
 
     requestAnimationFrame(loop);
