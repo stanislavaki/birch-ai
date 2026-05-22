@@ -31,6 +31,7 @@
     padding: var(--space-lg) var(--pad-horizontal);
     gap: var(--space-md);
     background: var(--color-bg);
+    overflow-x: clip; /* prevent staircase overflow from expanding page width */
   }
 
   /* Logo: "Bïrch [icon] AI  closed beta" */
@@ -66,7 +67,8 @@
     left: calc(100% + 0.375rem);
     top: 0;
     color: var(--color-text-grey);
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.2;
   }
 
   /* Main: wraps h1 + subtitle — used for mobile vertical centering */
@@ -99,7 +101,7 @@
   .hero__pill {
     display: block;
     /* Optical compensation: TT Commons cap-height sits high → extra bottom padding balances visually */
-    padding: 0.1875rem 1.5rem 0.5rem; /* pt=3px  px=24px  pb=8px */
+    padding: 0.058em 0.462em 0.154em; /* pt=3px  px=24px  pb=8px at 52px — scales with --ps */
     font-family: var(--font);
     font-size: var(--ps);
     font-weight: 600;
@@ -108,7 +110,7 @@
     white-space: nowrap;
     color: var(--color-text-inverted); /* dark text by default */
   }
-  .hero__pill--sq   { border-radius: var(--radius-lg); }
+  .hero__pill--sq   { border-radius: 0.308em; } /* 16px / 52px — scales with --ps */
   .hero__pill--pill { border-radius: var(--radius-pill); }
 
   .hero__pill--light-blue { background: var(--color-accent-light-blue); }
@@ -219,6 +221,10 @@
       gap: 0;
     }
 
+    /* Smaller logo on mobile */
+    .hero__logo-name { font-size: 1.25rem; }  /* 20px vs 32px desktop */
+    .hero__logo-icon { height: 1.875rem; }    /* 30px vs 45px desktop */
+
     /* h1 + subtitle centered in the space between logo and button */
     .hero__main {
       flex: 1;
@@ -234,9 +240,8 @@
       align-items: flex-start;
       gap: 0.625rem;          /* ~10px — matches Figma step spacing */
       width: 100%;
-      max-width: 30rem;       /* 480px — composition scales, never reflows */
-      /* Mobile pill size: 29.365px at 320px → scales with vw, caps at 2.75rem (44px) at 480px */
-      --ps: clamp(1.625rem, 9.18vw, 2.75rem);
+      /* --ps scales freely with viewport — steps are %-based so staircase is self-similar */
+      --ps: clamp(1.5rem, 9.18vw, 5rem);
     }
     .hero__step {
       display: flex;
@@ -245,11 +250,15 @@
       flex-shrink: 0;
     }
     /* Figma positions as % of 320px container: staircase offsets */
-    .hero__step--a { margin-left: 19.375%; }   /* 62px / 320 */
-    .hero__step--b { margin-left: 13.125%; }   /* 42px / 320 */
+    .hero__step--a { margin-left: 0; }
+    .hero__step--b { margin-left: 8.125%; }
     .hero__step--c { align-self: center;   }
     .hero__step--d { margin-left: 42.1875%; }  /* 135px / 320 */
     .hero__step--e { align-self: flex-end; }
+
+    .hero__h1--mb .hero__pill--green.hero__pill--sq {
+      margin-right: 4%;
+    }
 
     .hero__btn {
       width: 100%;
@@ -850,7 +859,7 @@
       <span class="hero__logo-name">Bïrch</span>
       <img src="images/icon ai.svg" class="hero__logo-icon" alt="" />
       <span class="hero__logo-name">AI</span>
-      <span class="hero__beta t-body">closed beta</span>
+      <span class="hero__beta t-body">closed<br>beta</span>
     </div>
   </div>
 
