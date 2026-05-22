@@ -462,6 +462,85 @@
   }
 
   /* ─────────────────────────────────────────
+     PROMPTS SECTION
+  ───────────────────────────────────────── */
+
+  .prompts {
+    padding: var(--space-lg) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    overflow: hidden;
+  }
+
+  .prompts__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-main);
+    text-align: center;
+    padding-inline: var(--pad-horizontal);
+  }
+
+  .prompts__title {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .prompts__subtitle {
+    color: var(--color-text-grey);
+    margin: 0;
+  }
+
+  /* Marquee rows */
+  .prompts__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+    width: 100%;
+  }
+
+  .prompts__track {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .prompts__belt {
+    display: flex;
+    gap: var(--gap-main);
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* Row 2 starts visually offset — achieved via JS translateX on init */
+
+  .prompts__chip {
+    display: inline-flex;
+    align-items: center;
+    height: 3.5rem;              /* 56px */
+    padding-inline: var(--space-md); /* 32px — nearest token to 33/22px */
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-xl);
+    font-family: var(--font);
+    font-size: var(--text-h6-size);
+    font-weight: 600;
+    line-height: var(--text-h6-lh);
+    color: var(--color-text);
+    white-space: nowrap;
+    font-style: normal;
+  }
+
+  .prompts__kw { font-style: normal; }
+  .prompts__kw--green { color: var(--color-accent-green); }
+  .prompts__kw--pink  { color: var(--color-accent-pink);  }
+  .prompts__kw--red   { color: var(--color-accent-red);   }
+
+  .prompts__cta {
+    padding-inline: var(--pad-horizontal);
+  }
+
+  /* ─────────────────────────────────────────
      TABLET  768–991px
   ───────────────────────────────────────── */
   @media (max-width: 991px) {
@@ -1019,6 +1098,52 @@
 
 <div class="test-block t-para-lg">Block after — 1200px</div>
 
+<!-- ─────────────────────────────────────────
+     PROMPTS SECTION
+───────────────────────────────────────── -->
+<section class="prompts">
+  <div class="prompts__head">
+    <h2 class="t-h2 prompts__title">Start fast with ready-to-use prompts</h2>
+    <p class="t-para-lg prompts__subtitle">Curated examples for every use case, from audits to optimization</p>
+  </div>
+
+  <div class="prompts__rows" aria-hidden="true">
+
+    <!-- Row 1 — scrolls left -->
+    <div class="prompts__track prompts__track--1">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Show Impressions and <em class="prompts__kw prompts__kw--green">Frequency</em> for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare Reach in Q1 2026 to Q1 2025 on Meta ad account</span>
+        <span class="prompts__chip">Show <em class="prompts__kw prompts__kw--green">Impressions</em> and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare Reach in Q1 2026 to Q1 2025 on Meta ad account</span>
+      </div>
+    </div>
+
+    <!-- Row 2 — scrolls right -->
+    <div class="prompts__track prompts__track--2">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Show Impressions and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--red">Reach</em> in Q1 2026 to Q1 2025 on Meta ad account</span>
+        <span class="prompts__chip">Show Impressions and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--red">Reach</em> in Q1 2026 to Q1 2025 on Meta ad account</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="prompts__cta">
+    <a href="#" class="btn btn-stroke btn-s">See our prompt library</a>
+  </div>
+</section>
+
 <script>
   const section      = document.querySelector('.promo');
   const visual       = document.querySelector('.promo__visual');
@@ -1200,6 +1325,64 @@
     tick(currentP, currentPws);
     requestAnimationFrame(loop);
   })();
+</script>
+
+<!-- ─── PROMPTS MARQUEE ─── -->
+<script>
+(function () {
+  var BASE_SPEED = 0.4;        /* px per frame at rest */
+  var SCROLL_BOOST = 0.08;     /* extra speed per px/frame of scroll velocity */
+  var ROW2_OFFSET = 0.4;       /* row 2 starts 40% of belt width to the right */
+
+  var tracks = Array.from(document.querySelectorAll('.prompts__track'));
+  var belts  = tracks.map(function (t) { return t.querySelector('.prompts__belt'); });
+
+  /* Clone belts for seamless loop */
+  belts.forEach(function (belt) {
+    var clone = belt.cloneNode(true);
+    belt.parentNode.appendChild(clone);
+  });
+
+  /* Init positions */
+  var positions = belts.map(function (belt, i) {
+    /* Row 2 starts offset by ROW2_OFFSET of belt width */
+    return i === 1 ? belt.offsetWidth * ROW2_OFFSET : 0;
+  });
+
+  /* Scroll velocity tracking */
+  var lastScrollY  = window.scrollY;
+  var scrollVel    = 0;
+
+  /* rAF loop */
+  var _ready = false;
+  (function loop() {
+    var sy  = window.scrollY;
+    scrollVel = sy - lastScrollY;
+    lastScrollY = sy;
+
+    var boost = Math.abs(scrollVel) * SCROLL_BOOST;
+    var speed = BASE_SPEED + boost;
+
+    belts.forEach(function (belt, i) {
+      var w = belt.offsetWidth;
+      /* Row 1: left (negative), Row 2: right (positive) */
+      var dir = i === 0 ? -1 : 1;
+      positions[i] += dir * speed;
+
+      /* Wrap: when scrolled a full belt width, reset to 0 */
+      if (positions[i] <= -w) positions[i] += w;
+      if (positions[i] >= w)  positions[i] -= w;
+
+      /* Apply to both original + clone via parent */
+      var children = Array.from(belt.parentNode.children);
+      children.forEach(function (child) {
+        child.style.transform = 'translateX(' + positions[i] + 'px)';
+      });
+    });
+
+    requestAnimationFrame(loop);
+  })();
+})();
 </script>
 
 <!-- ╔═══════════════════════════════════════╗
