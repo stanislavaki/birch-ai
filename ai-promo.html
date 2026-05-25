@@ -5,14 +5,414 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bïrch — AI Rules Promo</title>
 <link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/components/card-accordion.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
+<link rel="stylesheet" href="debug/panel.css" />
 <style>
   html, body { margin: 0; padding: 0; }
   body {
     font-family: var(--font);
-    background: #161616;
+    background: var(--color-bg);
     color: var(--color-text);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* ─────────────────────────────────────────
+     HERO SECTION
+  ───────────────────────────────────────── */
+
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) var(--pad-horizontal);
+    gap: var(--space-md);
+    background: var(--color-bg);
+    overflow-x: clip; /* prevent staircase overflow from expanding page width */
+  }
+
+  /* Logo: "Bïrch [icon] AI  closed beta" */
+  .hero__logo {
+    /* semantic wrapper — .hero's align-items:center centers the wordmark */
+  }
+
+  /* Inner wordmark: Bïrch + icon + AI, inline-flex so it's only as wide as content */
+  .hero__logo-wordmark {
+    position: relative;      /* anchor for .hero__beta absolute positioning */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;            /* 4px — tight gap between text and icon */
+  }
+
+  .hero__logo-name {
+    font-family: var(--font);
+    font-size: var(--text-h3-size);
+    font-weight: 600;
+    line-height: var(--text-h3-lh);
+    letter-spacing: var(--text-h3-ls);
+    color: var(--color-text);
+  }
+
+  .hero__logo-icon {
+    height: 2.8125rem; /* 45px */
+    width: auto;
+  }
+
+  /* "closed beta" — absolute badge to the right of the wordmark, doesn't affect its width */
+  .hero__beta {
+    position: absolute;
+    left: calc(100% + 0.375rem);
+    top: 0;
+    color: var(--color-text-grey);
+    white-space: nowrap;
+    line-height: 1;
+    padding-right: 0.5rem;
+  }
+
+
+  /* Main: wraps h1 + subtitle — used for mobile vertical centering */
+  .hero__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  /* H1 composition */
+  .hero__h1 {
+    /* --ps = pill size: scales from 2rem at ~490px up to 3.25rem (52px) at 1280px */
+    --ps: clamp(2rem, 5vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-sm);
+  }
+  /* Mobile staircase variant — hidden on desktop */
+  .hero__h1--mb { display: none; }
+
+  .hero__row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm); /* 8px ≈ Figma 10px */
+  }
+
+  /* Word pills */
+  .hero__pill {
+    display: block;
+    /* Optical compensation: TT Commons cap-height sits high → extra bottom padding balances visually */
+    padding: 0.058em 0.462em 0.154em; /* pt=3px  px=24px  pb=8px at 52px — scales with --ps */
+    font-family: var(--font);
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--color-text-inverted); /* dark text by default */
+  }
+  .hero__pill--sq   { border-radius: 0.308em; } /* 16px / 52px — scales with --ps */
+  .hero__pill--pill { border-radius: var(--radius-pill); }
+
+  .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+  .hero__pill--blue       { background: var(--color-accent-blue);   color: var(--color-text); }
+  .hero__pill--green      { background: var(--color-accent-green);  }
+  .hero__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+  /* ── Decorative columns (Row 1) ──
+     Two columns, bottom-aligned, that swap heights on a gentle loop.
+     Sized in em relative to --ps so they scale proportionally with the pills. */
+  .hero__deco-cols {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-size: var(--ps);   /* sets em reference for children */
+    width:  1.596em;        /* 83 / 52 */
+    height: 1.462em;        /* 76 / 52 */
+  }
+  .hero__col {
+    position: absolute;
+    bottom: 0;
+    width:         0.769em;  /* 40 / 52 */
+    border-radius: 0.199em;  /* 10.34 / 52 */
+  }
+  .hero__col--purple {
+    left:       0;
+    height:     78.9%;   /* 60/76 — shorter in state A */
+    background: var(--color-accent-purple);
+    animation:  hero-col-purple 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+  }
+  .hero__col--blue {
+    left:       0.827em;  /* 43 / 52 */
+    height:     100%;     /* full height in state A */
+    background: var(--color-accent-blue);
+    animation:  hero-col-blue 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.15s;
+  }
+  @keyframes hero-col-purple {
+    from { height: 78.9%; }
+    to   { height: 100%;  }
+  }
+  @keyframes hero-col-blue {
+    from { height: 100%;  }
+    to   { height: 78.9%; }
+  }
+
+  /* ── Decorative bars (Row 2) ──
+     Three horizontal capsules. Animation: A (left-aligned) → center → B (left-aligned, widths swapped).
+     Fixed gap keeps spacing equal regardless of bar width. */
+  .hero__deco-bars {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.058em;             /* 1.694px / 29.365px — Figma proportion */
+    flex-shrink: 0;
+    font-size: var(--ps);
+    width:  1.654em;          /* 86 / 52 */
+    height: 1.462em;          /* 76 / 52 */
+  }
+  .hero__bar {
+    height: 0.449em;          /* (1.462 - 2×0.058) / 3 — fills container evenly with gap */
+    border-radius: var(--radius-pill);
+  }
+  .hero__bar--lb {
+    width:      100%;
+    background: var(--color-accent-light-blue);
+    animation:  hero-bar-lb 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+  }
+  .hero__bar--pink {
+    width:      67.4%;        /* 58 / 86 — stays medium, only shifts for center state */
+    background: var(--color-accent-pink);
+    animation:  hero-bar-pink 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.075s;
+  }
+  .hero__bar--red {
+    width:      34.9%;        /* 30 / 86 — narrowest in state A */
+    background: var(--color-accent-red);
+    animation:  hero-bar-red 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation-delay: 0.15s;
+  }
+  /* State A (0%): left-aligned, widths far apart.
+     State mid (50%): all bars 67.4%, centered — natural crossing point where lb=red=pink.
+     State B (100%): left-aligned, widths swapped. */
+  @keyframes hero-bar-lb {
+    0%   { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    100% { width: 34.9%;  margin-left: 0; }
+  }
+  @keyframes hero-bar-pink {
+    0%,  100% { margin-left: 0;     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%        { margin-left: 16.3%; }
+  }
+  @keyframes hero-bar-red {
+    0%   { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+    100% { width: 100%;   margin-left: 0; }
+  }
+
+  .hero__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+  /* CTA — 4 of 12 cols ≈ 400px at 1280px */
+  .hero__btn {
+    width: clamp(17.5rem, 31.25vw, 25rem);
+  }
+
+  /* ─────────────────────────────────────────
+     HERO — MOBILE ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero {
+      height: 100svh;
+      min-height: unset;
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-md);
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    /* Smaller logo on mobile */
+    .hero__logo-name { font-size: 1.25rem; }  /* 20px vs 32px desktop */
+    .hero__logo-icon { height: 1.875rem; }    /* 30px vs 45px desktop */
+
+    /* h1 fills available space (centering itself), subtitle pinned to bottom above button */
+    .hero__main {
+      flex: 1;
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    /* Desktop H1 hidden; mobile staircase shown */
+    .hero__h1--dt { display: none; }
+    .hero__h1--mb {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;  /* centers staircase vertically in remaining space */
+      flex: 1;                  /* takes all space above subtitle */
+      gap: 0.625rem;
+      width: 100%;
+      --ps: clamp(1.5rem, 9.18vw, 5rem);
+    }
+    .hero__step {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-sm);
+      flex-shrink: 0;
+    }
+    /* Figma positions as % of 320px container: staircase offsets */
+    .hero__step--a { margin-left: 0; }
+    .hero__step--b { margin-left: 8.125%; }
+    .hero__step--c { align-self: center;   }
+    .hero__step--d { margin-left: 42.1875%; }  /* 135px / 320 */
+    .hero__step--e { align-self: flex-end; }
+
+    .hero__h1--mb .hero__pill--green.hero__pill--sq {
+      margin-right: 4%;
+    }
+
+    .hero__subtitle {
+      padding-bottom: 2rem; /* gap to button */
+      text-align: center;
+    }
+
+    .hero__btn {
+      width: 100%;
+      /* min-height, border-radius, font-size handled by .btn-s mobile rule in button.css */
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     PROVEPOINTS SECTION  (Figma 330:1455)
+  ───────────────────────────────────────── */
+
+  .provepoints {
+    padding: var(--space-xl) 0 var(--space-lg);
+    background: var(--color-bg);
+  }
+
+  .provepoints__heading {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+  }
+
+  /* Card */
+  .provepoints__card {
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-lg);
+    padding: 2rem var(--pad-card);
+    display: flex;
+    flex-direction: column;
+    min-height: 30.5rem; /* 488px */
+  }
+
+  .provepoints__card-title {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0;
+    flex-shrink: 0;
+    /* Reserve 2-line height so all titles align regardless of length */
+    min-height: calc(2 * var(--text-h3-size)); /* 2 × 2rem = 4rem (lh=1) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Middle image area — fills space between title and description */
+  .provepoints__media {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad-card) 0;
+    min-height: 0;
+  }
+
+  .provepoints__media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Subgrid: align title / media / desc rows across all three cards */
+  @media (min-width: 768px) {
+    .provepoints .grid {
+      grid-template-rows: auto 1fr auto;
+    }
+    .provepoints__card {
+      grid-row: span 3;
+      display: grid;
+      grid-template-rows: subgrid;
+      min-height: unset;
+      align-content: start;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      align-self: start;
+    }
+    .provepoints__media {
+      flex: unset;
+      align-self: center;
+    }
+    .provepoints__desc {
+      align-self: end;
+    }
+  }
+
+  /* Mobile: content-driven height, bigger images */
+  @media (max-width: 767px) {
+    .provepoints__card {
+      min-height: unset;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      display: block;
+    }
+    .provepoints__media {
+      flex: none;
+      min-height: 15rem;
+      padding: var(--space-md) 0;
+      margin: var(--space-lg) 0;
+    }
+  }
+
+  /* Card 02: yellow square wrap for rule icon */
+  .provepoints__rule-wrap {
+    background: var(--color-primary);
+    border-radius: var(--radius-xl);
+    width: clamp(8rem, 70%, 12.3rem);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .provepoints__rule-wrap img {
+    width: 66%;
+  }
+
+  /* Description — grey, centered */
+  .provepoints__desc {
+    text-align: center;
+    color: var(--color-text-grey);
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  /* ── Test blocks ── */
+  .test-block {
+    height: 75rem; /* 1200px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
   }
 
   /* ─────────────────────────────────────────
@@ -20,7 +420,8 @@
   ───────────────────────────────────────── */
 
   .promo {
-    height: 300vh;
+    padding-top: var(--space-xl);
+    /* height set by JS via window.C.scrollLength */
   }
 
   .promo__sticky {
@@ -31,63 +432,51 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 4.5rem 1.5rem 0;
+    padding: 0 1.5rem 0;
     overflow: hidden;
   }
 
-  /* ── Headline ── */
-  .promo__headline {
-    color: var(--color-text);
-    text-align: center;
-    margin: 0 0 1.25rem;
-    flex-shrink: 0;
-  }
-
-  /* ── Subtitle ── */
-  .promo__subtitle {
-    width: 100%;
-    max-width: 68.75rem;
-    margin-bottom: 2.5rem;
-    flex-shrink: 0;
-  }
-
-  /* Flex row — static text + clip containers inline */
-  .promo__sub-line {
+  /* ── Title swap ── */
+  .promo__sub-swap {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
+    width: 100%;
+    text-align: center;
+    margin: 4.5rem 0 3.5rem;
+    flex-shrink: 0;
+    /* height set by JS to match tallest text */
+  }
+
+  .promo__sub-text {
     color: var(--color-text);
+    width: 100%;
+    will-change: transform, opacity;
   }
 
-  /* Each clip masks one new chunk of text */
-  .promo__sub-clip {
-    display: inline-flex;
-    overflow: hidden;
-    /* height = 1 line: font-size × line-height */
-    height: calc(var(--text-para-xl-size) * var(--text-para-xl-lh));
-    vertical-align: bottom;
+  /* Used only for height measurement — keeps text1 out of sight */
+  .promo__sub-text--measuring {
+    position: static !important;
+    transform: none !important;
+    opacity: 0 !important;
+    visibility: hidden;
   }
 
-  /* Text inside starts hidden below, slides up */
-  .promo__sub-clip > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    transform: translateY(110%);
-    will-change: transform;
-    white-space: nowrap;
+  /* State 1: absolutely positioned, vertically centered in container */
+  .promo__sub-text--1 {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    opacity: 0;
+    /* JS sets transform: translateY(calc(-50% + offset)) */
   }
-
-  .arrow { color: var(--color-accent-green); }
-
-  /* Mobile clip hidden on desktop */
-  .promo__sub-clip--m { display: none; }
 
   /* ── Visual area ── */
   .promo__visual {
     position: relative;
-    width: clamp(56.25rem, 87.5vw, 90rem); /* ~1120px @ 1280 → scales → 1440px cap */
+    width: max(clamp(56.25rem, 87.5vw, 90rem), calc((100vh - 10rem) * 1.607)); /* grow to fill vh on tall screens */
     max-width: calc(100vw - 3rem);       /* safety: never overflows viewport */
     aspect-ratio: 900 / 560;            /* height follows width proportionally */
     flex-shrink: 0;
@@ -144,12 +533,495 @@
     width: 83.22%;                      /* 749/900 */
     border-radius: 0.875rem;            /* 14px */
     overflow: hidden;
+    opacity: 0.8;
     will-change: transform;
   }
 
   .promo__workspace img {
     width: 100%;
     display: block;
+  }
+
+  /* ─────────────────────────────────────────
+     ACCORDION SECTION
+  ───────────────────────────────────────── */
+
+  .acc {
+    padding: var(--space-xl) 0 4rem;
+  }
+
+  .acc__title {
+    color: var(--color-text);
+    text-align: center;
+    margin: 0 0 3rem;
+  }
+
+  /* Colored rounded box — full container width, fixed proportions from Figma (1232 × 656) */
+  .acc__box {
+    width: 100%;
+    background-color: var(--color-accent-green);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    overflow: hidden;
+    contain: layout;            /* internal layout changes don't affect elements outside */
+    overflow-anchor: none;      /* prevent browser scroll-anchoring from compensating */
+    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .acc__layout {
+    display: flex;
+    align-items: stretch;
+    gap: var(--gap-main);
+  }
+
+  /* Left col: 553 / 1213 of inner frame ≈ 45.6% */
+  .acc__left {
+    width: 45.59%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Right col: takes the rest */
+  .acc__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .acc__eyebrow {
+    color: var(--color-text-inverted);
+    margin: 0 0 1rem;
+  }
+
+  .acc__cards {
+    flex: 1;           /* fills remaining left-col space after eyebrow */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Placeholder rectangle — same aspect ratio as the Birch AI window (463 × 592) */
+  .acc__placeholder {
+    display: none;
+    width: 70.15%;    /* 463 / 660 of right col */
+    aspect-ratio: 463 / 592;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-xl);
+  }
+
+  /* ─────────────────────────────────────────
+     CHAT CARD
+  ───────────────────────────────────────── */
+
+  /* Wrapper owns the sizing — enables container queries for the card */
+  .chat-card-wrap {
+    height: min(80vh, 45rem); /* 45rem = 720px */
+    width: auto;
+    aspect-ratio: 400 / 600;
+    container-type: inline-size;
+  }
+
+  .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.172vw, 1.172rem); /* fallback */
+    font-size: 3.8cqi;                              /* 15px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Body */
+  .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE/Edge */
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-card__body::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  /* Feed — wraps all exchanges */
+  .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+
+  /* Messages group */
+  .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+
+  /* User bubble */
+  .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* AI response area — fades + floats in after send */
+  .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__response.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Inner content — base text styles for AI responses */
+  .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .chat-card__response-content p {
+    margin: 0 0 0.4em;
+  }
+  .chat-card__response-content p:last-child { margin-bottom: 0; }
+  .chat-card__response-content strong { font-weight: 700; }
+  .chat-card__response-content ul {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+  }
+  .chat-card__response-content li { margin-bottom: 0.2em; }
+
+  /* "Review rule" link — card 0 only */
+  .chat-card__review-link {
+    display: block;
+    color: #0067ed;
+    line-height: 1.467;
+    margin-top: 0.375em;
+    cursor: pointer;
+  }
+
+  /* ── Performance table (card 1 response) ── */
+  .chat-card__table {
+    width: 100%;
+    margin-bottom: 0.625em;
+  }
+  .chat-card__table-header,
+  .chat-card__table-row {
+    display: flex;
+    align-items: center;
+  }
+  .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-card__table-col:first-child { padding-left: 0.875em; }
+  .chat-card__table-col:last-child  { flex: 0 0 5em; }
+  .chat-card__table-header .chat-card__table-col {
+    color: #636363;
+    font-weight: 500;
+  }
+  .chat-card__table-row {
+    border-radius: 0.75em;
+  }
+  .chat-card__table-row--alt { background: #fafafa; }
+
+  /* Input area */
+  .chat-card__input-area {
+    flex-shrink: 0;
+    padding: 1em;
+    position: relative;
+  }
+  /* Fade gradient above input */
+  .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .chat-card__text-flow {
+    flex: 1;
+    min-width: 0;
+    line-height: inherit;
+  }
+  .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    /* visibility toggled via inline style in JS — no display:none here */
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .chat-card__cursor.is-blinking {
+    animation: cursorBlink 0.9s step-end infinite;
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  /* Send button — inside the textarea, absolute.
+     bottom = (padding-top + line-height + padding-bottom - button-height) / 2
+            = (0.9 + 1.4 + 0.9 - 2) / 2 = 0.6em  → centers in single-line input,
+     stays pinned to bottom when input grows to multiple lines. */
+  .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .chat-card__send.is-active {
+    background: #161616;
+    cursor: pointer;
+  }
+  .chat-card__send svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* ─────────────────────────────────────────
+     PROMPTS SECTION
+  ───────────────────────────────────────── */
+
+  .prompts {
+    padding: var(--space-xl) 0 var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    overflow: hidden;
+  }
+
+  .prompts__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-main);
+    text-align: center;
+    padding-inline: var(--pad-horizontal);
+  }
+
+  .prompts__title {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .prompts__subtitle {
+    color: var(--color-text-grey);
+    margin: 0;
+  }
+
+  /* Marquee rows */
+  .prompts__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+    width: 100%;
+  }
+
+  .prompts__track {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .prompts__belt {
+    display: flex;
+    gap: var(--gap-main);
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* Row 2 starts visually offset — achieved via JS translateX on init */
+
+  .prompts__chip {
+    /* display: block so it's a block-level flex item — text nodes inside are in normal
+       inline formatting context, which preserves spaces around <em> keywords.
+       display: inline-flex strips boundary whitespace from anonymous flex items. */
+    display: block;
+    height: 3.5rem;              /* 56px */
+    line-height: 3.5rem;         /* vertically centers single-line text */
+    padding-inline: var(--space-md); /* 32px */
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-xl);
+    font-family: var(--font);
+    font-size: var(--text-h6-size);
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    font-style: normal;
+  }
+
+  .prompts__kw { font-style: normal; }
+  .prompts__kw--green { color: var(--color-accent-green); }
+  .prompts__kw--pink  { color: var(--color-accent-pink);  }
+  .prompts__kw--red   { color: var(--color-accent-red);   }
+
+  .prompts__cta {
+    padding-inline: var(--pad-horizontal);
+  }
+
+  /* ─────────────────────────────────────────
+     VISION
+  ───────────────────────────────────────── */
+  .vision {
+    padding-top: var(--space-xl);
+  }
+
+  .vision .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .vision__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+  .vision__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);   /* 24px между карточками */
+    width: 100%;
+  }
+
+  .vision__copilot {
+    background: var(--color-accent-orange);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    height: 70svh;
+    color: var(--color-text-inverted);
+  }
+
+  .vision__copilot h2 { margin: 0; }
+
+  .vision__copilot-icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .vision__copilot-icon img {
+    width: 15.5625rem;   /* 249px */
+    height: 15.0625rem;  /* 241px */
+    object-fit: contain;
+  }
+
+  .vision__agent {
+    background: #004195;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text);
+  }
+
+  .vision__agent h2 { margin: 0; }
+
+  .vision__agent-desc {
+    max-width: 50rem;   /* 800px */
+    text-align: center;
+    margin: 0;
+  }
+
+  .vision__agent-ill {
+    width: 100%;
+  }
+
+  .vision__agent-ill img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* ─────────────────────────────────────────
+     TABLET  768–991px
+  ───────────────────────────────────────── */
+  @media (max-width: 991px) {
+    .acc__box {
+      aspect-ratio: auto;
+    }
   }
 
   /* ─────────────────────────────────────────
@@ -162,54 +1034,16 @@
     }
 
     .promo__sticky {
-      padding: 3rem 1rem 0;
+      padding: 0 1rem 0;
     }
 
-    .promo__subtitle {
-      margin-bottom: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .promo__sticky {
+      overflow: visible;   /* workspace hidden on mobile — no need to clip */
     }
 
-    /* Stack items vertically, centered */
-    .promo__sub-line {
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    /* Hide desktop-only clips */
-    .promo__sub-clip--d { display: none; }
-
-    /* Mobile clip: starts collapsed, JS grows it */
-    .promo__sub-clip--m {
-      display: flex;
-      overflow: hidden;
-      height: 0;
-      min-height: 0;
-      justify-content: center;
-    }
-
-    .promo__sub-clip--m > span {
-      width: 100%;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    /* Arrow: own line, green, larger */
-    .promo__m-arrow {
-      color: var(--color-accent-green);
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    /* Text below arrow: wraps naturally */
-    .promo__m-text {
-      white-space: normal;
-      text-align: center;
+    .promo__sub-swap {
+      margin: 3rem 0 1.5rem;
+      overflow: visible;
     }
 
     /* Visual: let chat image determine height naturally */
@@ -232,60 +1066,748 @@
     .promo__workspace {
       display: none !important;
     }
+
   }
+
+  /* ─────────────────────────────────────────
+     CTA LAST  (Figma 348:3061)
+  ───────────────────────────────────────── */
+
+  .cta-last {
+    padding-block: var(--space-xl);
+  }
+
+  .cta-last .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);           /* 16px between all elements */
+    text-align: center;
+  }
+
+  .cta-last__heading {
+    max-width: 66.19rem;            /* 1059px */
+    margin: 0;
+  }
+
+  .cta-last__sub {
+    color: var(--color-text-grey);
+    max-width: 34.25rem;            /* 548px */
+  }
+
+  .cta-last__btn {
+    width: clamp(17.5rem, 31.25vw, 25rem); /* 280→400px fluid, matches hero btn */
+    margin-top: var(--space-xs);    /* extra 8px gap before button */
+  }
+
+  @media (max-width: 767px) {
+    .cta-last__heading,
+    .cta-last__sub { max-width: 100%; }
+
+    .cta-last__btn { width: 100%; }
+  }
+
 </style>
 </head>
 <body>
 
+<!-- ─────────────────────────────────────────
+     HERO SECTION
+───────────────────────────────────────── -->
+<section class="hero">
+
+  <!-- Logo: Bïrch [cursor] AI  — "closed beta" floats as absolute badge to the right -->
+  <div class="hero__logo">
+    <div class="hero__logo-wordmark">
+      <span class="hero__logo-name">Bïrch</span>
+      <img src="images/icon ai.svg" class="hero__logo-icon" alt="" />
+      <span class="hero__logo-name">AI</span>
+      <span class="hero__beta t-body">closed beta</span>
+    </div>
+  </div>
+
+  <!-- H1 + subtitle — centered on mobile via flex:1 wrapper -->
+  <div class="hero__main">
+
+    <!-- H1 composition: desktop — two rows of word-pills -->
+    <div class="hero__h1 hero__h1--dt">
+
+      <!-- Row 1: Built [columns] with a  performance -->
+      <div class="hero__row hero__row--1">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <!-- Decorative columns: purple + blue, heights swap on loop -->
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+
+      <!-- Row 2: marketing  [bars]  mindset -->
+      <div class="hero__row hero__row--2">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+        <!-- Decorative bars: lb / pink / red widths swap on loop -->
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
+
+    </div><!-- /.hero__h1--dt -->
+
+    <!-- H1 composition: mobile — 5-step cascading staircase (Figma 379:1551) -->
+    <div class="hero__h1 hero__h1--mb" aria-label="Built with a performance marketing mindset">
+
+      <!-- Step A: Built + columns deco (top-left) -->
+      <div class="hero__step hero__step--a">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
+      </div>
+
+      <!-- Step B: bars deco + with a -->
+      <div class="hero__step hero__step--b">
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+      </div>
+
+      <!-- Step C: performance (centered) -->
+      <div class="hero__step hero__step--c">
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+
+      <!-- Step D: marketing (right-center) -->
+      <div class="hero__step hero__step--d">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+      </div>
+
+      <!-- Step E: mindset (far right) -->
+      <div class="hero__step hero__step--e">
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
+
+    </div><!-- /.hero__h1--mb -->
+
+    <p class="hero__subtitle t-para-lg">Built on your data. Sharper decisions across every channel – analyze, strategize, automate.</p>
+
+  </div><!-- /.hero__main -->
+
+  <!-- CTA -->
+  <a href="#" class="btn btn-default btn-s hero__btn">Apply now</a>
+
+</section>
+
+<!-- ─────────────────────────────────────────
+     PROVEPOINTS  "It works because…"
+───────────────────────────────────────── -->
+<section class="provepoints">
+  <div class="container">
+
+    <h2 class="t-h2 provepoints__heading">It works because it knows your context</h2>
+
+    <div class="grid">
+
+      <!-- Card 01: Your ad accounts -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your ad accounts</h3>
+        <div class="provepoints__media">
+          <img src="images/platforms.svg" alt="Meta, Google, TikTok, Snap platform logos" />
+        </div>
+        <p class="t-para-lg provepoints__desc">Meta, Google, TikTok, Snap. Performance data, structure, naming — all read directly</p>
+      </div>
+
+      <!-- Card 02: Your rule library -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your rule library</h3>
+        <div class="provepoints__media">
+          <div class="provepoints__rule-wrap">
+            <img src="images/rule-icon.svg" alt="" aria-hidden="true" />
+          </div>
+        </div>
+        <p class="t-para-lg provepoints__desc">Existing rules are part of the context</p>
+      </div>
+
+      <!-- Card 03: Your workspace, your data -->
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your workspace,<br>your data</h3>
+        <div class="provepoints__media">
+          <img src="images/ws-promo-ai.svg" alt="" aria-hidden="true" />
+        </div>
+        <p class="t-para-lg provepoints__desc">No external sharing. No training on your account.</p>
+      </div>
+
+    </div><!-- /.grid -->
+  </div><!-- /.container -->
+</section>
+
+<section class="acc">
+  <div class="container">
+
+    <h2 class="acc__title t-h2">It works because it knows your context</h2>
+
+    <div class="acc__box" id="accBox">
+      <div class="acc__layout">
+
+        <!-- Left: eyebrow + cards -->
+        <div class="acc__left">
+          <p class="acc__eyebrow t-eyebrow">Use Cases</p>
+          <div class="acc__cards">
+
+            <div class="card-accordion" data-index="0">
+              <h4 class="t-h4">Get rules suggestion</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Describe a goal. Co-pilot proposes a rule, explains the logic, and drops a draft into the Birch editor. You review and decide.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar0"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="1">
+              <h4 class="t-h4">Analyze your performance</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard. AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar1"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="2">
+              <h4 class="t-h4">Analyze impact of rules</h4>
+              <div class="card-accordion__body">
+                <p class="t-eyebrow" style="color:var(--color-text-grey);margin:0">Coming soon</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0;margin-top:0.5rem">See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Birch AI chat card -->
+        <div class="acc__right">
+          <!-- Chat card -->
+          <div class="chat-card-wrap">
+          <div class="chat-card">
+            <!-- Messages area -->
+            <div class="chat-card__body" id="chatBody">
+              <div class="chat-card__feed" id="chatFeed"></div>
+            </div>
+            <!-- Input area -->
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="chatPlaceholder">Ask anything</span><span class="chat-card__typed" id="chatTyped"></span><span class="chat-card__cursor" id="chatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="chatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div><!-- /.chat-card-wrap -->
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  /* ── Config ── */
+  var _root = getComputedStyle(document.documentElement);
+  function token(name) { return _root.getPropertyValue(name).trim(); }
+  var COLORS = [
+    token('--color-accent-green'),       /* card 0 */
+    token('--color-accent-pink'),        /* card 1 */
+    token('--color-accent-light-blue'),  /* card 2 */
+  ];
+  var DURATION = 5500; /* ms each card stays active — must cover the longest chat cycle */
+
+  var box   = document.getElementById('accBox');
+  var cards = Array.prototype.slice.call(box.querySelectorAll('.card-accordion'));
+  var bars  = Array.prototype.slice.call(box.querySelectorAll('.card-accordion__bar-fill'));
+  var active  = 0;
+  var startMs = null;
+  box.style.setProperty('--acc-color', COLORS[0]); /* seed on load */
+
+  /* ── Switch to a card ── */
+  function setActive(idx) {
+    /* component convention: default = open, is-closed = collapsed */
+    cards.forEach(function (c) { c.classList.add('is-closed'); });
+    cards[idx].classList.remove('is-closed');
+    box.style.backgroundColor = COLORS[idx];
+    box.style.setProperty('--acc-color', COLORS[idx]);
+    bars.forEach(function (b) { b.style.width = '0%'; });
+    active  = idx;
+    startMs = null; /* reset on next rAF tick */
+    /* Notify chat animation — guard: chat script loads after this one */
+    if (window.switchChat) window.switchChat(idx);
+  }
+
+  /* ── rAF loop: drives the progress bar and auto-advance ── */
+  (function tick(now) {
+    if (startMs === null) startMs = now;
+    var elapsed  = now - startMs;
+    var progress = Math.min(elapsed / DURATION, 1);
+    bars[active].style.width = (progress * 100).toFixed(1) + '%';
+    if (elapsed >= DURATION) {
+      setActive((active + 1) % cards.length);
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
+
+  /* ── Click to manually jump to a card ── */
+  cards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { setActive(idx); });
+  });
+
+  /* ── Size acc__box: ensure all open-card states fit without clipping ──
+     For each card scenario (card i open, others closed), measure the natural
+     cards-column height. Set min-height (desktop) or height (tablet) on the
+     box to prevent jumps when switching cards.                               */
+  var accCards = box.querySelector('.acc__cards');
+  var accLeft  = box.querySelector('.acc__left');
+  var eyebrow  = box.querySelector('.acc__eyebrow');
+
+  function sizeAccBox() {
+    /* 1. Kill transitions so measurement is instant */
+    var animated = [box].concat(cards).concat(
+      cards.map(function (c) { return c.querySelector('.card-accordion__body'); })
+    );
+    animated.forEach(function (el) { if (el) el.style.transition = 'none'; });
+
+    /* 2. Save card states */
+    var wasClosed = cards.map(function (c) { return c.classList.contains('is-closed'); });
+
+    /* 3. Remove flex:1 from accCards → natural stacking height */
+    accCards.style.flex = 'none';
+
+    /* 4. Measure each scenario */
+    var maxCardsH = 0;
+    cards.forEach(function (_, openIdx) {
+      cards.forEach(function (c, i) {
+        c.classList.toggle('is-closed', i !== openIdx);
+        c.style.flex = (i === openIdx) ? '0 0 auto' : '';
+      });
+      void box.offsetHeight; /* force reflow */
+      if (accCards.offsetHeight > maxCardsH) maxCardsH = accCards.offsetHeight;
+    });
+
+    /* 5. Restore card states and flex */
+    cards.forEach(function (c, i) {
+      c.style.flex = '';
+      c.classList.toggle('is-closed', wasClosed[i]);
+    });
+    accCards.style.flex = '';
+
+    /* 6. Restore transitions */
+    animated.forEach(function (el) { if (el) el.style.transition = ''; });
+
+    /* 7. Compute and apply height
+          box padding (V) + eyebrow height + gap (flex gap + eyebrow margin-bottom) + cards */
+    var cs       = getComputedStyle(box);
+    var boxPadV  = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var eyebrowH = eyebrow.offsetHeight;
+    var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap)
+                   + parseFloat(getComputedStyle(eyebrow).marginBottom);
+    var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+
+    /* Chat card rendered height (CSS clamps it to min(80vh, 45rem)) */
+    var chatWrap   = box.querySelector('.chat-card-wrap');
+    var chatMinH   = boxPadV + chatWrap.offsetHeight;
+
+    var minH = Math.max(leftColMinH, chatMinH);
+
+    /* All breakpoints: fix height so switching cards doesn't cause jumps */
+    box.style.minHeight = minH + 'px';
+    box.style.height    = minH + 'px';
+  }
+
+  sizeAccBox();
+  /* Re-measure after fonts render — custom font metrics differ from fallback */
+  document.fonts.ready.then(function () { sizeAccBox(); });
+  window.addEventListener('resize', sizeAccBox);
+
+})();
+</script>
+
+<!-- ── Chat animation: type → send → bubble → AI response → loop ── -->
+<script>
+(function () {
+
+  /* ══════════════════════════════════════════════════════════
+     CHATS — content for each accordion tab (0 / 1 / 2)
+  ══════════════════════════════════════════════════════════ */
+  var CHATS = [
+    /* 0 — Get rules suggestion */
+    {
+      userMsg: 'My target ROAS is 2.5. Share new ideas I could try to extend my current Birch rules setup',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p>I recommend moving to proactive growth and budget management:</p>',
+          '<p><strong>The "Soft Landing" (Budget Protection)</strong><br>',
+          'Logic: If ROAS is below your target but above your "dead-zone" ',
+          '(e.g., target 2.5, current 1.8) — decrease daily budget by 20%.<br>',
+          'Benefit: Protects spend during temporary dips while keeping ad sets in learning phase.</p>',
+        '</div>',
+        '<a class="chat-card__review-link">Review rule</a>'
+      ].join('')
+    },
+    /* 1 — Analyze performance */
+    {
+      userMsg: 'Analyze my performance by platform for the last week',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<div class="chat-card__table">',
+            '<div class="chat-card__table-header">',
+              '<span class="chat-card__table-col">Platform</span>',
+              '<span class="chat-card__table-col">Ad Account</span>',
+              '<span class="chat-card__table-col">Spend</span>',
+            '</div>',
+            '<div class="chat-card__table-row chat-card__table-row--alt">',
+              '<span class="chat-card__table-col">Google Ads</span>',
+              '<span class="chat-card__table-col">Birch</span>',
+              '<span class="chat-card__table-col">🟢 $3.94M</span>',
+            '</div>',
+            '<div class="chat-card__table-row">',
+              '<span class="chat-card__table-col">Meta Ads</span>',
+              '<span class="chat-card__table-col">Bir.ch Marketing</span>',
+              '<span class="chat-card__table-col">🔴 $5K</span>',
+            '</div>',
+            '<div class="chat-card__table-row chat-card__table-row--alt">',
+              '<span class="chat-card__table-col">TikTok Ads</span>',
+              '<span class="chat-card__table-col">Bir.ch Tiktok</span>',
+              '<span class="chat-card__table-col">⚪ $40.6K</span>',
+            '</div>',
+          '</div>',
+          '<p>🔍 <strong>Key Findings</strong></p>',
+          '<p>Google Ads Efficiency 🟢</p>',
+          '<ul>',
+            '<li>Performance: With a ROAS of 35.72, Google Ads is exceptionally profitable.</li>',
+            '<li>Insight: Your search or shopping campaigns are capturing high-intent traffic that converts at a very low cost relative to revenue.</li>',
+          '</ul>',
+        '</div>'
+      ].join('')
+    },
+    /* 2 — Analyze impact of rules */
+    {
+      userMsg: 'Can you check if my rules need any fixes in the setup?',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p>🛠 <strong>Critical Fix – Add Spend/Impression Thresholds</strong><br>',
+          'Without a minimum volume floor, low-spend ad sets will trigger false ROAS alerts. ',
+          'Add Spend (last 24h) &gt; [avg CPA] or Impressions &gt; 500.</p>',
+          '<p>📈 <strong>Optimization – Tighten the CPM Trigger</strong><br>',
+          'Your 1.5x CPM threshold may miss early warning signs. Drop to 1.3x to catch competition spikes sooner.</p>',
+        '</div>'
+      ].join('')
+    }
+  ];
+
+  /* ══════════════════════════════════════════════════════════
+     TIMING
+  ══════════════════════════════════════════════════════════ */
+  if (window.CHAT_TYPING_MS === undefined) window.CHAT_TYPING_MS = 15;
+  var PAUSE_SEND   = 500;
+  var RESP_DELAY   = 700;
+  var FULL_PAUSE   = 1800;
+  var FADE_MS      = 350;
+  var IDLE_PAUSE   = 400;
+  var INIT_DELAY   = 1400;
+
+  /* ══════════════════════════════════════════════════════════
+     ELEMENTS
+  ══════════════════════════════════════════════════════════ */
+  var chatBody    = document.getElementById('chatBody');
+  var chatFeed    = document.getElementById('chatFeed');
+  var placeholder = document.getElementById('chatPlaceholder');
+  var typedEl     = document.getElementById('chatTyped');
+  var inputCursor = document.getElementById('chatCursor');
+  var sendBtn     = document.getElementById('chatSendBtn');
+
+  /* Hide typed span initially (CSS no longer does this) */
+  typedEl.style.display = 'none';
+
+  /* ══════════════════════════════════════════════════════════
+     STATE
+  ══════════════════════════════════════════════════════════ */
+  var currentIdx      = 0;
+  var pendingTimers   = [];
+  var currentBubbleEl = null;
+  var currentRespEl   = null;
+  var phase = 'idle';
+
+  /* ══════════════════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════════════════ */
+  function addTimer(fn, ms) {
+    var t = setTimeout(fn, ms);
+    pendingTimers.push(t);
+    return t;
+  }
+  function cancelTimers() {
+    pendingTimers.forEach(function (t) { clearTimeout(t); });
+    pendingTimers = [];
+  }
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent    = '';
+    typedEl.style.display  = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     DOM FACTORY
+  ══════════════════════════════════════════════════════════ */
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     RESET — fade out everything and start fresh
+  ══════════════════════════════════════════════════════════ */
+  function resetChat(nextIdx) {
+    phase           = 'clearing';
+    currentIdx      = nextIdx;
+    currentBubbleEl = null;
+    currentRespEl   = null;
+    clearInput();
+
+    /* Fade out any visible bubbles / responses */
+    var els = chatFeed.querySelectorAll('.chat-card__bubble, .chat-card__response');
+    els.forEach(function (el) { el.classList.remove('is-visible'); });
+
+    /* After fade completes, clear feed and start typing immediately */
+    addTimer(function () {
+      chatFeed.innerHTML = '';
+      phase = 'idle';
+      type(0);
+    }, FADE_MS + 50);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 1 — User types in the input field
+  ══════════════════════════════════════════════════════════ */
+  function type(charIdx) {
+    phase = 'typing';
+    var msg = CHATS[currentIdx].userMsg;
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display     = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = msg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+
+    if (charIdx < msg.length) {
+      addTimer(function () { type(charIdx + 1); }, window.CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      phase = 'sending';
+      addTimer(doSend, PAUSE_SEND);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 2 — Send: input clears, bubble floats in
+  ══════════════════════════════════════════════════════════ */
+  function doSend() {
+    clearInput();
+    currentBubbleEl = createBubble(CHATS[currentIdx].userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentBubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    phase = 'responding';
+    addTimer(startResponse, RESP_DELAY);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 3 — AI response appears (fade + float)
+  ══════════════════════════════════════════════════════════ */
+  function startResponse() {
+    currentRespEl = createResponse(CHATS[currentIdx].aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentRespEl.classList.add('is-visible');
+        scrollToBottom();
+        phase = 'viewing';
+        addTimer(onExchangeComplete, FULL_PAUSE);
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 4 — Exchange done
+  ══════════════════════════════════════════════════════════ */
+  function onExchangeComplete() {
+    phase = 'idle';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PUBLIC — called by accordion on every tab switch
+  ══════════════════════════════════════════════════════════ */
+  window.switchChat = function (nextIdx) {
+    cancelTimers();
+    resetChat(nextIdx);
+  };
+
+  /* ── Kick off first exchange after page settles ── */
+  addTimer(function () { type(0); }, INIT_DELAY);
+
+})();
+</script>
+
+<!-- ─────────────────────────────────────────
+     PROMPTS SECTION
+───────────────────────────────────────── -->
+<section class="prompts">
+  <div class="prompts__head">
+    <h2 class="t-h2 prompts__title">Start fast with ready-to-use prompts</h2>
+    <p class="t-para-lg prompts__subtitle">Curated examples for every use case, from audits to optimization</p>
+  </div>
+
+  <div class="prompts__rows" aria-hidden="true">
+
+    <!-- Row 1 — scrolls left -->
+    <div class="prompts__track prompts__track--1">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Show Impressions and <em class="prompts__kw prompts__kw--green">Frequency</em> for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare Reach in Q1 2026 to Q1 2025 on Meta ad account</span>
+        <span class="prompts__chip">Show <em class="prompts__kw prompts__kw--green">Impressions</em> and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare Reach in Q1 2026 to Q1 2025 on Meta ad account</span>
+      </div>
+    </div>
+
+    <!-- Row 2 — scrolls right -->
+    <div class="prompts__track prompts__track--2">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Show Impressions and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--red">Reach</em> in Q1 2026 to Q1 2025 on Meta ad account</span>
+        <span class="prompts__chip">Show Impressions and Frequency for the last 14 days</span>
+        <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all ad accounts in this workspace for the period from Feb 14 till Mar 14</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+        <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--red">Reach</em> in Q1 2026 to Q1 2025 on Meta ad account</span>
+      </div>
+    </div>
+
+    <!-- Row 3 — scrolls left (staggered) -->
+    <div class="prompts__track prompts__track--3">
+      <div class="prompts__belt">
+        <span class="prompts__chip">Pause ad sets with <em class="prompts__kw prompts__kw--red">CPA</em> above $50 for the last 3 days</span>
+        <span class="prompts__chip">Create a budget protection rule when <em class="prompts__kw prompts__kw--pink">Spend</em> exceeds the daily cap</span>
+        <span class="prompts__chip">Scale budgets for ad sets with <em class="prompts__kw prompts__kw--green">ROAS</em> above 4x this week</span>
+        <span class="prompts__chip">Which campaigns have the lowest <em class="prompts__kw prompts__kw--green">CTR</em> on Google Ads last month?</span>
+        <span class="prompts__chip">Pause ad sets with <em class="prompts__kw prompts__kw--red">CPA</em> above $50 for the last 3 days</span>
+        <span class="prompts__chip">Create a budget protection rule when <em class="prompts__kw prompts__kw--pink">Spend</em> exceeds the daily cap</span>
+        <span class="prompts__chip">Scale budgets for ad sets with <em class="prompts__kw prompts__kw--green">ROAS</em> above 4x this week</span>
+        <span class="prompts__chip">Which campaigns have the lowest <em class="prompts__kw prompts__kw--green">CTR</em> on Google Ads last month?</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="prompts__cta">
+    <a href="#" class="btn btn-stroke btn-s">See our prompt library</a>
+  </div>
+</section>
+
+<!-- ===================== VISION ===================== -->
+<section class="vision">
+  <div class="container">
+    <p class="vision__subtitle t-para-lg">The first step toward a bigger vision</p>
+    <div class="vision__cards">
+      <div class="vision__copilot">
+        <h2 class="t-h2">Today's co-pilot</h2>
+        <div class="vision__copilot-icon">
+          <img src="images/icon ai.svg" alt="AI cursor icon">
+        </div>
+      </div>
+      <div class="vision__agent">
+        <h2 class="t-h2">Tomorrow's agent</h2>
+        <p class="t-para-xl vision__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
+        <div class="vision__agent-ill">
+          <img src="images/agent-ill.svg" alt="Agent illustration">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA LAST  (Figma 348:3061) ===================== -->
+<section class="cta-last">
+  <div class="container">
+    <h2 class="t-h2 cta-last__heading">Next-level performance marketing on autopilot</h2>
+    <p class="t-para-lg cta-last__sub">Your goals. Your context. Cross-platform workflows that get you there automatically. Safe.</p>
+    <button class="btn btn-default btn-s cta-last__btn">Apply now</button>
+  </div>
+</section>
+
+<div class="test-block t-para-lg">Block after — 1200px</div>
+
 <section class="promo">
   <div class="promo__sticky">
 
-    <h2 class="promo__headline t-h2">Birch flips the way you create rules</h2>
-
-    <div class="promo__subtitle">
-      <div class="promo__sub-line t-para-xl">
-        <span>Describe in the chat</span>
-        <!-- desktop: two clips slide in separately -->
-        <span class="promo__sub-clip promo__sub-clip--d" id="subClip2"><span><span class="arrow">→</span> The rule draft is ready</span></span>
-        <span class="promo__sub-clip promo__sub-clip--d" id="subClip3"><span>, right where you work</span></span>
-        <!-- mobile: single clip — arrow on own line, then text -->
-        <span class="promo__sub-clip promo__sub-clip--m" id="subClipM"><span>
-          <span class="promo__m-arrow">↓</span>
-          <span class="promo__m-text">The rule draft is ready, right where you work</span>
-        </span></span>
-      </div>
+    <div class="promo__sub-swap" id="subSwap">
+      <div class="promo__sub-text t-h2" id="subText0">Describe in the chat</div>
+      <div class="promo__sub-text promo__sub-text--1 t-h2" id="subText1">The rule draft is ready, <span style="white-space:nowrap">right where you work</span></div>
     </div>
 
     <div class="promo__visual">
 
       <div class="promo__chat-stack" id="chatStack">
-        <!-- 01_0 — empty chat, always visible, sets container height -->
-        <img
-          src="images/chat-empty.png"
-          class="promo__chat-base"
-          alt="Empty chat window"
-        />
-        <!-- 01_1 — user message: fades in quickly -->
-        <img
-          src="images/chat-msg.png"
-          class="promo__chat-overlay"
-          id="chatMsg"
-          alt="User message in chat"
-        />
-        <!-- 02 — AI response: slides up from viewport bottom -->
-        <img
-          src="images/chat-response.png"
-          class="promo__chat-response"
-          id="chatResponse"
-          alt="Birch AI responds with the drafted rule"
-        />
+        <img src="images/chat-empty.png" class="promo__chat-base" alt="Empty chat window" />
+        <img src="images/chat-msg.png" class="promo__chat-overlay" id="chatMsg" alt="User message in chat" />
+        <img src="images/chat-response.png" class="promo__chat-response" id="chatResponse" alt="Birch AI responds with the drafted rule" />
       </div>
 
       <div class="promo__workspace" id="workspace">
-        <img
-          src="images/workspace.png"
-          alt="Rule ready inside Birch workspace"
-        />
+        <img src="images/workspace.png" alt="Rule ready inside Birch workspace" />
       </div>
 
     </div>
@@ -300,19 +1822,31 @@
   const chatMsg      = document.getElementById('chatMsg');       /* 01_1 fade */
   const chatResponse = document.getElementById('chatResponse');  /* 02 slide  */
   const workspace    = document.getElementById('workspace');
-  const subLine    = document.querySelector('.promo__sub-line');
-  const subClip2El = document.getElementById('subClip2');
-  const subClip3El = document.getElementById('subClip3');
-  const clip2      = subClip2El.querySelector('span');
-  const clip3      = subClip3El.querySelector('span');
-  const subClipMEl = document.getElementById('subClipM');
-  const clipM      = subClipMEl ? subClipMEl.querySelector('span') : null;
-  const remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const subSwap  = document.getElementById('subSwap');
+  const subText0 = document.getElementById('subText0');
+  const subText1 = document.getElementById('subText1');
+  const remPx    = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  /* Set container height = tallest of the two texts so mask never clips */
+  function sizeSwapContainer() {
+    subText1.classList.add('promo__sub-text--measuring');
+    subSwap.style.height = Math.max(subText0.offsetHeight, subText1.offsetHeight) + 'px';
+    subText1.classList.remove('promo__sub-text--measuring');
+  }
+  sizeSwapContainer();
+  document.fonts.ready.then(sizeSwapContainer);
+
+  window.addEventListener('resize', sizeSwapContainer);
 
   /* ── Scroll progress ── */
   function scrollProgress() {
     const { top } = section.getBoundingClientRect();
     const scrollable = section.offsetHeight - window.innerHeight;
+    if (top > 0) {
+      /* Pre-sticky: section scrolling into view from below.
+         Returns -1 (section bottom at viewport edge) → 0 (sticky kicks in) */
+      return Math.max(-1, -(top / window.innerHeight));
+    }
     return Math.max(0, Math.min(1, -top / scrollable));
   }
 
@@ -320,13 +1854,41 @@
     return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
   }
 
-  /* ── Lerp smoothing ── */
-  let targetP    = 0;   /* raw scroll position               */
-  let currentP   = 0;   /* smoothed — chat-msg fade + text   */
-  let currentPws = 0;   /* smoothed — chat-response + workspace (snappier) */
+  /* ── Config — all timing params in one place ── */
+  window.C = {
+    entryStart:  -0.85, entryEnd:    0.24,  entryDist:   0.3,
+    msg1Start:   -0.05, msg1MoveDur: 0.25,  msg1FadeDur: 0.05,  msg1Float: 4,
+    msg2Start:    0.17, msg2MoveDur: 0.25,  msg2FadeDur: 0.05,  msg2Float: 4,
+    s3Start:      0.35, s3Dur:       0.5,
+    wsStart:      0.35, wsDur:       0.5,
+    titleSwapStart: 0.17, titleSwapDur: 0.2,
+    scrollLength: 2.5,
+    /* per-track cubic-bezier: [x1, y1, x2, y2] */
+    eases: {
+      entry:     [0.02, 0.22, 0.43, 1.02],
+      msg1:      [0.02, 0.22, 0.43, 1.02],
+      msg2:      [0.02, 0.22, 0.43, 1.02],
+      s3:        [0.34, 0.05, 0.00, 1.01],
+      ws:        [0.31, 0.01, 0.00, 1.05],
+      titleSwap: [0.4,  0.0,  0.2,  1.0],
+    },
+  };
 
-  window.LERP      = 0.15; /* chat + text + overlay  · 0.05 slow → 0.2 snappy */
-  window.LERP_WS   = 0.4;  /* workspace              · 0.05 slow → 0.2 snappy */
+  /* ── Lerp smoothing ── */
+  let targetP    = 0;
+  let currentP   = 0;
+  let currentPws = 0;
+  let _rafReady  = false; // snap on first frame after browser restores scroll
+
+  window.LERP      = 0.04;
+  window.LERP_WS   = 0.07;
+
+  /* Apply scrollLength → section height (also exposed for debug panel) */
+  window.applyScrollLength = function () {
+    section.style.height = (window.C.scrollLength * 100) + 'vh';
+  };
+  window.applyScrollLength();
+
   /* cubic-bezier solver — same as CSS cubic-bezier() */
   function makeBezier(x1, y1, x2, y2) {
     return function(p) {
@@ -346,64 +1908,275 @@
   /* cubic-bezier(.02,.22,.43,1.02) — slight overshoot at the end */
   let easeFn = makeBezier(0.02, 0.22, 0.43, 1.02);
 
-  window.addEventListener('scroll', () => {
-    targetP = scrollProgress();
-  }, { passive: true });
+  /* Per-track ease — creates + caches a bezier fn when coefficients change */
+  const _easeCache = {};
+  function trackEase(name) {
+    const [x1, y1, x2, y2] = window.C.eases[name];
+    const key = `${x1},${y1},${x2},${y2}`;
+    if (!_easeCache[name] || _easeCache[name].key !== key) {
+      _easeCache[name] = { key, fn: makeBezier(x1, y1, x2, y2) };
+    }
+    return _easeCache[name].fn;
+  }
 
   /* ── Render at smoothed position ── */
   function tick(p, pws) {
+    const C      = window.C;
     const mobile = window.innerWidth <= 767;
 
-    /* ── State 1→2a: user message — fade + float up 4rem ── */
-    const t01 = easeFn(remap(p, 0.28, 0.38));
-    chatMsg.style.opacity   = t01;
-    chatMsg.style.transform = `translateY(${(1 - t01) * 4 * remPx}px)`;
+    /* Entry */
+    const t00       = trackEase('entry')(remap(p, C.entryStart, C.entryEnd));
+    const chatInitY = (1 - t00) * window.innerHeight * C.entryDist;
 
-    /* ── State 1→2b: AI response — same: fade + float up 4rem (delayed) ── */
-    const t02 = easeFn(remap(pws, 0.48, 0.58));
-    chatResponse.style.opacity   = t02;
-    chatResponse.style.transform = `translateY(${(1 - t02) * 4 * remPx}px)`;
+    /* Msg 1 */
+    const t01move = trackEase('msg1')(remap(p, C.msg1Start, C.msg1Start + C.msg1MoveDur));
+    const t01fade = remap(p, C.msg1Start, C.msg1Start + C.msg1FadeDur);
+    chatMsg.style.opacity   = t01fade;
+    chatMsg.style.transform = `translateY(${(1 - t01move) * C.msg1Float * remPx}px)`;
+
+    /* Msg 2 */
+    const t02move = trackEase('msg2')(remap(pws, C.msg2Start, C.msg2Start + C.msg2MoveDur));
+    const t02fade = remap(pws, C.msg2Start, C.msg2Start + C.msg2FadeDur);
+    chatResponse.style.opacity   = t02fade;
+    chatResponse.style.transform = `translateY(${(1 - t02move) * C.msg2Float * remPx}px)`;
 
     if (!mobile) {
-      /* ── State 2→3: entire chat-stack (incl. response) shrinks + shifts right ── */
-      const p3 = easeFn(remap(p, 0.64, 0.86));
+      /* State 3 — chat shrinks + shifts */
+      const p3 = trackEase('s3')(remap(p, C.s3Start, C.s3Start + C.s3Dur));
       const chatScale  = 1 - p3 * 0.40;
       const chatShiftX = p3 * visual.offsetWidth * 0.293;
-      chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) scale(${chatScale})`;
+      chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) translateY(${chatInitY}px) scale(${chatScale})`;
 
-      /* ── State 2→3: workspace slides up from viewport bottom ── */
-      const p4ws = easeFn(remap(pws, 0.70, 0.86));
+      /* Workspace */
+      const p4ws = trackEase('ws')(remap(pws, C.wsStart, C.wsStart + C.wsDur));
       const fromViewportBottom = window.innerHeight - visual.getBoundingClientRect().top;
       workspace.style.transform = `translateX(-50%) translateY(${(1 - p4ws) * fromViewportBottom}px)`;
 
-      /* ── Subtitle: new chunks slide in from below; line compensates for width ── */
-      const t12 = remap(p, 0.28, 0.52);
-      const t23 = remap(p, 0.64, 0.86);
-      clip2.style.transform = `translateY(${(1 - t12) * 110}%)`;
-      clip3.style.transform = `translateY(${(1 - t23) * 110}%)`;
-      const c2 = subClip2El.offsetWidth;
-      const c3 = subClip3El.offsetWidth;
-      subLine.style.transform = `translateX(${(c2 * (1 - t12) + c3 * (1 - t23)) / 2}px)`;
-
     } else {
-      /* Mobile: single combined clip slides in, no X compensation needed */
-      chatStack.style.transform = '';
-      subLine.style.transform = '';
-      const t12m = remap(p, 0.28, 0.50);
-      if (subClipMEl && clipM) {
-        subClipMEl.style.height = (t12m * subClipMEl.scrollHeight) + 'px';
-        clipM.style.transform = `translateY(${(1 - t12m) * 110}%)`;
-      }
+      chatStack.style.transform = `translateY(${chatInitY}px)`;
     }
+
+    /* Title swap — both desktop and mobile */
+    const tSwap = trackEase('titleSwap')(remap(p, C.titleSwapStart, C.titleSwapStart + C.titleSwapDur));
+    const tExit = remap(p, C.titleSwapStart, C.titleSwapStart + C.titleSwapDur * 0.5);
+    subText0.style.opacity = 1 - tExit;
+    subText1.style.opacity = tSwap;
+    /* Same slide on both desktop and mobile; mask (overflow:hidden) only on desktop */
+    subText0.style.transform = `translateY(${-tSwap * 40}%)`;
+    subText1.style.transform = `translateY(calc(-50% + ${(1 - tSwap) * 60}%))`;
   }
 
   /* ── rAF loop — lerp both currentP values each frame ── */
   (function loop() {
+    targetP = scrollProgress();
+    if (!_rafReady) {
+      /* First frame: browser has restored scroll — snap to avoid lerp from 0 */
+      currentP   = targetP;
+      currentPws = targetP;
+      _rafReady  = true;
+    }
     currentP   += (targetP - currentP)   * window.LERP;
     currentPws += (targetP - currentPws) * window.LERP_WS;
+    window._dbgP   = currentP;
+    window._dbgPws = currentPws;
     tick(currentP, currentPws);
     requestAnimationFrame(loop);
   })();
+</script>
+
+<!-- ─── PROMPTS MARQUEE ─── -->
+<script>
+(function () {
+  /* Each .prompts__belt has 8 chips = 4 unique + 4 duplicate (see HTML).
+     halfWidth = half the belt = width of one full non-repeating set.
+     Rows alternate direction: LEFT / RIGHT / LEFT
+     Wrap logic:
+       LEFT  → pos decreasing; when pos <= -halfWidth: pos += halfWidth
+       RIGHT → pos increasing; when pos >= 0:          pos -= halfWidth  */
+
+  var BASE_SPEED   = 0.25;  /* px per frame at rest */
+  var SCROLL_BOOST = 0.3;   /* extra speed per px of scroll velocity */
+
+  /* Direction per row: -1 = left, +1 = right */
+  var DIRS    = [-1, 1, -1];
+  /* Starting offset as fraction of halfWidth (visual stagger so rows show different chips) */
+  var OFFSETS = [0, 0.6, 0.35];
+
+  var tracks = Array.from(document.querySelectorAll('.prompts__track'));
+  var belts  = tracks.map(function (t) { return t.querySelector('.prompts__belt'); });
+
+  /* Measure after layout */
+  var halfWidths = belts.map(function (b) { return b.offsetWidth / 2; });
+
+  /* Init positions */
+  var positions = belts.map(function (_, i) {
+    /* LEFT rows start at negative offset; RIGHT row starts at -(hw - offset) so it
+       scrolls rightward toward 0 and wraps correctly */
+    return DIRS[i] === -1
+      ? -(halfWidths[i] * OFFSETS[i])   /* left row: 0 or partway into the set */
+      : -(halfWidths[i] * OFFSETS[i]);  /* right row: same formula, wraps at 0 */
+  });
+
+  var lastScrollY = window.scrollY;
+  var scrollVel   = 0;
+
+  (function loop() {
+    var sy   = window.scrollY;
+    scrollVel   = sy - lastScrollY;
+    lastScrollY = sy;
+
+    var boost = Math.abs(scrollVel) * SCROLL_BOOST;
+    var speed = BASE_SPEED + boost;
+
+    belts.forEach(function (belt, i) {
+      var hw  = halfWidths[i];
+      positions[i] += DIRS[i] * speed;
+
+      /* Seamless wrap */
+      if (DIRS[i] === -1 && positions[i] <= -hw) positions[i] += hw;  /* left */
+      if (DIRS[i] ===  1 && positions[i] >= 0)   positions[i] -= hw;  /* right */
+
+      belt.style.transform = 'translateX(' + positions[i] + 'px)';
+    });
+
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+
+<!-- ╔═══════════════════════════════════════╗
+     ║  DEBUG PANEL  (dev only, not in embed) ║
+     ╚═══════════════════════════════════════╝ -->
+<script src="debug/panel.js"></script>
+<script>
+/* styles now in debug/panel.css, logic in debug/panel.js */
+(function () {
+  var C  = function () { return window.C; };
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
+
+  DebugPanel.init({
+    blocks: [
+
+      /* ══════════════════════════════════════════
+         BLOCK 1 — Promo (scroll animation)
+      ══════════════════════════════════════════ */
+      {
+        label: 'Promo',
+        getP:   function () { return window._dbgP   || 0; },
+        getPws: function () { return window._dbgPws || 0; },
+
+        tracks: [
+          /* ── Entry ── */
+          { key: 'entry', label: 'Entry', color: '#59DBFF',
+            getS: function () { return C().entryStart; },
+            getE: function () { return C().entryEnd; },
+            setS: function (v) { C().entryStart = r2(v); },
+            setE: function (v) { C().entryEnd   = r2(v); },
+            ease:    function () { return C().eases.entry; },
+            setEase: function (e) { C().eases.entry = e; },
+            inP: function (p) { return remap(p, C().entryStart, C().entryEnd); } },
+
+          /* ── Msg 1 move ── */
+          { key: 'msg1', label: 'Msg 1', color: '#04DE00',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1MoveDur; },
+            setS: function (v) { C().msg1Start   = r2(v); },
+            setE: function (v) { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); },
+            ease:    function () { return C().eases.msg1; },
+            setEase: function (e) { C().eases.msg1 = e; },
+            inP: function (p) { return remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur); } },
+
+          /* ── Msg 1 fade ── */
+          { key: 'msg1fade', label: 'Fade 1', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg1Start',
+            note: 'opacity only · start = Msg 1 start',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg1FadeDur = r2(Math.max(0.005, v - C().msg1Start)); } },
+
+          /* ── Msg 2 move ── */
+          { key: 'msg2', label: 'Msg 2', color: '#04DE0099',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2MoveDur; },
+            setS: function (v) { C().msg2Start   = r2(v); },
+            setE: function (v) { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); },
+            ease:    function () { return C().eases.msg2; },
+            setEase: function (e) { C().eases.msg2 = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur); } },
+
+          /* ── Msg 2 fade ── */
+          { key: 'msg2fade', label: 'Fade 2', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg2Start',
+            note: 'opacity only · start = Msg 2 start',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg2FadeDur = r2(Math.max(0.005, v - C().msg2Start)); } },
+
+          /* ── State 3 ── */
+          { key: 's3', label: 'State 3', color: '#FFE243',
+            getS: function () { return C().s3Start; },
+            getE: function () { return C().s3Start + C().s3Dur; },
+            setS: function (v) { C().s3Start = r2(v); },
+            setE: function (v) { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); },
+            ease:    function () { return C().eases.s3; },
+            setEase: function (e) { C().eases.s3 = e; },
+            inP: function (p) { return remap(p, C().s3Start, C().s3Start + C().s3Dur); } },
+
+          /* ── Workspace ── */
+          { key: 'ws', label: 'WS', color: '#FF7700',
+            getS: function () { return C().wsStart; },
+            getE: function () { return C().wsStart + C().wsDur; },
+            setS: function (v) { C().wsStart = r2(v); },
+            setE: function (v) { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); },
+            ease:    function () { return C().eases.ws; },
+            setEase: function (e) { C().eases.ws = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur); } },
+
+          /* ── Title swap ── */
+          { key: 'titleSwap', label: 'Title', color: '#E879F9',
+            getS: function () { return C().titleSwapStart; },
+            getE: function () { return C().titleSwapStart + C().titleSwapDur; },
+            setS: function (v) { C().titleSwapStart = r2(v); },
+            setE: function (v) { C().titleSwapDur = r2(Math.max(0.01, v - C().titleSwapStart)); },
+            ease:    function () { return C().eases.titleSwap; },
+            setEase: function (e) { C().eases.titleSwap = e; },
+            inP: function (p) { return remap(p, C().titleSwapStart, C().titleSwapStart + C().titleSwapDur); } },
+        ],
+
+        sliders: [
+          { label: 'LERP (slow)', get: function () { return window.LERP; },   set: function (v) { window.LERP    = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'LERP_WS',    get: function () { return window.LERP_WS; }, set: function (v) { window.LERP_WS = v; }, min: 0.01, max: 0.99, step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'Scroll ×',   get: function () { return C().scrollLength; }, set: function (v) { C().scrollLength = v; window.applyScrollLength(); }, min: 1.5, max: 6, step: 0.1, fmt: function (v) { return v.toFixed(1) + '×'; } },
+        ],
+
+        onCopy: function () {
+          var Cv = window.C, E = Cv.eases;
+          var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+          return 'window.C = {\n' +
+            '  entryStart: ' + Cv.entryStart + ',  entryEnd: ' + Cv.entryEnd + ',  entryDist: ' + Cv.entryDist + ',\n' +
+            '  msg1Start: ' + Cv.msg1Start + ',  msg1MoveDur: ' + Cv.msg1MoveDur + ',  msg1FadeDur: ' + Cv.msg1FadeDur + ',  msg1Float: ' + Cv.msg1Float + ',\n' +
+            '  msg2Start: ' + Cv.msg2Start + ',  msg2MoveDur: ' + Cv.msg2MoveDur + ',  msg2FadeDur: ' + Cv.msg2FadeDur + ',  msg2Float: ' + Cv.msg2Float + ',\n' +
+            '  s3Start: ' + Cv.s3Start + ',  s3Dur: ' + Cv.s3Dur + ',  wsStart: ' + Cv.wsStart + ',  wsDur: ' + Cv.wsDur + ',\n' +
+            '  titleSwapStart: ' + Cv.titleSwapStart + ',  titleSwapDur: ' + Cv.titleSwapDur + ',  scrollLength: ' + Cv.scrollLength + ',\n' +
+            '  eases: {\n' +
+            '    entry:     ' + fe(E.entry) + ',\n' +
+            '    msg1:      ' + fe(E.msg1) + ',\n' +
+            '    msg2:      ' + fe(E.msg2) + ',\n' +
+            '    s3:        ' + fe(E.s3) + ',\n' +
+            '    ws:        ' + fe(E.ws) + ',\n' +
+            '    titleSwap: ' + fe(E.titleSwap) + ',\n' +
+            '  },\n};\n' +
+            'window.LERP    = ' + window.LERP + ';\n' +
+            'window.LERP_WS = ' + window.LERP_WS + ';';
+        },
+      },
+
+    ], /* end blocks */
+  });
+  document.getElementById('dbg').classList.add('collapsed');
+})();
 </script>
 
 
