@@ -282,9 +282,7 @@
 
     .hero__btn {
       width: 100%;
-      min-height: 3.75rem;          /* 60px on mobile */
-      border-radius: var(--radius-md); /* 12px on mobile per Figma */
-      font-size: 1.125rem;          /* 18px on mobile */
+      /* min-height, border-radius, font-size handled by .btn-s mobile rule in button.css */
     }
   }
 
@@ -937,7 +935,6 @@
   ───────────────────────────────────────── */
   .vision {
     padding-top: var(--space-xl);
-    padding-bottom: var(--space-xl);
   }
 
   .vision .container {
@@ -954,12 +951,10 @@
   }
 
   .vision__cards {
-    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0;
-    overflow: clip;
+    gap: var(--space);   /* 24px между карточками */
+    width: 100%;
   }
 
   .vision__copilot {
@@ -971,25 +966,23 @@
     align-items: center;
     gap: var(--space-md);
     width: 100%;
+    height: 70svh;
     color: var(--color-text-inverted);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-    transform-origin: top center;
-    will-change: transform;
   }
 
   .vision__copilot h2 { margin: 0; }
 
   .vision__copilot-icon {
-    width: 15.5625rem;   /* 249px */
-    height: 15.0625rem;  /* 241px */
-    flex-shrink: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
   }
 
   .vision__copilot-icon img {
-    width: 100%;
-    height: 100%;
+    width: 15.5625rem;   /* 249px */
+    height: 15.0625rem;  /* 241px */
     object-fit: contain;
   }
 
@@ -1003,10 +996,6 @@
     gap: var(--space-md);
     width: 100%;
     color: var(--color-text);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 2;                /* sits above copilot */
-    will-change: transform;
   }
 
   .vision__agent h2 { margin: 0; }
@@ -1079,6 +1068,45 @@
     }
 
   }
+
+  /* ─────────────────────────────────────────
+     CTA LAST  (Figma 348:3061)
+  ───────────────────────────────────────── */
+
+  .cta-last {
+    padding-block: var(--space-xl);
+  }
+
+  .cta-last .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);           /* 16px between all elements */
+    text-align: center;
+  }
+
+  .cta-last__heading {
+    max-width: 66.19rem;            /* 1059px */
+    margin: 0;
+  }
+
+  .cta-last__sub {
+    color: var(--color-text-grey);
+    max-width: 34.25rem;            /* 548px */
+  }
+
+  .cta-last__btn {
+    width: clamp(17.5rem, 31.25vw, 25rem); /* 280→400px fluid, matches hero btn */
+    margin-top: var(--space-xs);    /* extra 8px gap before button */
+  }
+
+  @media (max-width: 767px) {
+    .cta-last__heading,
+    .cta-last__sub { max-width: 100%; }
+
+    .cta-last__btn { width: 100%; }
+  }
+
 </style>
 </head>
 <body>
@@ -1729,6 +1757,39 @@
   </div>
 </section>
 
+<!-- ===================== VISION ===================== -->
+<section class="vision">
+  <div class="container">
+    <p class="vision__subtitle t-para-lg">The first step toward a bigger vision</p>
+    <div class="vision__cards">
+      <div class="vision__copilot">
+        <h2 class="t-h2">Today's co-pilot</h2>
+        <div class="vision__copilot-icon">
+          <img src="images/icon ai.svg" alt="AI cursor icon">
+        </div>
+      </div>
+      <div class="vision__agent">
+        <h2 class="t-h2">Tomorrow's agent</h2>
+        <p class="t-para-xl vision__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
+        <div class="vision__agent-ill">
+          <img src="images/agent-ill.svg" alt="Agent illustration">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA LAST  (Figma 348:3061) ===================== -->
+<section class="cta-last">
+  <div class="container">
+    <h2 class="t-h2 cta-last__heading">Next-level performance marketing on autopilot</h2>
+    <p class="t-para-lg cta-last__sub">Your goals. Your context. Cross-platform workflows that get you there automatically. Safe.</p>
+    <button class="btn btn-default btn-s cta-last__btn">Apply now</button>
+  </div>
+</section>
+
+<div class="test-block t-para-lg">Block after — 1200px</div>
+
 <section class="promo">
   <div class="promo__sticky">
 
@@ -1754,28 +1815,6 @@
   </div>
 </section>
 
-<!-- ===================== VISION ===================== -->
-<section class="vision">
-  <div class="container">
-    <p class="vision__subtitle t-para-lg">The first step toward a bigger vision</p>
-    <div class="vision__cards" id="visionCards">
-      <div class="vision__copilot" id="visionCopilot">
-        <h2 class="t-h2">Today's co-pilot</h2>
-        <div class="vision__copilot-icon">
-          <img src="images/icon ai.svg" alt="AI cursor icon">
-        </div>
-      </div>
-      <div class="vision__agent" id="visionAgent">
-        <h2 class="t-h2">Tomorrow's agent</h2>
-        <p class="t-para-xl vision__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
-        <div class="vision__agent-ill">
-          <img src="images/agent-ill.svg" alt="Agent illustration">
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <script>
   const section      = document.querySelector('.promo');
   const visual       = document.querySelector('.promo__visual');
@@ -1795,6 +1834,7 @@
     subText1.classList.remove('promo__sub-text--measuring');
   }
   sizeSwapContainer();
+  document.fonts.ready.then(sizeSwapContainer);
 
   window.addEventListener('resize', sizeSwapContainer);
 
@@ -1848,6 +1888,7 @@
     section.style.height = (window.C.scrollLength * 100) + 'vh';
   };
   window.applyScrollLength();
+
   /* cubic-bezier solver — same as CSS cubic-bezier() */
   function makeBezier(x1, y1, x2, y2) {
     return function(p) {
@@ -1942,8 +1983,6 @@
     requestAnimationFrame(loop);
   })();
 </script>
-
-<div class="test-block t-para-lg">Block after — 1200px</div>
 
 <!-- ─── PROMPTS MARQUEE ─── -->
 <script>
@@ -2134,152 +2173,12 @@
         },
       },
 
-      /* ══════════════════════════════════════════
-         BLOCK 2 — Vision (card overlap animation)
-      ══════════════════════════════════════════ */
-      {
-        label:  'Vision',
-        getP:   function () { return window._visionP || 0; },
-        pRange: [0, 1],
-
-        tracks: [
-          /* ── Agent slide ── */
-          { key: 'agent', label: 'Agent', color: '#FF7700',
-            getS: function () { return window.VC.agentS; },
-            getE: function () { return window.VC.agentE; },
-            setS: function (v) { window.VC.agentS = Math.round(v * 100) / 100; },
-            setE: function (v) { window.VC.agentE = Math.round(v * 100) / 100; },
-            ease:    function () { return window.VC.eases.agent; },
-            setEase: function (e) { window.VC.eases.agent = e; },
-            inP: function (p) { return window.visionEase('agent')(remap(p, window.VC.agentS, window.VC.agentE)); } },
-
-          /* ── Copilot scale ── */
-          { key: 'scale', label: 'Scale', color: '#59DBFF',
-            getS: function () { return window.VC.scaleS; },
-            getE: function () { return window.VC.scaleE; },
-            setS: function (v) { window.VC.scaleS = Math.round(v * 100) / 100; },
-            setE: function (v) { window.VC.scaleE = Math.round(v * 100) / 100; },
-            ease:    function () { return window.VC.eases.scale; },
-            setEase: function (e) { window.VC.eases.scale = e; },
-            inP: function (p) { return window.visionEase('scale')(remap(p, window.VC.scaleS, window.VC.scaleE)); } },
-        ],
-
-        sliders: [
-          { label: 'Scale end',    get: function () { return window.VC.scaleEnd; },    set: function (v) { window.VC.scaleEnd    = v; }, min: 0.5,  max: 1.0,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
-          { label: 'Overlap %',    get: function () { return window.VC.overlapFrac; }, set: function (v) { window.VC.overlapFrac = v; window.visionMeasure && window.visionMeasure(); }, min: 0, max: 1.5, step: 0.05, fmt: function (v) { return Math.round(v * 100) + '%'; } },
-          { label: 'Peek px',      get: function () { return window.VC.peekPx; },      set: function (v) { window.VC.peekPx      = v; window.visionMeasure && window.visionMeasure(); }, min: 0,    max: 200,  step: 4,    fmt: function (v) { return Math.round(v) + 'px'; } },
-          { label: 'Scroll start', get: function () { return window.VC.scrollStart; }, set: function (v) { window.VC.scrollStart = v; }, min: 0,    max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2); } },
-          { label: 'Scroll range', get: function () { return window.VC.scrollRange; }, set: function (v) { window.VC.scrollRange = v; }, min: 0.1,  max: 2.0,  step: 0.05, fmt: function (v) { return v.toFixed(2); } },
-          { label: 'LERP',         get: function () { return window.VC.lerp; },        set: function (v) { window.VC.lerp        = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
-        ],
-
-        onCopy: function () {
-          var V  = window.VC;
-          var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
-          return 'window.VC = {\n' +
-            '  scrollStart:  ' + V.scrollStart  + ',\n' +
-            '  scrollRange:  ' + V.scrollRange  + ',\n' +
-            '  scaleEnd:     ' + V.scaleEnd     + ',\n' +
-            '  overlapFrac:  ' + V.overlapFrac  + ',\n' +
-            '  peekPx:       ' + V.peekPx       + ',\n' +
-            '  lerp:         ' + V.lerp         + ',\n' +
-            '  agentS: ' + V.agentS + ',  agentE: ' + V.agentE + ',\n' +
-            '  scaleS: ' + V.scaleS + ',  scaleE: ' + V.scaleE + ',\n' +
-            '  eases: {\n' +
-            '    agent: ' + fe(V.eases.agent) + ',\n' +
-            '    scale: ' + fe(V.eases.scale) + ',\n' +
-            '  },\n' +
-            '};';
-        },
-      },
-
     ], /* end blocks */
   });
   document.getElementById('dbg').classList.add('collapsed');
 })();
 </script>
 
-<!-- ── Vision scroll animation ── -->
-<script>
-/* Tuneable config — live-editable via Debug Panel "Vision" block */
-window.VC = {
-  scrollStart:  0.35,  /* fraction of vh where animation begins (section top at N*vh) */
-  scrollRange:  0.85,  /* fraction of vh over which animation plays */
-  scaleEnd:     0.83,  /* copilot scale when agent fully overlaps (~1032/1232 from Figma) */
-  overlapFrac:  0.7,   /* how much of copilotH the agent overlaps at end (0–1) */
-  peekPx:       200,   /* px of agent visible at the bottom before animation starts */
-  lerp:         0.07,  /* LERP smoothing */
-  /* per-track timeline positions within 0..1 progress */
-  agentS: 0.08, agentE: 0.72,  /* agent slide window */
-  scaleS: 0.3,  scaleE: 0.88,  /* copilot shrink window */
-  /* per-track cubic-bezier [x1, y1, x2, y2] */
-  eases: {
-    agent: [0.4, 0, 0.2, 1],
-    scale: [0.4, 0, 0.2, 1],
-  },
-};
-(function () {
-  var copilot  = document.getElementById('visionCopilot');
-  var agent    = document.getElementById('visionAgent');
-  var section  = document.querySelector('.vision');
-  if (!copilot || !agent || !section) return;
-
-  var agentInitTY = 0;
-  var agentEndTY  = 0;
-  var currentP    = 0;
-  var _rafReady   = false;
-
-  /* Per-track bezier cache — reuses global makeBezier() from promo script */
-  var _vEaseCache = {};
-  window.visionEase = function (name) {
-    var e   = window.VC.eases[name];
-    var key = e[0] + ',' + e[1] + ',' + e[2] + ',' + e[3];
-    if (!_vEaseCache[name] || _vEaseCache[name].key !== key) {
-      _vEaseCache[name] = { key: key, fn: makeBezier(e[0], e[1], e[2], e[3]) };
-    }
-    return _vEaseCache[name].fn;
-  };
-
-  function measure() {
-    var copilotH = copilot.offsetHeight;
-    var agentH   = agent.offsetHeight;
-    agentInitTY  = agentH - window.VC.peekPx;
-    agentEndTY   = -(copilotH * window.VC.overlapFrac + 24); /* 24px = --space = 1.5rem */
-  }
-  /* Exposed so debug panel sliders can trigger remeasure when overlapFrac / peekPx change */
-  window.visionMeasure = measure;
-
-  function getProgress() {
-    var rect  = section.getBoundingClientRect();
-    var vh    = window.innerHeight;
-    var start = vh * window.VC.scrollStart;
-    var range = vh * window.VC.scrollRange;
-    return Math.max(0, Math.min(1, (start - rect.top) / range));
-  }
-
-  function tick(p) {
-    var tAgent = window.visionEase('agent')(remap(p, window.VC.agentS, window.VC.agentE));
-    var tScale = window.visionEase('scale')(remap(p, window.VC.scaleS, window.VC.scaleE));
-    var ty     = agentInitTY + (agentEndTY - agentInitTY) * tAgent;
-    var scale  = 1 - (1 - window.VC.scaleEnd) * tScale;
-    agent.style.transform   = 'translateY(' + ty + 'px)';
-    copilot.style.transform = 'scale(' + scale + ')';
-  }
-
-  measure();
-
-  (function loop() {
-    var target = getProgress();
-    if (!_rafReady) { currentP = target; _rafReady = true; }
-    currentP += (target - currentP) * window.VC.lerp;
-    window._visionP = currentP;
-    tick(currentP);
-    requestAnimationFrame(loop);
-  })();
-
-  window.addEventListener('resize', measure);
-})();
-</script>
 
 </body>
 </html>

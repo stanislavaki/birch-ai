@@ -47,3 +47,12 @@
   background: var(--color-accent-purple);
   border-color: var(--color-accent-purple);
 }
+
+/* ── Mobile ≤767px: btn-s shrinks to 60px tall, smaller radius + font ── */
+@media (max-width: 767px) {
+  .btn-s {
+    min-height: 3.75rem;             /* 60px */
+    border-radius: var(--radius-md); /* 12px */
+    font-size: 1.125rem;             /* 18px */
+  }
+}
