@@ -23,8 +23,8 @@
     align-items: center;
     justify-content: center;
     color: var(--color-text-grey);
-    border-top: 1px solid #2a2a2a;
-    border-bottom: 1px solid #2a2a2a;
+    border-top: 1px solid var(--color-bg-grey);
+    border-bottom: 1px solid var(--color-bg-grey);
   }
 
   /* ─────────────────────────────────────────
@@ -163,6 +163,11 @@
     /* JS controls transform + opacity */
   }
 
+  /* picture is transparent to flex layout so img stays a direct flex child */
+  .hiw__slide picture {
+    display: contents;
+  }
+
   .hiw__slide img {
     max-width: 100%;
     max-height: 100%;
@@ -186,7 +191,7 @@
 
   .hiw__platform-icons {
     display: flex;
-    gap: 0.33rem;
+    gap: var(--space-xxs);
   }
 
   .hiw__platform-icons img {
@@ -205,6 +210,123 @@
     .hiw__step-title { font-size: var(--text-h5-size); line-height: var(--text-h5-lh); }
     .hiw__step-desc  { font-size: var(--text-body-size); line-height: var(--text-body-lh); }
   }
+
+  /* ─────────────────────────────────────────
+     MOBILE (≤767px) — horizontal carousel
+  ───────────────────────────────────────── */
+
+  /* Mobile text block (top of card) — hidden on desktop */
+  .hiw__mob-text {
+    display: none;
+  }
+
+  /* Mobile nav dots — hidden on desktop */
+  .hiw__mob-dots {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+
+    /* Disable scroll-driven sticky */
+    .hiw { height: auto !important; }
+
+    .hiw__sticky {
+      position: static;
+      height: auto;
+      overflow: visible;
+    }
+
+    .hiw__sticky .container {
+      flex-direction: column;
+      align-items: stretch;
+      padding-block: var(--space-lg);
+    }
+
+    /* Card: vertical column */
+    .hiw__card {
+      flex-direction: column;
+      height: auto;
+    }
+
+    /* Hide desktop accordion */
+    .hiw__accordion { display: none; }
+
+    /* Mobile text block */
+    .hiw__mob-text {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-main);
+      padding: var(--space-sm) var(--space-sm) var(--pad-card);
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      margin: var(--space-xs) var(--space-xs) 0;
+      flex-shrink: 0;
+    }
+
+    .hiw__mob-num {
+      flex-shrink: 0;
+      color: var(--color-text);
+    }
+
+    .hiw__mob-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-sm);
+    }
+
+    .hiw__mob-title,
+    .hiw__mob-desc { margin: 0; color: var(--color-text); }
+
+    /* Visual: full width, fixed aspect ratio */
+    .hiw__visual {
+      flex: 0 0 auto;
+      width: 100%;
+      aspect-ratio: 280 / 270;
+    }
+
+    /* Slides: horizontal instead of vertical */
+    .hiw__slide {
+      padding: var(--pad-card);
+    }
+
+    /* Coming soon bar: full-width, left-aligned, dark bg */
+    .hiw__coming-soon {
+      left: var(--space-xs);
+      right: var(--space-xs);
+      bottom: var(--space-xs);
+      background: var(--color-bg);
+      border-radius: var(--radius-md);
+      padding: var(--space-xs);
+      justify-content: flex-start;
+    }
+
+    /* Icons before text on mobile */
+    .hiw__platform-icons { order: -1; }
+
+    /* Nav dots */
+    .hiw__mob-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: var(--space-sm) 0 0;
+    }
+
+    .hiw__mob-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--color-text-grey);
+      transition: background 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .hiw__mob-dot.is-active {
+      background: var(--color-text);
+    }
+  }
 </style>
 </head>
 <body>
@@ -215,6 +337,15 @@
   <div class="hiw__sticky">
     <div class="container">
     <div class="hiw__card" id="hiwCard">
+
+      <!-- Mobile: text block (top of card, updated by JS) -->
+      <div class="hiw__mob-text" id="hiwMobText" aria-live="polite">
+        <span class="hiw__mob-num t-h5"></span>
+        <div class="hiw__mob-body">
+          <p class="hiw__mob-title t-h5"></p>
+          <p class="hiw__mob-desc t-body"></p>
+        </div>
+      </div>
 
       <!-- Left: accordion -->
       <div class="hiw__accordion" id="hiwAccordion">
@@ -264,12 +395,35 @@
 
       <!-- Right: slides -->
       <div class="hiw__visual" id="hiwVisual">
-        <div class="hiw__slide" data-idx="0"><img src="images/stage_how-it-works_01.png" alt="Connect your Google Drive folders" /></div>
-        <div class="hiw__slide" data-idx="1"><img src="images/stage_how-it-works_02.jpg" alt="Connect your Google Spreadsheet" /></div>
-        <div class="hiw__slide" data-idx="2"><img src="images/stage_how-it-works_03.jpg" alt="Filter what to launch by status" /></div>
-        <div class="hiw__slide" data-idx="3"><img src="images/stage_how-it-works_04.jpg" alt="Choose how ads are built" /></div>
+        <div class="hiw__slide" data-idx="0">
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/stage_how-it-works_01_mob.png" />
+            <img src="images/stage_how-it-works_01.png" alt="Connect your Google Drive folders" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="1">
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/stage_how-it-works_02_mob.jpg" />
+            <img src="images/stage_how-it-works_02.jpg" alt="Connect your Google Spreadsheet" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="2">
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/stage_how-it-works_03_mob.jpg" />
+            <img src="images/stage_how-it-works_03.jpg" alt="Filter what to launch by status" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="3">
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/stage_how-it-works_04_mob.jpg" />
+            <img src="images/stage_how-it-works_04.jpg" alt="Choose how ads are built" />
+          </picture>
+        </div>
         <div class="hiw__slide" data-idx="4">
-          <img src="images/stage_how-it-works_05.jpg" alt="Push to ad accounts automatically" />
+          <picture>
+            <source media="(max-width: 767px)" srcset="images/stage_how-it-works_05_mob.jpg" />
+            <img src="images/stage_how-it-works_05.jpg" alt="Push to ad accounts automatically" />
+          </picture>
           <div class="hiw__coming-soon">
             <span class="hiw__coming-soon-text t-body">More platforms coming soon</span>
             <div class="hiw__platform-icons">
@@ -280,9 +434,19 @@
         </div>
       </div>
 
+    </div><!-- /.hiw__card -->
+
+    <!-- Mobile nav dots (outside card, below it) -->
+    <div class="hiw__mob-dots" id="hiwMobDots" aria-hidden="true">
+      <span class="hiw__mob-dot is-active"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
     </div>
-    </div>
-  </div>
+
+    </div><!-- /.container -->
+  </div><!-- /.hiw__sticky -->
 </section>
 
 <div class="test-block t-para-lg">Block after</div>
@@ -292,6 +456,7 @@
 
   var STEP_COUNT  = 5;
   var BG_COLORS   = ['#6d0092', '#005019', '#dbe96d', '#dbe96d', '#1877f2'];
+  var _mobMode    = false; /* set to true on mobile — pauses LERP loop */
 
   var section   = document.getElementById('hiw');
   var visual    = document.getElementById('hiwVisual');
@@ -328,6 +493,7 @@
 
   /* Apply scroll length to section height */
   window.applyScrollLength = function () {
+    if (_mobMode) return; /* CSS height:auto !important handles mobile */
     section.style.height = (window.C.scrollLength * 100) + 'vh';
   };
   window.applyScrollLength();
@@ -406,6 +572,7 @@
   var _transReady  = false;
 
   requestAnimationFrame(function loop() {
+    if (_mobMode) { requestAnimationFrame(loop); return; } /* mobile handles its own carousel */
     targetP = scrollProgress();
     if (!_rafReady) {
       currentP  = targetP;   /* snap: browser has restored scroll by first rAF */
@@ -459,6 +626,123 @@
     updateHighlight();
     requestAnimationFrame(function () { highlight.style.transition = ''; });
   }).observe(document.getElementById('hiwAccordion'));
+
+  /* ─────────────────────────────────────────
+     MOBILE CAROUSEL
+  ───────────────────────────────────────── */
+
+  var MOB          = window.matchMedia('(max-width: 767px)');
+  var _mobIdx      = 0;
+  var _mobTimer    = null;
+  var MOB_INTERVAL = 5000; /* 5 s auto-advance */
+
+  /* Collect text from accordion (single source of truth) */
+  var stepData = steps.map(function (btn) {
+    return {
+      num:   btn.querySelector('.hiw__step-num').textContent,
+      title: btn.querySelector('.hiw__step-title').textContent,
+      desc:  btn.querySelector('.hiw__step-desc').textContent,
+    };
+  });
+
+  var mobTextEl  = document.getElementById('hiwMobText');
+  var mobNumEl   = mobTextEl && mobTextEl.querySelector('.hiw__mob-num');
+  var mobTitleEl = mobTextEl && mobTextEl.querySelector('.hiw__mob-title');
+  var mobDescEl  = mobTextEl && mobTextEl.querySelector('.hiw__mob-desc');
+  var mobDots    = Array.prototype.slice.call(document.querySelectorAll('.hiw__mob-dot'));
+
+  function mobUpdateText(idx) {
+    if (!mobNumEl) return;
+    mobNumEl.textContent   = stepData[idx].num;
+    mobTitleEl.textContent = stepData[idx].title;
+    mobDescEl.textContent  = stepData[idx].desc;
+  }
+
+  function mobUpdateDots(idx) {
+    mobDots.forEach(function (dot, i) {
+      dot.classList.toggle('is-active', i === idx);
+    });
+  }
+
+  function mobGoTo(idx, animate) {
+    idx      = Math.max(0, Math.min(STEP_COUNT - 1, idx));
+    _mobIdx  = idx;
+
+    slides.forEach(function (slide, i) {
+      if (!animate) slide.style.transition = 'none';
+      slide.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      slide.style.zIndex    = i === idx ? 1 : 0;
+    });
+
+    visual.style.backgroundColor = BG_COLORS[idx];
+    mobUpdateText(idx);
+    mobUpdateDots(idx);
+
+    if (!animate) {
+      requestAnimationFrame(function () {
+        slides.forEach(function (slide) { slide.style.transition = ''; });
+      });
+    }
+  }
+
+  function mobStopTimer() {
+    if (_mobTimer) { clearInterval(_mobTimer); _mobTimer = null; }
+  }
+
+  function mobStartTimer() {
+    mobStopTimer();
+    _mobTimer = setInterval(function () {
+      mobGoTo((_mobIdx + 1) % STEP_COUNT, true);
+    }, MOB_INTERVAL);
+  }
+
+  function mobInitSwipe() {
+    var touchStartX = 0;
+    var touchStartY = 0;
+
+    visual.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      mobStopTimer();
+    }, { passive: true });
+
+    visual.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      var dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        mobGoTo(dx < 0 ? _mobIdx + 1 : _mobIdx - 1, true);
+      }
+      mobStartTimer();
+    }, { passive: true });
+  }
+
+  function destroyMobile() {
+    _mobMode = false;
+    mobStopTimer();
+    /* Restore slides to desktop translateY state via tick() */
+    slides.forEach(function (slide) {
+      slide.style.transform  = '';
+      slide.style.zIndex     = '';
+      slide.style.transition = '';
+    });
+    /* Re-apply section height now that _mobMode is false */
+    window.applyScrollLength();
+  }
+
+  function initMobile() {
+    _mobMode = true;
+    mobGoTo(0, false);
+    /* Re-enable visual bg transition after positions are snapped */
+    requestAnimationFrame(function () { visual.style.transition = ''; });
+    mobInitSwipe();
+    mobStartTimer();
+  }
+
+  if (MOB.matches) { initMobile(); }
+
+  MOB.addEventListener('change', function (e) {
+    if (e.matches) { initMobile(); } else { destroyMobile(); }
+  });
 
 })();
 </script>
