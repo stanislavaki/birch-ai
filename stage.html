@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Stage — How it works</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="debug/panel.css" />
+<style id="hiw-dynamic"></style>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .test-block {
+    height: 50rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  /* ─────────────────────────────────────────
+     HOW IT WORKS SECTION
+  ───────────────────────────────────────── */
+
+  .hiw {
+    /* height set by JS via scrollLength */
+  }
+
+  .hiw__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hiw__sticky .container {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Card */
+  .hiw__card {
+    display: flex;
+    width: 100%;
+    height: clamp(22rem, 80vh, 40rem);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-grey);
+    overflow: hidden;
+  }
+
+  /* ── Left: accordion ── */
+  .hiw__accordion {
+    width: 33.33%;
+    flex-shrink: 0;
+    padding: var(--pad-card);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+  }
+
+  .hiw__highlight {
+    position: absolute;
+    left: var(--pad-card);
+    right: var(--pad-card);
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    pointer-events: none;
+    z-index: 0;
+    /* transition injected by applyTransitions() */
+  }
+
+  .hiw__step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-main);
+    padding: 0.7rem var(--space-sm);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: var(--font);
+    flex: 0 1 auto;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hiw__step.is-active {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .hiw__step-num {
+    flex-shrink: 0;
+    color: var(--color-text-grey);
+  }
+
+  .hiw__step.is-active .hiw__step-num,
+  .hiw__step.is-read   .hiw__step-num { color: var(--color-text); }
+
+  .hiw__step-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .hiw__step-title {
+    color: var(--color-text-grey);
+    margin: 0;
+  }
+
+  .hiw__step.is-active .hiw__step-title,
+  .hiw__step.is-read   .hiw__step-title { color: var(--color-text); }
+
+  .hiw__step-desc {
+    color: var(--color-text);
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+
+  .hiw__step.is-active .hiw__step-desc {
+    max-height: 12rem;
+    opacity: 1;
+    /* transition injected by applyTransitions() */
+  }
+
+  /* ── Right: visual panel ── */
+  .hiw__visual {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    /* background color set by JS */
+  }
+
+  /* Each slide: image slides in from bottom, out to top */
+  .hiw__slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) var(--pad-card);
+    will-change: transform, opacity;
+    /* JS controls transform + opacity */
+  }
+
+  .hiw__slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+    display: block;
+  }
+
+  .hiw__coming-soon {
+    position: absolute;
+    bottom: var(--space-xs);
+    right: var(--space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm);
+  }
+
+  .hiw__coming-soon-text {
+    color: var(--color-text);
+  }
+
+  .hiw__platform-icons {
+    display: flex;
+    gap: 0.33rem;
+  }
+
+  .hiw__platform-icons img {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+  }
+
+  @media (max-width: 1279px) {
+    .hiw__accordion { width: 41.67%; /* 5/12 col */ }
+  }
+
+  @media (max-width: 991px) {
+    .hiw__accordion  { width: 33.33%; /* back to 4/12 col */ }
+    .hiw__step-num,
+    .hiw__step-title { font-size: var(--text-h5-size); line-height: var(--text-h5-lh); }
+    .hiw__step-desc  { font-size: var(--text-body-size); line-height: var(--text-body-lh); }
+  }
+</style>
+</head>
+<body>
+
+<div class="test-block t-para-lg">Block before</div>
+
+<section class="hiw" id="hiw">
+  <div class="hiw__sticky">
+    <div class="container">
+    <div class="hiw__card" id="hiwCard">
+
+      <!-- Left: accordion -->
+      <div class="hiw__accordion" id="hiwAccordion">
+        <div class="hiw__highlight" id="hiwHighlight"></div>
+
+        <button class="hiw__step is-active" data-idx="0">
+          <span class="hiw__step-num t-h4">1.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Connect your Google Drive folders</p>
+            <p class="hiw__step-desc t-para-lg">Turn your Google Drive folders into one library in Stage. Read-only access. Your files stay in Drive, untouched</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="1">
+          <span class="hiw__step-num t-h4">2.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Connect your Google Spreadsheet</p>
+            <p class="hiw__step-desc t-para-lg">Use your planning Sheet: your columns, your statuses, your structure.</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="2">
+          <span class="hiw__step-num t-h4">3.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Filter what to launch by status</p>
+            <p class="hiw__step-desc t-para-lg">Filter by your own statuses — "draft," "ready," "to test," however your team labels them.</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="3">
+          <span class="hiw__step-num t-h4">4.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Choose how ads are built</p>
+            <p class="hiw__step-desc t-para-lg">Create new ads, or duplicate a proven setup and swap new creatives in</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="4">
+          <span class="hiw__step-num t-h4">5.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Push to ad accounts automatically</p>
+            <p class="hiw__step-desc t-para-lg">Your ads are ready to go live. Review and set them live when you're ready</p>
+          </div>
+        </button>
+
+      </div>
+
+      <!-- Right: slides -->
+      <div class="hiw__visual" id="hiwVisual">
+        <div class="hiw__slide" data-idx="0"><img src="images/stage_how-it-works_01.png" alt="Connect your Google Drive folders" /></div>
+        <div class="hiw__slide" data-idx="1"><img src="images/stage_how-it-works_02.jpg" alt="Connect your Google Spreadsheet" /></div>
+        <div class="hiw__slide" data-idx="2"><img src="images/stage_how-it-works_03.jpg" alt="Filter what to launch by status" /></div>
+        <div class="hiw__slide" data-idx="3"><img src="images/stage_how-it-works_04.jpg" alt="Choose how ads are built" /></div>
+        <div class="hiw__slide" data-idx="4">
+          <img src="images/stage_how-it-works_05.jpg" alt="Push to ad accounts automatically" />
+          <div class="hiw__coming-soon">
+            <span class="hiw__coming-soon-text t-body">More platforms coming soon</span>
+            <div class="hiw__platform-icons">
+              <img src="images/stage-hiw-tt.svg" alt="TikTok" />
+              <img src="images/stage-hiw-snap.svg" alt="Snapchat" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+  </div>
+</section>
+
+<div class="test-block t-para-lg">Block after</div>
+
+<script>
+(function () {
+
+  var STEP_COUNT  = 5;
+  var BG_COLORS   = ['#6d0092', '#005019', '#dbe96d', '#dbe96d', '#1877f2'];
+
+  var section   = document.getElementById('hiw');
+  var visual    = document.getElementById('hiwVisual');
+  var highlight = document.getElementById('hiwHighlight');
+  var steps     = Array.prototype.slice.call(document.querySelectorAll('.hiw__step'));
+  var slides    = Array.prototype.slice.call(document.querySelectorAll('.hiw__slide'));
+  var _lastIdx  = -1;
+  var remPx     = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  function updateHighlight() {
+    var active = document.querySelector('.hiw__step.is-active');
+    if (!active) return;
+    highlight.style.top    = (active.offsetTop    / remPx) + 'rem';
+    highlight.style.height = (active.offsetHeight / remPx) + 'rem';
+  }
+
+  /* ── Config ── */
+  window.C = {
+    scrollLength: 5,
+    eases: {
+      slide:     [0.00, 0.00, 0.20, 1.00],
+      highlight: [0.00, 0.00, 0.20, 1.00],
+      desc:      [0.00, 0.00, 0.20, 1.00],
+      bg:        [0.00, 0.00, 0.20, 1.00],
+    },
+    trans: {
+      highlightDur: 0.6,
+      descDur:      0.6,
+      colorDur:     0.5,
+      slideDur:     0.6,
+      bgDur:        0.6,
+    },
+  };
+
+  /* Apply scroll length to section height */
+  window.applyScrollLength = function () {
+    section.style.height = (window.C.scrollLength * 100) + 'vh';
+  };
+  window.applyScrollLength();
+
+  /* Apply CSS transitions from config */
+  window.applyTransitions = function () {
+    var T = window.C.trans, E = window.C.eases;
+    var be = function (e) { return 'cubic-bezier(' + e.join(',') + ')'; };
+    document.getElementById('hiw-dynamic').textContent =
+      '.hiw__highlight { transition: top ' + T.highlightDur + 's ' + be(E.highlight) + ', height ' + T.highlightDur + 's ' + be(E.highlight) + '; }\n' +
+      '.hiw__step.is-active .hiw__step-desc { transition: max-height ' + T.descDur + 's ' + be(E.desc) + ', opacity ' + (Math.round(T.descDur * 0.75 * 100) / 100) + 's ' + be(E.desc) + '; }\n' +
+      '.hiw__step-num, .hiw__step-title { transition: color ' + T.colorDur + 's ease; }\n' +
+      '.hiw__slide { transition: transform ' + T.slideDur + 's ' + be(E.slide) + '; }\n' +
+      '.hiw__visual { transition: background-color ' + T.bgDur + 's ' + be(E.bg) + '; }';
+  };
+  window.applyTransitions();
+
+  /* ── Scroll progress: 0 when sticky starts, 1 when sticky ends ── */
+  function scrollProgress() {
+    var top       = section.getBoundingClientRect().top;
+    var scrollable = section.offsetHeight - window.innerHeight;
+    if (top > 0) return 0;
+    return Math.max(0, Math.min(1, -top / scrollable));
+  }
+
+  function remap(p, lo, hi) {
+    return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
+  }
+  window.remap = remap;
+
+
+  /* ── Render ── */
+  function tick(p) {
+    var frac = p * (STEP_COUNT - 1);
+    var idx  = Math.max(0, Math.min(STEP_COUNT - 1, Math.round(frac)));
+
+    /* ── Accordion states ── */
+    steps.forEach(function (s, i) {
+      s.classList.toggle('is-active', i === idx);
+      s.classList.toggle('is-read',   i < idx);
+    });
+
+    if (idx !== _lastIdx) {
+      _lastIdx = idx;
+      requestAnimationFrame(updateHighlight);
+
+      /* ── Slides: CSS transition handles animation ── */
+      slides.forEach(function (slide, i) {
+        slide.style.transform = i === idx ? 'translateY(0%)' : (i < idx ? 'translateY(-100%)' : 'translateY(100%)');
+        slide.style.zIndex    = i === idx ? 1 : 0;
+      });
+
+      /* ── Background: CSS transition handles animation ── */
+      visual.style.backgroundColor = BG_COLORS[idx];
+    }
+  }
+
+
+  /* ── Init without transitions ── */
+  highlight.style.transition = 'none';
+  slides.forEach(function (slide, i) { slide.style.transition = 'none'; });
+  visual.style.transition = 'none';
+  updateHighlight();
+  slides.forEach(function (slide, i) {
+    slide.style.transform = i === 0 ? 'translateY(0%)' : 'translateY(100%)';
+    slide.style.zIndex    = i === 0 ? 1 : 0;
+  });
+  visual.style.backgroundColor = BG_COLORS[0];
+
+  /* ── LERP loop ── */
+  window.LERP = 0.04;
+
+  var targetP      = 0;
+  var currentP     = 0;
+  var _rafReady    = false;
+  var _transReady  = false;
+
+  requestAnimationFrame(function loop() {
+    targetP = scrollProgress();
+    if (!_rafReady) {
+      currentP  = targetP;   /* snap: browser has restored scroll by first rAF */
+      _rafReady = true;
+    }
+    currentP += (targetP - currentP) * window.LERP;
+    window._dbgP = currentP;
+    tick(currentP);
+    if (!_transReady) {
+      _transReady = true;
+      highlight.style.transition = '';
+      slides.forEach(function (slide) { slide.style.transition = ''; });
+      visual.style.transition = '';
+    }
+    requestAnimationFrame(loop);
+  });
+
+  /* ── Click to jump to a step ── */
+  steps.forEach(function (btn, i) {
+    btn.addEventListener('click', function () {
+      var frac       = i / (STEP_COUNT - 1);
+      var scrollable = section.offsetHeight - window.innerHeight;
+      var oldIdx     = _lastIdx;
+
+      /* Snap background slides (not old, not new) instantly — no animation */
+      slides.forEach(function (slide, j) {
+        if (j !== oldIdx && j !== i) {
+          slide.style.transition = 'none';
+          slide.style.transform  = j < i ? 'translateY(-100%)' : 'translateY(100%)';
+          slide.style.zIndex     = 0;
+        }
+      });
+
+      targetP  = frac;
+      currentP = frac;
+      window.scrollTo(0, section.offsetTop + frac * scrollable);
+
+      /* Re-enable transitions after tick has set positions */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          slides.forEach(function (slide) { slide.style.transition = ''; });
+        });
+      });
+    });
+  });
+
+  /* ── Recalculate highlight on resize (snap, no animation) ── */
+  new ResizeObserver(function () {
+    remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    highlight.style.transition = 'none';
+    updateHighlight();
+    requestAnimationFrame(function () { highlight.style.transition = ''; });
+  }).observe(document.getElementById('hiwAccordion'));
+
+})();
+</script>
+
+<!-- Debug panel (dev only — not in Webflow embed) -->
+<script src="debug/panel.js"></script>
+<script>
+(function () {
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
+
+  DebugPanel.init({
+    getP:   function () { return window._dbgP || 0; },
+    pRange: [0, 1],
+
+    tracks: [
+      { key: 'slide', label: 'Slide', color: '#59DBFF',
+        getS: function () { return 0; }, getE: function () { return 1; },
+        setS: function () {}, setE: function () {},
+        readonlyS: true, readonlyE: true,
+        ease:    function () { return window.C.eases.slide; },
+        setEase: function (e) { window.C.eases.slide = e; window.applyTransitions(); },
+        inP: function (p) { return p; },
+      },
+      { key: 'bg', label: 'BG', color: '#04DE00',
+        getS: function () { return 0; }, getE: function () { return 1; },
+        setS: function () {}, setE: function () {},
+        readonlyS: true, readonlyE: true,
+        ease:    function () { return window.C.eases.bg; },
+        setEase: function (e) { window.C.eases.bg = e; window.applyTransitions(); },
+        inP: function (p) { return p; },
+      },
+      { key: 'highlight', label: 'Highlight', color: '#FFE243',
+        getS: function () { return 0; },
+        getE: function () { return window.C.stepDur; },
+        setS: function () {}, setE: function () {},
+        readonlyS: true, readonlyE: true,
+        hintS: 'follows stepDur', hintE: 'follows stepDur',
+        ease:    function () { return window.C.eases.highlight; },
+        setEase: function (e) { window.C.eases.highlight = e; window.applyTransitions(); },
+        inP: function (p) { return p; },
+      },
+      { key: 'desc', label: 'Desc open', color: '#FF7700',
+        getS: function () { return 0; },
+        getE: function () { return window.C.stepDur; },
+        setS: function () {}, setE: function () {},
+        readonlyS: true, readonlyE: true,
+        hintS: 'follows stepDur', hintE: 'follows stepDur',
+        ease:    function () { return window.C.eases.desc; },
+        setEase: function (e) { window.C.eases.desc = e; window.applyTransitions(); },
+        inP: function (p) { return p; },
+      },
+    ],
+
+    sliders: [
+      { label: 'LERP',      get: function () { return window.LERP; },                   set: function (v) { window.LERP = v; },                                              min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+      { label: 'Scroll ×',  get: function () { return window.C.scrollLength; },         set: function (v) { window.C.scrollLength = v; window.applyScrollLength(); },        min: 2,    max: 10,   step: 0.5,  fmt: function (v) { return v.toFixed(1) + '×'; } },
+      { label: 'Slide dur', get: function () { return window.C.trans.slideDur; },       set: function (v) { window.C.trans.slideDur = v;     window.applyTransitions(); },   min: 0.1,  max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2) + 's'; } },
+      { label: 'BG dur',    get: function () { return window.C.trans.bgDur; },          set: function (v) { window.C.trans.bgDur = v;        window.applyTransitions(); },   min: 0.1,  max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2) + 's'; } },
+      { label: 'HL dur',    get: function () { return window.C.trans.highlightDur; },   set: function (v) { window.C.trans.highlightDur = v; window.applyTransitions(); },   min: 0.1,  max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2) + 's'; } },
+      { label: 'Desc dur',  get: function () { return window.C.trans.descDur; },        set: function (v) { window.C.trans.descDur = v;      window.applyTransitions(); },   min: 0.1,  max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2) + 's'; } },
+      { label: 'Color dur', get: function () { return window.C.trans.colorDur; },       set: function (v) { window.C.trans.colorDur = v;     window.applyTransitions(); },   min: 0.1,  max: 1.5,  step: 0.05, fmt: function (v) { return v.toFixed(2) + 's'; } },
+    ],
+
+    onCopy: function () {
+      var C = window.C, E = C.eases, T = C.trans;
+      var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+      return 'window.C = {\n' +
+        '  scrollLength: ' + C.scrollLength + ',\n' +
+        '  eases: {\n' +
+        '    slide:     ' + fe(E.slide)     + ',\n' +
+        '    highlight: ' + fe(E.highlight) + ',\n' +
+        '    desc:      ' + fe(E.desc)      + ',\n' +
+        '    bg:        ' + fe(E.bg)        + ',\n' +
+        '  },\n' +
+        '  trans: {\n' +
+        '    slideDur:     ' + T.slideDur     + ',\n' +
+        '    bgDur:        ' + T.bgDur        + ',\n' +
+        '    highlightDur: ' + T.highlightDur + ',\n' +
+        '    descDur:      ' + T.descDur      + ',\n' +
+        '    colorDur:     ' + T.colorDur     + ',\n' +
+        '  },\n};\n' +
+        'window.LERP = ' + window.LERP + ';';
+    },
+  });
+
+  document.getElementById('dbg').classList.add('collapsed');
+})();
+</script>
+
+</body>
+</html>
