@@ -461,6 +461,8 @@
   var section   = document.getElementById('hiw');
   var visual    = document.getElementById('hiwVisual');
   var highlight = document.getElementById('hiwHighlight');
+  var card      = document.getElementById('hiwCard');
+  var accordion = document.getElementById('hiwAccordion');
   var steps     = Array.prototype.slice.call(document.querySelectorAll('.hiw__step'));
   var slides    = Array.prototype.slice.call(document.querySelectorAll('.hiw__slide'));
   var _lastIdx  = -1;
@@ -509,7 +511,9 @@
       '.hiw__slide { transition: transform ' + T.slideDur + 's ' + be(E.slide) + '; }\n' +
       '.hiw__visual { transition: background-color ' + T.bgDur + 's ' + be(E.bg) + '; }';
   };
-  window.applyTransitions();
+  /* applyTransitions() is NOT called at page load.
+     It is called in the deferred rAF after the first snap tick,
+     so no CSS transitions fire during scroll-position restoration. */
 
   /* ── Scroll progress: 0 when sticky starts, 1 when sticky ends ── */
   function scrollProgress() {
@@ -552,7 +556,60 @@
   }
 
 
+  /* ── Card auto-height: size to tallest accordion state ── */
+  function sizeCard() {
+    if (_mobMode) return;
+    var accW = accordion.offsetWidth;
+    if (!accW) return;
+
+    /* Off-screen clone — same class/styles, but height:auto + overflow:visible */
+    var clone = accordion.cloneNode(true);
+    clone.style.cssText =
+      'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
+      'width:' + accW + 'px;height:auto;overflow:visible;min-height:0;';
+    document.body.appendChild(clone);
+
+    var cSteps = clone.querySelectorAll('.hiw__step');
+    var cDescs = clone.querySelectorAll('.hiw__step-desc');
+    var maxH   = 0;
+
+    for (var ci = 0; ci < STEP_COUNT; ci++) {
+      /* Set each step as active in turn */
+      cSteps.forEach(function (s, j) {
+        s.classList.toggle('is-active', j === ci);
+        s.classList.toggle('is-read',   j < ci);
+      });
+      /* Force active desc fully open (no max-height cap) */
+      cDescs[ci].style.cssText = 'max-height:none;opacity:1;transition:none;overflow:visible;';
+      var h = clone.scrollHeight;
+      if (h > maxH) maxH = h;
+      cDescs[ci].style.cssText = '';
+    }
+
+    document.body.removeChild(clone);
+    if (!maxH) return;
+
+    /* Clear inline height briefly to read the CSS clamp value */
+    var prevH = card.style.height;
+    card.style.height = '';
+    var clampH = card.offsetHeight;
+    card.style.height = prevH;
+
+    /* Only override if content needs more space than the CSS clamp provides */
+    var finalH = Math.max(maxH, clampH);
+    if (finalH !== clampH) {
+      card.style.height = (finalH / 16) + 'rem';
+    } else {
+      card.style.height = ''; /* Let CSS clamp handle it */
+    }
+  }
+
+  /* Run immediately + after fonts load (font metrics change measured height) */
+  sizeCard();
+  document.fonts.ready.then(sizeCard);
+
   /* ── Init without transitions ── */
+  card.style.opacity = '0'; /* Hide card until snap — prevents wrong-step flash on reload */
   highlight.style.transition = 'none';
   slides.forEach(function (slide, i) { slide.style.transition = 'none'; });
   visual.style.transition = 'none';
@@ -583,9 +640,14 @@
     tick(currentP);
     if (!_transReady) {
       _transReady = true;
-      highlight.style.transition = '';
-      slides.forEach(function (slide) { slide.style.transition = ''; });
-      visual.style.transition = '';
+      card.style.opacity = ''; /* Reveal card — correct state is already set */
+      /* Enable CSS transitions one frame later so the snap-frame renders first */
+      requestAnimationFrame(function () {
+        window.applyTransitions();
+        highlight.style.transition = '';
+        slides.forEach(function (slide) { slide.style.transition = ''; });
+        visual.style.transition = '';
+      });
     }
     requestAnimationFrame(loop);
   });
@@ -619,13 +681,14 @@
     });
   });
 
-  /* ── Recalculate highlight on resize (snap, no animation) ── */
+  /* ── Recalculate highlight + card height on resize (snap, no animation) ── */
   new ResizeObserver(function () {
     remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
     highlight.style.transition = 'none';
     updateHighlight();
     requestAnimationFrame(function () { highlight.style.transition = ''; });
-  }).observe(document.getElementById('hiwAccordion'));
+    if (!_mobMode) { sizeCard(); window.applyScrollLength(); }
+  }).observe(accordion);
 
   /* ─────────────────────────────────────────
      MOBILE CAROUSEL
@@ -725,8 +788,9 @@
       slide.style.zIndex     = '';
       slide.style.transition = '';
     });
-    /* Re-apply section height now that _mobMode is false */
+    /* Re-apply section height + card height for current viewport */
     window.applyScrollLength();
+    sizeCard();
   }
 
   function initMobile() {
