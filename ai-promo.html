@@ -308,7 +308,6 @@
     padding: 2rem var(--pad-card);
     display: flex;
     flex-direction: column;
-    min-height: 30.5rem; /* 488px */
   }
 
   .provepoints__card-title {
@@ -329,8 +328,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--pad-card) 0;
+    padding: var(--space-sm) 0;
     min-height: 0;
+    overflow: hidden;
   }
 
   .provepoints__media img {
@@ -342,14 +342,13 @@
   /* Subgrid: align title / media / desc rows across all three cards */
   @media (min-width: 768px) {
     .provepoints .grid {
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto minmax(12rem, 1fr) auto;
     }
     .provepoints__card {
       grid-row: span 3;
       display: grid;
       grid-template-rows: subgrid;
       min-height: unset;
-      align-content: start;
     }
     .provepoints__card-title {
       min-height: unset;
@@ -375,7 +374,6 @@
     }
     .provepoints__media {
       flex: none;
-      min-height: 15rem;
       padding: var(--space-md) 0;
       margin: var(--space-lg) 0;
     }
@@ -402,6 +400,7 @@
     color: var(--color-text-grey);
     margin: 0;
     flex-shrink: 0;
+    padding-inline: var(--space-md); /* 32px */
   }
 
   /* ── Test blocks ── */
@@ -1222,7 +1221,7 @@
         <div class="provepoints__media">
           <img src="images/platforms.svg" alt="Meta, Google, TikTok, Snap platform logos" />
         </div>
-        <p class="t-para-lg provepoints__desc">Meta, Google, TikTok, Snap. Performance data, structure, naming — all read directly</p>
+        <p class="t-para-xl provepoints__desc">Meta, Google, TikTok, Snap. Performance data, structure, naming — all read directly</p>
       </div>
 
       <!-- Card 02: Your rule library -->
@@ -1233,7 +1232,7 @@
             <img src="images/rule-icon.svg" alt="" aria-hidden="true" />
           </div>
         </div>
-        <p class="t-para-lg provepoints__desc">Existing rules are part of the context</p>
+        <p class="t-para-xl provepoints__desc">Existing rules are part of the context</p>
       </div>
 
       <!-- Card 03: Your workspace, your data -->
@@ -1242,7 +1241,7 @@
         <div class="provepoints__media">
           <img src="images/ws-promo-ai.svg" alt="" aria-hidden="true" />
         </div>
-        <p class="t-para-lg provepoints__desc">No external sharing. No training on your account.</p>
+        <p class="t-para-xl provepoints__desc">No external sharing. No training on your account.</p>
       </div>
 
     </div><!-- /.grid -->
@@ -1252,7 +1251,7 @@
 <section class="acc">
   <div class="container">
 
-    <h2 class="acc__title t-h2">It works because it knows your context</h2>
+    <h2 class="acc__title t-h2">Every answer sits on top of your data</h2>
 
     <div class="acc__box" id="accBox">
       <div class="acc__layout">

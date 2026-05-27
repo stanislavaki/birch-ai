@@ -225,6 +225,11 @@
     display: none;
   }
 
+  /* Mobile arrow buttons — hidden on desktop */
+  .hiw__mob-arrow {
+    display: none;
+  }
+
   @media (max-width: 767px) {
 
     /* Disable scroll-driven sticky */
@@ -242,25 +247,33 @@
       padding-block: var(--space-lg);
     }
 
-    /* Card: vertical column */
+    /* Card: flex-column — JS sets height to tallest content state */
     .hiw__card {
       flex-direction: column;
-      height: auto;
+      align-items: stretch;
+      height: auto;        /* JS: sizeMobCard() */
+      background: transparent;
+      position: relative;
+      overflow: hidden;
     }
 
     /* Hide desktop accordion */
     .hiw__accordion { display: none; }
 
-    /* Mobile text block */
+    /* Mobile text block: in-flow flex child, auto-height sized to content */
+    /* JS fixes height to the tallest step so carousel transitions don't jump */
     .hiw__mob-text {
       display: flex;
       align-items: flex-start;
       gap: var(--gap-main);
-      padding: var(--space-sm) var(--space-sm) var(--pad-card);
+      padding: var(--space-sm) var(--space-sm) var(--space-lg); /* bottom: 3rem = 48px */
       background: var(--color-bg);
       border-radius: var(--radius-lg);
-      margin: var(--space-xs) var(--space-xs) 0;
+      margin: var(--space-xs) var(--space-xs) 0; /* 8px from card edges, 0 bottom */
+      position: relative;
+      z-index: 2;
       flex-shrink: 0;
+      overflow: hidden;
     }
 
     .hiw__mob-num {
@@ -279,19 +292,74 @@
     .hiw__mob-title,
     .hiw__mob-desc { margin: 0; color: var(--color-text); }
 
-    /* Visual: full width, fixed aspect ratio */
+    /* Visual: fills remaining height, 32px gap from text block */
     .hiw__visual {
-      flex: 0 0 auto;
+      flex: 1 0 0;
+      position: relative;
+      overflow: hidden;
       width: 100%;
-      aspect-ratio: 280 / 270;
+      margin-top: var(--space-md); /* 32px gap */
+      aspect-ratio: unset;
     }
 
-    /* Slides: horizontal instead of vertical */
+    /* Slides: stacked inside visual — CSS transition drives the carousel animation */
     .hiw__slide {
-      padding: var(--pad-card);
+      padding: 0;
+      align-items: flex-start;
+      justify-content: flex-start;
+      transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
-    /* Coming soon bar: full-width, left-aligned, dark bg */
+    /* Card bg animates with the slide color */
+    .hiw__card {
+      transition: background-color 0.5s ease;
+    }
+
+    /* Arrow buttons */
+    .hiw__mob-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2rem;
+      height: 2rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-pill);
+      color: var(--color-text);
+      z-index: 2;
+      cursor: pointer;
+      padding: 0;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: opacity 0.2s ease;
+    }
+    .hiw__mob-arrow--prev { left: var(--space-xs); }
+    .hiw__mob-arrow--next { right: var(--space-xs); }
+    .hiw__mob-arrow[disabled] { opacity: 0.25; cursor: default; }
+
+    /* picture: block on mobile so img is in-flow (override display:contents) */
+    .hiw__slide picture {
+      display: block;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* Image: fills available width with left gap, natural aspect ratio, no crop */
+    .hiw__slide img {
+      position: static;
+      display: block;
+      width: 96.4%;        /* 270/280 — flush to right edge */
+      margin-left: 3.6%;   /* 10/280 — left gap */
+      height: auto;        /* natural aspect ratio */
+      max-width: none;
+      max-height: none;
+      object-fit: unset;
+      border-radius: var(--radius-md) 0 0 0; /* top-left only */
+    }
+
+    /* Coming soon bar: anchored to bottom of visual */
     .hiw__coming-soon {
       left: var(--space-xs);
       right: var(--space-xs);
@@ -300,6 +368,7 @@
       border-radius: var(--radius-md);
       padding: var(--space-xs);
       justify-content: flex-start;
+      z-index: 1;
     }
 
     /* Icons before text on mobile */
@@ -393,7 +462,7 @@
 
       </div>
 
-      <!-- Right: slides -->
+      <!-- Right: slides + mobile arrows -->
       <div class="hiw__visual" id="hiwVisual">
         <div class="hiw__slide" data-idx="0">
           <picture>
@@ -432,6 +501,18 @@
             </div>
           </div>
         </div>
+
+        <!-- Mobile carousel arrow buttons (hidden on desktop via CSS) -->
+        <button class="hiw__mob-arrow hiw__mob-arrow--prev" id="hiwMobPrev" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 13L5 8L10 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="hiw__mob-arrow hiw__mob-arrow--next" id="hiwMobNext" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
 
     </div><!-- /.hiw__card -->
@@ -608,6 +689,58 @@
   sizeCard();
   document.fonts.ready.then(sizeCard);
 
+  /* ── Mobile card height: fix to tallest text + tallest image state ── */
+  function sizeMobCard() {
+    if (!_mobMode) return;
+    if (!mobTextEl) return;
+    var cardW = card.offsetWidth;
+    if (!cardW) return;
+
+    /* ─ 1. Measure max mob-text height via off-screen clone ─ */
+    var clone = mobTextEl.cloneNode(true);
+    clone.style.cssText =
+      'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
+      'width:' + mobTextEl.offsetWidth + 'px;height:auto;';
+    document.body.appendChild(clone);
+
+    var cloneNum   = clone.querySelector('.hiw__mob-num');
+    var cloneTitle = clone.querySelector('.hiw__mob-title');
+    var cloneDesc  = clone.querySelector('.hiw__mob-desc');
+    var maxMobH = 0;
+    for (var si = 0; si < STEP_COUNT; si++) {
+      if (cloneNum)   cloneNum.textContent   = stepData[si].num;
+      if (cloneTitle) cloneTitle.textContent = stepData[si].title;
+      if (cloneDesc)  cloneDesc.textContent  = stepData[si].desc;
+      var h = clone.offsetHeight;
+      if (h > maxMobH) maxMobH = h;
+    }
+    document.body.removeChild(clone);
+    if (!maxMobH) return;
+
+    /* ─ 2. Measure max image natural height at display width ─ */
+    var imgDisplayW = cardW * 0.964; /* 96.4% of card width */
+    var maxImgH = 0;
+    slides.forEach(function (slide) {
+      var img = slide.querySelector('img');
+      if (img && img.naturalWidth) {
+        var imgH = Math.round(img.naturalHeight * imgDisplayW / img.naturalWidth);
+        if (imgH > maxImgH) maxImgH = imgH;
+      }
+    });
+    if (!maxImgH) return; /* images not loaded yet — will retry on window.load */
+
+    /* ─ 3. Fix mob-text height + total card height ─ */
+    mobTextEl.style.height = (maxMobH / remPx) + 'rem';
+
+    var spaceXs = remPx * 0.5; /* --space-xs = 8px  (mob-text margin-top) */
+    var spaceMd = remPx * 2;   /* --space-md = 32px (visual margin-top) */
+    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH) / remPx) + 'rem';
+  }
+
+  /* Retry after all resources loaded (images need naturalWidth/Height) */
+  window.addEventListener('load', function () { if (_mobMode) sizeMobCard(); });
+  document.fonts.ready.then(function () { if (_mobMode) sizeMobCard(); });
+
   /* ── Init without transitions ── */
   card.style.opacity = '0'; /* Hide card until snap — prevents wrong-step flash on reload */
   highlight.style.transition = 'none';
@@ -681,7 +814,7 @@
     });
   });
 
-  /* ── Recalculate highlight + card height on resize (snap, no animation) ── */
+  /* ── Desktop resize: recalculate highlight + card height ── */
   new ResizeObserver(function () {
     remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
     highlight.style.transition = 'none';
@@ -689,6 +822,12 @@
     requestAnimationFrame(function () { highlight.style.transition = ''; });
     if (!_mobMode) { sizeCard(); window.applyScrollLength(); }
   }).observe(accordion);
+
+  /* ── Mobile resize: recalculate mob card height (accordion is display:none on mobile) ── */
+  new ResizeObserver(function () {
+    remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    if (_mobMode) { sizeMobCard(); }
+  }).observe(card);
 
   /* ─────────────────────────────────────────
      MOBILE CAROUSEL
@@ -713,6 +852,8 @@
   var mobTitleEl = mobTextEl && mobTextEl.querySelector('.hiw__mob-title');
   var mobDescEl  = mobTextEl && mobTextEl.querySelector('.hiw__mob-desc');
   var mobDots    = Array.prototype.slice.call(document.querySelectorAll('.hiw__mob-dot'));
+  var mobPrevBtn = document.getElementById('hiwMobPrev');
+  var mobNextBtn = document.getElementById('hiwMobNext');
 
   function mobUpdateText(idx) {
     if (!mobNumEl) return;
@@ -727,6 +868,12 @@
     });
   }
 
+  function mobUpdateArrows(idx) {
+    if (!mobPrevBtn || !mobNextBtn) return;
+    mobPrevBtn.disabled = (idx === 0);
+    mobNextBtn.disabled = (idx === STEP_COUNT - 1);
+  }
+
   function mobGoTo(idx, animate) {
     idx      = Math.max(0, Math.min(STEP_COUNT - 1, idx));
     _mobIdx  = idx;
@@ -738,8 +885,10 @@
     });
 
     visual.style.backgroundColor = BG_COLORS[idx];
+    card.style.backgroundColor   = BG_COLORS[idx]; /* fill entire card bg on mobile */
     mobUpdateText(idx);
     mobUpdateDots(idx);
+    mobUpdateArrows(idx);
 
     if (!animate) {
       requestAnimationFrame(function () {
@@ -759,7 +908,12 @@
     }, MOB_INTERVAL);
   }
 
+  var _swipeInited  = false;
+  var _arrowsInited = false;
+
   function mobInitSwipe() {
+    if (_swipeInited) return;
+    _swipeInited = true;
     var touchStartX = 0;
     var touchStartY = 0;
 
@@ -779,9 +933,37 @@
     }, { passive: true });
   }
 
+  function mobInitArrows() {
+    if (_arrowsInited) return;
+    _arrowsInited = true;
+    if (!mobPrevBtn || !mobNextBtn) return;
+    mobPrevBtn.addEventListener('click', function () {
+      mobStopTimer();
+      mobGoTo(_mobIdx - 1, true);
+      mobStartTimer();
+    });
+    mobNextBtn.addEventListener('click', function () {
+      mobStopTimer();
+      mobGoTo(_mobIdx + 1, true);
+      mobStartTimer();
+    });
+  }
+
+  /* Keyboard navigation (ArrowLeft / ArrowRight) on mobile */
+  document.addEventListener('keydown', function (e) {
+    if (!_mobMode) return;
+    if (e.key === 'ArrowLeft') {
+      mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer();
+    } else if (e.key === 'ArrowRight') {
+      mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer();
+    }
+  });
+
   function destroyMobile() {
     _mobMode = false;
     mobStopTimer();
+    mobTextEl.style.height    = ''; /* Clear JS-fixed mob-text height */
+    card.style.backgroundColor = ''; /* Restore desktop --color-bg-grey from CSS */
     /* Restore slides to desktop translateY state via tick() */
     slides.forEach(function (slide) {
       slide.style.transform  = '';
@@ -795,10 +977,13 @@
 
   function initMobile() {
     _mobMode = true;
-    mobGoTo(0, false);
+    mobGoTo(0, false);       /* Set content + card.backgroundColor BEFORE revealing */
+    card.style.opacity = ''; /* Reveal card — correct bg is already set */
+    sizeMobCard(); /* Fix mob-text and card height to tallest content state */
     /* Re-enable visual bg transition after positions are snapped */
     requestAnimationFrame(function () { visual.style.transition = ''; });
     mobInitSwipe();
+    mobInitArrows();
     mobStartTimer();
   }
 
