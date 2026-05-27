@@ -35,6 +35,9 @@
   color: #555; font-size: 10px; padding-right: 0.4rem;
   justify-content: flex-end;
 }
+.tl-label-cell.clickable { cursor: pointer; }
+.tl-label-cell.clickable:hover { color: #aaa; }
+.tl-label-cell.selected { color: #fff; }
 .tl-label-cell.ruler { height: 1.4rem; color: #333; }
 
 #tl-ruler {
@@ -83,31 +86,31 @@
 
 /* ── Timeline quick-edit row ── */
 #tl-edit {
-  display: flex; align-items: center; gap: 0.5rem;
-  margin-top: 0.35rem; min-height: 1.4rem;
-  font-size: 10px;
+  display: flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.35rem; height: 1.4rem;
+  font-size: 10px; overflow: hidden;
+  visibility: hidden;
 }
+#tl-edit.visible { visibility: visible; }
 #tl-edit-label {
   width: 4.2rem; flex-shrink: 0; text-align: right;
   padding-right: 0.4rem; font-weight: bold;
 }
 .tl-edit-field { display: flex; align-items: center; gap: 3px; }
-.tl-edit-lbl { color: #444; }
+.tl-edit-lbl { color: #777; }
 .tl-edit-inp {
-  width: 3rem; background: #0d0d0d; border: 1px solid #2a2a2a;
+  width: 3.8rem; background: #0d0d0d; border: 1px solid #2a2a2a;
   border-radius: 3px; color: #ccc; padding: 1px 4px;
   font: 10px monospace;
 }
 .tl-edit-inp:focus { outline: none; border-color: #04DE00; color: #fff; }
+.tl-edit-inp:disabled { color: #777; border-color: #333; cursor: not-allowed; background: #0d0d0d; }
+.tl-edit-lbl--locked { color: #777; cursor: not-allowed; }
+#tl-edit-note { color: #444; font-size: 9px; font-style: italic; margin-left: 0.2rem; align-self: center; min-width: 1px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── Bezier editor ── */
 #bez-section { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #1e1e1e; }
-#bez-tabs    { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
-.bez-tab {
-  padding: 2px 7px; background: #111; border: 1px solid #222;
-  border-radius: 3px; cursor: pointer; font: bold 10px monospace; color: #444;
-}
-.bez-tab.active { color: #000; border-color: transparent; }
+#bez-section.bez-inactive { opacity: 0.25; pointer-events: none; }
 #bez-row    { display: flex; gap: 0.75rem; align-items: flex-start; }
 #bez-svg    { display: block; overflow: visible; }
 #bez-inputs { display: flex; flex-direction: column; gap: 5px; padding-top: 2px; }
@@ -125,6 +128,28 @@
 .lerp-lbl  { color: #555; font-size: 10px; width: 5rem; flex-shrink: 0; }
 .lerp-range { flex: 1; height: 3px; cursor: pointer; accent-color: #04DE00; }
 .lerp-val  { color: #04DE00; font-size: 10px; width: 2.5rem; text-align: right; }
+
+/* ── Block tabs ── */
+#dbg-tabs {
+  display: flex; gap: 0.25rem; align-items: center;
+}
+.dbg-tab {
+  padding: 0.15rem 0.5rem;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  border-radius: 0.25rem;
+  color: #555;
+  font: 10px monospace;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.dbg-tab:hover { color: #aaa; border-color: #444; }
+.dbg-tab.active {
+  background: #04DE00;
+  border-color: #04DE00;
+  color: #000;
+  font-weight: bold;
+}
 
 /* ── Copy button ── */
 #dbg-copy {

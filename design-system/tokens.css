@@ -49,7 +49,7 @@
   --text-h1-lh:   1.0;
   --text-h1-ls:  -0.02em;
 
-  --text-h2-size: 3.8rem;        /* 60.8px */
+  --text-h2-size: 3.25rem;       /* 52px  */
   --text-h2-lh:   1.1;
   --text-h2-ls:  -0.02em;
 
@@ -58,7 +58,7 @@
   --text-h3-ls:  -0.02em;
 
   --text-h4-size: 1.5rem;        /* 24px  */
-  --text-h4-lh:   1.4;
+  --text-h4-lh:   1;
   --text-h4-ls:   0em;
 
   --text-h5-size: 1.2rem;        /* 19.2px */
@@ -93,11 +93,14 @@
   --text-btn-lh:   1.0;
   --text-btn-ls:  -0.02em;
 
-  /* ---- Spacing (margins) ---- */
-  --space-xs: 0.5rem;   /*  8px */
-  --space-sm: 1rem;     /* 16px */
-  --space-md: 2rem;     /* 32px */
-  --space-lg: 3rem;     /* 48px */
+  /* ---- Spacing — mirrors Figma "Spacing/*" variables ---- */
+  --space-xxs: 0.25rem;  /*  4px — Spacing XXS */
+  --space-xs:  0.5rem;   /*  8px — Spacing XS  */
+  --space-sm:  1rem;     /* 16px — Spacing SM  */
+  --space:     1.5rem;   /* 24px — Spacing     */
+  --space-md:  2rem;     /* 32px — Spacing MD  */
+  --space-lg:  3rem;     /* 48px — Spacing L   */
+  --space-xl:  5rem;     /* 80px — Spacing XL  */
 
   /* ---- Gaps (column / flex gaps) ---- */
   --gap-sm:   0.5rem;   /*  8px */
@@ -120,6 +123,7 @@
   --radius-md:   0.75rem;  /* 12px */
   --radius-lg:   1rem;     /* 16px */
   --radius-xl:   1.5rem;   /* 24px */
+  --radius-2xl:  3.75rem;  /* 60px */
   --radius-pill: 9999px;
 
   /* ---- Grid ---- */
@@ -268,7 +272,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; padding
 /* Container — centers content with responsive horizontal padding */
 .container {
   width: 100%;
-  max-width: var(--container-md); /* 1280px default */
+  max-width: var(--container-lg); /* 1600px */
   margin-inline: auto;
   padding-inline: var(--pad-horizontal);
 }
