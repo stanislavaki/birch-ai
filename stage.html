@@ -37,8 +37,8 @@
 
   .hiw__sticky {
     position: sticky;
-    top: 0;
-    height: 100vh;
+    top: var(--nav-height, 0px);
+    height: calc(100vh - var(--nav-height, 0px));
     display: flex;
     align-items: center;
     overflow: hidden;

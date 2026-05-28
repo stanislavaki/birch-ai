@@ -1,0 +1,889 @@
+<!-- ╔═══════════════════════════════════════════════════════════╗
+     ║  BIRCH — Stage "How it works"  |  Webflow Embed          ║
+     ╠═══════════════════════════════════════════════════════════╣
+     ║  SETUP (do this before pasting):                         ║
+     ║  1. Upload all 10 images to Webflow Assets:              ║
+     ║     stage_how-it-works_01.png  + _01_mob.png             ║
+     ║     stage_how-it-works_02.jpg  + _02_mob.jpg             ║
+     ║     stage_how-it-works_03.jpg  + _03_mob.jpg             ║
+     ║     stage_how-it-works_04.jpg  + _04_mob.jpg             ║
+     ║     stage_how-it-works_05.jpg  + _05_mob.jpg             ║
+     ║     stage-hiw-tt.svg                                     ║
+     ║     stage-hiw-snap.svg                                   ║
+     ║  2. Replace IMAGE_URL_* placeholders below with          ║
+     ║     the CDN URLs from Webflow Assets panel               ║
+     ║                                                          ║
+     ║  WEBFLOW SETUP:                                          ║
+     ║  • Paste into an Embed element inside a Section          ║
+     ║  • The Section and all parent Divs must have             ║
+     ║    overflow set to "Visible" — otherwise sticky          ║
+     ║    scroll won't work                                     ║
+     ║  • The section scroll track is 500vh — make sure         ║
+     ║    there is no max-height on any ancestor                ║
+     ╚═══════════════════════════════════════════════════════════╝ -->
+
+<style id="hiw-dynamic"></style>
+<style>
+  /* ── Scoped design tokens ── */
+  .hiw {
+    --hiw-font:         "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+    --hiw-color-bg:     #0D0D12;
+    --hiw-color-grey:   #2A2A2A;
+    --hiw-color-text:   #FFFFFF;
+    --hiw-color-muted:  #909090;
+    --hiw-radius-xl:    1.5rem;
+    --hiw-radius-lg:    1rem;
+    --hiw-radius-md:    0.75rem;
+    --hiw-radius-pill:  9999px;
+    --hiw-pad:          1.5rem;
+    --hiw-gap:          1rem;
+    --hiw-gap-sm:       0.5rem;
+    --hiw-space-xxs:    0.25rem;
+    --hiw-space-xs:     0.5rem;
+    --hiw-space-sm:     1rem;
+    --hiw-space-md:     2rem;
+    --hiw-space-lg:     3rem;
+  }
+
+  /* ── Typography (scoped to .hiw) ── */
+  .hiw .t-h4 {
+    font-family: var(--hiw-font);
+    font-size: 1.5rem; font-weight: 600;
+    line-height: 1; letter-spacing: 0;
+  }
+  .hiw .t-h5 {
+    font-family: var(--hiw-font);
+    font-size: 1.2rem; font-weight: 600;
+    line-height: 1.4; letter-spacing: 0;
+  }
+  .hiw .t-para-lg {
+    font-family: var(--hiw-font);
+    font-size: 1.25rem; font-weight: 600;
+    line-height: 1.1; letter-spacing: 0;
+  }
+  .hiw .t-body {
+    font-family: var(--hiw-font);
+    font-size: 0.9rem; font-weight: 600;
+    line-height: 1.2; letter-spacing: 0;
+  }
+  @media (max-width: 991px) {
+    .hiw .t-h4 { font-size: 1.2rem; line-height: 1.4; }
+  }
+  @media (max-width: 767px) {
+    .hiw .t-h5  { font-size: 1.2rem; }
+    .hiw .t-para-lg { font-size: 1.1rem; }
+  }
+
+  /* ── Section ── */
+  .hiw {
+    font-family: var(--hiw-font);
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+  }
+  .hiw *, .hiw *::before, .hiw *::after { box-sizing: border-box; }
+  .hiw a { color: inherit; text-decoration: none; }
+  .hiw button { font: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+  .hiw img, .hiw svg { display: block; max-width: 100%; }
+
+  /* ── Container ── */
+  .hiw__sticky .hiw__container {
+    width: 100%;
+    max-width: 100rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  @media (max-width: 1279px) {
+    .hiw__sticky .hiw__container { padding-inline: 1.25rem; }
+  }
+  @media (max-width: 991px) {
+    .hiw__sticky .hiw__container { padding-inline: 1rem; }
+  }
+
+  /* ── Sticky wrapper ── */
+  .hiw__sticky {
+    position: sticky;
+    top: var(--nav-height, 0px);
+    height: calc(100vh - var(--nav-height, 0px));
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* ── Card ── */
+  .hiw__card {
+    display: flex;
+    width: 100%;
+    height: clamp(22rem, 80vh, 40rem);
+    border-radius: var(--hiw-radius-xl);
+    background: var(--hiw-color-grey);
+    overflow: hidden;
+  }
+
+  /* ── Left: accordion ── */
+  .hiw__accordion {
+    width: 33.33%;
+    flex-shrink: 0;
+    padding: var(--hiw-pad);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+  }
+  @media (max-width: 1279px) { .hiw__accordion { width: 41.67%; } }
+  @media (max-width: 991px)  { .hiw__accordion { width: 33.33%; } }
+
+  .hiw__highlight {
+    position: absolute;
+    left: var(--hiw-pad);
+    right: var(--hiw-pad);
+    background: var(--hiw-color-bg);
+    border-radius: var(--hiw-radius-lg);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hiw__step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--hiw-gap);
+    padding: 0.7rem var(--hiw-space-sm);
+    border-radius: var(--hiw-radius-lg);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    font-family: var(--hiw-font);
+    flex: 0 1 auto;
+    min-height: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .hiw__step.is-active { flex: 1 1 0; min-height: 0; }
+
+  .hiw__step-num   { flex-shrink: 0; color: var(--hiw-color-muted); }
+  .hiw__step.is-active .hiw__step-num,
+  .hiw__step.is-read   .hiw__step-num { color: var(--hiw-color-text); }
+
+  .hiw__step-content {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column;
+    gap: var(--hiw-gap-sm);
+  }
+
+  .hiw__step-title { color: var(--hiw-color-muted); margin: 0; }
+  .hiw__step.is-active .hiw__step-title,
+  .hiw__step.is-read   .hiw__step-title { color: var(--hiw-color-text); }
+
+  .hiw__step-desc {
+    color: var(--hiw-color-text);
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+  .hiw__step.is-active .hiw__step-desc {
+    max-height: 12rem;
+    opacity: 1;
+    /* transition injected by applyTransitions() */
+  }
+
+  /* ── Right: visual panel ── */
+  .hiw__visual {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hiw__slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--hiw-space-lg) var(--hiw-pad);
+    will-change: transform, opacity;
+  }
+  .hiw__slide picture { display: contents; }
+  .hiw__slide img {
+    max-width: 100%; max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--hiw-radius-lg);
+    display: block;
+  }
+
+  .hiw__coming-soon {
+    position: absolute;
+    bottom: var(--hiw-space-xs);
+    right: var(--hiw-space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--hiw-gap-sm);
+  }
+  .hiw__coming-soon-text { color: var(--hiw-color-text); }
+  .hiw__platform-icons { display: flex; gap: var(--hiw-space-xxs); }
+  .hiw__platform-icons img {
+    width: 2rem; height: 2rem;
+    border-radius: var(--hiw-radius-pill);
+  }
+
+  /* ── Mobile-only elements (hidden on desktop) ── */
+  .hiw__mob-text   { display: none; }
+  .hiw__mob-dots   { display: none; }
+  .hiw__mob-arrow  { display: none; }
+
+  /* ─────────────────────────────────────────
+     MOBILE (≤767px) — horizontal carousel
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+
+    .hiw { height: auto !important; }
+
+    .hiw__sticky {
+      position: static;
+      height: auto;
+      overflow: visible;
+    }
+
+    .hiw__sticky .hiw__container {
+      flex-direction: column;
+      align-items: stretch;
+      padding-block: var(--hiw-space-lg);
+    }
+
+    .hiw__card {
+      flex-direction: column;
+      align-items: stretch;
+      height: auto;
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+      transition: background-color 0.5s ease;
+    }
+
+    .hiw__accordion { display: none; }
+
+    .hiw__mob-text {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--hiw-gap);
+      padding: var(--hiw-space-sm) var(--hiw-space-sm) var(--hiw-space-lg);
+      background: var(--hiw-color-bg);
+      border-radius: var(--hiw-radius-lg);
+      margin: var(--hiw-space-xs) var(--hiw-space-xs) 0;
+      position: relative;
+      z-index: 2;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .hiw__mob-num  { flex-shrink: 0; color: var(--hiw-color-text); }
+    .hiw__mob-body {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column;
+      gap: var(--hiw-gap-sm);
+    }
+    .hiw__mob-title,
+    .hiw__mob-desc { margin: 0; color: var(--hiw-color-text); }
+
+    .hiw__visual {
+      flex: 1 0 0;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      margin-top: var(--hiw-space-md);
+      aspect-ratio: unset;
+    }
+
+    .hiw__slide {
+      padding: 0;
+      align-items: flex-start;
+      justify-content: flex-start;
+      transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+    }
+
+    .hiw__mob-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2rem; height: 2rem;
+      background: rgba(0,0,0,0.35);
+      border-radius: var(--hiw-radius-pill);
+      color: var(--hiw-color-text);
+      z-index: 2;
+      cursor: pointer;
+      padding: 0;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      transition: opacity 0.2s ease;
+    }
+    .hiw__mob-arrow--prev { left: var(--hiw-space-xs); }
+    .hiw__mob-arrow--next { right: var(--hiw-space-xs); }
+    .hiw__mob-arrow[disabled] { opacity: 0.25; cursor: default; }
+
+    .hiw__slide picture { display: block; width: 100%; flex-shrink: 0; }
+    .hiw__slide img {
+      position: static;
+      display: block;
+      width: 96.4%;
+      margin-left: 3.6%;
+      height: auto;
+      max-width: none; max-height: none;
+      object-fit: unset;
+      border-radius: var(--hiw-radius-md) 0 0 0;
+    }
+
+    .hiw__coming-soon {
+      left: var(--hiw-space-xs);
+      right: var(--hiw-space-xs);
+      bottom: var(--hiw-space-xs);
+      background: var(--hiw-color-bg);
+      border-radius: var(--hiw-radius-md);
+      padding: var(--hiw-space-xs);
+      justify-content: flex-start;
+      z-index: 1;
+    }
+    .hiw__platform-icons { order: -1; }
+
+    .hiw__mob-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--hiw-space-xs);
+      padding: var(--hiw-space-sm) 0 0;
+    }
+    .hiw__mob-dot {
+      width: 0.5rem; height: 0.5rem;
+      border-radius: var(--hiw-radius-pill);
+      background: var(--hiw-color-muted);
+      transition: background 0.3s ease;
+      flex-shrink: 0;
+    }
+    .hiw__mob-dot.is-active { background: var(--hiw-color-text); }
+  }
+</style>
+
+<section class="hiw" id="hiw">
+  <div class="hiw__sticky">
+    <div class="hiw__container">
+    <div class="hiw__card" id="hiwCard">
+
+      <!-- Mobile: text block -->
+      <div class="hiw__mob-text" id="hiwMobText" aria-live="polite">
+        <span class="hiw__mob-num t-h5"></span>
+        <div class="hiw__mob-body">
+          <p class="hiw__mob-title t-h5"></p>
+          <p class="hiw__mob-desc t-body"></p>
+        </div>
+      </div>
+
+      <!-- Left: accordion -->
+      <div class="hiw__accordion" id="hiwAccordion">
+        <div class="hiw__highlight" id="hiwHighlight"></div>
+
+        <button class="hiw__step is-active" data-idx="0">
+          <span class="hiw__step-num t-h4">1.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Connect your Google Drive folders</p>
+            <p class="hiw__step-desc t-para-lg">Turn your Google Drive folders into one library in Stage. Read-only access. Your files stay in Drive, untouched</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="1">
+          <span class="hiw__step-num t-h4">2.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Connect your Google Spreadsheet</p>
+            <p class="hiw__step-desc t-para-lg">Use your planning Sheet: your columns, your statuses, your structure.</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="2">
+          <span class="hiw__step-num t-h4">3.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Filter what to launch by status</p>
+            <p class="hiw__step-desc t-para-lg">Filter by your own statuses — "draft," "ready," "to test," however your team labels them.</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="3">
+          <span class="hiw__step-num t-h4">4.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Choose how ads are built</p>
+            <p class="hiw__step-desc t-para-lg">Create new ads, or duplicate a proven setup and swap new creatives in</p>
+          </div>
+        </button>
+
+        <button class="hiw__step" data-idx="4">
+          <span class="hiw__step-num t-h4">5.</span>
+          <div class="hiw__step-content">
+            <p class="hiw__step-title t-h4">Push to ad accounts automatically</p>
+            <p class="hiw__step-desc t-para-lg">Your ads are ready to go live. Review and set them live when you're ready</p>
+          </div>
+        </button>
+
+      </div><!-- /.hiw__accordion -->
+
+      <!-- Right: slides + mobile arrows -->
+      <div class="hiw__visual" id="hiwVisual">
+
+        <div class="hiw__slide" data-idx="0">
+          <picture>
+            <source media="(max-width: 767px)" srcset="IMAGE_URL_01_MOB" />
+            <img src="IMAGE_URL_01" alt="Connect your Google Drive folders" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="1">
+          <picture>
+            <source media="(max-width: 767px)" srcset="IMAGE_URL_02_MOB" />
+            <img src="IMAGE_URL_02" alt="Connect your Google Spreadsheet" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="2">
+          <picture>
+            <source media="(max-width: 767px)" srcset="IMAGE_URL_03_MOB" />
+            <img src="IMAGE_URL_03" alt="Filter what to launch by status" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="3">
+          <picture>
+            <source media="(max-width: 767px)" srcset="IMAGE_URL_04_MOB" />
+            <img src="IMAGE_URL_04" alt="Choose how ads are built" />
+          </picture>
+        </div>
+        <div class="hiw__slide" data-idx="4">
+          <picture>
+            <source media="(max-width: 767px)" srcset="IMAGE_URL_05_MOB" />
+            <img src="IMAGE_URL_05" alt="Push to ad accounts automatically" />
+          </picture>
+          <div class="hiw__coming-soon">
+            <span class="hiw__coming-soon-text t-body">More platforms coming soon</span>
+            <div class="hiw__platform-icons">
+              <img src="IMAGE_URL_TT"   alt="TikTok" />
+              <img src="IMAGE_URL_SNAP" alt="Snapchat" />
+            </div>
+          </div>
+        </div>
+
+        <button class="hiw__mob-arrow hiw__mob-arrow--prev" id="hiwMobPrev" aria-label="Previous">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 13L5 8L10 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="hiw__mob-arrow hiw__mob-arrow--next" id="hiwMobNext" aria-label="Next">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+      </div><!-- /.hiw__visual -->
+
+    </div><!-- /.hiw__card -->
+
+    <!-- Mobile nav dots -->
+    <div class="hiw__mob-dots" id="hiwMobDots" aria-hidden="true">
+      <span class="hiw__mob-dot is-active"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
+      <span class="hiw__mob-dot"></span>
+    </div>
+
+    </div><!-- /.hiw__container -->
+  </div><!-- /.hiw__sticky -->
+</section>
+
+<script>
+(function () {
+
+  var STEP_COUNT  = 5;
+  var BG_COLORS   = ['#6d0092', '#005019', '#dbe96d', '#dbe96d', '#1877f2'];
+  var _mobMode    = false;
+
+  var section   = document.getElementById('hiw');
+  var visual    = document.getElementById('hiwVisual');
+  var highlight = document.getElementById('hiwHighlight');
+  var card      = document.getElementById('hiwCard');
+  var accordion = document.getElementById('hiwAccordion');
+  var steps     = Array.prototype.slice.call(section.querySelectorAll('.hiw__step'));
+  var slides    = Array.prototype.slice.call(section.querySelectorAll('.hiw__slide'));
+  var _lastIdx  = -1;
+  var remPx     = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  /* Dynamic style tag for transitions (created inline in embed) */
+  var dynStyle  = document.getElementById('hiw-dynamic');
+
+  function updateHighlight() {
+    var active = accordion.querySelector('.hiw__step.is-active');
+    if (!active) return;
+    highlight.style.top    = (active.offsetTop    / remPx) + 'rem';
+    highlight.style.height = (active.offsetHeight / remPx) + 'rem';
+  }
+
+  /* ── Config ── */
+  var C = {
+    scrollLength: 5,
+    eases: {
+      slide:     [0.00, 0.00, 0.20, 1.00],
+      highlight: [0.00, 0.00, 0.20, 1.00],
+      desc:      [0.00, 0.00, 0.20, 1.00],
+      bg:        [0.00, 0.00, 0.20, 1.00],
+    },
+    trans: {
+      highlightDur: 0.6,
+      descDur:      0.6,
+      colorDur:     0.5,
+      slideDur:     0.6,
+      bgDur:        0.6,
+    },
+  };
+
+  function applyScrollLength() {
+    if (_mobMode) return;
+    section.style.height = (C.scrollLength * 100) + 'vh';
+  }
+  applyScrollLength();
+
+  function applyTransitions() {
+    var T = C.trans, E = C.eases;
+    var be = function (e) { return 'cubic-bezier(' + e.join(',') + ')'; };
+    dynStyle.textContent =
+      '.hiw__highlight { transition: top ' + T.highlightDur + 's ' + be(E.highlight) + ', height ' + T.highlightDur + 's ' + be(E.highlight) + '; }\n' +
+      '.hiw__step.is-active .hiw__step-desc { transition: max-height ' + T.descDur + 's ' + be(E.desc) + ', opacity ' + (Math.round(T.descDur * 0.75 * 100) / 100) + 's ' + be(E.desc) + '; }\n' +
+      '.hiw__step-num, .hiw__step-title { transition: color ' + T.colorDur + 's ease; }\n' +
+      '.hiw__slide { transition: transform ' + T.slideDur + 's ' + be(E.slide) + '; }\n' +
+      '.hiw__visual { transition: background-color ' + T.bgDur + 's ' + be(E.bg) + '; }';
+  }
+
+  /* ── Scroll progress ── */
+  function scrollProgress() {
+    var top      = section.getBoundingClientRect().top;
+    var scrollable = section.offsetHeight - window.innerHeight;
+    if (top > 0) return 0;
+    return Math.max(0, Math.min(1, -top / scrollable));
+  }
+
+  /* ── Render ── */
+  function tick(p) {
+    var frac = p * (STEP_COUNT - 1);
+    var idx  = Math.max(0, Math.min(STEP_COUNT - 1, Math.round(frac)));
+
+    steps.forEach(function (s, i) {
+      s.classList.toggle('is-active', i === idx);
+      s.classList.toggle('is-read',   i < idx);
+    });
+
+    if (idx !== _lastIdx) {
+      _lastIdx = idx;
+      requestAnimationFrame(updateHighlight);
+      slides.forEach(function (slide, i) {
+        slide.style.transform = i === idx ? 'translateY(0%)' : (i < idx ? 'translateY(-100%)' : 'translateY(100%)');
+        slide.style.zIndex    = i === idx ? 1 : 0;
+      });
+      visual.style.backgroundColor = BG_COLORS[idx];
+    }
+  }
+
+  /* ── Card auto-height ── */
+  function sizeCard() {
+    if (_mobMode) return;
+    var accW = accordion.offsetWidth;
+    if (!accW) return;
+
+    var clone = accordion.cloneNode(true);
+    clone.style.cssText =
+      'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
+      'width:' + accW + 'px;height:auto;overflow:visible;min-height:0;';
+    document.body.appendChild(clone);
+
+    var cSteps = clone.querySelectorAll('.hiw__step');
+    var cDescs = clone.querySelectorAll('.hiw__step-desc');
+    var maxH   = 0;
+
+    for (var ci = 0; ci < STEP_COUNT; ci++) {
+      cSteps.forEach(function (s, j) {
+        s.classList.toggle('is-active', j === ci);
+        s.classList.toggle('is-read',   j < ci);
+      });
+      cDescs[ci].style.cssText = 'max-height:none;opacity:1;transition:none;overflow:visible;';
+      var h = clone.scrollHeight;
+      if (h > maxH) maxH = h;
+      cDescs[ci].style.cssText = '';
+    }
+
+    document.body.removeChild(clone);
+    if (!maxH) return;
+
+    var prevH = card.style.height;
+    card.style.height = '';
+    var clampH = card.offsetHeight;
+    card.style.height = prevH;
+
+    var finalH = Math.max(maxH, clampH);
+    card.style.height = finalH !== clampH ? (finalH / 16) + 'rem' : '';
+  }
+
+  sizeCard();
+  document.fonts.ready.then(sizeCard);
+
+  /* ── Mobile card height ── */
+  var mobTextEl  = document.getElementById('hiwMobText');
+  var mobNumEl   = mobTextEl && mobTextEl.querySelector('.hiw__mob-num');
+  var mobTitleEl = mobTextEl && mobTextEl.querySelector('.hiw__mob-title');
+  var mobDescEl  = mobTextEl && mobTextEl.querySelector('.hiw__mob-desc');
+
+  function sizeMobCard() {
+    if (!_mobMode || !mobTextEl) return;
+    var cardW = card.offsetWidth;
+    if (!cardW) return;
+
+    var clone = mobTextEl.cloneNode(true);
+    clone.style.cssText =
+      'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
+      'width:' + mobTextEl.offsetWidth + 'px;height:auto;';
+    document.body.appendChild(clone);
+
+    var cloneNum   = clone.querySelector('.hiw__mob-num');
+    var cloneTitle = clone.querySelector('.hiw__mob-title');
+    var cloneDesc  = clone.querySelector('.hiw__mob-desc');
+    var maxMobH = 0;
+    for (var si = 0; si < STEP_COUNT; si++) {
+      if (cloneNum)   cloneNum.textContent   = stepData[si].num;
+      if (cloneTitle) cloneTitle.textContent = stepData[si].title;
+      if (cloneDesc)  cloneDesc.textContent  = stepData[si].desc;
+      var h = clone.offsetHeight;
+      if (h > maxMobH) maxMobH = h;
+    }
+    document.body.removeChild(clone);
+    if (!maxMobH) return;
+
+    var imgDisplayW = cardW * 0.964;
+    var maxImgH = 0;
+    slides.forEach(function (slide) {
+      var img = slide.querySelector('img');
+      if (img && img.naturalWidth) {
+        var imgH = Math.round(img.naturalHeight * imgDisplayW / img.naturalWidth);
+        if (imgH > maxImgH) maxImgH = imgH;
+      }
+    });
+    if (!maxImgH) return;
+
+    mobTextEl.style.height = (maxMobH / remPx) + 'rem';
+    var spaceXs = remPx * 0.5;
+    var spaceMd = remPx * 2;
+    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH) / remPx) + 'rem';
+  }
+
+  window.addEventListener('load', function () { if (_mobMode) sizeMobCard(); });
+  document.fonts.ready.then(function () { if (_mobMode) sizeMobCard(); });
+
+  /* ── Init without transitions ── */
+  card.style.opacity = '0';
+  highlight.style.transition = 'none';
+  slides.forEach(function (slide, i) { slide.style.transition = 'none'; });
+  visual.style.transition = 'none';
+  updateHighlight();
+  slides.forEach(function (slide, i) {
+    slide.style.transform = i === 0 ? 'translateY(0%)' : 'translateY(100%)';
+    slide.style.zIndex    = i === 0 ? 1 : 0;
+  });
+  visual.style.backgroundColor = BG_COLORS[0];
+
+  /* ── LERP loop ── */
+  var LERP        = 0.04;
+  var targetP     = 0;
+  var currentP    = 0;
+  var _rafReady   = false;
+  var _transReady = false;
+
+  requestAnimationFrame(function loop() {
+    if (_mobMode) { requestAnimationFrame(loop); return; }
+    targetP = scrollProgress();
+    if (!_rafReady) { currentP = targetP; _rafReady = true; }
+    currentP += (targetP - currentP) * LERP;
+    tick(currentP);
+    if (!_transReady) {
+      _transReady = true;
+      card.style.opacity = '';
+      requestAnimationFrame(function () {
+        applyTransitions();
+        highlight.style.transition = '';
+        slides.forEach(function (slide) { slide.style.transition = ''; });
+        visual.style.transition = '';
+      });
+    }
+    requestAnimationFrame(loop);
+  });
+
+  /* ── Click to jump ── */
+  steps.forEach(function (btn, i) {
+    btn.addEventListener('click', function () {
+      var frac       = i / (STEP_COUNT - 1);
+      var scrollable = section.offsetHeight - window.innerHeight;
+      var oldIdx     = _lastIdx;
+
+      slides.forEach(function (slide, j) {
+        if (j !== oldIdx && j !== i) {
+          slide.style.transition = 'none';
+          slide.style.transform  = j < i ? 'translateY(-100%)' : 'translateY(100%)';
+          slide.style.zIndex     = 0;
+        }
+      });
+
+      targetP  = frac;
+      currentP = frac;
+      window.scrollTo(0, section.offsetTop + frac * scrollable);
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          slides.forEach(function (slide) { slide.style.transition = ''; });
+        });
+      });
+    });
+  });
+
+  /* ── Resize observers ── */
+  new ResizeObserver(function () {
+    remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    highlight.style.transition = 'none';
+    updateHighlight();
+    requestAnimationFrame(function () { highlight.style.transition = ''; });
+    if (!_mobMode) { sizeCard(); applyScrollLength(); }
+  }).observe(accordion);
+
+  new ResizeObserver(function () {
+    remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    if (_mobMode) { sizeMobCard(); }
+  }).observe(card);
+
+  /* ── Mobile carousel ── */
+  var MOB          = window.matchMedia('(max-width: 767px)');
+  var _mobIdx      = 0;
+  var _mobTimer    = null;
+  var MOB_INTERVAL = 5000;
+
+  var stepData = steps.map(function (btn) {
+    return {
+      num:   btn.querySelector('.hiw__step-num').textContent,
+      title: btn.querySelector('.hiw__step-title').textContent,
+      desc:  btn.querySelector('.hiw__step-desc').textContent,
+    };
+  });
+
+  var mobDots    = Array.prototype.slice.call(section.querySelectorAll('.hiw__mob-dot'));
+  var mobPrevBtn = document.getElementById('hiwMobPrev');
+  var mobNextBtn = document.getElementById('hiwMobNext');
+
+  function mobUpdateText(idx) {
+    if (!mobNumEl) return;
+    mobNumEl.textContent   = stepData[idx].num;
+    mobTitleEl.textContent = stepData[idx].title;
+    mobDescEl.textContent  = stepData[idx].desc;
+  }
+  function mobUpdateDots(idx) {
+    mobDots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === idx); });
+  }
+  function mobUpdateArrows(idx) {
+    if (!mobPrevBtn || !mobNextBtn) return;
+    mobPrevBtn.disabled = (idx === 0);
+    mobNextBtn.disabled = (idx === STEP_COUNT - 1);
+  }
+
+  function mobGoTo(idx, animate) {
+    idx = Math.max(0, Math.min(STEP_COUNT - 1, idx));
+    _mobIdx = idx;
+    slides.forEach(function (slide, i) {
+      if (!animate) slide.style.transition = 'none';
+      slide.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      slide.style.zIndex    = i === idx ? 1 : 0;
+    });
+    visual.style.backgroundColor = BG_COLORS[idx];
+    card.style.backgroundColor   = BG_COLORS[idx];
+    mobUpdateText(idx);
+    mobUpdateDots(idx);
+    mobUpdateArrows(idx);
+    if (!animate) {
+      requestAnimationFrame(function () {
+        slides.forEach(function (slide) { slide.style.transition = ''; });
+      });
+    }
+  }
+
+  function mobStopTimer()  { if (_mobTimer) { clearInterval(_mobTimer); _mobTimer = null; } }
+  function mobStartTimer() {
+    mobStopTimer();
+    _mobTimer = setInterval(function () { mobGoTo((_mobIdx + 1) % STEP_COUNT, true); }, MOB_INTERVAL);
+  }
+
+  var _swipeInited  = false;
+  var _arrowsInited = false;
+
+  function mobInitSwipe() {
+    if (_swipeInited) return;
+    _swipeInited = true;
+    var touchStartX = 0, touchStartY = 0;
+    visual.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      mobStopTimer();
+    }, { passive: true });
+    visual.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      var dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        mobGoTo(dx < 0 ? _mobIdx + 1 : _mobIdx - 1, true);
+      }
+      mobStartTimer();
+    }, { passive: true });
+  }
+
+  function mobInitArrows() {
+    if (_arrowsInited) return;
+    _arrowsInited = true;
+    if (!mobPrevBtn || !mobNextBtn) return;
+    mobPrevBtn.addEventListener('click', function () { mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer(); });
+    mobNextBtn.addEventListener('click', function () { mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer(); });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (!_mobMode) return;
+    if (e.key === 'ArrowLeft')  { mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer(); }
+    if (e.key === 'ArrowRight') { mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer(); }
+  });
+
+  function destroyMobile() {
+    _mobMode = false;
+    mobStopTimer();
+    mobTextEl.style.height     = '';
+    card.style.backgroundColor = '';
+    slides.forEach(function (slide) {
+      slide.style.transform  = '';
+      slide.style.zIndex     = '';
+      slide.style.transition = '';
+    });
+    applyScrollLength();
+    sizeCard();
+  }
+
+  function initMobile() {
+    _mobMode = true;
+    mobGoTo(0, false);
+    card.style.opacity = '';
+    sizeMobCard();
+    requestAnimationFrame(function () { visual.style.transition = ''; });
+    mobInitSwipe();
+    mobInitArrows();
+    mobStartTimer();
+  }
+
+  if (MOB.matches) { initMobile(); }
+  MOB.addEventListener('change', function (e) {
+    if (e.matches) { initMobile(); } else { destroyMobile(); }
+  });
+
+})();
+</script>
