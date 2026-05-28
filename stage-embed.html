@@ -74,10 +74,13 @@
     .hiw-e .t-para-lg { font-size: 1.1rem; }
   }
 
-  /* ── Section ── */
+  /* ── Section: break out of Webflow's container ── */
   .hiw-e {
     display: block;
-    width: 100%;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    margin-left: -50vw;
     font-family: var(--hiw-font);
     -webkit-font-smoothing: antialiased;
     box-sizing: border-box;
