@@ -93,7 +93,7 @@
   /* ── Container ── */
   .hiw-e__sticky .hiw-e__container {
     width: 100%;
-    max-width: 100rem;
+    max-width: min(100rem, calc(100vw - 3rem));
     margin-inline: auto;
     padding-inline: 1.5rem;
     display: flex;
@@ -121,7 +121,7 @@
   .hiw-e__card {
     display: flex;
     width: 100%;
-    height: clamp(22rem, 80vh, 40rem);
+    height: clamp(22rem, 80vh, min(40rem, 62.5vh));
     border-radius: var(--hiw-radius-xl);
     background: var(--hiw-color-grey);
     overflow: hidden;
