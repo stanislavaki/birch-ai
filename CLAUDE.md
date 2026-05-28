@@ -15,6 +15,13 @@
 
 - **Webflow embed — padding** — паддинги на accordion и step могут быть сброшены глобальным reset-ом Webflow. Задавать их с `!important`: `padding: var(--xxx-pad) !important`.
 
+- **Webflow embed — sticky scroll JS** — три обязательных правила для sticky-блоков в embed:
+  1. **`offsetTop` ненадёжен** — Webflow оборачивает embed в позиционированные контейнеры, поэтому `section.offsetTop` даёт смещение относительно родителя, а не документа. Для программного скролла всегда использовать `section.getBoundingClientRect().top + window.pageYOffset`.
+  2. **`scroll-behavior: smooth`** — Webflow включает его глобально. Перед программным `window.scrollTo()` отключать: `document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')` и восстанавливать в `requestAnimationFrame`.
+  3. **`scrollProgress()`** — для анимации по скроллу всегда использовать `getBoundingClientRect().top` (viewport-relative), а не `offsetTop`. Это работает корректно внутри любого контейнера.
+
+- **Webflow embed — шрифт** — если шрифт уже загружен на Webflow-сайте, в embed ничего делать не нужно: браузер найдёт его по имени через `font-family`. Fallback-шрифты в стеке подхватятся автоматически если что-то пойдёт не так.
+
 - **Универсальные решения** — если для задачи есть более универсальный или гибкий подход (например `min()`, `clamp()`, относительные единицы вместо фиксированных), сначала предложи варианты с объяснением, не применяй сразу.
 
 - **Нумерация вопросов в брифинге** — все уточняющие вопросы перед версткой нумеровать (1, 2, 3…), чтобы пользователь мог отвечать в формате «1 — ответ, 2 — ответ».
