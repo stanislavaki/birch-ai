@@ -732,7 +732,14 @@
 
       targetP  = frac;
       currentP = frac;
+      /* Disable smooth scroll (Webflow sets scroll-behavior:smooth globally)
+         so programmatic scroll snaps instantly without a visible page jump */
+      var docEl = document.documentElement;
+      docEl.style.setProperty('scroll-behavior', 'auto', 'important');
       window.scrollTo(0, section.offsetTop + frac * scrollable);
+      requestAnimationFrame(function () {
+        docEl.style.removeProperty('scroll-behavior');
+      });
 
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
