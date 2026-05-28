@@ -74,13 +74,8 @@
     .hiw-e .t-para-lg { font-size: 1.1rem; }
   }
 
-  /* ── Section: break out of Webflow's container ── */
+  /* ── Section ── */
   .hiw-e {
-    display: block;
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    margin-left: -50vw;
     font-family: var(--hiw-font);
     -webkit-font-smoothing: antialiased;
     box-sizing: border-box;
@@ -93,7 +88,7 @@
   /* ── Container ── */
   .hiw-e__sticky .hiw-e__container {
     width: 100%;
-    max-width: min(100rem, calc(100vw - 3rem));
+    max-width: 100rem;
     margin-inline: auto;
     padding-inline: 1.5rem;
     display: flex;
@@ -110,7 +105,6 @@
   .hiw-e__sticky {
     position: sticky;
     top: var(--nav-height, 0px);
-    width: 100%;
     height: calc(100vh - var(--nav-height, 0px));
     display: flex;
     align-items: center;
@@ -121,7 +115,7 @@
   .hiw-e__card {
     display: flex;
     width: 100%;
-    height: clamp(22rem, 80vh, min(40rem, 62.5vh));
+    height: clamp(22rem, 80vh, 40rem);
     border-radius: var(--hiw-radius-xl);
     background: var(--hiw-color-grey);
     overflow: hidden;
@@ -131,7 +125,7 @@
   .hiw-e__accordion {
     width: 33.33%;
     flex-shrink: 0;
-    padding: var(--hiw-pad);
+    padding: var(--hiw-pad) !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -155,7 +149,7 @@
     display: flex;
     align-items: flex-start;
     gap: var(--hiw-gap);
-    padding: 0.7rem var(--hiw-space-sm);
+    padding: 0.7rem var(--hiw-space-sm) !important;
     border-radius: var(--hiw-radius-lg);
     background: transparent;
     border: none;
