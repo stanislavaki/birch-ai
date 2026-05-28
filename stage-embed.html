@@ -86,7 +86,10 @@
   .hiw-e img, .hiw-e svg { display: block; max-width: 100%; }
 
   /* ── Container ── */
+  /* font-size: 16px anchors all rem values inside the card to 16px base,
+     regardless of what Webflow sets on :root */
   .hiw-e__sticky .hiw-e__container {
+    font-size: 16px;
     width: 100%;
     max-width: 100rem;
     margin-inline: auto;
