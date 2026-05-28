@@ -732,11 +732,13 @@
 
       targetP  = frac;
       currentP = frac;
-      /* Disable smooth scroll (Webflow sets scroll-behavior:smooth globally)
-         so programmatic scroll snaps instantly without a visible page jump */
+      /* getBoundingClientRect+pageYOffset gives true document position
+         regardless of Webflow's positioned parent containers.
+         Also disable smooth-scroll so the jump is instant. */
       var docEl = document.documentElement;
       docEl.style.setProperty('scroll-behavior', 'auto', 'important');
-      window.scrollTo(0, section.offsetTop + frac * scrollable);
+      var sectionDocTop = section.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo(0, sectionDocTop + frac * scrollable);
       requestAnimationFrame(function () {
         docEl.style.removeProperty('scroll-behavior');
       });
