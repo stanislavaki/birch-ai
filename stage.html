@@ -40,20 +40,22 @@
     top: var(--nav-height, 0px);
     height: calc(100vh - var(--nav-height, 0px));
     display: flex;
-    align-items: center;
+    align-items: stretch;
     overflow: hidden;
+    padding-bottom: 2rem;
   }
 
   .hiw__sticky .container {
     display: flex;
-    align-items: center;
+    align-items: stretch;
+    height: 100%;
   }
 
   /* Card */
   .hiw__card {
     display: flex;
     width: 100%;
-    height: clamp(22rem, 80vh, 40rem);
+    height: 100%;
     border-radius: var(--radius-xl);
     background: var(--color-bg-grey);
     overflow: hidden;
@@ -204,33 +206,15 @@
     .hiw__accordion { width: 41.67%; /* 5/12 col */ }
   }
 
-  @media (max-width: 991px) {
-    .hiw__accordion  { width: 33.33%; /* back to 4/12 col */ }
-    .hiw__step-num,
-    .hiw__step-title { font-size: var(--text-h5-size); line-height: var(--text-h5-lh); }
-    .hiw__step-desc  { font-size: var(--text-body-size); line-height: var(--text-body-lh); }
-  }
-
   /* ─────────────────────────────────────────
-     MOBILE (≤767px) — horizontal carousel
+     TABLET + MOBILE (≤991px) — carousel mode
   ───────────────────────────────────────── */
 
-  /* Mobile text block (top of card) — hidden on desktop */
-  .hiw__mob-text {
-    display: none;
-  }
+  /* Carousel UI — hidden on desktop */
+  .hiw__mob-text  { display: none; }
+  .hiw__mob-dots  { display: none; }
 
-  /* Mobile nav dots — hidden on desktop */
-  .hiw__mob-dots {
-    display: none;
-  }
-
-  /* Mobile arrow buttons — hidden on desktop */
-  .hiw__mob-arrow {
-    display: none;
-  }
-
-  @media (max-width: 767px) {
+  @media (max-width: 991px) {
 
     /* Disable scroll-driven sticky */
     .hiw { height: auto !important; }
@@ -244,32 +228,32 @@
     .hiw__sticky .container {
       flex-direction: column;
       align-items: stretch;
-      padding-block: var(--space-lg);
+      padding-block: var(--space-sm);
     }
 
-    /* Card: flex-column — JS sets height to tallest content state */
+    /* Card: flex-column */
     .hiw__card {
       flex-direction: column;
       align-items: stretch;
-      height: auto;        /* JS: sizeMobCard() */
+      height: auto;
       background: transparent;
       position: relative;
       overflow: hidden;
+      transition: background-color 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
     /* Hide desktop accordion */
     .hiw__accordion { display: none; }
 
-    /* Mobile text block: in-flow flex child, auto-height sized to content */
-    /* JS fixes height to the tallest step so carousel transitions don't jump */
+    /* Text block */
     .hiw__mob-text {
       display: flex;
       align-items: flex-start;
       gap: var(--gap-main);
-      padding: var(--space-sm) var(--space-sm) var(--space-lg); /* bottom: 3rem = 48px */
+      padding: var(--space-sm) var(--space-sm) var(--space-lg);
       background: var(--color-bg);
       border-radius: var(--radius-lg);
-      margin: var(--space-xs) var(--space-xs) 0; /* 8px from card edges, 0 bottom */
+      margin: var(--space-xs) var(--space-xs) 0;
       position: relative;
       z-index: 2;
       flex-shrink: 0;
@@ -279,6 +263,9 @@
     .hiw__mob-num {
       flex-shrink: 0;
       color: var(--color-text);
+      /* tablet: desktop h4 size */
+      font-size: var(--text-h4-size);
+      line-height: var(--text-h4-lh);
     }
 
     .hiw__mob-body {
@@ -289,77 +276,66 @@
       gap: var(--gap-sm);
     }
 
-    .hiw__mob-title,
-    .hiw__mob-desc { margin: 0; color: var(--color-text); }
+    .hiw__mob-title {
+      margin: 0;
+      color: var(--color-text);
+      /* tablet: desktop h4 size */
+      font-size: var(--text-h4-size);
+      line-height: var(--text-h4-lh);
+    }
 
-    /* Visual: fills remaining height, 32px gap from text block */
+    .hiw__mob-desc {
+      margin: 0;
+      color: var(--color-text);
+      /* tablet: desktop para-lg size */
+      font-size: var(--text-para-lg-size);
+      line-height: var(--text-para-lg-lh);
+    }
+
+    /* Visual panel */
     .hiw__visual {
       flex: 1 0 0;
       position: relative;
       overflow: hidden;
       width: 100%;
-      margin-top: var(--space-md); /* 32px gap */
+      margin-top: var(--space-md);
       aspect-ratio: unset;
+      transition: background-color 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+      touch-action: pan-y;
+      user-select: none;
     }
 
-    /* Slides: stacked inside visual — CSS transition drives the carousel animation */
+    /* Slides */
     .hiw__slide {
-      padding: 0;
-      align-items: flex-start;
-      justify-content: flex-start;
+      padding: 0 2rem var(--space-md);
+      align-items: center;
+      justify-content: center;
       transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
-    /* Card bg animates with the slide color */
-    .hiw__card {
-      transition: background-color 0.5s ease;
-    }
 
-    /* Arrow buttons */
-    .hiw__mob-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 2rem;
-      height: 2rem;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: var(--radius-pill);
-      color: var(--color-text);
-      z-index: 2;
-      cursor: pointer;
-      padding: 0;
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-      transition: opacity 0.2s ease;
-    }
-    .hiw__mob-arrow--prev { left: var(--space-xs); }
-    .hiw__mob-arrow--next { right: var(--space-xs); }
-    .hiw__mob-arrow[disabled] { opacity: 0.25; cursor: default; }
-
-    /* picture: block on mobile so img is in-flow (override display:contents) */
+    /* picture: block so img is in-flow */
     .hiw__slide picture {
-      display: block;
+      display: flex;
+      justify-content: center;
       width: 100%;
       flex-shrink: 0;
     }
 
-    /* Image: fills available width with left gap, natural aspect ratio, no crop */
+    /* Image: desktop file, centered, capped at 600px */
     .hiw__slide img {
       position: static;
       display: block;
-      width: 96.4%;        /* 270/280 — flush to right edge */
-      margin-left: 3.6%;   /* 10/280 — left gap */
-      height: auto;        /* natural aspect ratio */
-      max-width: none;
-      max-height: none;
-      object-fit: unset;
-      border-radius: var(--radius-md) 0 0 0; /* top-left only */
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
+      margin: 0 auto;
     }
 
-    /* Coming soon bar: anchored to bottom of visual */
+    /* Coming soon */
     .hiw__coming-soon {
       left: var(--space-xs);
       right: var(--space-xs);
@@ -371,30 +347,83 @@
       z-index: 1;
     }
 
-    /* Icons before text on mobile */
     .hiw__platform-icons { order: -1; }
 
     /* Nav dots */
+    @keyframes hiw-dot-fill {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(0); }
+    }
+
     .hiw__mob-dots {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: var(--space-xs);
-      padding: var(--space-sm) 0 0;
+      width: 100%;
+      gap: 0.25rem;
+      padding-top: var(--space-sm);
+      padding-inline: var(--radius-lg);
     }
 
     .hiw__mob-dot {
-      width: 0.5rem;
-      height: 0.5rem;
+      flex: 1;
+      min-width: 0;
+      height: 0.25rem;
       border-radius: var(--radius-pill);
-      background: var(--color-text-grey);
-      transition: background 0.3s ease;
-      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
     }
 
-    .hiw__mob-dot.is-active {
-      background: var(--color-text);
+    .hiw__mob-dots--paused .hiw__mob-dot.is-active::after {
+      animation-play-state: paused;
     }
+
+    .hiw__mob-dot.is-active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-100%);
+      animation: hiw-dot-fill 3s linear forwards;
+      border-radius: var(--radius-pill);
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     MOBILE ONLY (≤767px) — image offset style
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+
+    /* Text: smaller mobile sizes */
+    .hiw__mob-num,
+    .hiw__mob-title {
+      font-size: var(--text-h5-size);
+      line-height: var(--text-h5-lh);
+    }
+    .hiw__mob-desc {
+      font-size: var(--text-body-size);
+      line-height: var(--text-body-lh);
+    }
+
+    /* picture: flush left */
+    .hiw__slide picture {
+      justify-content: flex-start;
+    }
+
+    /* Image: fills width with left offset, flush right, mobile crop style */
+    .hiw__slide img {
+      width: 96.4%;
+      margin-left: 3.6%;
+      margin-right: 0;
+      max-width: none;
+      max-height: none;
+      height: auto;
+      object-fit: unset;
+      border-radius: var(--radius-md) 0 0 0;
+    }
+
+    /* Slide padding reset for flush mobile look */
+    .hiw__slide { padding: 0; align-items: flex-start; justify-content: flex-start; }
   }
 </style>
 </head>
@@ -502,17 +531,6 @@
           </div>
         </div>
 
-        <!-- Mobile carousel arrow buttons (hidden on desktop via CSS) -->
-        <button class="hiw__mob-arrow hiw__mob-arrow--prev" id="hiwMobPrev" aria-label="Previous">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 13L5 8L10 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="hiw__mob-arrow hiw__mob-arrow--next" id="hiwMobNext" aria-label="Next">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
       </div>
 
     </div><!-- /.hiw__card -->
@@ -701,7 +719,7 @@
     clone.style.cssText =
       'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
       'width:' + mobTextEl.offsetWidth + 'px;height:auto;';
-    document.body.appendChild(clone);
+    mobTextEl.parentNode.appendChild(clone);
 
     var cloneNum   = clone.querySelector('.hiw__mob-num');
     var cloneTitle = clone.querySelector('.hiw__mob-title');
@@ -714,7 +732,7 @@
       var h = clone.offsetHeight;
       if (h > maxMobH) maxMobH = h;
     }
-    document.body.removeChild(clone);
+    mobTextEl.parentNode.removeChild(clone);
     if (!maxMobH) return;
 
     /* ─ 2. Measure max image natural height at display width ─ */
@@ -732,9 +750,10 @@
     /* ─ 3. Fix mob-text height + total card height ─ */
     mobTextEl.style.height = (maxMobH / remPx) + 'rem';
 
-    var spaceXs = remPx * 0.5; /* --space-xs = 8px  (mob-text margin-top) */
-    var spaceMd = remPx * 2;   /* --space-md = 32px (visual margin-top) */
-    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH) / remPx) + 'rem';
+    var spaceXs       = remPx * 0.5; /* --space-xs = 8px  (mob-text margin-top) */
+    var spaceMd       = remPx * 2;   /* --space-md = 32px (visual margin-top) */
+    var slideBottomPad = window.innerWidth <= 767 ? 0 : spaceMd; /* tablet: matching bottom pad */
+    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH + slideBottomPad) / remPx) + 'rem';
   }
 
   /* Retry after all resources loaded (images need naturalWidth/Height) */
@@ -833,10 +852,10 @@
      MOBILE CAROUSEL
   ───────────────────────────────────────── */
 
-  var MOB          = window.matchMedia('(max-width: 767px)');
+  var MOB          = window.matchMedia('(max-width: 991px)');
   var _mobIdx      = 0;
   var _mobTimer    = null;
-  var MOB_INTERVAL = 5000; /* 5 s auto-advance */
+  var MOB_INTERVAL = 3000; /* 3 s auto-advance */
 
   /* Collect text from accordion (single source of truth) */
   var stepData = steps.map(function (btn) {
@@ -852,8 +871,6 @@
   var mobTitleEl = mobTextEl && mobTextEl.querySelector('.hiw__mob-title');
   var mobDescEl  = mobTextEl && mobTextEl.querySelector('.hiw__mob-desc');
   var mobDots    = Array.prototype.slice.call(document.querySelectorAll('.hiw__mob-dot'));
-  var mobPrevBtn = document.getElementById('hiwMobPrev');
-  var mobNextBtn = document.getElementById('hiwMobNext');
 
   function mobUpdateText(idx) {
     if (!mobNumEl) return;
@@ -864,19 +881,26 @@
 
   function mobUpdateDots(idx) {
     mobDots.forEach(function (dot, i) {
-      dot.classList.toggle('is-active', i === idx);
+      var active = i === idx;
+      if (active) {
+        /* Force animation restart: remove → reflow → re-add */
+        dot.classList.remove('is-active');
+        dot.offsetWidth; /* trigger reflow */
+        dot.classList.add('is-active');
+      } else {
+        dot.classList.remove('is-active');
+      }
     });
-  }
-
-  function mobUpdateArrows(idx) {
-    if (!mobPrevBtn || !mobNextBtn) return;
-    mobPrevBtn.disabled = (idx === 0);
-    mobNextBtn.disabled = (idx === STEP_COUNT - 1);
   }
 
   function mobGoTo(idx, animate) {
     idx      = Math.max(0, Math.min(STEP_COUNT - 1, idx));
     _mobIdx  = idx;
+
+    if (!animate) {
+      visual.style.transition = 'none';
+      card.style.transition   = 'none';
+    }
 
     slides.forEach(function (slide, i) {
       if (!animate) slide.style.transition = 'none';
@@ -885,14 +909,15 @@
     });
 
     visual.style.backgroundColor = BG_COLORS[idx];
-    card.style.backgroundColor   = BG_COLORS[idx]; /* fill entire card bg on mobile */
+    card.style.backgroundColor   = BG_COLORS[idx];
     mobUpdateText(idx);
     mobUpdateDots(idx);
-    mobUpdateArrows(idx);
 
     if (!animate) {
       requestAnimationFrame(function () {
         slides.forEach(function (slide) { slide.style.transition = ''; });
+        visual.style.transition = '';
+        card.style.transition   = '';
       });
     }
   }
@@ -908,83 +933,91 @@
     }, MOB_INTERVAL);
   }
 
-  var _swipeInited  = false;
-  var _arrowsInited = false;
+  var _swipeInited = false;
 
   function mobInitSwipe() {
     if (_swipeInited) return;
     _swipeInited = true;
-    var touchStartX = 0;
-    var touchStartY = 0;
+    var startX = 0, startY = 0, _down = false;
+    var dotsContainer = document.getElementById('hiwMobDots');
 
-    visual.addEventListener('touchstart', function (e) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
+    visual.addEventListener('pointerdown', function (e) {
+      startX = e.clientX;
+      startY = e.clientY;
+      _down  = true;
+      visual.setPointerCapture(e.pointerId);
       mobStopTimer();
-    }, { passive: true });
+      if (dotsContainer) dotsContainer.classList.add('hiw__mob-dots--paused');
+    });
 
-    visual.addEventListener('touchend', function (e) {
-      var dx = e.changedTouches[0].clientX - touchStartX;
-      var dy = e.changedTouches[0].clientY - touchStartY;
+    visual.addEventListener('pointerup', function (e) {
+      if (!_down) return;
+      _down = false;
+      var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+      if (dotsContainer) dotsContainer.classList.remove('hiw__mob-dots--paused');
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        /* Свайп */
         mobGoTo(dx < 0 ? _mobIdx + 1 : _mobIdx - 1, true);
+      } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        /* Тап/клик — левая/правая половина */
+        var midX = visual.getBoundingClientRect().left + visual.offsetWidth / 2;
+        mobGoTo(e.clientX < midX ? _mobIdx - 1 : _mobIdx + 1, true);
+      } else {
+        mobUpdateDots(_mobIdx);
       }
       mobStartTimer();
-    }, { passive: true });
-  }
-
-  function mobInitArrows() {
-    if (_arrowsInited) return;
-    _arrowsInited = true;
-    if (!mobPrevBtn || !mobNextBtn) return;
-    mobPrevBtn.addEventListener('click', function () {
-      mobStopTimer();
-      mobGoTo(_mobIdx - 1, true);
-      mobStartTimer();
     });
-    mobNextBtn.addEventListener('click', function () {
-      mobStopTimer();
-      mobGoTo(_mobIdx + 1, true);
+
+    visual.addEventListener('pointercancel', function () {
+      if (!_down) return;
+      _down = false;
+      if (dotsContainer) dotsContainer.classList.remove('hiw__mob-dots--paused');
       mobStartTimer();
     });
   }
 
-  /* Keyboard navigation (ArrowLeft / ArrowRight) on mobile */
-  document.addEventListener('keydown', function (e) {
-    if (!_mobMode) return;
-    if (e.key === 'ArrowLeft') {
-      mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer();
-    } else if (e.key === 'ArrowRight') {
-      mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer();
-    }
-  });
+  var _mobObserver = null;
 
   function destroyMobile() {
     _mobMode = false;
     mobStopTimer();
-    mobTextEl.style.height    = ''; /* Clear JS-fixed mob-text height */
-    card.style.backgroundColor = ''; /* Restore desktop --color-bg-grey from CSS */
-    /* Restore slides to desktop translateY state via tick() */
+    if (_mobObserver) { _mobObserver.disconnect(); _mobObserver = null; }
+    mobTextEl.style.height    = '';
+    card.style.backgroundColor = '';
     slides.forEach(function (slide) {
       slide.style.transform  = '';
       slide.style.zIndex     = '';
       slide.style.transition = '';
     });
-    /* Re-apply section height + card height for current viewport */
     window.applyScrollLength();
     sizeCard();
   }
 
   function initMobile() {
     _mobMode = true;
-    mobGoTo(0, false);       /* Set content + card.backgroundColor BEFORE revealing */
-    card.style.opacity = ''; /* Reveal card — correct bg is already set */
-    sizeMobCard(); /* Fix mob-text and card height to tallest content state */
-    /* Re-enable visual bg transition after positions are snapped */
+    mobGoTo(0, false);
+    card.style.opacity = '';
+    sizeMobCard();
     requestAnimationFrame(function () { visual.style.transition = ''; });
     mobInitSwipe();
-    mobInitArrows();
-    mobStartTimer();
+
+    /* Пауза анимации до появления блока на экране */
+    var dotsContainer = document.getElementById('hiwMobDots');
+    if (dotsContainer) dotsContainer.classList.add('hiw__mob-dots--paused');
+
+    if (_mobObserver) { _mobObserver.disconnect(); }
+    _mobObserver = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        if (dotsContainer) dotsContainer.classList.remove('hiw__mob-dots--paused');
+        mobUpdateDots(_mobIdx);
+        mobStartTimer();
+      } else {
+        if (dotsContainer) dotsContainer.classList.add('hiw__mob-dots--paused');
+        mobStopTimer();
+      }
+    }, { threshold: 0.1 });
+    _mobObserver.observe(section);
   }
 
   if (MOB.matches) { initMobile(); }

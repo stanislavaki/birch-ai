@@ -48,7 +48,7 @@
   /* ── Typography (scoped to .hiw-e) ── */
   .hiw-e .t-h4 {
     font-family: var(--hiw-font);
-    font-size: 1.5rem; font-weight: 600;
+    font-size: 1.25rem; font-weight: 600;
     line-height: 1; letter-spacing: 0;
   }
   .hiw-e .t-h5 {
@@ -58,7 +58,7 @@
   }
   .hiw-e .t-para-lg {
     font-family: var(--hiw-font);
-    font-size: 1.25rem; font-weight: 600;
+    font-size: 0.9rem; font-weight: 600;
     line-height: 1.1; letter-spacing: 0;
   }
   .hiw-e .t-body {
@@ -94,24 +94,26 @@
     max-width: 100rem;
     margin-inline: auto;
     display: flex;
-    align-items: center;
+    align-items: stretch;
+    height: 100%;
   }
 
   /* ── Sticky wrapper ── */
   .hiw-e__sticky {
     position: sticky;
-    top: var(--nav-height, 0px);
-    height: calc(100vh - var(--nav-height, 0px));
+    top: 6.5rem;
+    height: calc(100vh - 6.5rem);
     display: flex;
-    align-items: center;
+    align-items: stretch;
     overflow: hidden;
+    padding-bottom: 2rem;
   }
 
   /* ── Card ── */
   .hiw-e__card {
     display: flex;
     width: 100%;
-    height: clamp(22rem, 80vh, 40rem);
+    height: 100%;
     border-radius: var(--hiw-radius-xl);
     background: var(--hiw-color-grey);
     overflow: hidden;
@@ -229,12 +231,16 @@
   /* ── Mobile-only elements (hidden on desktop) ── */
   .hiw-e__mob-text   { display: none; }
   .hiw-e__mob-dots   { display: none; }
-  .hiw-e__mob-arrow  { display: none; }
 
   /* ─────────────────────────────────────────
-     MOBILE (≤767px) — horizontal carousel
+     TABLET + MOBILE (≤991px) — carousel mode
   ───────────────────────────────────────── */
-  @media (max-width: 767px) {
+  @keyframes hiw-dot-fill {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
+
+  @media (max-width: 991px) {
 
     .hiw-e { height: auto !important; }
 
@@ -247,7 +253,7 @@
     .hiw-e__sticky .hiw-e__container {
       flex-direction: column;
       align-items: stretch;
-      padding-block: var(--hiw-space-lg);
+      padding-block: var(--hiw-space-sm);
     }
 
     .hiw-e__card {
@@ -257,7 +263,7 @@
       background: transparent;
       position: relative;
       overflow: hidden;
-      transition: background-color 0.5s ease;
+      transition: background-color 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
     .hiw-e__accordion { display: none; }
@@ -275,14 +281,14 @@
       flex-shrink: 0;
       overflow: hidden;
     }
-    .hiw-e__mob-num  { flex-shrink: 0; color: var(--hiw-color-text); }
+    .hiw-e__mob-num  { flex-shrink: 0; color: var(--hiw-color-text); font-size: 1.5rem; line-height: 1; }
     .hiw-e__mob-body {
       flex: 1; min-width: 0;
       display: flex; flex-direction: column;
       gap: var(--hiw-gap-sm);
     }
-    .hiw-e__mob-title,
-    .hiw-e__mob-desc { margin: 0; color: var(--hiw-color-text); }
+    .hiw-e__mob-title { margin: 0; color: var(--hiw-color-text); font-size: 1.5rem; line-height: 1; }
+    .hiw-e__mob-desc  { margin: 0; color: var(--hiw-color-text); font-size: 1.25rem; line-height: 1.1; }
 
     .hiw-e__visual {
       flex: 1 0 0;
@@ -291,47 +297,28 @@
       width: 100%;
       margin-top: var(--hiw-space-md);
       aspect-ratio: unset;
+      transition: background-color 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+      touch-action: pan-y; /* вертикальный скролл — браузер, горизонталь — наш JS */
+      user-select: none;
     }
 
     .hiw-e__slide {
-      padding: 0;
-      align-items: flex-start;
-      justify-content: flex-start;
+      padding: 0 2rem var(--hiw-space-md);
+      align-items: center;
+      justify-content: center;
       transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
-    .hiw-e__mob-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 2rem; height: 2rem;
-      background: rgba(0,0,0,0.35);
-      border-radius: var(--hiw-radius-pill);
-      color: var(--hiw-color-text);
-      z-index: 2;
-      cursor: pointer;
-      padding: 0;
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
-      transition: opacity 0.2s ease;
-    }
-    .hiw-e__mob-arrow--prev { left: var(--hiw-space-xs); }
-    .hiw-e__mob-arrow--next { right: var(--hiw-space-xs); }
-    .hiw-e__mob-arrow[disabled] { opacity: 0.25; cursor: default; }
-
-    .hiw-e__slide picture { display: block; width: 100%; flex-shrink: 0; }
+    .hiw-e__slide picture { display: flex; justify-content: center; width: 100%; flex-shrink: 0; }
     .hiw-e__slide img {
       position: static;
       display: block;
-      width: 96.4%;
-      margin-left: 3.6%;
+      width: 100%;
+      max-width: 100%;
       height: auto;
-      max-width: none; max-height: none;
-      object-fit: unset;
-      border-radius: var(--hiw-radius-md) 0 0 0;
+      object-fit: contain;
+      border-radius: var(--hiw-radius-lg);
+      margin: 0 auto;
     }
 
     .hiw-e__coming-soon {
@@ -346,21 +333,57 @@
     }
     .hiw-e__platform-icons { order: -1; }
 
+    .hiw-e__mob-dots--paused .hiw-e__mob-dot.is-active::after {
+      animation-play-state: paused;
+    }
+
     .hiw-e__mob-dots {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: var(--hiw-space-xs);
-      padding: var(--hiw-space-sm) 0 0;
+      width: 100%;
+      gap: 0.25rem;
+      padding-top: var(--hiw-space-sm);
+      padding-inline: var(--hiw-radius-lg);
     }
     .hiw-e__mob-dot {
-      width: 0.5rem; height: 0.5rem;
+      flex: 1;
+      min-width: 0;
+      height: 0.25rem;
       border-radius: var(--hiw-radius-pill);
-      background: var(--hiw-color-muted);
-      transition: background 0.3s ease;
-      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
     }
-    .hiw-e__mob-dot.is-active { background: var(--hiw-color-text); }
+    .hiw-e__mob-dot.is-active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-100%);
+      animation: hiw-dot-fill 3s linear forwards;
+      border-radius: var(--hiw-radius-pill);
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     MOBILE ONLY (≤767px) — image offset style
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hiw-e__mob-num,
+    .hiw-e__mob-title { font-size: 1.2rem; line-height: 1.4; }
+    .hiw-e__mob-desc  { font-size: 0.9rem; line-height: 1.2; }
+
+    .hiw-e__slide picture { justify-content: flex-start; }
+    .hiw-e__slide img {
+      width: 96.4%;
+      margin-left: 3.6%;
+      margin-right: 0;
+      max-width: none;
+      height: auto;
+      object-fit: unset;
+      border-radius: var(--hiw-radius-md) 0 0 0;
+    }
+    .hiw-e__slide { padding: 0; align-items: flex-start; justify-content: flex-start; }
   }
 </style>
 
@@ -429,8 +452,8 @@
 
         <div class="hiw-e__slide" data-idx="0">
           <picture>
-            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a183857aa667d8d7dc90187_stage_how-it-works_01_mob.webp" />
-            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a18390dbd29472343d0dc83_stage_how-it-works_01.png" alt="Connect your Google Drive folders" />
+            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7e2559dd2a0c418d62_stage_how-it-works_01_mob.webp" />
+            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7e8ba3231f3225f1bb_stage_how-it-works_01.webp" alt="Connect your Google Drive folders" />
           </picture>
         </div>
         <div class="hiw-e__slide" data-idx="1">
@@ -453,8 +476,8 @@
         </div>
         <div class="hiw-e__slide" data-idx="4">
           <picture>
-            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a183857070156fbb2c1bf4d_stage_how-it-works_05_mob.webp" />
-            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a18390d876668f21afafc48_stage_how-it-works_05.webp" alt="Push to ad accounts automatically" />
+            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7d7f8bcec44f2c6107_stage_how-it-works_05_mob.webp" />
+            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7e1f185b189a1f11fd_stage_how-it-works_05.webp" alt="Push to ad accounts automatically" />
           </picture>
           <div class="hiw-e__coming-soon">
             <span class="hiw-e__coming-soon-text t-body">More platforms coming soon</span>
@@ -465,16 +488,6 @@
           </div>
         </div>
 
-        <button class="hiw-e__mob-arrow hiw-e__mob-arrow--prev" id="hiw-eMobPrev" aria-label="Previous">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 13L5 8L10 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="hiw-e__mob-arrow hiw-e__mob-arrow--next" id="hiw-eMobNext" aria-label="Next">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
 
       </div><!-- /.hiw-e__visual -->
 
@@ -641,7 +654,7 @@
     clone.style.cssText =
       'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;' +
       'width:' + mobTextEl.offsetWidth + 'px;height:auto;';
-    document.body.appendChild(clone);
+    mobTextEl.parentNode.appendChild(clone);
 
     var cloneNum   = clone.querySelector('.hiw-e__mob-num');
     var cloneTitle = clone.querySelector('.hiw-e__mob-title');
@@ -654,7 +667,7 @@
       var h = clone.offsetHeight;
       if (h > maxMobH) maxMobH = h;
     }
-    document.body.removeChild(clone);
+    mobTextEl.parentNode.removeChild(clone);
     if (!maxMobH) return;
 
     var imgDisplayW = cardW * 0.964;
@@ -669,9 +682,10 @@
     if (!maxImgH) return;
 
     mobTextEl.style.height = (maxMobH / remPx) + 'rem';
-    var spaceXs = remPx * 0.5;
-    var spaceMd = remPx * 2;
-    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH) / remPx) + 'rem';
+    var spaceXs        = remPx * 0.5;
+    var spaceMd        = remPx * 2;
+    var slideBottomPad = window.innerWidth <= 767 ? 0 : spaceMd;
+    card.style.height = ((spaceXs + maxMobH + spaceMd + maxImgH + slideBottomPad) / remPx) + 'rem';
   }
 
   window.addEventListener('load', function () { if (_mobMode) sizeMobCard(); });
@@ -766,10 +780,10 @@
   }).observe(card);
 
   /* ── Mobile carousel ── */
-  var MOB          = window.matchMedia('(max-width: 767px)');
+  var MOB          = window.matchMedia('(max-width: 991px)');
   var _mobIdx      = 0;
   var _mobTimer    = null;
-  var MOB_INTERVAL = 5000;
+  var MOB_INTERVAL = 3000;
 
   var stepData = steps.map(function (btn) {
     return {
@@ -780,8 +794,6 @@
   });
 
   var mobDots    = Array.prototype.slice.call(section.querySelectorAll('.hiw-e__mob-dot'));
-  var mobPrevBtn = document.getElementById('hiw-eMobPrev');
-  var mobNextBtn = document.getElementById('hiw-eMobNext');
 
   function mobUpdateText(idx) {
     if (!mobNumEl) return;
@@ -790,17 +802,24 @@
     mobDescEl.textContent  = stepData[idx].desc;
   }
   function mobUpdateDots(idx) {
-    mobDots.forEach(function (dot, i) { dot.classList.toggle('is-active', i === idx); });
+    mobDots.forEach(function (dot, i) {
+      var active = i === idx;
+      if (active) {
+        dot.classList.remove('is-active');
+        dot.offsetWidth;
+        dot.classList.add('is-active');
+      } else {
+        dot.classList.remove('is-active');
+      }
+    });
   }
-  function mobUpdateArrows(idx) {
-    if (!mobPrevBtn || !mobNextBtn) return;
-    mobPrevBtn.disabled = (idx === 0);
-    mobNextBtn.disabled = (idx === STEP_COUNT - 1);
-  }
-
   function mobGoTo(idx, animate) {
-    idx = Math.max(0, Math.min(STEP_COUNT - 1, idx));
+    idx = ((idx % STEP_COUNT) + STEP_COUNT) % STEP_COUNT;
     _mobIdx = idx;
+    if (!animate) {
+      visual.style.transition = 'none';
+      card.style.transition   = 'none';
+    }
     slides.forEach(function (slide, i) {
       if (!animate) slide.style.transition = 'none';
       slide.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
@@ -810,10 +829,11 @@
     card.style.backgroundColor   = BG_COLORS[idx];
     mobUpdateText(idx);
     mobUpdateDots(idx);
-    mobUpdateArrows(idx);
     if (!animate) {
       requestAnimationFrame(function () {
         slides.forEach(function (slide) { slide.style.transition = ''; });
+        visual.style.transition = '';
+        card.style.transition   = '';
       });
     }
   }
@@ -824,45 +844,56 @@
     _mobTimer = setInterval(function () { mobGoTo((_mobIdx + 1) % STEP_COUNT, true); }, MOB_INTERVAL);
   }
 
-  var _swipeInited  = false;
-  var _arrowsInited = false;
+  var _swipeInited = false;
 
   function mobInitSwipe() {
     if (_swipeInited) return;
     _swipeInited = true;
-    var touchStartX = 0, touchStartY = 0;
-    visual.addEventListener('touchstart', function (e) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
+    var startX = 0, startY = 0, _down = false;
+    var dotsContainer = document.getElementById('hiw-eMobDots');
+
+    visual.addEventListener('pointerdown', function (e) {
+      startX = e.clientX;
+      startY = e.clientY;
+      _down  = true;
+      visual.setPointerCapture(e.pointerId); /* удерживаем события даже если палец вышел за пределы */
       mobStopTimer();
-    }, { passive: true });
-    visual.addEventListener('touchend', function (e) {
-      var dx = e.changedTouches[0].clientX - touchStartX;
-      var dy = e.changedTouches[0].clientY - touchStartY;
+      if (dotsContainer) dotsContainer.classList.add('hiw-e__mob-dots--paused');
+    });
+
+    visual.addEventListener('pointerup', function (e) {
+      if (!_down) return;
+      _down = false;
+      var dx = e.clientX - startX;
+      var dy = e.clientY - startY;
+      if (dotsContainer) dotsContainer.classList.remove('hiw-e__mob-dots--paused');
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        /* Свайп */
         mobGoTo(dx < 0 ? _mobIdx + 1 : _mobIdx - 1, true);
+      } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        /* Тап/клик — левая/правая половина */
+        var midX = visual.getBoundingClientRect().left + visual.offsetWidth / 2;
+        mobGoTo(e.clientX < midX ? _mobIdx - 1 : _mobIdx + 1, true);
+      } else {
+        mobUpdateDots(_mobIdx);
       }
       mobStartTimer();
-    }, { passive: true });
+    });
+
+    visual.addEventListener('pointercancel', function () {
+      if (!_down) return;
+      _down = false;
+      if (dotsContainer) dotsContainer.classList.remove('hiw-e__mob-dots--paused');
+      mobStartTimer();
+    });
   }
 
-  function mobInitArrows() {
-    if (_arrowsInited) return;
-    _arrowsInited = true;
-    if (!mobPrevBtn || !mobNextBtn) return;
-    mobPrevBtn.addEventListener('click', function () { mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer(); });
-    mobNextBtn.addEventListener('click', function () { mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer(); });
-  }
-
-  document.addEventListener('keydown', function (e) {
-    if (!_mobMode) return;
-    if (e.key === 'ArrowLeft')  { mobStopTimer(); mobGoTo(_mobIdx - 1, true); mobStartTimer(); }
-    if (e.key === 'ArrowRight') { mobStopTimer(); mobGoTo(_mobIdx + 1, true); mobStartTimer(); }
-  });
+  var _mobObserver = null;
 
   function destroyMobile() {
     _mobMode = false;
     mobStopTimer();
+    if (_mobObserver) { _mobObserver.disconnect(); _mobObserver = null; }
     mobTextEl.style.height     = '';
     card.style.backgroundColor = '';
     slides.forEach(function (slide) {
@@ -881,8 +912,23 @@
     sizeMobCard();
     requestAnimationFrame(function () { visual.style.transition = ''; });
     mobInitSwipe();
-    mobInitArrows();
-    mobStartTimer();
+
+    /* Пауза анимации до появления блока на экране */
+    var dotsContainer = document.getElementById('hiw-eMobDots');
+    if (dotsContainer) dotsContainer.classList.add('hiw-e__mob-dots--paused');
+
+    if (_mobObserver) { _mobObserver.disconnect(); }
+    _mobObserver = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        if (dotsContainer) dotsContainer.classList.remove('hiw-e__mob-dots--paused');
+        mobUpdateDots(_mobIdx); /* рестарт анимации точки с нуля */
+        mobStartTimer();
+      } else {
+        if (dotsContainer) dotsContainer.classList.add('hiw-e__mob-dots--paused');
+        mobStopTimer();
+      }
+    }, { threshold: 0.1 });
+    _mobObserver.observe(section);
   }
 
   if (MOB.matches) { initMobile(); }

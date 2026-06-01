@@ -48,6 +48,32 @@
 
 - **Фиксировать решения сразу** — если в процессе работы выясняется что-то важное (как работает анимация, какова высота блока, как ведёт себя элемент) — сразу записывать в CLAUDE.md. Иначе в следующей сессии придётся заново к этому приходить.
 
+- **Pointer Events для свайпа/тапа в каруселях** — вместо `touchstart/touchend + click` использовать единый `pointerdown/pointerup/pointercancel`. Работает для мыши, тача и стилуса без дублирования событий и без `passive`/`preventDefault` костылей. Обязательные детали:
+  - `el.setPointerCapture(e.pointerId)` в `pointerdown` — события не теряются если палец вышел за край элемента
+  - `touch-action: pan-y` на элементе в CSS — браузер обрабатывает вертикальный скролл, горизонталь перехватывает наш JS
+  - `user-select: none` на элементе — предотвращает выделение текста при свайпе
+  - `pointercancel` — чистый сброс состояния если браузер перехватил жест (например передал скролл)
+  ```js
+  el.addEventListener('pointerdown', function(e) {
+    startX = e.clientX; startY = e.clientY; _down = true;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointerup', function(e) {
+    if (!_down) return; _down = false;
+    var dx = e.clientX - startX, dy = e.clientY - startY;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { /* свайп */ }
+    else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) { /* тап/клик */ }
+  });
+  el.addEventListener('pointercancel', function() { _down = false; });
+  ```
+
+- **IntersectionObserver для автопереключения каруселей** — таймер и анимация индикаторов не должны стартовать при инициализации, только когда блок виден на экране. Паттерн:
+  - В `initX()` сразу добавлять паузу-класс на индикаторы (`--paused`)
+  - Observer при `isIntersecting`: снять паузу → `updateDots(idx)` (рестарт анимации) → `startTimer()`
+  - Observer при выходе из viewport: добавить паузу → `stopTimer()`
+  - Хранить observer в переменной `_observer`, в `destroyX()` вызывать `_observer.disconnect()`
+  - Порог `threshold: 0.1` — таймер стартует когда блок на 10% появился на экране
+
 - **Кнопка dashed → dotted** — стиль `dashed` в Figma для кнопок соответствует `border-style: dotted` в CSS. В Figma нет отдельного dotted-варианта, поэтому всегда используем `dotted` в коде для `.btn-stroke`.
 
 - **Стили перед версткой** — после брифинга по layout/анимации, но до написания кода, пройтись по стилям блока и уточнить:
