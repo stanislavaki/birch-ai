@@ -223,18 +223,17 @@
       align-items: flex-start;
       justify-content: center;  /* centers staircase vertically in remaining space */
       flex: 1;                  /* takes all space above subtitle */
-      gap: 0.625rem;
+      gap: 0.15em;
       width: fit-content;
-      --ps: clamp(1.5rem, 9.18vw, 2.295rem); /* caps at 400px viewport */
+      --ps: clamp(1.95rem, 11.93vw, 2.984rem); /* +30% from original */
       font-size: var(--ps);
     }
     .hero__step {
       display: flex;
       align-items: center;
-      gap: var(--gap-sm);
+      gap: 2em;
       flex-shrink: 0;
     }
-    /* Figma positions as % of 320px container: staircase offsets */
     .hero__step--a { margin-left: 0; }
     .hero__step--b { margin-left: 0.5em; }
     .hero__step--c { align-self: flex-start; margin-left: 0.6em; }
@@ -242,12 +241,13 @@
     .hero__step--e { align-self: flex-start; margin-left: 2.8em; }
 
     .hero__h1--mb .hero__pill--green.hero__pill--sq {
-      margin-right: 4%;
+      margin-right: 0.2em;
     }
 
     .hero__subtitle {
       padding-bottom: 2rem; /* gap to button */
       text-align: center;
+      max-width: 25rem; /* 400px */
     }
 
     .hero__btn {
@@ -333,8 +333,7 @@
     }
   }
 
-  /* Mobile: content-driven height, bigger images */
-  @media (max-width: 991px) and (min-width: 768px) {
+  @media (max-width: 991px) {
     .provepoints__media {
       margin: 0;
     }
@@ -351,7 +350,6 @@
     .provepoints__media {
       flex: none;
       padding: var(--space-md) 0;
-      margin: var(--space-lg) 0;
     }
   }
 
@@ -371,14 +369,20 @@
   .provepoints__desc {
     text-align: center;
     color: var(--color-text-grey);
-    margin: 0;
+    margin: 0 auto;
     flex-shrink: 0;
     padding-inline: var(--space-md); /* 32px */
   }
 
-  @media (max-width: 1279px) and (min-width: 992px) {
+  @media (max-width: 1279px) {
     .provepoints__desc {
       padding-inline: 0;
+    }
+  }
+
+  @media (max-width: 991px) {
+    .provepoints__desc {
+      max-width: 25rem; /* 400px */
     }
   }
 
@@ -1250,17 +1254,25 @@
             <div class="card-accordion is-closed" data-index="1">
               <h4 class="t-h4">Analyze your performance</h4>
               <div class="card-accordion__body">
-                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard. AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard.</p>
                 <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar1"></div></div>
               </div>
             </div>
 
             <div class="card-accordion is-closed" data-index="2">
+              <h4 class="t-h4">Audit your rules</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="3">
               <h4 class="t-h4">Analyze impact of rules</h4>
               <div class="card-accordion__body">
                 <p class="t-eyebrow" style="color:var(--color-text-grey);margin:0">Coming soon</p>
                 <p class="t-para-lg" style="color:var(--color-text-grey);margin:0;margin-top:0.5rem">See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
-                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar3"></div></div>
               </div>
             </div>
 
@@ -1306,6 +1318,7 @@
     token('--color-accent-green'),       /* card 0 */
     token('--color-accent-pink'),        /* card 1 */
     token('--color-accent-light-blue'),  /* card 2 */
+    token('--color-accent-purple'),      /* card 3 */
   ];
   var DURATION = 5500; /* ms each card stays active — must cover the longest chat cycle */
 
@@ -1427,7 +1440,7 @@
   var CHATS = [
     /* 0 — Get rules suggestion */
     {
-      userMsg: 'My target ROAS is 2.5. Share new ideas I could try to extend my current Birch rules setup',
+      userMsg: 'My target ROAS is 2.5. Share new ideas for my rules setup',
       aiHtml: [
         '<div class="chat-card__response-content">',
           '<p>I recommend moving to proactive growth and budget management:</p>',
@@ -1441,7 +1454,7 @@
     },
     /* 1 — Analyze performance */
     {
-      userMsg: 'Analyze my performance by platform for the last week',
+      userMsg: 'Analyze my performance by platform',
       aiHtml: [
         '<div class="chat-card__response-content">',
           '<div class="chat-card__table">',
@@ -1466,25 +1479,33 @@
               '<span class="chat-card__table-col">⚪ $40.6K</span>',
             '</div>',
           '</div>',
-          '<p>🔍 <strong>Key Findings</strong></p>',
-          '<p>Google Ads Efficiency 🟢</p>',
-          '<ul>',
-            '<li>Performance: With a ROAS of 35.72, Google Ads is exceptionally profitable.</li>',
-            '<li>Insight: Your search or shopping campaigns are capturing high-intent traffic that converts at a very low cost relative to revenue.</li>',
-          '</ul>',
+          '<p><strong>🔍 Key Findings</strong></p>',
+          '<p>Google Ads Efficiency 🟢<br>',
+          'This high efficiency signals your campaigns are capturing high-intent traffic that converts at minimal cost relative to revenue.</p>',
         '</div>'
       ].join('')
     },
-    /* 2 — Analyze impact of rules */
+    /* 2 — Audit your rules */
     {
-      userMsg: 'Can you check if my rules need any fixes in the setup?',
+      userMsg: 'Do my rules need any fixes in the setup?',
       aiHtml: [
         '<div class="chat-card__response-content">',
-          '<p>🛠 <strong>Critical Fix – Add Spend/Impression Thresholds</strong><br>',
-          'Without a minimum volume floor, low-spend ad sets will trigger false ROAS alerts. ',
-          'Add Spend (last 24h) &gt; [avg CPA] or Impressions &gt; 500.</p>',
+          '<p>🛠 <strong>Critical Fix – Add Spend Thresholds</strong><br>',
+          'Low-spend ad sets trigger false ROAS alerts. Fix: require Spend (last 24h) &gt; [avg CPA] before alerts fire.</p>',
           '<p>📈 <strong>Optimization – Tighten the CPM Trigger</strong><br>',
-          'Your 1.5x CPM threshold may miss early warning signs. Drop to 1.3x to catch competition spikes sooner.</p>',
+          'Drop your CPM threshold from 1.5x to 1.3x to catch competition spikes or creative fatigue sooner.</p>',
+        '</div>'
+      ].join('')
+    },
+    /* 3 — Analyze impact of rules */
+    {
+      userMsg: 'How Bïrch rule affected my metrics',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p><strong>The Action Density:</strong><br>',
+          'The rule triggered 5 increases (+10% budget each) and 1 decrease for the last 14 days.</p>',
+          '<p><strong>The ROAS Trajectory:</strong><br>',
+          'ROAS maintained a stable upward trend from 2.4 to 2.9, even as overall daily spend increased by 50%.</p>',
         '</div>'
       ].join('')
     }
