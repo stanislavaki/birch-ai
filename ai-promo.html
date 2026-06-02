@@ -129,7 +129,7 @@
     overflow: hidden;
     font-size: var(--ps);   /* sets em reference for children */
     width:  1.596em;        /* 83 / 52 */
-    height: 1.462em;        /* 76 / 52 */
+    height: 1.312em;        /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
   }
   .hero__col {
     position: absolute;
@@ -137,33 +137,15 @@
     width:         0.769em;  /* 40 / 52 */
     border-radius: 0.199em;  /* 10.34 / 52 */
   }
-  /* Cols: duration 1050ms + pause 1025ms = 2075ms total half-cycle
-     Hold at extremes: 0–24.70% and 75.30–100%
-     ease: cubic-bezier(0.85, 0.01, 0.55, 1) */
   .hero__col--purple {
     left:       0;
     height:     78.9%;
     background: var(--color-accent-purple);
-    animation:  hero-col-purple 2075ms linear infinite alternate both;
   }
   .hero__col--blue {
     left:       0.827em;  /* 43 / 52 */
     height:     100%;
     background: var(--color-accent-blue);
-    animation:  hero-col-blue 2075ms linear infinite alternate both;
-    animation-delay: 105ms;
-  }
-  @keyframes hero-col-purple {
-    0%     { height: 78.9%; }
-    24.70% { height: 78.9%; animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
-    75.30% { height: 100%;  animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
-    100%   { height: 100%;  }
-  }
-  @keyframes hero-col-blue {
-    0%     { height: 100%;  }
-    24.70% { height: 100%;  animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
-    75.30% { height: 78.9%; animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
-    100%   { height: 78.9%; }
   }
 
   /* ── Decorative bars (Row 2) ──
@@ -179,49 +161,23 @@
     flex-shrink: 0;
     font-size: var(--ps);
     width:  1.654em;          /* 86 / 52 */
-    height: 1.462em;          /* 76 / 52 */
+    height: 1.312em;          /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
   }
   .hero__bar {
-    height: 0.449em;          /* (1.462 - 2×0.058) / 3 — fills container evenly with gap */
+    height: 0.399em;          /* (1.312 - 2×0.058) / 3 */
     border-radius: var(--radius-pill);
   }
   .hero__bar--lb {
     width:      100%;
     background: var(--color-accent-light-blue);
-    animation:  hero-bar-lb 1650ms linear infinite alternate both;
   }
   .hero__bar--pink {
-    width:      67.4%;        /* 58 / 86 — stays medium, only shifts for center state */
+    width:      67.4%;
     background: var(--color-accent-pink);
-    animation:  hero-bar-pink 1650ms linear infinite alternate both;
-    animation-delay: 135ms;
   }
   .hero__bar--red {
-    width:      34.9%;        /* 30 / 86 — narrowest in state A */
+    width:      34.9%;
     background: var(--color-accent-red);
-    animation:  hero-bar-red 1650ms linear infinite alternate both;
-    animation-delay: 270ms;
-  }
-  @keyframes hero-bar-lb {
-    0%     { width: 100%;   margin-left: 0; }
-    27.27% { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    50%    { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    72.73% { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    100%   { width: 34.9%;  margin-left: 0; }
-  }
-  @keyframes hero-bar-pink {
-    0%     { margin-left: 0; }
-    27.27% { margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    50%    { margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    72.73% { margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    100%   { margin-left: 0; }
-  }
-  @keyframes hero-bar-red {
-    0%     { width: 34.9%;  margin-left: 0; }
-    27.27% { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    50%    { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    72.73% { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
-    100%   { width: 100%;   margin-left: 0; }
   }
 
   .hero__subtitle {
@@ -268,8 +224,9 @@
       justify-content: center;  /* centers staircase vertically in remaining space */
       flex: 1;                  /* takes all space above subtitle */
       gap: 0.625rem;
-      width: 100%;
-      --ps: clamp(1.5rem, 9.18vw, 5rem);
+      width: fit-content;
+      --ps: clamp(1.5rem, 9.18vw, 2.295rem); /* caps at 400px viewport */
+      font-size: var(--ps);
     }
     .hero__step {
       display: flex;
@@ -279,10 +236,10 @@
     }
     /* Figma positions as % of 320px container: staircase offsets */
     .hero__step--a { margin-left: 0; }
-    .hero__step--b { margin-left: 8.125%; }
-    .hero__step--c { align-self: center;   }
-    .hero__step--d { margin-left: 42.1875%; }  /* 135px / 320 */
-    .hero__step--e { align-self: flex-end; }
+    .hero__step--b { margin-left: 0.5em; }
+    .hero__step--c { align-self: flex-start; margin-left: 0.6em; }
+    .hero__step--d { margin-left: 1.9em; }
+    .hero__step--e { align-self: flex-start; margin-left: 2.8em; }
 
     .hero__h1--mb .hero__pill--green.hero__pill--sq {
       margin-right: 4%;
@@ -377,6 +334,12 @@
   }
 
   /* Mobile: content-driven height, bigger images */
+  @media (max-width: 991px) and (min-width: 768px) {
+    .provepoints__media {
+      margin: 0;
+    }
+  }
+
   @media (max-width: 767px) {
     .provepoints__card {
       min-height: unset;
@@ -392,19 +355,16 @@
     }
   }
 
-  /* Card 02: yellow square wrap for rule icon */
+  /* Card 02: rule icon — SVG has its own layered card design */
   .provepoints__rule-wrap {
-    background: var(--color-primary);
-    border-radius: var(--radius-xl);
-    width: clamp(8rem, 70%, 12.3rem);
-    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .provepoints__rule-wrap img {
-    width: 66%;
+    width: 100%;
+    height: auto;
   }
 
   /* Description — grey, centered */
@@ -414,6 +374,12 @@
     margin: 0;
     flex-shrink: 0;
     padding-inline: var(--space-md); /* 32px */
+  }
+
+  @media (max-width: 1279px) and (min-width: 992px) {
+    .provepoints__desc {
+      padding-inline: 0;
+    }
   }
 
   /* ── Test blocks ── */
@@ -1132,7 +1098,6 @@
   <div class="hero__logo">
     <div class="hero__logo-wordmark">
       <span class="hero__logo-name">Bïrch</span>
-      <img src="images/icon ai.svg" class="hero__logo-icon" alt="" />
       <span class="hero__logo-name">AI</span>
       <span class="hero__beta t-body">closed beta</span>
     </div>
@@ -1886,6 +1851,117 @@
     },
   };
 
+  /* ── Staircase step margins (mobile h1) ── */
+  window.STEPS = { b: 0.5, c: 0.6, d: 1.9, e: 2.8 };
+
+  function applySteps() {
+    var S = window.STEPS;
+    var els = {
+      b: document.querySelectorAll('.hero__step--b'),
+      c: document.querySelectorAll('.hero__step--c'),
+      d: document.querySelectorAll('.hero__step--d'),
+      e: document.querySelectorAll('.hero__step--e'),
+    };
+    setAll(els.b, 'marginLeft', S.b + 'em');
+    setAll(els.c, 'marginLeft', S.c + 'em');
+    setAll(els.d, 'marginLeft', S.d + 'em');
+    setAll(els.e, 'marginLeft', S.e + 'em');
+    for (var i = 0; i < els.c.length; i++) els.c[i].style.alignSelf = 'flex-start';
+    for (var i = 0; i < els.e.length; i++) els.e[i].style.alignSelf = 'flex-start';
+  }
+
+  /* ── Icon animation configs ── */
+  window.CC = { dur: 1050, pause: 1025, stagger: 105,  ease: [0.85, 0.01, 0.55, 1] };
+  window.CB = { dur: 1150, pause: 775,  stagger: 135,  pinkMid: 91, ease: [0.88, -0.03, 0.43, 1.07] };
+
+  /* Cached bezier per key — shared with icon system */
+  var _iconBezCache = {};
+  function getIconBez(key, e) {
+    var k = e.join(',');
+    if (!_iconBezCache[key] || _iconBezCache[key].k !== k) {
+      _iconBezCache[key] = { k: k, fn: makeBezier(e[0], e[1], e[2], e[3]) };
+    }
+    return _iconBezCache[key].fn;
+  }
+
+  /* Raw triangular wave 0→1→0 with pause at extremes */
+  function rawPhase(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    var tLin = t < 1 ? t : 2 - t;
+    var p = (Cfg.pause / 2) / half;
+    if (tLin <= p) return 0;
+    if (tLin >= 1 - p) return 1;
+    return (tLin - p) / (1 - 2*p);
+  }
+
+  /* Raw tLin without pause mapping — for cycle-change detection */
+  function rawTLin(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    return t < 1 ? t : 2 - t;
+  }
+
+  /* Lerp util (separate from smoothing lerp) */
+  function iLerp(a, b, t) { return a + (b - a) * t; }
+
+  /* Piecewise 3-keyframe ease per segment */
+  function pw3(t, ez, v0, vm, v1) {
+    if (t < 0.5) return iLerp(v0, vm, ez(t * 2));
+    return iLerp(vm, v1, ez((t - 0.5) * 2));
+  }
+
+  /* Independent random heights — each column picks its own target on descent */
+  var _colMinP = 39, _colMinB = 39;
+  var _colLastTLinP = 0, _colLastTLinB = 0;
+
+  /* Elements — querySelectorAll covers desktop + mobile instances */
+  var _colsPurple = document.querySelectorAll('.hero__col--purple');
+  var _colsBlue   = document.querySelectorAll('.hero__col--blue');
+  var _barsLB     = document.querySelectorAll('.hero__bar--lb');
+  var _barsPink   = document.querySelectorAll('.hero__bar--pink');
+  var _barsRed    = document.querySelectorAll('.hero__bar--red');
+
+  function setAll(els, prop, val) {
+    for (var i = 0; i < els.length; i++) els[i].style[prop] = val;
+  }
+
+  function tickIcons(now) {
+    var eC = getIconBez('cols', CC.ease);
+    var eB = getIconBez('bars', CB.ease);
+
+    /* — Cols — */
+    var tP = rawPhase(now, 0,          CC);
+    var tB = rawPhase(now, CC.stagger, CC);
+
+    var tLinP = rawTLin(now, 0,          CC);
+    var tLinB = rawTLin(now, CC.stagger, CC);
+    var topP  = 1 - (CC.pause / 2) / (CC.dur + CC.pause);
+    var botP  =     (CC.pause / 2) / (CC.dur + CC.pause);
+
+    if (_colLastTLinP >= topP && tLinP < topP) _colMinP = Math.round(20 + Math.random() * 70);
+    if (_colLastTLinB <= botP && tLinB > botP) _colMinB = Math.round(20 + Math.random() * 70);
+    _colLastTLinP = tLinP;
+    _colLastTLinB = tLinB;
+
+    setAll(_colsPurple, 'height', iLerp(_colMinP, 100,     eC(tP)) + '%');
+    setAll(_colsBlue,   'height', iLerp(100,     _colMinB, eC(tB)) + '%');
+    window._dbgP_cols = tP;
+
+    /* — Bars — */
+    var tLB   = rawPhase(now, 0,             CB);
+    var tPink = rawPhase(now, CB.stagger,     CB);
+    var tRed  = rawPhase(now, CB.stagger * 2, CB);
+
+    setAll(_barsLB,   'width',      pw3(tLB,   eB, 100,  67.4, 34.9)          + '%');
+    setAll(_barsLB,   'marginLeft', pw3(tLB,   eB, 0,    16.3, 0)             + '%');
+    setAll(_barsPink, 'width',      pw3(tPink, eB, 67.4, CB.pinkMid, 67.4)    + '%');
+    setAll(_barsPink, 'marginLeft', pw3(tPink, eB, 0,    16.3, 0)             + '%');
+    setAll(_barsRed,  'width',      pw3(tRed,  eB, 34.9, 67.4, 100)           + '%');
+    setAll(_barsRed,  'marginLeft', pw3(tRed,  eB, 0,    16.3, 0)             + '%');
+    window._dbgP_bars = tLB;
+  }
+
   /* ── Lerp smoothing ── */
   let targetP    = 0;
   let currentP   = 0;
@@ -1992,8 +2068,11 @@
     window._dbgP   = currentP;
     window._dbgPws = currentPws;
     tick(currentP, currentPws);
+    tickIcons(performance.now());
     requestAnimationFrame(loop);
   })();
+
+  applySteps();
 </script>
 
 <!-- ─── PROMPTS MARQUEE ─── -->
@@ -2182,6 +2261,81 @@
             '  },\n};\n' +
             'window.LERP    = ' + window.LERP + ';\n' +
             'window.LERP_WS = ' + window.LERP_WS + ';';
+        },
+      },
+
+      /* ══════════════════════════════════════════
+         BLOCK 2 — Icons Cols
+      ══════════════════════════════════════════ */
+      {
+        label: 'Cols',
+        getP:   function () { return window._dbgP_cols || 0; },
+        pRange: [0, 1],
+        tracks: [
+          { key: 'ease', label: 'Ease', color: '#B983FF',
+            getS: function () { return 0; }, setS: function () {},
+            getE: function () { return 1; }, setE: function () {},
+            ease:    function () { return window.CC.ease; },
+            setEase: function (e) { window.CC.ease = e; },
+            inP:     function (p) { return getIconBez('cols', window.CC.ease)(p); },
+            readonlyS: true, readonlyE: true, hintS: 'fixed', hintE: 'fixed' },
+        ],
+        sliders: [
+          { label: 'Duration', get: function () { return window.CC.dur; },     set: function (v) { window.CC.dur = v; },     min: 400, max: 5000, step: 50,  fmt: function (v) { return v + 'ms'; } },
+          { label: 'Pause',    get: function () { return window.CC.pause; },   set: function (v) { window.CC.pause = v; },   min: 0,   max: 2000, step: 25,  fmt: function (v) { return v + 'ms'; } },
+          { label: 'Stagger',  get: function () { return window.CC.stagger; }, set: function (v) { window.CC.stagger = v; }, min: 0,   max: 500,  step: 5,   fmt: function (v) { return v + 'ms'; } },
+        ],
+        onCopy: function () {
+          var C = window.CC;
+          return 'duration: ' + C.dur + 'ms\npause: ' + C.pause + 'ms\nstagger: ' + C.stagger + 'ms\nease: cubic-bezier(' + C.ease.join(', ') + ')';
+        },
+      },
+
+      /* ══════════════════════════════════════════
+         BLOCK 3 — Icons Bars
+      ══════════════════════════════════════════ */
+      {
+        label: 'Bars',
+        getP:   function () { return window._dbgP_bars || 0; },
+        pRange: [0, 1],
+        tracks: [
+          { key: 'ease', label: 'Ease', color: '#59DBFF',
+            getS: function () { return 0; }, setS: function () {},
+            getE: function () { return 1; }, setE: function () {},
+            ease:    function () { return window.CB.ease; },
+            setEase: function (e) { window.CB.ease = e; },
+            inP:     function (p) { return getIconBez('bars', window.CB.ease)(p); },
+            readonlyS: true, readonlyE: true, hintS: 'fixed', hintE: 'fixed' },
+        ],
+        sliders: [
+          { label: 'Duration', get: function () { return window.CB.dur; },      set: function (v) { window.CB.dur = v; },      min: 400, max: 5000, step: 50,  fmt: function (v) { return v + 'ms'; } },
+          { label: 'Pause',    get: function () { return window.CB.pause; },    set: function (v) { window.CB.pause = v; },    min: 0,   max: 2000, step: 25,  fmt: function (v) { return v + 'ms'; } },
+          { label: 'Stagger',  get: function () { return window.CB.stagger; },  set: function (v) { window.CB.stagger = v; },  min: 0,   max: 500,  step: 5,   fmt: function (v) { return v + 'ms'; } },
+          { label: 'Pink mid', get: function () { return window.CB.pinkMid; },  set: function (v) { window.CB.pinkMid = v; },  min: 20,  max: 100,  step: 1,   fmt: function (v) { return v + '%'; } },
+        ],
+        onCopy: function () {
+          var C = window.CB;
+          return 'duration: ' + C.dur + 'ms\npause: ' + C.pause + 'ms\nstagger: ' + C.stagger + 'ms\npink mid: ' + C.pinkMid + '%\nease: cubic-bezier(' + C.ease.join(', ') + ')';
+        },
+      },
+
+      /* ══════════════════════════════════════════
+         BLOCK 4 — Mobile staircase steps
+      ══════════════════════════════════════════ */
+      {
+        label: 'Steps',
+        getP:   function () { return 0; },
+        pRange: [0, 1],
+        tracks: [],
+        sliders: [
+          { label: 'bars+with a',  get: function () { return window.STEPS.b; }, set: function (v) { window.STEPS.b = v; applySteps(); }, min: 0, max: 5,   step: 0.05, fmt: function (v) { return v + 'em'; } },
+          { label: 'performance',  get: function () { return window.STEPS.c; }, set: function (v) { window.STEPS.c = v; applySteps(); }, min: 0, max: 8,   step: 0.05, fmt: function (v) { return v + 'em'; } },
+          { label: 'marketing',    get: function () { return window.STEPS.d; }, set: function (v) { window.STEPS.d = v; applySteps(); }, min: 0, max: 10,  step: 0.05, fmt: function (v) { return v + 'em'; } },
+          { label: 'mindset',      get: function () { return window.STEPS.e; }, set: function (v) { window.STEPS.e = v; applySteps(); }, min: 0, max: 12,  step: 0.05, fmt: function (v) { return v + 'em'; } },
+        ],
+        onCopy: function () {
+          var S = window.STEPS;
+          return 'step--b: ' + S.b + 'em\nstep--c: ' + S.c + 'em\nstep--d: ' + S.d + 'em\nstep--e: ' + S.e + 'em';
         },
       },
 
