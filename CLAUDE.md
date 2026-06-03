@@ -13,8 +13,6 @@
 
 - **Webflow embed — rem-контекст** — в Webflow root `font-size` может быть не 16px, поэтому все `rem` значения внутри embed-блока пересчитываются неправильно. Решение: задать `font-size: 16px` на ВНУТРЕННЕМ контейнере карточки (например `.xxx__container`), но НЕ на внешней секции — иначе сломается `top: var(--nav-height)` (он использует `em` Webflow и должен оставаться в контексте Webflow-шрифта).
 
-- **Webflow embed — имена классов** — все классы в embed должны иметь уникальный суффикс (например `-e`): `.hiw-e`, `.hiw-e__card` и т.д. Это предотвращает конфликт со стилями Webflow, которые могут использовать те же имена. При генерации нового embed сразу применять этот суффикс.
-
 - **Webflow embed — padding** — паддинги на accordion и step могут быть сброшены глобальным reset-ом Webflow. Задавать их с `!important`: `padding: var(--xxx-pad) !important`.
 
 - **Webflow embed — sticky scroll JS** — три обязательных правила для sticky-блоков в embed:
