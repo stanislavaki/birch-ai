@@ -188,7 +188,10 @@
 
   /* CTA — 4 of 12 cols ≈ 400px at 1280px */
   .hero__btn {
-    width: clamp(17.5rem, 31.25vw, 25rem);
+    width: 14rem;
+    height: 5rem;
+    margin-top: var(--space-md);
+    font-size: 2em;
   }
 
   /* ─────────────────────────────────────────
@@ -423,6 +426,16 @@
     margin: 0 0 3rem;
   }
 
+  .acc__hint {
+    text-align: center;
+    color: var(--color-text-grey);
+    margin: var(--space-sm) 0 0;
+  }
+
+  @media (max-width: 991px) {
+    .acc__hint { display: none; }
+  }
+
   /* Colored rounded box — full container width, fixed proportions from Figma (1232 × 656) */
   .acc__box {
     width: 100%;
@@ -485,7 +498,7 @@
 
   /* Wrapper owns the sizing — enables container queries for the card */
   .chat-card-wrap {
-    height: min(80vh, 45rem); /* 45rem = 720px */
+    height: min(70vh, 45rem); /* 45rem = 720px */
     width: auto;
     aspect-ratio: 400 / 600;
     container-type: inline-size;
@@ -976,6 +989,19 @@
       opacity: 0.75;
     }
 
+    .acc-mob__hint {
+      display: none;
+    }
+
+    @media (max-width: 991px) {
+      .acc-mob__hint {
+        display: block;
+        text-align: center;
+        color: var(--color-text-grey);
+        margin: var(--space-sm) 0 0;
+      }
+    }
+
     /* Last slide (purple bg) — white text */
     .acc-mob__slide:last-child .acc-mob__eyebrow,
     .acc-mob__slide:last-child .acc-mob__slide-title,
@@ -1223,7 +1249,7 @@
 
       <!-- Card 03: Your workspace, your data -->
       <div class="col-4 provepoints__card">
-        <h3 class="t-h3 provepoints__card-title">Your workspace,<br>your data</h3>
+        <h3 class="t-h3 provepoints__card-title">Your workspace, your data</h3>
         <div class="provepoints__media">
           <img src="images/ws-promo-ai.svg" alt="" aria-hidden="true" />
         </div>
@@ -1309,6 +1335,7 @@
 
       </div>
     </div>
+    <p class="acc__hint t-para-sm">Hold to pause auto-switching</p>
 
   </div>
 </section>
@@ -1470,6 +1497,7 @@
       <span class="acc-mob__dot"></span>
       <span class="acc-mob__dot"></span>
     </div>
+    <p class="acc-mob__hint t-para-sm">Hold to pause auto-switching</p>
   </div>
 </section>
 
