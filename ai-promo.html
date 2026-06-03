@@ -137,31 +137,40 @@
     width:         0.769em;  /* 40 / 52 */
     border-radius: 0.199em;  /* 10.34 / 52 */
   }
+  /* Cols: duration 1050ms + pause 1025ms = 2075ms total half-cycle
+     Hold at extremes: 0–24.70% and 75.30–100%
+     ease: cubic-bezier(0.85, 0.01, 0.55, 1) */
   .hero__col--purple {
     left:       0;
-    height:     78.9%;   /* 60/76 — shorter in state A */
+    height:     78.9%;
     background: var(--color-accent-purple);
-    animation:  hero-col-purple 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation:  hero-col-purple 2075ms linear infinite alternate both;
   }
   .hero__col--blue {
     left:       0.827em;  /* 43 / 52 */
-    height:     100%;     /* full height in state A */
+    height:     100%;
     background: var(--color-accent-blue);
-    animation:  hero-col-blue 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
-    animation-delay: 0.15s;
+    animation:  hero-col-blue 2075ms linear infinite alternate both;
+    animation-delay: 105ms;
   }
   @keyframes hero-col-purple {
-    from { height: 78.9%; }
-    to   { height: 100%;  }
+    0%     { height: 78.9%; }
+    24.70% { height: 78.9%; animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
+    75.30% { height: 100%;  animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
+    100%   { height: 100%;  }
   }
   @keyframes hero-col-blue {
-    from { height: 100%;  }
-    to   { height: 78.9%; }
+    0%     { height: 100%;  }
+    24.70% { height: 100%;  animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
+    75.30% { height: 78.9%; animation-timing-function: cubic-bezier(0.85, 0.01, 0.55, 1); }
+    100%   { height: 78.9%; }
   }
 
   /* ── Decorative bars (Row 2) ──
      Three horizontal capsules. Animation: A (left-aligned) → center → B (left-aligned, widths swapped).
-     Fixed gap keeps spacing equal regardless of bar width. */
+     Bars: duration 750ms + pause 900ms = 1650ms total half-cycle
+     Hold at extremes: 0–27.27% and 72.73–100%  mid at 50%
+     ease: cubic-bezier(0.87, 0, 0.55, 1) */
   .hero__deco-bars {
     display: flex;
     flex-direction: column;
@@ -179,36 +188,40 @@
   .hero__bar--lb {
     width:      100%;
     background: var(--color-accent-light-blue);
-    animation:  hero-bar-lb 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
+    animation:  hero-bar-lb 1650ms linear infinite alternate both;
   }
   .hero__bar--pink {
     width:      67.4%;        /* 58 / 86 — stays medium, only shifts for center state */
     background: var(--color-accent-pink);
-    animation:  hero-bar-pink 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
-    animation-delay: 0.075s;
+    animation:  hero-bar-pink 1650ms linear infinite alternate both;
+    animation-delay: 135ms;
   }
   .hero__bar--red {
     width:      34.9%;        /* 30 / 86 — narrowest in state A */
     background: var(--color-accent-red);
-    animation:  hero-bar-red 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate both;
-    animation-delay: 0.15s;
+    animation:  hero-bar-red 1650ms linear infinite alternate both;
+    animation-delay: 270ms;
   }
-  /* State A (0%): left-aligned, widths far apart.
-     State mid (50%): all bars 67.4%, centered — natural crossing point where lb=red=pink.
-     State B (100%): left-aligned, widths swapped. */
   @keyframes hero-bar-lb {
-    0%   { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-    100% { width: 34.9%;  margin-left: 0; }
+    0%     { width: 100%;   margin-left: 0; }
+    27.27% { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    50%    { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    72.73% { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    100%   { width: 34.9%;  margin-left: 0; }
   }
   @keyframes hero-bar-pink {
-    0%,  100% { margin-left: 0;     animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-    50%        { margin-left: 16.3%; }
+    0%     { margin-left: 0; }
+    27.27% { margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    50%    { margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    72.73% { margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    100%   { margin-left: 0; }
   }
   @keyframes hero-bar-red {
-    0%   { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-    50%  { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
-    100% { width: 100%;   margin-left: 0; }
+    0%     { width: 34.9%;  margin-left: 0; }
+    27.27% { width: 34.9%;  margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    50%    { width: 67.4%;  margin-left: 16.3%;  animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    72.73% { width: 100%;   margin-left: 0;      animation-timing-function: cubic-bezier(0.87, 0, 0.55, 1); }
+    100%   { width: 100%;   margin-left: 0; }
   }
 
   .hero__subtitle {
