@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Experiments — Promo scroll animation</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
+<link rel="stylesheet" href="debug/panel.css" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ── Test blocks (scroll context) ── */
+  .test-block {
+    height: 75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  /* ─────────────────────────────────────────
+     PROMO SECTION
+  ───────────────────────────────────────── */
+
+  .promo {
+    padding-top: var(--space-xl);
+    /* height set by JS via window.C.scrollLength */
+  }
+
+  .promo__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 1.5rem 0;
+    overflow: hidden;
+  }
+
+  /* ── Title swap ── */
+  .promo__sub-swap {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    margin: 4.5rem 0 3.5rem;
+    flex-shrink: 0;
+    /* height set by JS to match tallest text */
+  }
+
+  .promo__sub-text {
+    color: var(--color-text);
+    width: 100%;
+    will-change: transform, opacity;
+  }
+
+  /* Used only for height measurement — keeps text1 out of sight */
+  .promo__sub-text--measuring {
+    position: static !important;
+    transform: none !important;
+    opacity: 0 !important;
+    visibility: hidden;
+  }
+
+  /* State 1: absolutely positioned, vertically centered in container */
+  .promo__sub-text--1 {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    opacity: 0;
+    /* JS sets transform: translateY(calc(-50% + offset)) */
+  }
+
+  /* ── Visual area ── */
+  .promo__visual {
+    position: relative;
+    width: max(clamp(56.25rem, 87.5vw, 90rem), calc((100vh - 10rem) * 1.607));
+    max-width: calc(100vw - 3rem);
+    aspect-ratio: 900 / 560;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+
+  /* Chat images stacked, centered */
+  .promo__chat-stack {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: top center;
+    width: 41.11%;                      /* 370/900 */
+    z-index: 2;
+    will-change: transform;
+  }
+
+  .promo__chat-base {
+    width: 100%;
+    border-radius: var(--radius-xl);
+  }
+
+  .promo__chat-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: var(--radius-xl);
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  /* AI response — slides up from viewport bottom */
+  .promo__chat-response {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: var(--radius-xl);
+    opacity: 0;
+    z-index: 1;
+    will-change: opacity, transform;
+  }
+
+  /* Workspace — slides up from below */
+  .promo__workspace {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 1;
+    transform: translateX(-50%) translateY(100%);
+    width: 83.22%;                      /* 749/900 */
+    border-radius: 0.875rem;
+    overflow: hidden;
+    opacity: 0.8;
+    will-change: transform;
+  }
+
+  .promo__workspace img {
+    width: 100%;
+    display: block;
+  }
+
+  @media (max-width: 767px) {
+    .promo {
+      height: 200vh;   /* shorter scroll — no state 3 */
+    }
+
+    .promo__sticky {
+      padding: 0 1rem 0;
+      overflow: visible;
+    }
+
+    .promo__sub-swap {
+      margin: 3rem 0 1.5rem;
+      overflow: visible;
+    }
+
+    .promo__visual {
+      width: calc(100vw - 2rem);
+      aspect-ratio: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    .promo__chat-stack {
+      position: relative;
+      left: auto;
+      transform: none;
+      width: calc(100% - 2.5rem);
+      margin: 0 auto;
+    }
+
+    .promo__workspace {
+      display: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="test-block">Block before — 1200px</div>
+
+<section class="promo">
+  <div class="promo__sticky">
+
+    <div class="promo__sub-swap" id="subSwap">
+      <div class="promo__sub-text t-h2" id="subText0">Describe in the chat</div>
+      <div class="promo__sub-text promo__sub-text--1 t-h2" id="subText1">The rule draft is ready, <span style="white-space:nowrap">right where you work</span></div>
+    </div>
+
+    <div class="promo__visual">
+
+      <div class="promo__chat-stack" id="chatStack">
+        <img src="images/chat-empty.png" class="promo__chat-base" alt="Empty chat window" />
+        <img src="images/chat-msg.png" class="promo__chat-overlay" id="chatMsg" alt="User message in chat" />
+        <img src="images/chat-response.png" class="promo__chat-response" id="chatResponse" alt="Birch AI responds with the drafted rule" />
+      </div>
+
+      <div class="promo__workspace" id="workspace">
+        <img src="images/workspace.png" alt="Rule ready inside Birch workspace" />
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<div class="test-block">Block after — 1200px</div>
+
+<script>
+  const section      = document.querySelector('.promo');
+  const visual       = document.querySelector('.promo__visual');
+  const chatStack    = document.getElementById('chatStack');
+  const chatMsg      = document.getElementById('chatMsg');
+  const chatResponse = document.getElementById('chatResponse');
+  const workspace    = document.getElementById('workspace');
+  const subSwap  = document.getElementById('subSwap');
+  const subText0 = document.getElementById('subText0');
+  const subText1 = document.getElementById('subText1');
+  const remPx    = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  function sizeSwapContainer() {
+    subText1.classList.add('promo__sub-text--measuring');
+    subSwap.style.height = Math.max(subText0.offsetHeight, subText1.offsetHeight) + 'px';
+    subText1.classList.remove('promo__sub-text--measuring');
+  }
+  sizeSwapContainer();
+  document.fonts.ready.then(sizeSwapContainer);
+  window.addEventListener('resize', sizeSwapContainer);
+
+  function scrollProgress() {
+    const { top } = section.getBoundingClientRect();
+    const scrollable = section.offsetHeight - window.innerHeight;
+    if (top > 0) {
+      return Math.max(-1, -(top / window.innerHeight));
+    }
+    return Math.max(0, Math.min(1, -top / scrollable));
+  }
+
+  function remap(p, lo, hi) {
+    return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
+  }
+
+  window.C = {
+    entryStart:  -0.85, entryEnd:    0.24,  entryDist:   0.3,
+    msg1Start:   -0.05, msg1MoveDur: 0.25,  msg1FadeDur: 0.05,  msg1Float: 4,
+    msg2Start:    0.17, msg2MoveDur: 0.25,  msg2FadeDur: 0.05,  msg2Float: 4,
+    s3Start:      0.35, s3Dur:       0.5,
+    wsStart:      0.35, wsDur:       0.5,
+    titleSwapStart: 0.17, titleSwapDur: 0.2,
+    scrollLength: 2.5,
+    eases: {
+      entry:     [0.02, 0.22, 0.43, 1.02],
+      msg1:      [0.02, 0.22, 0.43, 1.02],
+      msg2:      [0.02, 0.22, 0.43, 1.02],
+      s3:        [0.34, 0.05, 0.00, 1.01],
+      ws:        [0.31, 0.01, 0.00, 1.05],
+      titleSwap: [0.4,  0.0,  0.2,  1.0],
+    },
+  };
+
+  window.LERP    = 0.04;
+  window.LERP_WS = 0.07;
+
+  window.applyScrollLength = function () {
+    section.style.height = (window.C.scrollLength * 100) + 'vh';
+  };
+  window.applyScrollLength();
+
+  function makeBezier(x1, y1, x2, y2) {
+    return function(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      let t = p, lo = 0, hi = 1;
+      for (let i = 0; i < 14; i++) {
+        const bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
+        if (Math.abs(bx - p) < 0.0001) break;
+        if (bx < p) lo = t; else hi = t;
+        t = (lo + hi) / 2;
+      }
+      return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
+    };
+  }
+
+  const _easeCache = {};
+  function trackEase(name) {
+    const [x1, y1, x2, y2] = window.C.eases[name];
+    const key = `${x1},${y1},${x2},${y2}`;
+    if (!_easeCache[name] || _easeCache[name].key !== key) {
+      _easeCache[name] = { key, fn: makeBezier(x1, y1, x2, y2) };
+    }
+    return _easeCache[name].fn;
+  }
+
+  function tick(p, pws) {
+    const C      = window.C;
+    const mobile = window.innerWidth <= 767;
+
+    /* Entry */
+    const t00       = trackEase('entry')(remap(p, C.entryStart, C.entryEnd));
+    const chatInitY = (1 - t00) * window.innerHeight * C.entryDist;
+
+    /* Msg 1 */
+    const t01move = trackEase('msg1')(remap(p, C.msg1Start, C.msg1Start + C.msg1MoveDur));
+    const t01fade = remap(p, C.msg1Start, C.msg1Start + C.msg1FadeDur);
+    chatMsg.style.opacity   = t01fade;
+    chatMsg.style.transform = `translateY(${(1 - t01move) * C.msg1Float * remPx}px)`;
+
+    /* Msg 2 */
+    const t02move = trackEase('msg2')(remap(pws, C.msg2Start, C.msg2Start + C.msg2MoveDur));
+    const t02fade = remap(pws, C.msg2Start, C.msg2Start + C.msg2FadeDur);
+    chatResponse.style.opacity   = t02fade;
+    chatResponse.style.transform = `translateY(${(1 - t02move) * C.msg2Float * remPx}px)`;
+
+    if (!mobile) {
+      /* State 3 — chat shrinks + shifts */
+      const p3 = trackEase('s3')(remap(p, C.s3Start, C.s3Start + C.s3Dur));
+      const chatScale  = 1 - p3 * 0.40;
+      const chatShiftX = p3 * visual.offsetWidth * 0.293;
+      chatStack.style.transform = `translateX(calc(-50% + ${chatShiftX}px)) translateY(${chatInitY}px) scale(${chatScale})`;
+
+      /* Workspace */
+      const p4ws = trackEase('ws')(remap(pws, C.wsStart, C.wsStart + C.wsDur));
+      const fromViewportBottom = window.innerHeight - visual.getBoundingClientRect().top;
+      workspace.style.transform = `translateX(-50%) translateY(${(1 - p4ws) * fromViewportBottom}px)`;
+
+    } else {
+      chatStack.style.transform = `translateY(${chatInitY}px)`;
+    }
+
+    /* Title swap */
+    const tSwap = trackEase('titleSwap')(remap(p, C.titleSwapStart, C.titleSwapStart + C.titleSwapDur));
+    const tExit = remap(p, C.titleSwapStart, C.titleSwapStart + C.titleSwapDur * 0.5);
+    subText0.style.opacity = 1 - tExit;
+    subText1.style.opacity = tSwap;
+    subText0.style.transform = `translateY(${-tSwap * 40}%)`;
+    subText1.style.transform = `translateY(calc(-50% + ${(1 - tSwap) * 60}%))`;
+  }
+
+  let targetP    = 0;
+  let currentP   = 0;
+  let currentPws = 0;
+  let _rafReady  = false;
+
+  (function loop() {
+    targetP = scrollProgress();
+    if (!_rafReady) {
+      currentP   = targetP;
+      currentPws = targetP;
+      _rafReady  = true;
+    }
+    currentP   += (targetP - currentP)   * window.LERP;
+    currentPws += (targetP - currentPws) * window.LERP_WS;
+    window._dbgP   = currentP;
+    window._dbgPws = currentPws;
+    tick(currentP, currentPws);
+    requestAnimationFrame(loop);
+  })();
+</script>
+
+<!-- ╔═══════════════════════════════════════╗
+     ║  DEBUG PANEL  (dev only, not in embed) ║
+     ╚═══════════════════════════════════════╝ -->
+<script src="debug/panel.js"></script>
+<script>
+(function () {
+  var C  = function () { return window.C; };
+  var r2 = function (v) { return Math.round(v * 100) / 100; };
+
+  DebugPanel.init({
+    blocks: [
+      {
+        label: 'Promo',
+        getP:   function () { return window._dbgP   || 0; },
+        getPws: function () { return window._dbgPws || 0; },
+
+        tracks: [
+          { key: 'entry', label: 'Entry', color: '#59DBFF',
+            getS: function () { return C().entryStart; },
+            getE: function () { return C().entryEnd; },
+            setS: function (v) { C().entryStart = r2(v); },
+            setE: function (v) { C().entryEnd   = r2(v); },
+            ease:    function () { return C().eases.entry; },
+            setEase: function (e) { C().eases.entry = e; },
+            inP: function (p) { return remap(p, C().entryStart, C().entryEnd); } },
+
+          { key: 'msg1', label: 'Msg 1', color: '#04DE00',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1MoveDur; },
+            setS: function (v) { C().msg1Start   = r2(v); },
+            setE: function (v) { C().msg1MoveDur = r2(Math.max(0.01, v - C().msg1Start)); },
+            ease:    function () { return C().eases.msg1; },
+            setEase: function (e) { C().eases.msg1 = e; },
+            inP: function (p) { return remap(p, C().msg1Start, C().msg1Start + C().msg1MoveDur); } },
+
+          { key: 'msg1fade', label: 'Fade 1', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg1Start',
+            note: 'opacity only · start = Msg 1 start',
+            getS: function () { return C().msg1Start; },
+            getE: function () { return C().msg1Start + C().msg1FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg1FadeDur = r2(Math.max(0.005, v - C().msg1Start)); } },
+
+          { key: 'msg2', label: 'Msg 2', color: '#04DE0099',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2MoveDur; },
+            setS: function (v) { C().msg2Start   = r2(v); },
+            setE: function (v) { C().msg2MoveDur = r2(Math.max(0.01, v - C().msg2Start)); },
+            ease:    function () { return C().eases.msg2; },
+            setEase: function (e) { C().eases.msg2 = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().msg2Start, C().msg2Start + C().msg2MoveDur); } },
+
+          { key: 'msg2fade', label: 'Fade 2', color: '#04DE0044', bodyDrag: false,
+            readonlyS: true, hintS: 'locked to msg2Start',
+            note: 'opacity only · start = Msg 2 start',
+            getS: function () { return C().msg2Start; },
+            getE: function () { return C().msg2Start + C().msg2FadeDur; },
+            setS: function () {},
+            setE: function (v) { C().msg2FadeDur = r2(Math.max(0.005, v - C().msg2Start)); } },
+
+          { key: 's3', label: 'State 3', color: '#FFE243',
+            getS: function () { return C().s3Start; },
+            getE: function () { return C().s3Start + C().s3Dur; },
+            setS: function (v) { C().s3Start = r2(v); },
+            setE: function (v) { C().s3Dur   = r2(Math.max(0.01, v - C().s3Start)); },
+            ease:    function () { return C().eases.s3; },
+            setEase: function (e) { C().eases.s3 = e; },
+            inP: function (p) { return remap(p, C().s3Start, C().s3Start + C().s3Dur); } },
+
+          { key: 'ws', label: 'WS', color: '#FF7700',
+            getS: function () { return C().wsStart; },
+            getE: function () { return C().wsStart + C().wsDur; },
+            setS: function (v) { C().wsStart = r2(v); },
+            setE: function (v) { C().wsDur   = r2(Math.max(0.01, v - C().wsStart)); },
+            ease:    function () { return C().eases.ws; },
+            setEase: function (e) { C().eases.ws = e; },
+            inP: function () { return remap(window._dbgPws || 0, C().wsStart, C().wsStart + C().wsDur); } },
+
+          { key: 'titleSwap', label: 'Title', color: '#E879F9',
+            getS: function () { return C().titleSwapStart; },
+            getE: function () { return C().titleSwapStart + C().titleSwapDur; },
+            setS: function (v) { C().titleSwapStart = r2(v); },
+            setE: function (v) { C().titleSwapDur = r2(Math.max(0.01, v - C().titleSwapStart)); },
+            ease:    function () { return C().eases.titleSwap; },
+            setEase: function (e) { C().eases.titleSwap = e; },
+            inP: function (p) { return remap(p, C().titleSwapStart, C().titleSwapStart + C().titleSwapDur); } },
+        ],
+
+        sliders: [
+          { label: 'LERP (slow)', get: function () { return window.LERP; },   set: function (v) { window.LERP    = v; }, min: 0.01, max: 0.5,  step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'LERP_WS',    get: function () { return window.LERP_WS; }, set: function (v) { window.LERP_WS = v; }, min: 0.01, max: 0.99, step: 0.01, fmt: function (v) { return v.toFixed(2); } },
+          { label: 'Scroll ×',   get: function () { return C().scrollLength; }, set: function (v) { C().scrollLength = v; window.applyScrollLength(); }, min: 1.5, max: 6, step: 0.1, fmt: function (v) { return v.toFixed(1) + '×'; } },
+        ],
+
+        onCopy: function () {
+          var Cv = window.C, E = Cv.eases;
+          var fe = function (e) { return '[' + e.map(function (v) { return +v.toFixed(2); }).join(', ') + ']'; };
+          return 'window.C = {\n' +
+            '  entryStart: ' + Cv.entryStart + ',  entryEnd: ' + Cv.entryEnd + ',  entryDist: ' + Cv.entryDist + ',\n' +
+            '  msg1Start: ' + Cv.msg1Start + ',  msg1MoveDur: ' + Cv.msg1MoveDur + ',  msg1FadeDur: ' + Cv.msg1FadeDur + ',  msg1Float: ' + Cv.msg1Float + ',\n' +
+            '  msg2Start: ' + Cv.msg2Start + ',  msg2MoveDur: ' + Cv.msg2MoveDur + ',  msg2FadeDur: ' + Cv.msg2FadeDur + ',  msg2Float: ' + Cv.msg2Float + ',\n' +
+            '  s3Start: ' + Cv.s3Start + ',  s3Dur: ' + Cv.s3Dur + ',  wsStart: ' + Cv.wsStart + ',  wsDur: ' + Cv.wsDur + ',\n' +
+            '  titleSwapStart: ' + Cv.titleSwapStart + ',  titleSwapDur: ' + Cv.titleSwapDur + ',  scrollLength: ' + Cv.scrollLength + ',\n' +
+            '  eases: {\n' +
+            '    entry:     ' + fe(E.entry) + ',\n' +
+            '    msg1:      ' + fe(E.msg1) + ',\n' +
+            '    msg2:      ' + fe(E.msg2) + ',\n' +
+            '    s3:        ' + fe(E.s3) + ',\n' +
+            '    ws:        ' + fe(E.ws) + ',\n' +
+            '    titleSwap: ' + fe(E.titleSwap) + ',\n' +
+            '  },\n};\n' +
+            'window.LERP    = ' + window.LERP + ';\n' +
+            'window.LERP_WS = ' + window.LERP_WS + ';';
+        },
+      },
+    ],
+  });
+  setTimeout(function () { document.getElementById('dbg').classList.add('collapsed'); }, 0);
+})();
+</script>
+
+</body>
+</html>
