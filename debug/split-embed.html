@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embed Splitter — ai-promo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .subtitle a { color: #888; }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid #2a2a2a;
+      gap: 1rem;
+    }
+
+    .card__meta {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      min-width: 0;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2em 0.55em;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .badge--css  { background: #1d3a5c; color: #59b4ff; }
+    .badge--js   { background: #3a2e0a; color: #f0c040; }
+    .badge--html { background: #1f3320; color: #6dcc7e; }
+
+    .card__label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #ccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card__size {
+      font-size: 0.75rem;
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    .btn-copy {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      color: #ccc;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover { background: #333; color: #fff; border-color: #555; }
+
+    .btn-copy.copied {
+      background: #1a3a1a;
+      border-color: #3a6a3a;
+      color: #6dcc7e;
+    }
+
+    .btn-copy svg { flex-shrink: 0; }
+
+    .card__preview {
+      padding: 0.875rem 1rem;
+      font-size: 0.72rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #555;
+      line-height: 1.5;
+      white-space: pre;
+      overflow: hidden;
+      max-height: 4.5em;
+      text-overflow: ellipsis;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .section-header {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #444;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .error {
+      padding: 1rem;
+      background: #2a1a1a;
+      border: 1px solid #5a2a2a;
+      border-radius: 8px;
+      color: #ff8080;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .loading {
+      color: #555;
+      font-size: 0.85rem;
+      padding: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Embed Splitter</h1>
+  <p class="subtitle">ai-promo-embed.html → Webflow Custom Code &amp; Embeds</p>
+
+  <div id="root"><p class="loading">Loading embed file…</p></div>
+
+  <script>
+    var EMBED_PATH = '../ai-promo-embed.html';
+
+    var SECTIONS = [
+      { key: 'hero',        label: 'Hero',              start: 'class="hero"',      end: '</section>' },
+      { key: 'provepoints', label: 'Provepoints',       start: 'class="provepoints"', end: '</section>' },
+      { key: 'acc',         label: 'Accordion (desktop)', start: 'class="acc"',     end: '</section>' },
+      { key: 'acc-mob',     label: 'Carousel (mobile)', start: 'class="acc-mob"',   end: '</section>' },
+      { key: 'prompts',     label: 'Prompts',           start: 'class="prompts"',   end: '</section>' },
+      { key: 'vision',      label: 'Vision',            start: 'class="vision-outer"', end: '</div>', outerDiv: true },
+      { key: 'cta-last',    label: 'CTA Last',          start: 'class="cta-last"',  end: '</section>' },
+    ];
+
+    function escapeHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function kb(str) {
+      var bytes = new TextEncoder().encode(str).length;
+      return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    function copyIcon() {
+      return '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>';
+    }
+
+    function checkIcon() {
+      return '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.classList.add('copied');
+        btn.innerHTML = checkIcon() + ' Copied!';
+        setTimeout(function() {
+          btn.classList.remove('copied');
+          btn.innerHTML = copyIcon() + ' Copy';
+        }, 2000);
+      });
+    }
+
+    function makeCard(badgeClass, badgeLabel, label, content, previewLines) {
+      var card = document.createElement('div');
+      card.className = 'card';
+
+      var preview = (previewLines || content).split('\n').slice(0, 3).join('\n');
+
+      card.innerHTML =
+        '<div class="card__header">' +
+          '<div class="card__meta">' +
+            '<span class="badge ' + badgeClass + '">' + badgeLabel + '</span>' +
+            '<span class="card__label">' + label + '</span>' +
+          '</div>' +
+          '<span class="card__size">' + kb(content) + '</span>' +
+          '<button class="btn-copy">' + copyIcon() + ' Copy</button>' +
+        '</div>' +
+        '<div class="card__preview">' + escapeHtml(preview) + '</div>';
+
+      card.querySelector('.btn-copy').addEventListener('click', function() {
+        copyText(content, this);
+      });
+
+      return card;
+    }
+
+    function extractCSS(html) {
+      var match = html.match(/<style>([\s\S]*?)<\/style>/);
+      return match ? match[1].trim() : '';
+    }
+
+    function extractJS(html) {
+      var blocks = [];
+      var re = /<script>([\s\S]*?)<\/script>/g;
+      var m;
+      while ((m = re.exec(html)) !== null) {
+        blocks.push(m[1].trim());
+      }
+      return blocks.join('\n\n');
+    }
+
+    function extractSection(html, sectionDef) {
+      var tag = sectionDef.outerDiv ? '<div ' : '<section ';
+      var closingTag = sectionDef.outerDiv ? '</div>' : '</section>';
+
+      var startIdx = html.indexOf(tag + sectionDef.start);
+      if (startIdx === -1) return '<!-- section not found: ' + sectionDef.key + ' -->';
+
+      if (sectionDef.outerDiv) {
+        // For nested divs, find the matching closing tag by counting depth
+        var depth = 0, i = startIdx;
+        while (i < html.length) {
+          var open  = html.indexOf('<div', i);
+          var close = html.indexOf('</div>', i);
+          if (close === -1) break;
+          if (open !== -1 && open < close) { depth++; i = open + 4; }
+          else { depth--; i = close + 6; if (depth === 0) { var endIdx = i; break; } }
+        }
+        var content = html.slice(startIdx, endIdx);
+      } else {
+        var endIdx = html.indexOf(closingTag, startIdx);
+        if (endIdx === -1) return '<!-- closing tag not found: ' + sectionDef.key + ' -->';
+        var content = html.slice(startIdx, endIdx + closingTag.length);
+      }
+
+      // Wrap in .birch-ai-embed so CSS tokens and scoped styles apply
+      return '<div class="birch-ai-embed">\n' + content + '\n</div>';
+    }
+
+    fetch(EMBED_PATH)
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function(html) {
+        var root = document.getElementById('root');
+        root.innerHTML = '';
+
+        var css = extractCSS(html);
+        var js  = extractJS(html);
+
+        // ── Global: CSS + JS ──
+        var globalHeader = document.createElement('p');
+        globalHeader.className = 'section-header';
+        globalHeader.textContent = 'Page Settings → Custom Code';
+        root.appendChild(globalHeader);
+
+        var globalGrid = document.createElement('div');
+        globalGrid.className = 'grid';
+        globalGrid.appendChild(makeCard('badge--css',  'CSS', 'Paste into &lt;head&gt; custom code', '<style>\n' + css + '\n</style>'));
+        var jsWrapped = '<script>\nwindow.addEventListener(\'load\', function() {\n' + js + '\n});\n<\/script>';
+        globalGrid.appendChild(makeCard('badge--js',   'JS',  'Paste before &lt;/body&gt; custom code', jsWrapped));
+        root.appendChild(globalGrid);
+
+        // ── Per-section HTML ──
+        var htmlHeader = document.createElement('p');
+        htmlHeader.className = 'section-header';
+        htmlHeader.textContent = 'Embed blocks — one per section';
+        root.appendChild(htmlHeader);
+
+        var htmlGrid = document.createElement('div');
+        htmlGrid.className = 'grid';
+
+        SECTIONS.forEach(function(sec) {
+          var content = extractSection(html, sec);
+          htmlGrid.appendChild(makeCard('badge--html', 'HTML', sec.label, content));
+        });
+
+        root.appendChild(htmlGrid);
+      })
+      .catch(function(err) {
+        document.getElementById('root').innerHTML =
+          '<div class="error">' +
+          '<strong>Could not load embed file.</strong><br>' +
+          'Open via local server, not file://&nbsp;&nbsp;→&nbsp;&nbsp;' +
+          '<code>cd "' + window.location.pathname.replace(/\/debug\/.*/, '') + '" && python3 -m http.server 8080</code><br><br>' +
+          'Then open: <a href="http://localhost:8080/debug/split-embed.html">http://localhost:8080/debug/split-embed.html</a><br><br>' +
+          'Error: ' + err.message +
+          '</div>';
+      });
+  </script>
+</body>
+</html>
