@@ -1,372 +1,2262 @@
-<!-- ╔═══════════════════════════════════════════════════════════╗
-     ║  BIRCH — AI Rules Promo  |  Webflow Embed                ║
-     ╠═══════════════════════════════════════════════════════════╣
-     ║  SETUP (do this before pasting):                         ║
-     ║  1. Upload chat-01.png, chat-02.png, workspace.png       ║
-     ║     to Webflow Assets                                     ║
-     ║  2. Replace the three IMAGE_URL_* placeholders below     ║
-     ║     with the CDN URLs from Webflow Assets panel          ║
-     ║                                                          ║
-     ║  IMPORTANT: sticky scroll requires no parent element     ║
-     ║  to have overflow:hidden. In Webflow, check the          ║
-     ║  Section and any wrapper Divs — set overflow to          ║
-     ║  "Visible" if sticky doesn't work.                       ║
-     ╚═══════════════════════════════════════════════════════════╝ -->
-
 <style>
-  /* ── Scoped design tokens ── */
-  .bp {
-    --bp-font:         "TT Commons Pro Variable", "Inter", Arial, sans-serif;
-    --bp-color:        #FFFFFF;
-    --bp-green:        #04DE00;
-    --bp-h2-size:      3.8rem;
-    --bp-h2-lh:        1.1;
-    --bp-h2-ls:       -0.02em;
-    --bp-sub-size:     1.5rem;
-    --bp-sub-lh:       1.1;
-    --bp-radius:       1.5rem;
-  }
 
-  @media (max-width: 767px) {
-    .bp {
-      --bp-h2-size:  2rem;
-      --bp-sub-size: 1.2rem;
-    }
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — scoped to embed wrapper
+   (tokens.css not loaded in Webflow)
+═══════════════════════════════════════════ */
+.birch-ai-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-primary:           #FFE243;
+  --color-accent-red:        #FF4747;
+  --color-accent-green:      #04DE00;
+  --color-accent-pink:       #FF21A6;
+  --color-accent-blue:       #1877F2;
+  --color-accent-light-blue: #59DBFF;
+  --color-accent-orange:     #FF7700;
+  --color-accent-purple:     #5B45CD;
+  --color-accent-indigo:     #4450F2;
+  --color-bg:            #0D0D12;
+  --color-bg-grey:       #2A2A2A;
+  --color-text:          #FFFFFF;
+  --color-text-inverted: #000000;
+  --color-text-grey:     #909090;
+  --text-h2-size: 3.25rem; --text-h2-lh: 1.1;  --text-h2-ls: -0.02em;
+  --text-h3-size: 2rem;    --text-h3-lh: 1.0;  --text-h3-ls: -0.02em;
+  --text-h4-size: 1.5rem;  --text-h4-lh: 1;    --text-h4-ls: 0em;
+  --text-h6-size: 1rem;    --text-h6-lh: 1.4;  --text-h6-ls: 0em;
+  --text-para-xl-size: 1.5rem;   --text-para-xl-lh: 1.1; --text-para-xl-ls: 0em;
+  --text-para-lg-size: 1.25rem;  --text-para-lg-lh: 1.1; --text-para-lg-ls: 0em;
+  --text-para-sm-size: 0.875rem; --text-para-sm-lh: 1.3; --text-para-sm-ls: 0em;
+  --text-btn-size: 1.5rem; --text-btn-lh: 1.0; --text-btn-ls: -0.02em;
+  --space-xxs: 0.25rem; --space-xs: 0.5rem; --space-sm: 1rem;
+  --space: 1.5rem; --space-md: 2rem; --space-lg: 3rem; --space-xl: 5rem;
+  --gap-sm: 0.5rem; --gap-main: 1rem; --gap-md: 1.5rem;
+  --container-lg: 100rem; --container-md: 80rem; --container-sm: 64rem;
+  --pad-horizontal: 1.5rem; --pad-gutter: 1.5rem; --pad-card: 1.5rem;
+  --grid-cols: 12; --grid-gap: 1rem;
+  --radius-sm: 0.5rem; --radius-md: 0.75rem; --radius-lg: 1rem;
+  --radius-xl: 1.5rem; --radius-2xl: 3.75rem; --radius-pill: 9999px;
+}
+@media (max-width: 1279px) {
+  .birch-ai-embed { --pad-horizontal: 1.25rem; }
+}
+@media (max-width: 991px) {
+  .birch-ai-embed { --pad-horizontal: 1rem; --pad-gutter: 1rem; --grid-gap: 1rem; }
+}
+@media (max-width: 767px) {
+  .birch-ai-embed {
+    --pad-horizontal: 1rem;
+    --text-h2-size: 2rem; --text-h2-lh: 1.1;
+    --text-h3-size: 1.5rem; --text-h3-lh: 1.0;
+    --text-para-xl-size: 1.2rem; --text-para-xl-lh: 1.1;
+    --text-para-lg-size: 1.1rem; --text-para-lg-lh: 1.1;
   }
+}
 
-  /* ── Section: 300vh scroll track ── */
-  .bp {
-    height: 300vh;
-    font-family: var(--bp-font);
-    color: var(--bp-color);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
+/* ═══════════════════════════════════════════
+   EMBED WRAPPER + WEBFLOW RESET
+═══════════════════════════════════════════ */
+.birch-ai-embed { font-size: 16px; }
 
-  /* ── Sticky viewport ── */
-  .bp__sticky {
-    position: sticky;
-    top: 0;
-    height: 100vh;
+.birch-ai-embed h1, .birch-ai-embed h2, .birch-ai-embed h3,
+.birch-ai-embed h4, .birch-ai-embed h5, .birch-ai-embed h6,
+.birch-ai-embed p, .birch-ai-embed ul, .birch-ai-embed ol,
+.birch-ai-embed li, .birch-ai-embed figure, .birch-ai-embed blockquote {
+  margin: 0; padding: 0;
+}
+
+/* ═══════════════════════════════════════════
+   GRID SYSTEM
+═══════════════════════════════════════════ */
+.birch-ai-embed .container {
+  width: 100%; max-width: var(--container-lg);
+  margin-inline: auto; padding-inline: var(--pad-horizontal);
+}
+.birch-ai-embed .container-sm { max-width: var(--container-sm); }
+.birch-ai-embed .container-md { max-width: var(--container-md); }
+.birch-ai-embed .grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), 1fr);
+  gap: var(--grid-gap);
+}
+.birch-ai-embed .col-1  { grid-column: span 1; }
+.birch-ai-embed .col-2  { grid-column: span 2; }
+.birch-ai-embed .col-3  { grid-column: span 3; }
+.birch-ai-embed .col-4  { grid-column: span 4; }
+.birch-ai-embed .col-6  { grid-column: span 6; }
+.birch-ai-embed .col-8  { grid-column: span 8; }
+.birch-ai-embed .col-12 { grid-column: span 12; }
+@media (max-width: 767px) {
+  .birch-ai-embed .grid { grid-template-columns: 1fr; }
+  .birch-ai-embed [class*="col-"] { grid-column: span 1; }
+}
+
+/* ═══════════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════════ */
+.birch-ai-embed .t-h2 { font-family: var(--font); font-size: var(--text-h2-size); line-height: var(--text-h2-lh); letter-spacing: var(--text-h2-ls); font-weight: 600; }
+.birch-ai-embed .t-h3 { font-family: var(--font); font-size: var(--text-h3-size); line-height: var(--text-h3-lh); letter-spacing: var(--text-h3-ls); font-weight: 600; }
+.birch-ai-embed .t-h4 { font-family: var(--font); font-size: var(--text-h4-size); line-height: var(--text-h4-lh); letter-spacing: var(--text-h4-ls); font-weight: 600; }
+.birch-ai-embed .t-para-xl { font-family: var(--font); font-size: var(--text-para-xl-size); line-height: var(--text-para-xl-lh); letter-spacing: var(--text-para-xl-ls); font-weight: 600; }
+.birch-ai-embed .t-para-lg { font-family: var(--font); font-size: var(--text-para-lg-size); line-height: var(--text-para-lg-lh); letter-spacing: var(--text-para-lg-ls); font-weight: 600; }
+.birch-ai-embed .t-para-sm { font-family: var(--font); font-size: var(--text-para-sm-size); line-height: var(--text-para-sm-lh); letter-spacing: var(--text-para-sm-ls); font-weight: 600; }
+
+/* ═══════════════════════════════════════════
+   BUTTON
+═══════════════════════════════════════════ */
+.birch-ai-embed .btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-size: var(--text-btn-size); font-weight: 600;
+  line-height: var(--text-btn-lh); letter-spacing: var(--text-btn-ls);
+  border-radius: var(--radius-lg); cursor: pointer; white-space: nowrap;
+  padding-inline: 3rem; text-decoration: none; transition: opacity 0.15s ease;
+}
+.birch-ai-embed .btn:hover { opacity: 0.85; }
+.birch-ai-embed .btn-l { min-height: 10rem; }
+.birch-ai-embed .btn-m { min-height: 8.75rem; }
+.birch-ai-embed .btn-s { min-height: 6.25rem; }
+.birch-ai-embed .btn-default {
+  background: var(--color-primary) !important; color: var(--color-text-inverted) !important;
+  border: 5px solid transparent !important; pointer-events: auto !important; cursor: pointer !important;
+}
+.birch-ai-embed .btn-default:hover {
+  opacity: 1 !important; background: var(--color-accent-indigo) !important; color: var(--color-text) !important;
+}
+.birch-ai-embed .btn-stroke {
+  background: transparent !important; color: var(--color-text) !important;
+  border: 5px dotted var(--color-text) !important;
+}
+.birch-ai-embed .btn-stroke:hover {
+  opacity: 1 !important; background: var(--color-accent-purple) !important;
+  border-color: var(--color-accent-purple) !important;
+}
+@media (max-width: 767px) {
+  .birch-ai-embed .btn-s { min-height: 3.75rem; border-radius: var(--radius-md); font-size: 1.125rem; }
+}
+
+/* ═══════════════════════════════════════════
+   CARD ACCORDION
+═══════════════════════════════════════════ */
+.birch-ai-embed .card-accordion {
+  background: var(--color-bg) !important; color: var(--color-text) !important;
+  border-radius: var(--radius-lg) !important; padding: var(--pad-card) !important;
+  display: flex; flex-direction: column; justify-content: space-between;
+  cursor: pointer; user-select: none; flex: 1 1 0;
+  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.birch-ai-embed .card-accordion.is-closed { flex: 0 0 auto; justify-content: flex-start; }
+.birch-ai-embed .card-accordion h1, .birch-ai-embed .card-accordion h2,
+.birch-ai-embed .card-accordion h3, .birch-ai-embed .card-accordion h4,
+.birch-ai-embed .card-accordion h5, .birch-ai-embed .card-accordion h6 { margin: 0; }
+.birch-ai-embed .card-accordion__body {
+  display: flex; flex-direction: column; gap: var(--space-sm);
+  padding-top: var(--space-sm); overflow: hidden; opacity: 1;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.birch-ai-embed .card-accordion.is-closed .card-accordion__body { height: 0; padding-top: 0; opacity: 0; pointer-events: none; }
+.birch-ai-embed .card-accordion__bar { position: relative; height: 4px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.15); flex-shrink: 0; }
+.birch-ai-embed .card-accordion__bar-fill { position: absolute; inset: 0; border-radius: var(--radius-sm); background: var(--acc-color, var(--color-accent-green)); }
+
+/* ═══════════════════════════════════════════
+   PAGE STYLES
+═══════════════════════════════════════════ */
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     HERO SECTION
+  ───────────────────────────────────────── */
+
+  .hero {
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 4.5rem 1.5rem 0;
-    overflow: hidden;
+    justify-content: center;
+    padding: var(--space-lg) var(--pad-horizontal);
+    gap: var(--space-md);
+    background: var(--color-bg);
+    overflow-x: clip; /* prevent staircase overflow from expanding page width */
   }
 
-  /* ── Headline ── */
-  .bp__headline {
-    font-family: var(--bp-font);
-    font-size: var(--bp-h2-size);
-    line-height: var(--bp-h2-lh);
-    letter-spacing: var(--bp-h2-ls);
+.birch-ai-embed /* Logo: "Bïrch [icon] AI  closed beta" */
+  .hero__logo {
+    /* semantic wrapper — .hero's align-items:center centers the wordmark */
+  }
+
+.birch-ai-embed /* Inner wordmark: Bïrch + icon + AI, .birch-ai-embed inline-flex so it's only as wide as content */
+  .hero__logo-wordmark {
+    position: relative;      /* anchor for .hero__beta absolute positioning */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;            /* 4px — tight gap between text and icon */
+  }
+
+.birch-ai-embed .hero__logo-name {
+    font-family: var(--font);
+    font-size: var(--text-h3-size);
     font-weight: 600;
-    color: var(--bp-color);
+    line-height: var(--text-h3-lh);
+    letter-spacing: var(--text-h3-ls);
+    color: var(--color-text);
+  }
+
+.birch-ai-embed .hero__logo-icon {
+    height: 2.8125rem; /* 45px */
+    width: auto;
+  }
+
+.birch-ai-embed /* "closed beta" — absolute badge to the right of the wordmark, .birch-ai-embed doesn't affect its width */
+  .hero__beta {
+    position: absolute;
+    left: calc(100% + 0.375rem);
+    top: 0;
+    color: var(--color-text-grey);
+    white-space: nowrap;
+    line-height: 1;
+    padding-right: 0.5rem;
+  }
+
+.birch-ai-embed /* Main: wraps h1 + subtitle — used for mobile vertical centering */
+  .hero__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+.birch-ai-embed /* H1 composition */
+  .hero__h1 {
+    /* --ps = pill size: scales from 2rem at ~490px up to 3.25rem (52px) at 1280px */
+    --ps: clamp(2rem, 5vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-sm);
+  }
+
+.birch-ai-embed /* Mobile staircase variant — hidden on desktop */
+  .hero__h1--mb { display: none; }
+
+.birch-ai-embed .hero__row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm); /* 8px ≈ Figma 10px */
+  }
+
+.birch-ai-embed /* Word pills */
+  .hero__pill {
+    display: block;
+    /* Optical compensation: TT Commons cap-height sits high → extra bottom padding balances visually */
+    padding: 0.058em 0.462em 0.154em; /* pt=3px  px=24px  pb=8px at 52px — scales with --ps */
+    font-family: var(--font);
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--color-text-inverted); /* dark text by default */
+  }
+
+.birch-ai-embed .hero__pill--sq { border-radius: 0.308em; }
+
+.birch-ai-embed /* 16px / 52px — scales with --ps */
+  .hero__pill--pill { border-radius: var(--radius-pill); }
+
+.birch-ai-embed .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+
+.birch-ai-embed .hero__pill--blue { background: var(--color-accent-blue);   color: var(--color-text); }
+
+.birch-ai-embed .hero__pill--green { background: var(--color-accent-green);  }
+
+.birch-ai-embed .hero__pill--indigo { background: var(--color-accent-indigo); color: var(--color-text); }
+
+.birch-ai-embed /* ── Decorative columns (Row 1) ──
+     Two columns, .birch-ai-embed bottom-aligned, .birch-ai-embed that swap heights on a gentle loop.
+     Sized in em relative to --ps so they scale proportionally with the pills. */
+  .hero__deco-cols {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-size: var(--ps);   /* sets em reference for children */
+    width:  1.596em;        /* 83 / 52 */
+    height: 1.312em;        /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
+  }
+
+.birch-ai-embed .hero__col {
+    position: absolute;
+    bottom: 0;
+    width:         0.769em;  /* 40 / 52 */
+    border-radius: 0.199em;  /* 10.34 / 52 */
+  }
+
+.birch-ai-embed .hero__col--purple {
+    left:       0;
+    height:     78.9%;
+    background: var(--color-accent-purple);
+  }
+
+.birch-ai-embed .hero__col--blue {
+    left:       0.827em;  /* 43 / 52 */
+    height:     100%;
+    background: var(--color-accent-blue);
+  }
+
+.birch-ai-embed /* ── Decorative bars (Row 2) ──
+     Three horizontal capsules. Animation: A (left-aligned) → center → B (left-aligned, .birch-ai-embed widths swapped).
+     Bars: duration 750ms + pause 900ms = 1650ms total half-cycle
+     Hold at extremes: 0–27.27% and 72.73–100%  mid at 50%
+     ease: cubic-bezier(0.87, .birch-ai-embed 0, .birch-ai-embed 0.55, .birch-ai-embed 1) */
+  .hero__deco-bars {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.058em;             /* 1.694px / 29.365px — Figma proportion */
+    flex-shrink: 0;
+    font-size: var(--ps);
+    width:  1.654em;          /* 86 / 52 */
+    height: 1.312em;          /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
+  }
+
+.birch-ai-embed .hero__bar {
+    height: 0.399em;          /* (1.312 - 2×0.058) / 3 */
+    border-radius: var(--radius-pill);
+  }
+
+.birch-ai-embed .hero__bar--lb {
+    width:      100%;
+    background: var(--color-accent-light-blue);
+  }
+
+.birch-ai-embed .hero__bar--pink {
+    width:      67.4%;
+    background: var(--color-accent-pink);
+  }
+
+.birch-ai-embed .hero__bar--red {
+    width:      34.9%;
+    background: var(--color-accent-red);
+  }
+
+.birch-ai-embed .hero__subtitle {
+    color: var(--color-text-grey);
     text-align: center;
-    margin: 0 0 1.25rem;
-    flex-shrink: 0;
+    margin: 0;
   }
 
-  /* ── Subtitle container ── */
-  .bp__subtitle {
-    width: 100%;
-    max-width: 68.75rem;
-    margin-bottom: 2.5rem;
-    flex-shrink: 0;
+.birch-ai-embed /* CTA — 4 of 12 cols ≈ 400px at 1280px */
+  .hero__btn {
+    width: 14rem;
+    height: 5rem;
+    margin-top: var(--space-md);
+    font-size: 2em;
   }
 
-  /* Inline flex row: static text + animated clips */
-  .bp__sub-line {
+.birch-ai-embed /* ─────────────────────────────────────────
+     HERO — MOBILE ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero {
+      height: 100svh;
+      min-height: unset;
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-md);
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+.birch-ai-embed /* Smaller logo on mobile */
+    .hero__logo-name { font-size: 1.25rem; }
+
+.birch-ai-embed /* 20px vs 32px desktop */
+    .hero__logo-icon { height: 1.875rem; }
+
+.birch-ai-embed /* 30px vs 45px desktop */
+
+    /* h1 fills available space (centering itself), .birch-ai-embed subtitle pinned to bottom above button */
+    .hero__main {
+      flex: 1;
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+.birch-ai-embed /* Desktop H1 hidden; mobile staircase shown */
+    .hero__h1--dt { display: none; }
+
+.birch-ai-embed .hero__h1--mb {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;  /* centers staircase vertically in remaining space */
+      flex: 1;                  /* takes all space above subtitle */
+      gap: 0.15em;
+      width: fit-content;
+      --ps: clamp(1.95rem, 11.93vw, 2.984rem); /* +30% from original */
+      font-size: var(--ps);
+    }
+
+.birch-ai-embed .hero__step {
+      display: flex;
+      align-items: center;
+      gap: 0.1em;
+      flex-shrink: 0;
+    }
+
+.birch-ai-embed .hero__step--a { margin-left: 0; }
+
+.birch-ai-embed .hero__step--b { margin-left: 0.5em; }
+
+.birch-ai-embed .hero__step--c { align-self: flex-start; margin-left: 0.6em; }
+
+.birch-ai-embed .hero__step--d { margin-left: 1.9em; }
+
+.birch-ai-embed .hero__step--e { align-self: flex-start; margin-left: 2.8em; }
+
+.birch-ai-embed .hero__h1--mb .hero__pill--green.hero__pill--sq {
+      margin-right: 0.2em;
+    }
+
+.birch-ai-embed .hero__subtitle {
+      padding-bottom: 2rem; /* gap to button */
+      text-align: center;
+      max-width: 25rem; /* 400px */
+    }
+
+.birch-ai-embed .hero__btn {
+      width: 100%;
+      /* min-height, border-radius, font-size handled by .btn-s mobile rule in button.css */
+    }
+
+.birch-ai-embed }
+
+  /* ─────────────────────────────────────────
+     PROVEPOINTS SECTION  (Figma 330:1455)
+  ───────────────────────────────────────── */
+
+  .provepoints {
+    padding: var(--space-xl) 0 var(--space-lg);
+    background: var(--color-bg);
+  }
+
+.birch-ai-embed .provepoints__heading {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+  }
+
+.birch-ai-embed /* Card */
+  .provepoints__card {
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+.birch-ai-embed .provepoints__card-title {
+    text-align: left;
+    color: var(--color-text);
+    margin: 0;
+    flex-shrink: 0;
+    /* Reserve 2-line height so all titles align regardless of length */
+    min-height: calc(2 * var(--text-h3-size)); /* 2 × 2rem = 4rem (lh=1) */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+.birch-ai-embed /* Middle image area — fills space between title and description */
+  .provepoints__media {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    font-family: var(--bp-font);
-    font-size: var(--bp-sub-size);
-    line-height: var(--bp-sub-lh);
-    font-weight: 600;
-    color: var(--bp-color);
-  }
-
-  /* Clip: masks one chunk, height = 1 line */
-  .bp__clip {
-    display: inline-flex;
-    overflow: hidden;
-    height: calc(var(--bp-sub-size) * var(--bp-sub-lh));
-    vertical-align: bottom;
-  }
-
-  /* Inner span starts below the clip, slides up */
-  .bp__clip > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    transform: translateY(110%);
-    will-change: transform;
-    white-space: nowrap;
-  }
-
-  .bp__arrow { color: var(--bp-green); }
-
-  /* Mobile clip hidden on desktop */
-  .bp__clip--m { display: none; }
-
-  /* ── Visual area ── */
-  .bp__visual {
-    position: relative;
-    width: clamp(56.25rem, 87.5vw, 90rem);
-    max-width: calc(100vw - 3rem);
-    aspect-ratio: 900 / 560;
-    flex-shrink: 0;
+    padding: var(--space-sm) 0;
+    min-height: 0;
     overflow: hidden;
   }
 
-  /* Chat images stacked */
-  .bp__chat-stack {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    transform-origin: top center;
-    width: 41.11%;
-    z-index: 2;
-    will-change: transform;
+.birch-ai-embed .provepoints__media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
 
-  .bp__chat-base {
-    width: 100%;
-    border-radius: var(--bp-radius);
-  }
-
-  .bp__chat-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    border-radius: var(--bp-radius);
-    opacity: 0;
-    will-change: opacity;
-  }
-
-  /* Workspace slides up from below */
-  .bp__workspace {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    z-index: 1;
-    transform: translateX(-50%) translateY(0);
-    width: 83.22%;
-    opacity: 0;
-    border-radius: 0.875rem;
-    overflow: hidden;
-    will-change: opacity, transform;
-  }
-
-  .bp__workspace img {
-    width: 100%;
-    display: block;
-  }
-
-  /* ── Mobile ≤767px ── */
-  @media (max-width: 767px) {
-
-    .bp {
-      height: 200vh;
+.birch-ai-embed /* Subgrid: align title / media / desc rows across all three cards */
+  @media (min-width: 768px) {
+    .provepoints .grid {
+      grid-template-rows: auto minmax(18rem, 1fr) auto;
     }
 
-    .bp__sticky {
-      padding: 3rem 1rem 0;
+.birch-ai-embed .provepoints__card {
+      grid-row: span 3;
+      display: grid;
+      grid-template-rows: subgrid;
+      min-height: unset;
     }
 
-    .bp__subtitle {
-      margin-bottom: 1.5rem;
+.birch-ai-embed .provepoints__card-title {
+      min-height: unset;
+      align-self: start;
+    }
+
+.birch-ai-embed .provepoints__media {
+      flex: unset;
+      height: 22rem;
+    }
+
+.birch-ai-embed .provepoints__media img {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+    }
+
+.birch-ai-embed .provepoints__card:nth-child(1) .provepoints__media img, .birch-ai-embed .provepoints__card:nth-child(3) .provepoints__media img {
+      height: 80%;
+    }
+
+.birch-ai-embed .provepoints__card:nth-child(2) .provepoints__media img {
+      height: 120%;
+    }
+
+.birch-ai-embed .provepoints__desc {
+      align-self: end;
+    }
+
+.birch-ai-embed }
+
+  @media (max-width: 991px) {
+    .provepoints .grid {
+      grid-template-rows: unset;
+    }
+
+.birch-ai-embed .provepoints__card {
+      grid-column: span 12;
+      grid-row: unset;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
     }
 
-    .bp__sub-line {
+.birch-ai-embed .provepoints__media {
+      margin: 0;
+    }
+
+.birch-ai-embed }
+
+  @media (max-width: 767px) {
+    .provepoints__card {
+      min-height: unset;
+    }
+
+.birch-ai-embed .provepoints__card-title {
+      min-height: unset;
+      display: block;
+    }
+
+.birch-ai-embed .provepoints__media {
+      flex: none;
+      padding: var(--space-md) 0;
+    }
+
+.birch-ai-embed }
+
+  /* Card 02: rule icon — SVG has its own layered card design */
+  .provepoints__rule-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.birch-ai-embed .provepoints__rule-wrap img {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+  }
+
+.birch-ai-embed /* Description — grey, .birch-ai-embed centered */
+  .provepoints__desc {
+    text-align: left;
+    color: var(--color-text-grey);
+    margin: 0;
+    flex-shrink: 0;
+    padding-inline: 0;
+    width: 100%;
+  }
+
+.birch-ai-embed /* ── Test blocks ── */
+  .test-block {
+    height: 75rem; /* 1200px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     ACCORDION SECTION
+  ───────────────────────────────────────── */
+
+  .acc {
+    padding: var(--space-xl) 0 4rem;
+  }
+
+.birch-ai-embed .acc__title {
+    color: var(--color-text);
+    text-align: center;
+    margin: 0 0 3rem;
+  }
+
+.birch-ai-embed .acc__hint {
+    text-align: center;
+    color: var(--color-text-grey);
+    margin: var(--space-sm) 0 0;
+  }
+
+@media (max-width: 991px) {
+.birch-ai-embed .acc__hint { display: none; }
+
+  }
+
+.birch-ai-embed /* Colored rounded box — full container width, .birch-ai-embed fixed proportions from Figma (1232 × 656) */
+  .acc__box {
+    width: 100%;
+    background-color: var(--color-accent-green);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    overflow: hidden;
+    contain: layout;            /* internal layout changes don't affect elements outside */
+    overflow-anchor: none;      /* prevent browser scroll-anchoring from compensating */
+    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+.birch-ai-embed .acc__layout {
+    display: flex;
+    align-items: stretch;
+    gap: var(--gap-main);
+  }
+
+.birch-ai-embed /* Left col: 553 / 1213 of inner frame ≈ 45.6% */
+  .acc__left {
+    width: 45.59%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+.birch-ai-embed /* Right col: takes the rest */
+  .acc__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.birch-ai-embed .acc__eyebrow {
+    color: var(--color-text-inverted);
+    margin: 0 0 1rem;
+  }
+
+.birch-ai-embed .acc__cards {
+    flex: 1;           /* fills remaining left-col space after eyebrow */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+.birch-ai-embed /* Placeholder rectangle — same aspect ratio as the Birch AI window (463 × 592) */
+  .acc__placeholder {
+    display: none;
+    width: 70.15%;    /* 463 / 660 of right col */
+    aspect-ratio: 463 / 592;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-xl);
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     CHAT CARD
+  ───────────────────────────────────────── */
+
+  /* Wrapper owns the sizing — enables container queries for the card */
+  .chat-card-wrap {
+    height: min(70vh, 45rem); /* 45rem = 720px */
+    width: auto;
+    aspect-ratio: 400 / 600;
+    container-type: inline-size;
+  }
+
+.birch-ai-embed .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1.5em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.25vw, 1.25rem);    /* fallback */
+    font-size: 4.55cqi;                             /* 18px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+
+.birch-ai-embed /* Body */
+  .chat-card__
+  .chat-card__body::-webkit-scrollbar { display: none; }
+
+.birch-ai-embed /* Chrome/Safari */
+
+  /* Feed — wraps all exchanges */
+  .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+
+.birch-ai-embed /* Messages group */
+  .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+
+.birch-ai-embed /* User bubble */
+  .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+.birch-ai-embed .chat-card__bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+.birch-ai-embed /* AI response area — fades + floats in after send */
+  .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+.birch-ai-embed .chat-card__response.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+.birch-ai-embed /* Inner content — base text styles for AI responses */
+  .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+
+.birch-ai-embed .chat-card__response-content p {
+    margin: 0 0 0.4em;
+  }
+
+.birch-ai-embed .chat-card__response-content p:last-child { margin-bottom: 0; }
+
+.birch-ai-embed .chat-card__response-content strong { font-weight: 700; }
+
+.birch-ai-embed .chat-card__response-content ul {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+  }
+
+.birch-ai-embed .chat-card__response-content li { margin-bottom: 0.2em; }
+
+.birch-ai-embed /* "Review rule" link — card 0 only */
+  .chat-card__review-link {
+    display: block;
+    color: #0067ed;
+    line-height: 1.467;
+    margin-top: 0.375em;
+    cursor: pointer;
+  }
+
+.birch-ai-embed /* ── Performance table (card 1 response) ── */
+  .chat-card__table {
+    width: 100%;
+    margin-bottom: 0.625em;
+  }
+
+.birch-ai-embed .chat-card__table-header, .birch-ai-embed .chat-card__table-row {
+    display: flex;
+    align-items: center;
+  }
+
+.birch-ai-embed .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+.birch-ai-embed .chat-card__table-col:first-child { padding-left: 0.875em; }
+
+.birch-ai-embed .chat-card__table-col:last-child { flex: 0 0 5em; }
+
+.birch-ai-embed .chat-card__table-header .chat-card__table-col {
+    color: #636363;
+    font-weight: 500;
+  }
+
+.birch-ai-embed .chat-card__table-row {
+    border-radius: 0.75em;
+  }
+
+.birch-ai-embed .chat-card__table-row--alt { background: #fafafa; }
+
+.birch-ai-embed /* Input area */
+  .chat-card__input-area {
+    flex-shrink: 0;
+    padding: 1em;
+    position: relative;
+  }
+
+.birch-ai-embed /* Fade gradient above input */
+  .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+
+.birch-ai-embed .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+
+.birch-ai-embed .chat-card__text-flow {
+    flex: 1;
+    min-width: 0;
+    line-height: inherit;
+  }
+
+.birch-ai-embed .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+
+.birch-ai-embed .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    /* visibility toggled via inline style in JS — no display:none here */
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+.birch-ai-embed .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+
+.birch-ai-embed .chat-card__cursor.is-blinking {
+    animation: cursorBlink 0.9s step-end infinite;
+  }
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+.birch-ai-embed /* Send button — inside the textarea, .birch-ai-embed absolute.
+     bottom = (padding-top + line-height + padding-bottom - button-height) / 2
+            = (0.9 + 1.4 + 0.9 - 2) / 2 = 0.6em  → centers in single-line input, .birch-ai-embed stays pinned to bottom when input grows to multiple lines. */
+  .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+
+.birch-ai-embed .chat-card__send.is-active {
+    background: #161616;
+    cursor: pointer;
+  }
+
+.birch-ai-embed .chat-card__send svg {
+    width: 1em;
+    height: 1em;
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     PROMPTS SECTION
+  ───────────────────────────────────────── */
+
+  .prompts {
+    padding: var(--space-xl) 0 var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    overflow: hidden;
+  }
+
+.birch-ai-embed .prompts__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-main);
+    text-align: center;
+    padding-inline: var(--pad-horizontal);
+  }
+
+.birch-ai-embed .prompts__title {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+.birch-ai-embed .prompts__subtitle {
+    color: var(--color-text-grey);
+    margin: 0;
+  }
+
+.birch-ai-embed /* Marquee rows */
+  .prompts__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+    width: 100%;
+  }
+
+.birch-ai-embed .prompts__track {
+    width: 100%;
+    overflow: hidden;
+  }
+
+.birch-ai-embed .prompts__belt {
+    display: flex;
+    gap: var(--gap-main);
+    width: max-content;
+    will-change: transform;
+  }
+
+.birch-ai-embed /* Row 2 starts visually offset — achieved via JS translateX on init */
+
+  .prompts__chip {
+    /* display: block so it's a block-level flex item — text nodes inside are in normal
+       inline formatting context, which preserves spaces around <em> keywords.
+       display: inline-flex strips boundary whitespace from anonymous flex items. */
+    display: block;
+    height: 3.5rem;              /* 56px */
+    line-height: 3.5rem;         /* vertically centers single-line text */
+    padding-inline: var(--space-md); /* 32px */
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-xl);
+    font-family: var(--font);
+    font-size: var(--text-h6-size);
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    font-style: normal;
+  }
+
+.birch-ai-embed .prompts__kw { font-style: normal; }
+
+.birch-ai-embed .prompts__kw--green { color: var(--color-accent-green);      }
+
+.birch-ai-embed .prompts__kw--pink { color: var(--color-accent-pink);       }
+
+.birch-ai-embed .prompts__kw--light-blue { color: var(--color-accent-red);        }
+
+.birch-ai-embed .prompts__kw--light-blue { color: var(--color-accent-light-blue); }
+
+.birch-ai-embed .prompts__cta {
+    padding-inline: var(--pad-horizontal);
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     VISION
+  ───────────────────────────────────────── */
+  .vision {
+    padding-top: var(--space-xl);
+    position: sticky;
+    top: 0; /* overridden by JS sizeCards() */
+  }
+
+.birch-ai-embed .vision__agent {
+    position: relative;
+    z-index: 1;
+  }
+
+.birch-ai-embed .vision .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+.birch-ai-embed .vision__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+.birch-ai-embed .vision__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);   /* 24px между карточками */
+    width: 100%;
+  }
+
+.birch-ai-embed .vision__copilot {
+    background: var(--color-accent-orange);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text-inverted);
+  }
+
+.birch-ai-embed .vision__copilot h2 { margin: 0; }
+
+.birch-ai-embed .vision__copilot-icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 25rem;
+  }
+
+.birch-ai-embed .vision__copilot-icon img {
+    width: 15.5625rem;   /* 249px */
+    height: 15.0625rem;  /* 241px */
+    object-fit: contain;
+  }
+
+.birch-ai-embed .vision__agent {
+    background: #004195;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text);
+  }
+
+.birch-ai-embed .vision__agent h2 { margin: 0; }
+
+.birch-ai-embed .vision__agent-desc {
+    max-width: 50rem;   /* 800px */
+    text-align: center;
+    margin: 0;
+    padding-bottom: var(--space-lg); /* 48px */
+  }
+
+.birch-ai-embed .vision__agent-ill {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.birch-ai-embed .vision__agent-ill img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     TABLET  768–991px
+  ───────────────────────────────────────── */
+  @media (max-width: 991px) {
+    .acc__box {
+      aspect-ratio: auto;
+    }
+
+.birch-ai-embed .vision__copilot, .birch-ai-embed .vision__agent {
+      border-radius: var(--radius-xl);
+    }
+
+.birch-ai-embed }
+
+  /* ─────────────────────────────────────────
+     ACCORDION MOBILE CAROUSEL  ≤991px
+  ───────────────────────────────────────── */
+
+  .acc-mob { display: none; }
+
+@media (max-width: 991px) {
+.birch-ai-embed /* Hide desktop version */
+    .acc__box { display: none !important; }
+
+.birch-ai-embed .acc__title { display: none; }
+
+.birch-ai-embed .acc-mob {
+      display: block;
+      padding: var(--space-xl) 0 4rem;
+    }
+
+.birch-ai-embed .acc-mob__heading {
+      text-align: center;
+      margin: 0 0 var(--space-md);
+    }
+
+.birch-ai-embed /* Carousel viewport */
+    .acc-mob__carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      touch-action: pan-y;
+      user-select: none;
+      /* height set by JS */
+    }
+
+.birch-ai-embed /* Each slide */
+    .acc-mob__slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 1.5rem;
+      display: flex;
       flex-direction: column;
+      gap: 0;
+      box-sizing: border-box;
+      transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+    }
+
+.birch-ai-embed .acc-mob__slide:first-child {
+      position: relative; /* drives carousel height */
+    }
+
+.birch-ai-embed .acc-mob__eyebrow {
+      color: var(--color-text-inverted);
+      margin: 0 0 var(--space-sm);
+    }
+
+.birch-ai-embed .acc-mob__slide-title {
+      margin: 0 0 calc(var(--space-sm) / 2);
+      color: var(--color-text-inverted);
+    }
+
+.birch-ai-embed .acc-mob__slide-desc {
+      color: var(--color-text-inverted);
+      margin: 0 0 var(--space);
+      opacity: 0.75;
+    }
+
+.birch-ai-embed .acc-mob__hint {
+      display: none;
+    }
+
+@media (max-width: 991px) {
+.birch-ai-embed .acc-mob__hint {
+        display: block;
+        text-align: center;
+        color: var(--color-text-grey);
+        margin: var(--space-sm) 0 0;
+      }
+
+    }
+
+.birch-ai-embed /* Last slide (purple bg) — white text */
+    .acc-mob__slide:last-child .acc-mob__eyebrow, .birch-ai-embed .acc-mob__slide:last-child .acc-mob__slide-title, .birch-ai-embed .acc-mob__slide:last-child .acc-mob__slide-desc {
+      color: #fff;
+    }
+
+.birch-ai-embed /* Static chat: override transitions so content shows instantly */
+    .acc-mob .chat-card__bubble, .birch-ai-embed .acc-mob .chat-card__response {
+      transition: none !important;
+    }
+
+.birch-ai-embed /* Chat card: same proportions as desktop */
+    .acc-mob .chat-card-wrap {
+      width: min(100%, 22rem);
+      height: auto;
+      aspect-ratio: 400 / 600;
+      margin: auto auto 0; /* push chat to bottom of slide */
+    }
+
+.birch-ai-embed .acc-mob .chat-card {
+      height: 100%;
+    }
+
+.birch-ai-embed .acc-mob .chat-card__
+
+    /* Progress dots */
+    @keyframes acc-mob-dot-fill {
+      from { transform: translateX(-100%); }
+
+.birch-ai-embed to { transform: translateX(0); }
+
+.birch-ai-embed }
+
+    .acc-mob__dots {
+      display: flex;
       align-items: center;
       gap: 0.25rem;
+      padding-top: var(--space-sm);
+      padding-inline: var(--radius-lg);
     }
 
-    /* Hide desktop clips */
-    .bp__clip--d { display: none; }
-
-    /* Mobile clip: collapsed, JS grows it */
-    .bp__clip--m {
-      display: flex;
-      overflow: hidden;
-      height: 0;
-      min-height: 0;
-      justify-content: center;
-    }
-
-    .bp__clip--m > span {
-      width: 100%;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .bp__m-arrow {
-      color: var(--bp-green);
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .bp__m-text {
-      white-space: normal;
-      text-align: center;
-    }
-
-    .bp__visual {
-      width: calc(100vw - 2rem);
-      aspect-ratio: auto;
-      height: auto;
-      overflow: visible;
-    }
-
-    .bp__chat-stack {
+.birch-ai-embed .acc-mob__dot {
+      flex: 1;
+      min-width: 0;
+      height: 0.25rem;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.3);
       position: relative;
-      left: auto;
-      transform: none;
-      width: calc(100% - 2.5rem);
-      margin: 0 auto;
+      overflow: hidden;
     }
 
-    .bp__workspace {
-      display: none !important;
+.birch-ai-embed .acc-mob__dots--paused .acc-mob__dot.is-active::after {
+      animation-play-state: paused;
     }
+
+.birch-ai-embed .acc-mob__dot.is-active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-100%);
+      animation: acc-mob-dot-fill 7s linear forwards;
+      border-radius: var(--radius-pill);
+    }
+
   }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     CTA LAST
+  ───────────────────────────────────────── */
+
+  .cta-last {
+    padding-top: calc(var(--space-xl) * 2);
+    padding-bottom: 0;
+  }
+
+.birch-ai-embed .cta-last .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space);
+    text-align: center;
+  }
+
+.birch-ai-embed .cta-last__heading {
+    max-width: 62.125rem; /* 994px */
+    margin: 0;
+  }
+
+.birch-ai-embed .cta-last__sub {
+    color: var(--color-text-grey);
+    max-width: 62.125rem;
+    margin: 0;
+  }
+
+@media (max-width: 767px) {
+.birch-ai-embed .cta-last__heading, .birch-ai-embed .cta-last__sub { max-width: 100%; }
+
+  }
+
+.birch-ai-embed /* ─────────────────────────────────────────
+     MOBILE  ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+
+  @media (max-width: 767px) {
+    .vision__agent { gap: var(--space); }
+
+.birch-ai-embed .vision__copilot-icon img { width: 50%; }
+
+.birch-ai-embed .vision__agent-ill {
+      margin-inline: calc(var(--space-lg) / -2);
+      width: calc(100% + var(--space-lg));
+    }
+
+  }
+
+
 </style>
 
-<section class="bp">
-  <div class="bp__sticky">
+<div class="birch-ai-embed">
 
-    <h2 class="bp__headline">Birch flips the way you create rules</h2>
+<!-- ─────────────────────────────────────────
+     HERO
+───────────────────────────────────────── -->
+<section class="hero">
 
-    <div class="bp__subtitle">
-      <div class="bp__sub-line">
-        <span>Describe in the chat</span>
-        <!-- desktop: two clips slide in separately -->
-        <span class="bp__clip bp__clip--d" id="bpClip2"><span><span class="bp__arrow">→</span> The rule draft is ready</span></span>
-        <span class="bp__clip bp__clip--d" id="bpClip3"><span>, right where you work</span></span>
-        <!-- mobile: single clip, arrow on own line -->
-        <span class="bp__clip bp__clip--m" id="bpClipM"><span>
-          <span class="bp__m-arrow">↓</span>
-          <span class="bp__m-text">The rule draft is ready, right where you work</span>
-        </span></span>
+  <div class="hero__logo">
+    <div class="hero__logo-wordmark">
+      <span class="hero__logo-name">Bïrch</span>
+      <span class="hero__logo-name">AI</span>
+      <span class="hero__beta t-body">closed beta</span>
+    </div>
+  </div>
+
+  <div class="hero__main">
+
+    <div class="hero__h1 hero__h1--dt">
+      <div class="hero__row hero__row--1">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+      <div class="hero__row hero__row--2">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
       </div>
     </div>
 
-    <div class="bp__visual">
-
-      <div class="bp__chat-stack" id="bpChatStack">
-        <img
-          src="IMAGE_URL_CHAT_01"
-          class="bp__chat-base"
-          alt="Chat: user describes the rule"
-        />
-        <img
-          src="IMAGE_URL_CHAT_02"
-          class="bp__chat-overlay"
-          id="bpChatOverlay"
-          alt="Birch AI responds with the drafted rule"
-        />
+    <div class="hero__h1 hero__h1--mb" aria-label="Built with a performance marketing mindset">
+      <div class="hero__step hero__step--a">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
       </div>
-
-      <div class="bp__workspace" id="bpWorkspace">
-        <img
-          src="IMAGE_URL_WORKSPACE"
-          alt="Rule ready inside Birch workspace"
-        />
+      <div class="hero__step hero__step--b">
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
       </div>
-
+      <div class="hero__step hero__step--c">
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+      <div class="hero__step hero__step--d">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+      </div>
+      <div class="hero__step hero__step--e">
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
     </div>
+
+    <p class="hero__subtitle t-para-lg">Built on your data. Sharper decisions across every channel – analyze, strategize, automate.</p>
+
+  </div>
+
+  <a href="#" class="btn btn-default btn-s hero__btn">Apply now</a>
+
+</section>
+
+<!-- ─────────────────────────────────────────
+     PROVEPOINTS
+───────────────────────────────────────── -->
+<section class="provepoints">
+  <div class="container">
+    <h2 class="t-h2 provepoints__heading">It works because it knows your context</h2>
+    <div class="grid">
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your ad accounts</h3>
+        <div class="provepoints__media">
+          <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741fce0efcc22b3624e4_platforms.svg" alt="Meta, Google, TikTok, Snap platform logos" />
+        </div>
+        <p class="t-para-xl provepoints__desc">Meta, Google, TikTok, Snap. Performance data, structure, naming — all read directly</p>
+      </div>
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your rule library</h3>
+        <div class="provepoints__media">
+          <div class="provepoints__rule-wrap">
+            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f55c64bfb0413281a_rule-icon.svg" alt="" aria-hidden="true" />
+          </div>
+        </div>
+        <p class="t-para-xl provepoints__desc">Existing rules are part of the context</p>
+      </div>
+      <div class="col-4 provepoints__card">
+        <h3 class="t-h3 provepoints__card-title">Your workspace, your data</h3>
+        <div class="provepoints__media">
+          <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f15a96b10bddd9a16_ws-promo-ai.svg" alt="" aria-hidden="true" />
+        </div>
+        <p class="t-para-xl provepoints__desc">No external sharing. No training on your account.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────
+     ACCORDION
+───────────────────────────────────────── -->
+<section class="acc">
+  <div class="container">
+
+    <h2 class="acc__title t-h2">Every answer sits on top of your data</h2>
+
+    <div class="acc__box" id="accBox">
+      <div class="acc__layout">
+
+        <div class="acc__left">
+          <p class="acc__eyebrow t-eyebrow">Use Cases</p>
+          <div class="acc__cards">
+
+            <div class="card-accordion" data-index="0">
+              <h4 class="t-h4">Get rules suggestion</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Describe your performance marketing goal, and AI will turn it into a complex automation rule, explain the logic behind it, and create a draft directly in the Birch workspace. Review the recommendation, make any adjustments, and decide whether to activate it.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar0"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="1">
+              <h4 class="t-h4">Analyze your performance</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar1"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="2">
+              <h4 class="t-h4">Audit your rules</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="3">
+              <h4 class="t-h4">Analyze impact of rules</h4>
+              <div class="card-accordion__body">
+                <p class="t-eyebrow" style="color:var(--color-text-grey);margin:0">Coming soon</p>
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0;margin-top:0.25rem">See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar3"></div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="acc__right">
+          <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body" id="chatBody">
+              <div class="chat-card__feed" id="chatFeed"></div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="chatPlaceholder">Ask anything</span><span class="chat-card__typed" id="chatTyped"></span><span class="chat-card__cursor" id="chatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="chatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <p class="acc__hint t-para-sm">Hold to pause auto-switching</p>
 
   </div>
 </section>
 
+<!-- ── Mobile accordion carousel (≤991px) ── -->
+<section class="acc-mob" id="accMob">
+  <div class="container">
+    <h2 class="acc-mob__heading t-h2">Every answer sits on top of your data</h2>
+    <div class="acc-mob__carousel" id="accMobCarousel">
+
+      <div class="acc-mob__slide" data-index="0">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Get rules suggestion</h4>
+        <p class="acc-mob__slide-desc t-para-lg">Describe your performance marketing goal, and AI will turn it into a complex automation rule, explain the logic behind it, and create a draft directly in the Birch workspace.</p>
+        <div class="chat-card-wrap"><div class="chat-card">
+          <div class="chat-card__body"><div class="chat-card__feed">
+            <div class="chat-card__messages"><div class="chat-card__bubble is-visible">My target ROAS is 2.5. Share new ideas for my rules setup</div></div>
+            <div class="chat-card__response is-visible"><div class="chat-card__response-content">
+              <p>I recommend moving to proactive growth and budget management:</p>
+              <p><strong>The "Soft Landing" (Budget Protection)</strong><br>Logic: If ROAS is below your target but above your "dead-zone" (e.g., target 2.5, current 1.8) — decrease daily budget by 20%.<br>Benefit: Protects spend during temporary dips while keeping ad sets in learning phase.</p>
+            </div><a class="chat-card__review-link">Review rule</a></div>
+          </div></div>
+          <div class="chat-card__input-area"><div class="chat-card__input-wrap">
+            <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+            <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div></div>
+        </div></div>
+      </div>
+
+      <div class="acc-mob__slide" data-index="1">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Analyze your performance</h4>
+        <p class="acc-mob__slide-desc t-para-lg">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard.</p>
+        <div class="chat-card-wrap"><div class="chat-card">
+          <div class="chat-card__body"><div class="chat-card__feed">
+            <div class="chat-card__messages"><div class="chat-card__bubble is-visible">Analyze my performance by platform</div></div>
+            <div class="chat-card__response is-visible"><div class="chat-card__response-content">
+              <div class="chat-card__table">
+                <div class="chat-card__table-header">
+                  <span class="chat-card__table-col">Platform</span>
+                  <span class="chat-card__table-col">Ad Account</span>
+                  <span class="chat-card__table-col">Spend</span>
+                </div>
+                <div class="chat-card__table-row chat-card__table-row--alt">
+                  <span class="chat-card__table-col">Google Ads</span>
+                  <span class="chat-card__table-col">Birch</span>
+                  <span class="chat-card__table-col">🟢 $3.94M</span>
+                </div>
+                <div class="chat-card__table-row">
+                  <span class="chat-card__table-col">Meta Ads</span>
+                  <span class="chat-card__table-col">Bir.ch Marketing</span>
+                  <span class="chat-card__table-col">🔴 $5K</span>
+                </div>
+                <div class="chat-card__table-row chat-card__table-row--alt">
+                  <span class="chat-card__table-col">TikTok Ads</span>
+                  <span class="chat-card__table-col">Bir.ch Tiktok</span>
+                  <span class="chat-card__table-col">⚪ $40.6K</span>
+                </div>
+              </div>
+              <p><strong>🔍 Key Findings</strong></p>
+              <p>Google Ads Efficiency 🟢<br>This high efficiency signals your campaigns are capturing high-intent traffic that converts at minimal cost relative to revenue.</p>
+            </div></div>
+          </div></div>
+          <div class="chat-card__input-area"><div class="chat-card__input-wrap">
+            <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+            <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div></div>
+        </div></div>
+      </div>
+
+      <div class="acc-mob__slide" data-index="2">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Audit your rules</h4>
+        <p class="acc-mob__slide-desc t-para-lg">AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
+        <div class="chat-card-wrap"><div class="chat-card">
+          <div class="chat-card__body"><div class="chat-card__feed">
+            <div class="chat-card__messages"><div class="chat-card__bubble is-visible">Do my rules need any fixes in the setup?</div></div>
+            <div class="chat-card__response is-visible"><div class="chat-card__response-content">
+              <p>🛠 <strong>Critical Fix – Add Spend Thresholds</strong><br>Low-spend ad sets trigger false ROAS alerts. Fix: require Spend (last 24h) &gt; [avg CPA] before alerts fire.</p>
+              <p>📈 <strong>Optimization – Tighten the CPM Trigger</strong><br>Drop your CPM threshold from 1.5x to 1.3x to catch competition spikes or creative fatigue sooner.</p>
+            </div></div>
+          </div></div>
+          <div class="chat-card__input-area"><div class="chat-card__input-wrap">
+            <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+            <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div></div>
+        </div></div>
+      </div>
+
+      <div class="acc-mob__slide" data-index="3">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Analyze impact of rules</h4>
+        <p class="acc-mob__slide-desc t-para-lg"><span class="t-eyebrow" style="opacity:0.6;display:block;margin-bottom:0.25rem">Coming soon</span>See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+        <div class="chat-card-wrap"><div class="chat-card">
+          <div class="chat-card__body"><div class="chat-card__feed">
+            <div class="chat-card__messages"><div class="chat-card__bubble is-visible">How Bïrch rule affected my metrics</div></div>
+            <div class="chat-card__response is-visible"><div class="chat-card__response-content">
+              <p><strong>The Action Density:</strong><br>The rule triggered 5 increases (+10% budget each) and 1 decrease for the last 14 days.</p>
+              <p><strong>The ROAS Trajectory:</strong><br>ROAS maintained a stable upward trend from 2.4 to 2.9, even as overall daily spend increased by 50%.</p>
+            </div></div>
+          </div></div>
+          <div class="chat-card__input-area"><div class="chat-card__input-wrap">
+            <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+            <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div></div>
+        </div></div>
+      </div>
+
+    </div>
+
+    <div class="acc-mob__dots acc-mob__dots--paused" id="accMobDots">
+      <span class="acc-mob__dot is-active"></span>
+      <span class="acc-mob__dot"></span>
+      <span class="acc-mob__dot"></span>
+      <span class="acc-mob__dot"></span>
+    </div>
+    <p class="acc-mob__hint t-para-sm">Hold to pause auto-switching</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────
+     PROMPTS
+───────────────────────────────────────── -->
+<section class="prompts">
+  <div class="prompts__head">
+    <h2 class="t-h2 prompts__title">Start fast with ready-to-use prompts</h2>
+    <p class="t-para-lg prompts__subtitle">Curated examples for every use case, from audits to optimization</p>
+  </div>
+
+  <div class="prompts__rows" aria-hidden="true">
+    <div class="prompts__track prompts__track--1"><div class="prompts__belt">
+      <span class="prompts__chip">Show <em class="prompts__kw prompts__kw--green">Impressions</em> and <em class="prompts__kw prompts__kw--green">Frequency</em> for the last 14 days</span>
+      <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all <em class="prompts__kw prompts__kw--light-blue">ad accounts</em> in this workspace for the period from Feb 14 till Mar 14</span>
+      <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+      <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--green">Reach</em> in Q1 2026 to Q1 2025 on Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+      <span class="prompts__chip">Recommend <em class="prompts__kw prompts__kw--light-blue">rules</em> based on my industry</span>
+      <span class="prompts__chip">Show <em class="prompts__kw prompts__kw--green">Impressions</em> and <em class="prompts__kw prompts__kw--green">Frequency</em> for the last 14 days</span>
+      <span class="prompts__chip">Breakdown of <em class="prompts__kw prompts__kw--pink">Spend</em> for all <em class="prompts__kw prompts__kw--light-blue">ad accounts</em> in this workspace for the period from Feb 14 till Mar 14</span>
+      <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+      <span class="prompts__chip">Compare <em class="prompts__kw prompts__kw--green">Reach</em> in Q1 2026 to Q1 2025 on Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+      <span class="prompts__chip">Recommend <em class="prompts__kw prompts__kw--light-blue">rules</em> based on my industry</span>
+    </div></div>
+    <div class="prompts__track prompts__track--2"><div class="prompts__belt">
+      <span class="prompts__chip">How is my <em class="prompts__kw prompts__kw--green">ROAS</em> this week compared to last week?</span>
+      <span class="prompts__chip">Which <em class="prompts__kw prompts__kw--pink">ad</em> generated the highest <em class="prompts__kw prompts__kw--green">CTR</em> this month?</span>
+      <span class="prompts__chip">Show overspending <em class="prompts__kw prompts__kw--light-blue">campaigns</em></span>
+      <span class="prompts__chip">Where are we <em class="prompts__kw prompts__kw--light-blue">scaling</em> faster: Meta or TikTok?</span>
+      <span class="prompts__chip">List my top 5 performing ads by <em class="prompts__kw prompts__kw--green">CTR</em></span>
+      <span class="prompts__chip">Create a leadership-ready <em class="prompts__kw prompts__kw--pink">dashboard</em> overviewing my monthly results</span>
+      <span class="prompts__chip">How is my <em class="prompts__kw prompts__kw--green">ROAS</em> this week compared to last week?</span>
+      <span class="prompts__chip">Which <em class="prompts__kw prompts__kw--pink">ad</em> generated the highest <em class="prompts__kw prompts__kw--green">CTR</em> this month?</span>
+      <span class="prompts__chip">Show overspending <em class="prompts__kw prompts__kw--light-blue">campaigns</em></span>
+      <span class="prompts__chip">Where are we <em class="prompts__kw prompts__kw--light-blue">scaling</em> faster: Meta or TikTok?</span>
+      <span class="prompts__chip">List my top 5 performing ads by <em class="prompts__kw prompts__kw--green">CTR</em></span>
+      <span class="prompts__chip">Create a leadership-ready <em class="prompts__kw prompts__kw--pink">dashboard</em> overviewing my monthly results</span>
+    </div></div>
+    <div class="prompts__track prompts__track--3"><div class="prompts__belt">
+      <span class="prompts__chip">Suggest 3 starter <em class="prompts__kw prompts__kw--light-blue">rules</em> for Google <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+      <span class="prompts__chip">Suggest the best <em class="prompts__kw prompts__kw--pink">CPA-based</em> scaling strategy for lead generation</span>
+      <span class="prompts__chip">Which <em class="prompts__kw prompts__kw--light-blue">ad accounts</em> have the lowest <em class="prompts__kw prompts__kw--pink">CPC</em> and <em class="prompts__kw prompts__kw--pink">CPM</em>?</span>
+      <span class="prompts__chip">What are the causes of performance drops in my Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em>?</span>
+      <span class="prompts__chip">List ad sets with <em class="prompts__kw prompts__kw--pink">Cost Per Purchase</em> under $30 for Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+      <span class="prompts__chip">Suggest 3 starter <em class="prompts__kw prompts__kw--light-blue">rules</em> for Google <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+      <span class="prompts__chip">Suggest the best <em class="prompts__kw prompts__kw--pink">CPA-based</em> scaling strategy for lead generation</span>
+      <span class="prompts__chip">Which <em class="prompts__kw prompts__kw--light-blue">ad accounts</em> have the lowest <em class="prompts__kw prompts__kw--pink">CPC</em> and <em class="prompts__kw prompts__kw--pink">CPM</em>?</span>
+      <span class="prompts__chip">What are the causes of performance drops in my Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em>?</span>
+      <span class="prompts__chip">List ad sets with <em class="prompts__kw prompts__kw--pink">Cost Per Purchase</em> under $30 for Meta <em class="prompts__kw prompts__kw--light-blue">ad account</em></span>
+    </div></div>
+  </div>
+
+  <div class="prompts__cta">
+    <a href="https://help.bir.ch/en/articles/15285844-birch-ai-prompting-guide" target="_blank" class="btn btn-stroke btn-s">See our prompt library</a>
+  </div>
+</section>
+
+<!-- ===================== VISION ===================== -->
+<div class="vision-outer">
+<section class="vision">
+  <div class="container">
+    <p class="vision__subtitle t-para-lg">The first step toward a bigger vision</p>
+    <div class="vision__cards">
+      <div class="vision__copilot">
+        <h2 class="t-h2">Today's co-pilot</h2>
+        <div class="vision__copilot-icon">
+          <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f198e328ea773d95a_icon%20ai.svg" alt="AI cursor icon">
+        </div>
+      </div>
+      <div class="vision__agent">
+        <h2 class="t-h2">Tomorrow's agent</h2>
+        <p class="t-para-xl vision__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
+        <div class="vision__agent-ill">
+          <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f95feb603c8b254f9_agent-ill.svg" alt="Agent illustration">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ===================== CTA LAST ===================== -->
+<section class="cta-last">
+  <div class="container">
+    <h2 class="t-h2 cta-last__heading">Your goals. Your context. Safe</h2>
+    <p class="t-para-lg cta-last__sub">Transform How Your Team Strategizes and Performs. Apply to unlock access</p>
+    <a href="#" class="btn btn-default btn-s hero__btn">Apply now</a>
+  </div>
+</section>
+
+</div><!-- /.birch-ai-embed -->
+
+<!-- ── Accordion JS ── -->
+<!-- ── Desktop accordion: auto-switching tabs + progress bars ──
+     Reads accent colors from CSS tokens, rotates cards every 7s.
+     Hold (pointerdown) pauses the timer and resumes on release.
+     Calls window.switchChat(idx) to sync the chat animation.
+──────────────────────────────────────────────────────────── -->
 <script>
-  (function () {
-    var section     = document.querySelector('.bp');
-    var visual      = section.querySelector('.bp__visual');
-    var chatStack   = section.querySelector('#bpChatStack');
-    var chatOverlay = section.querySelector('#bpChatOverlay');
-    var workspace   = section.querySelector('#bpWorkspace');
-    var subLine     = section.querySelector('.bp__sub-line');
-    var clip2El     = section.querySelector('#bpClip2');
-    var clip3El     = section.querySelector('#bpClip3');
-    var clip2       = clip2El.querySelector('span');
-    var clip3       = clip3El.querySelector('span');
-    var clipMEl     = section.querySelector('#bpClipM');
-    var clipM       = clipMEl ? clipMEl.querySelector('span') : null;
+(function () {
+  var _root = getComputedStyle(document.querySelector('.birch-ai-embed') || document.documentElement);
+  function token(name) { return _root.getPropertyValue(name).trim(); }
+  var COLORS = [
+    token('--color-accent-green'),
+    token('--color-accent-pink'),
+    token('--color-accent-light-blue'),
+    token('--color-accent-purple'),
+  ];
+  var DURATION = 7000;
+  var box   = document.getElementById('accBox');
+  var cards = Array.prototype.slice.call(box.querySelectorAll('.card-accordion'));
+  var bars  = Array.prototype.slice.call(box.querySelectorAll('.card-accordion__bar-fill'));
+  var active = 0, startMs = null;
+  box.style.setProperty('--acc-color', COLORS[0]);
 
-    function progress() {
-      var top = section.getBoundingClientRect().top;
-      var scrollable = section.offsetHeight - window.innerHeight;
-      return Math.max(0, Math.min(1, -top / scrollable));
+  function setActive(idx) {
+    cards.forEach(function (c) { c.classList.add('is-closed'); });
+    cards[idx].classList.remove('is-closed');
+    box.style.backgroundColor = COLORS[idx];
+    box.style.setProperty('--acc-color', COLORS[idx]);
+    bars.forEach(function (b) { b.style.width = '0%'; });
+    active = idx; startMs = null;
+    if (window.switchChat) window.switchChat(idx);
+  }
+
+  var _paused = false, _pausedAt = null;
+  box.addEventListener('pointerdown', function () { _paused = true; _pausedAt = performance.now(); });
+  document.addEventListener('pointerup', function () {
+    if (!_paused) return; _paused = false;
+    if (startMs !== null && _pausedAt !== null) startMs += performance.now() - _pausedAt;
+    _pausedAt = null;
+  });
+  document.addEventListener('pointercancel', function () {
+    if (!_paused) return; _paused = false;
+    if (startMs !== null && _pausedAt !== null) startMs += performance.now() - _pausedAt;
+    _pausedAt = null;
+  });
+
+  (function tick(now) {
+    if (!_paused) {
+      if (startMs === null) startMs = now;
+      var elapsed = now - startMs;
+      var progress = Math.min(elapsed / DURATION, 1);
+      bars[active].style.width = (progress * 100).toFixed(1) + '%';
+      if (elapsed >= DURATION) setActive((active + 1) % cards.length);
     }
+    requestAnimationFrame(tick);
+  })(performance.now());
 
-    function remap(p, lo, hi) {
-      return Math.max(0, Math.min(1, (p - lo) / (hi - lo)));
+  cards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { setActive(idx); });
+  });
+
+  /* sizeAccBox — measures the tallest card state and pins the accordion
+     box to that height so it never jumps when cards open/close.
+     Runs once on load, once after fonts are ready, and on resize. */
+  var accCards = box.querySelector('.acc__cards');
+  var accLeft  = box.querySelector('.acc__left');
+  var eyebrow  = box.querySelector('.acc__eyebrow');
+
+  function sizeAccBox() {
+    var animated = [box].concat(cards).concat(
+      cards.map(function (c) { return c.querySelector('.card-accordion__body'); })
+    );
+    animated.forEach(function (el) { if (el) el.style.transition = 'none'; });
+    var wasClosed = cards.map(function (c) { return c.classList.contains('is-closed'); });
+    accCards.style.flex = 'none';
+    var maxCardsH = 0;
+    cards.forEach(function (_, openIdx) {
+      cards.forEach(function (c, i) {
+        c.classList.toggle('is-closed', i !== openIdx);
+        c.style.flex = (i === openIdx) ? '0 0 auto' : '';
+      });
+      void box.offsetHeight;
+      if (accCards.offsetHeight > maxCardsH) maxCardsH = accCards.offsetHeight;
+    });
+    cards.forEach(function (c, i) { c.style.flex = ''; c.classList.toggle('is-closed', wasClosed[i]); });
+    accCards.style.flex = '';
+    animated.forEach(function (el) { if (el) el.style.transition = ''; });
+    var cs = getComputedStyle(box);
+    var boxPadV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var eyebrowH = eyebrow.offsetHeight;
+    var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap) + parseFloat(getComputedStyle(eyebrow).marginBottom);
+    var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+    var chatWrap = box.querySelector('.chat-card-wrap');
+    var chatMinH = boxPadV + chatWrap.offsetHeight;
+    var minH = Math.max(leftColMinH, chatMinH);
+    box.style.minHeight = minH + 'px';
+    box.style.height    = minH + 'px';
+  }
+
+  sizeAccBox();
+  document.fonts.ready.then(function () { sizeAccBox(); });
+  window.addEventListener('resize', sizeAccBox);
+})();
+</script>
+
+<!-- ── Mobile carousel (≤991px): swipe + auto-play + IntersectionObserver ──
+     Activated only when matchMedia('max-width: 991px') matches.
+     Swipe via Pointer Events API (mouse, touch, stylus — no duplicates).
+     Auto-play starts only when the section is 10% visible (IntersectionObserver).
+     Holding the carousel pauses the timer and dot animation.
+     initMobile / destroyMobile called on breakpoint change.
+──────────────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  var _root = getComputedStyle(document.querySelector('.birch-ai-embed') || document.documentElement);
+  function token(name) { return _root.getPropertyValue(name).trim(); }
+  var BG_COLORS = [
+    token('--color-accent-green'), token('--color-accent-pink'),
+    token('--color-accent-light-blue'), token('--color-accent-purple')
+  ];
+  var MOB_INTERVAL = 7000;
+  var MOB = window.matchMedia('(max-width: 991px)');
+  var section  = document.getElementById('accMob');
+  var carousel = document.getElementById('accMobCarousel');
+  var dotsEl   = document.getElementById('accMobDots');
+  var slides   = Array.prototype.slice.call(carousel.querySelectorAll('.acc-mob__slide'));
+  var dots     = Array.prototype.slice.call(dotsEl.querySelectorAll('.acc-mob__dot'));
+  var SLIDE_COUNT = slides.length;
+  var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+
+  function updateDots(idx) {
+    dots.forEach(function (d, i) {
+      if (i === idx) { d.classList.remove('is-active'); d.offsetWidth; d.classList.add('is-active'); }
+      else { d.classList.remove('is-active'); }
+    });
+  }
+
+  function goTo(idx, animate) {
+    idx = Math.max(0, Math.min(SLIDE_COUNT - 1, idx)); _idx = idx;
+    if (!animate) slides.forEach(function (s) { s.style.transition = 'none'; });
+    slides.forEach(function (s, i) {
+      s.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      s.style.zIndex = i === idx ? 1 : 0;
+    });
+    carousel.style.backgroundColor = BG_COLORS[idx];
+    updateDots(idx);
+    if (!animate) { requestAnimationFrame(function () { slides.forEach(function (s) { s.style.transition = ''; }); }); }
+  }
+
+  function stopTimer() { if (_timer) { clearInterval(_timer); _timer = null; } }
+  function startTimer() { stopTimer(); _timer = setInterval(function () { goTo((_idx + 1) % SLIDE_COUNT, true); }, MOB_INTERVAL); }
+
+  function initSwipe() {
+    if (_swipeInited) return; _swipeInited = true;
+    var startX = 0, startY = 0, _down = false;
+    carousel.addEventListener('pointerdown', function (e) {
+      startX = e.clientX; startY = e.clientY; _down = true;
+      carousel.setPointerCapture(e.pointerId); stopTimer();
+      dotsEl.classList.add('acc-mob__dots--paused');
+    });
+    carousel.addEventListener('pointerup', function (e) {
+      if (!_down) return; _down = false;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      dotsEl.classList.remove('acc-mob__dots--paused');
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        goTo(dx < 0 ? _idx + 1 : _idx - 1, true);
+      } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        var midX = carousel.getBoundingClientRect().left + carousel.offsetWidth / 2;
+        goTo(e.clientX < midX ? _idx - 1 : _idx + 1, true);
+      } else { updateDots(_idx); }
+      startTimer();
+    });
+    carousel.addEventListener('pointercancel', function () {
+      if (!_down) return; _down = false;
+      dotsEl.classList.remove('acc-mob__dots--paused'); startTimer();
+    });
+  }
+
+  function initMobile() {
+    goTo(0, false); initSwipe();
+    dotsEl.classList.add('acc-mob__dots--paused');
+    if (_observer) _observer.disconnect();
+    _observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { dotsEl.classList.remove('acc-mob__dots--paused'); updateDots(_idx); startTimer(); }
+      else { dotsEl.classList.add('acc-mob__dots--paused'); stopTimer(); }
+    }, { threshold: 0.1 });
+    _observer.observe(section);
+  }
+
+  function destroyMobile() {
+    stopTimer();
+    if (_observer) { _observer.disconnect(); _observer = null; }
+    slides.forEach(function (s) { s.style.transform = ''; s.style.zIndex = ''; s.style.transition = ''; });
+    carousel.style.backgroundColor = '';
+  }
+
+  if (MOB.matches) { initMobile(); }
+  MOB.addEventListener('change', function (e) { if (e.matches) initMobile(); else destroyMobile(); });
+})();
+</script>
+
+<!-- ── Chat animation: typing → send → AI response loop ──
+     Simulates a live chat: types the user message character by character,
+     shows a user bubble, then fades in the AI response.
+     window.switchChat(idx) is called by the accordion to sync content.
+     CHAT_TYPING_MS controls typing speed (default 15ms/char).
+──────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  var CHATS = [
+    {
+      userMsg: 'My target ROAS is 2.5. Share new ideas for my rules setup',
+      aiHtml: ['<div class="chat-card__response-content">',
+        '<p>I recommend moving to proactive growth and budget management:</p>',
+        '<p><strong>The "Soft Landing" (Budget Protection)</strong><br>Logic: If ROAS is below your target but above your "dead-zone" (e.g., target 2.5, current 1.8) — decrease daily budget by 20%.<br>Benefit: Protects spend during temporary dips while keeping ad sets in learning phase.</p>',
+        '</div><a class="chat-card__review-link">Review rule</a>'].join('')
+    },
+    {
+      userMsg: 'Analyze my performance by platform',
+      aiHtml: ['<div class="chat-card__response-content">',
+        '<div class="chat-card__table">',
+          '<div class="chat-card__table-header"><span class="chat-card__table-col">Platform</span><span class="chat-card__table-col">Ad Account</span><span class="chat-card__table-col">Spend</span></div>',
+          '<div class="chat-card__table-row chat-card__table-row--alt"><span class="chat-card__table-col">Google Ads</span><span class="chat-card__table-col">Birch</span><span class="chat-card__table-col">🟢 $3.94M</span></div>',
+          '<div class="chat-card__table-row"><span class="chat-card__table-col">Meta Ads</span><span class="chat-card__table-col">Bir.ch Marketing</span><span class="chat-card__table-col">🔴 $5K</span></div>',
+          '<div class="chat-card__table-row chat-card__table-row--alt"><span class="chat-card__table-col">TikTok Ads</span><span class="chat-card__table-col">Bir.ch Tiktok</span><span class="chat-card__table-col">⚪ $40.6K</span></div>',
+        '</div>',
+        '<p><strong>🔍 Key Findings</strong></p>',
+        '<p>Google Ads Efficiency 🟢<br>This high efficiency signals your campaigns are capturing high-intent traffic that converts at minimal cost relative to revenue.</p>',
+        '</div>'].join('')
+    },
+    {
+      userMsg: 'Do my rules need any fixes in the setup?',
+      aiHtml: ['<div class="chat-card__response-content">',
+        '<p>🛠 <strong>Critical Fix – Add Spend Thresholds</strong><br>Low-spend ad sets trigger false ROAS alerts. Fix: require Spend (last 24h) &gt; [avg CPA] before alerts fire.</p>',
+        '<p>📈 <strong>Optimization – Tighten the CPM Trigger</strong><br>Drop your CPM threshold from 1.5x to 1.3x to catch competition spikes or creative fatigue sooner.</p>',
+        '</div>'].join('')
+    },
+    {
+      userMsg: 'How Bïrch rule affected my metrics',
+      aiHtml: ['<div class="chat-card__response-content">',
+        '<p><strong>The Action Density:</strong><br>The rule triggered 5 increases (+10% budget each) and 1 decrease for the last 14 days.</p>',
+        '<p><strong>The ROAS Trajectory:</strong><br>ROAS maintained a stable upward trend from 2.4 to 2.9, even as overall daily spend increased by 50%.</p>',
+        '</div>'].join('')
     }
+  ];
 
-    /* Lerp smoothing */
-    var targetP  = 0;
-    var currentP = 0;
-    var LERP     = 0.09;
+  if (window.CHAT_TYPING_MS === undefined) window.CHAT_TYPING_MS = 15;
+  var PAUSE_SEND = 500, RESP_DELAY = 700, FULL_PAUSE = 1800, FADE_MS = 350, INIT_DELAY = 1400;
 
-    window.addEventListener('scroll', function() {
-      targetP = progress();
-    }, { passive: true });
+  var chatBody = document.getElementById('chatBody');
+  var chatFeed = document.getElementById('chatFeed');
+  var placeholder = document.getElementById('chatPlaceholder');
+  var typedEl = document.getElementById('chatTyped');
+  var inputCursor = document.getElementById('chatCursor');
+  var sendBtn = document.getElementById('chatSendBtn');
 
-    function tick(p) {
-      var mobile = window.innerWidth <= 767;
-      var p2 = remap(p, 0.28, 0.52);
+  typedEl.style.display = 'none';
+  var currentIdx = 0, pendingTimers = [], currentBubbleEl = null, currentRespEl = null, phase = 'idle';
 
-      chatOverlay.style.opacity = p2;
+  function addTimer(fn, ms) { var t = setTimeout(fn, ms); pendingTimers.push(t); return t; }
+  function cancelTimers() { pendingTimers.forEach(function (t) { clearTimeout(t); }); pendingTimers = []; }
+  function setSendActive(on) { sendBtn.classList.toggle('is-active', on); sendBtn.disabled = !on; }
+  function showInputCursor(on) { inputCursor.classList.toggle('is-blinking', on); inputCursor.style.opacity = on ? '' : '0'; }
+  function clearInput() { typedEl.textContent = ''; typedEl.style.display = 'none'; placeholder.style.display = ''; setSendActive(false); showInputCursor(false); }
+  function scrollToBottom() { chatBody.scrollTop = chatBody.scrollHeight; }
 
-      if (!mobile) {
-        var p3 = remap(p, 0.64, 0.86);
+  function createBubble(text) {
+    var wrap = document.createElement('div'); wrap.className = 'chat-card__messages';
+    var el = document.createElement('div'); el.className = 'chat-card__bubble';
+    el.textContent = text; wrap.appendChild(el); chatFeed.appendChild(wrap); scrollToBottom(); return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div'); el.className = 'chat-card__response';
+    el.innerHTML = html; chatFeed.appendChild(el); scrollToBottom(); return el;
+  }
 
-        var chatScale  = 1 - p3 * 0.40;
-        var chatShiftX = p3 * visual.offsetWidth * 0.293;
-        chatStack.style.transform = 'translateX(calc(-50% + ' + chatShiftX + 'px)) scale(' + chatScale + ')';
+  function resetChat(nextIdx) {
+    phase = 'clearing'; currentIdx = nextIdx; currentBubbleEl = null; currentRespEl = null; clearInput();
+    var els = chatFeed.querySelectorAll('.chat-card__bubble, .chat-card__response');
+    els.forEach(function (el) { el.classList.remove('is-visible'); });
+    addTimer(function () { chatFeed.innerHTML = ''; phase = 'idle'; type(0); }, FADE_MS + 50);
+  }
 
-        var slideY = visual.offsetHeight * 0.143;
-        workspace.style.opacity   = p3;
-        workspace.style.transform = 'translateX(-50%) translateY(' + ((1 - p3) * slideY) + 'px)';
+  function type(charIdx) {
+    phase = 'typing';
+    var msg = CHATS[currentIdx].userMsg;
+    if (charIdx === 0) { placeholder.style.display = 'none'; typedEl.style.display = 'inline'; showInputCursor(true); }
+    typedEl.textContent = msg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+    if (charIdx < msg.length) { addTimer(function () { type(charIdx + 1); }, window.CHAT_TYPING_MS); }
+    else { showInputCursor(false); phase = 'sending'; addTimer(doSend, PAUSE_SEND); }
+  }
 
-        var t12 = remap(p, 0.28, 0.52);
-        var t23 = remap(p, 0.64, 0.86);
-        clip2.style.transform = 'translateY(' + ((1 - t12) * 110) + '%)';
-        clip3.style.transform = 'translateY(' + ((1 - t23) * 110) + '%)';
-        var c2 = clip2El.offsetWidth;
-        var c3 = clip3El.offsetWidth;
-        subLine.style.transform = 'translateX(' + ((c2 * (1 - t12) + c3 * (1 - t23)) / 2) + 'px)';
+  function doSend() {
+    clearInput(); currentBubbleEl = createBubble(CHATS[currentIdx].userMsg);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { currentBubbleEl.classList.add('is-visible'); scrollToBottom(); }); });
+    phase = 'responding'; addTimer(startResponse, RESP_DELAY);
+  }
 
-      } else {
-        chatStack.style.transform = '';
-        subLine.style.transform   = '';
-        var t12m = remap(p, 0.28, 0.50);
-        if (clipMEl && clipM) {
-          clipMEl.style.height  = (t12m * clipMEl.scrollHeight) + 'px';
-          clipM.style.transform = 'translateY(' + ((1 - t12m) * 110) + '%)';
-        }
+  function startResponse() {
+    currentRespEl = createResponse(CHATS[currentIdx].aiHtml);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      currentRespEl.classList.add('is-visible'); scrollToBottom();
+      phase = 'viewing'; addTimer(function () { phase = 'idle'; }, FULL_PAUSE);
+    }); });
+  }
+
+  window.switchChat = function (nextIdx) { cancelTimers(); resetChat(nextIdx); };
+  addTimer(function () { type(0); }, INIT_DELAY);
+})();
+</script>
+
+<!-- ── Hero: bar/column chart animation + mobile staircase offsets ──
+     Animates SVG-like bar and column elements in the hero illustration
+     using a custom cubic-bezier loop (no CSS animations — JS-driven rAF).
+     CC = column config, CB = bar config.
+     STEPS = marginLeft offsets for the mobile staircase h1 layout.
+──────────────────────────────────────────────────────────────────── -->
+<script>
+  window.STEPS = { b: 0.5, c: 0.6, d: 1.9, e: 2.8 };
+
+  function applySteps() {
+    var S = window.STEPS;
+    var els = {
+      b: document.querySelectorAll('.hero__step--b'),
+      c: document.querySelectorAll('.hero__step--c'),
+      d: document.querySelectorAll('.hero__step--d'),
+      e: document.querySelectorAll('.hero__step--e'),
+    };
+    setAll(els.b, 'marginLeft', S.b + 'em');
+    setAll(els.c, 'marginLeft', S.c + 'em');
+    setAll(els.d, 'marginLeft', S.d + 'em');
+    setAll(els.e, 'marginLeft', S.e + 'em');
+    for (var i = 0; i < els.c.length; i++) els.c[i].style.alignSelf = 'flex-start';
+    for (var i = 0; i < els.e.length; i++) els.e[i].style.alignSelf = 'flex-start';
+  }
+
+  window.CC = { dur: 1050, pause: 1025, stagger: 105,  ease: [0.85, 0.01, 0.55, 1] };
+  window.CB = { dur: 1150, pause: 775,  stagger: 135,  pinkMid: 91, ease: [0.88, -0.03, 0.43, 1.07] };
+
+  function makeBezier(x1, y1, x2, y2) {
+    return function(p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, lo = 0, hi = 1;
+      for (var i = 0; i < 14; i++) {
+        var bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
+        if (Math.abs(bx - p) < 0.0001) break;
+        if (bx < p) lo = t; else hi = t; t = (lo + hi) / 2;
       }
-    }
+      return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
+    };
+  }
 
-    /* rAF loop */
-    (function loop() {
-      currentP += (targetP - currentP) * LERP;
-      tick(currentP);
-      requestAnimationFrame(loop);
-    })();
+  var _iconBezCache = {};
+  function getIconBez(key, e) {
+    var k = e.join(',');
+    if (!_iconBezCache[key] || _iconBezCache[key].k !== k) _iconBezCache[key] = { k: k, fn: makeBezier(e[0], e[1], e[2], e[3]) };
+    return _iconBezCache[key].fn;
+  }
+
+  function rawPhase(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    var tLin = t < 1 ? t : 2 - t;
+    var p = (Cfg.pause / 2) / half;
+    if (tLin <= p) return 0; if (tLin >= 1 - p) return 1;
+    return (tLin - p) / (1 - 2*p);
+  }
+
+  function rawTLin(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    return t < 1 ? t : 2 - t;
+  }
+
+  function iLerp(a, b, t) { return a + (b - a) * t; }
+
+  function pw3(t, ez, v0, vm, v1) {
+    if (t < 0.5) return iLerp(v0, vm, ez(t * 2));
+    return iLerp(vm, v1, ez((t - 0.5) * 2));
+  }
+
+  var _colMinP = 39, _colMinB = 39, _colLastTLinP = 0, _colLastTLinB = 0;
+
+  var _colsPurple = document.querySelectorAll('.hero__col--purple');
+  var _colsBlue   = document.querySelectorAll('.hero__col--blue');
+  var _barsLB     = document.querySelectorAll('.hero__bar--lb');
+  var _barsPink   = document.querySelectorAll('.hero__bar--pink');
+  var _barsRed    = document.querySelectorAll('.hero__bar--red');
+
+  function setAll(els, prop, val) { for (var i = 0; i < els.length; i++) els[i].style[prop] = val; }
+
+  function tickIcons(now) {
+    var eC = getIconBez('cols', CC.ease);
+    var eB = getIconBez('bars', CB.ease);
+    var tP = rawPhase(now, 0, CC), tB = rawPhase(now, CC.stagger, CC);
+    var tLinP = rawTLin(now, 0, CC), tLinB = rawTLin(now, CC.stagger, CC);
+    var topP = 1 - (CC.pause / 2) / (CC.dur + CC.pause);
+    var botP =     (CC.pause / 2) / (CC.dur + CC.pause);
+    if (_colLastTLinP >= topP && tLinP < topP) _colMinP = Math.round(20 + Math.random() * 70);
+    if (_colLastTLinB <= botP && tLinB > botP) _colMinB = Math.round(20 + Math.random() * 70);
+    _colLastTLinP = tLinP; _colLastTLinB = tLinB;
+    setAll(_colsPurple, 'height', iLerp(_colMinP, 100,     eC(tP)) + '%');
+    setAll(_colsBlue,   'height', iLerp(100,     _colMinB, eC(tB)) + '%');
+    var tLB = rawPhase(now, 0, CB), tPink = rawPhase(now, CB.stagger, CB), tRed = rawPhase(now, CB.stagger * 2, CB);
+    setAll(_barsLB,   'width',      pw3(tLB,   eB, 100,  67.4, 34.9) + '%');
+    setAll(_barsLB,   'marginLeft', pw3(tLB,   eB, 0,    16.3, 0)    + '%');
+    setAll(_barsPink, 'width',      pw3(tPink, eB, 67.4, CB.pinkMid, 67.4) + '%');
+    setAll(_barsPink, 'marginLeft', pw3(tPink, eB, 0,    16.3, 0)    + '%');
+    setAll(_barsRed,  'width',      pw3(tRed,  eB, 34.9, 67.4, 100)  + '%');
+    setAll(_barsRed,  'marginLeft', pw3(tRed,  eB, 0,    16.3, 0)    + '%');
+  }
+
+  (function loop() { tickIcons(performance.now()); requestAnimationFrame(loop); })();
+  applySteps();
+</script>
+
+<!-- ── Prompts marquee: three rows scrolling at different speeds/directions ──
+     Three tracks scroll independently: left, right, left.
+     BASE_SPEED = px/frame at rest; scroll adds a velocity boost.
+     Each belt is duplicated in HTML so the loop is seamless.
+──────────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  var BASE_SPEED = 0.25, SCROLL_BOOST = 0.3;
+  var DIRS = [-1, 1, -1], OFFSETS = [0, 0.6, 0.35];
+  var tracks = Array.from(document.querySelectorAll('.prompts__track'));
+  var belts  = tracks.map(function (t) { return t.querySelector('.prompts__belt'); });
+  var halfWidths = belts.map(function (b) { return b.offsetWidth / 2; });
+  var positions  = belts.map(function (_, i) { return -(halfWidths[i] * OFFSETS[i]); });
+  var lastScrollY = window.scrollY, scrollVel = 0;
+  (function loop() {
+    var sy = window.scrollY; scrollVel = sy - lastScrollY; lastScrollY = sy;
+    var speed = BASE_SPEED + Math.abs(scrollVel) * SCROLL_BOOST;
+    belts.forEach(function (belt, i) {
+      var hw = halfWidths[i]; positions[i] += DIRS[i] * speed;
+      if (DIRS[i] === -1 && positions[i] <= -hw) positions[i] += hw;
+      if (DIRS[i] ===  1 && positions[i] >= 0)   positions[i] -= hw;
+      belt.style.transform = 'translateX(' + positions[i] + 'px)';
+    });
+    requestAnimationFrame(loop);
   })();
+})();
+</script>
+
+<!-- ── Vision: sticky scroll — Copilot card scales down, Agent card slides up ──
+     The section is position:sticky; scrollDist controls how far Agent travels.
+     sizeCards() computes card heights to fill the viewport minus nav,
+     then sets section height so the sticky scroll distance is exact.
+     getNavH() reads --nav-height from Webflow's :root (in em → px).
+     getBoundingClientRect() used throughout — safe inside Webflow embeds.
+──────────────────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  var outer     = document.querySelector('.vision-outer');
+  var section   = document.querySelector('.vision');
+  var container = section.querySelector('.container');
+  var subtitle  = section.querySelector('.vision__subtitle');
+  var copilot   = section.querySelector('.vision__copilot');
+  var agent     = section.querySelector('.vision__agent');
+  var cards     = section.querySelector('.vision__cards');
+
+  var navH = 0, scrollDist = 0, stickyTop = 0;
+
+  function getNavH() {
+    /* Webflow sets --nav-height in em on :root; fallback 6.5rem = 104px */
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    if (raw) return parseFloat(raw) * 16;
+    return 6.5 * 16;
+  }
+
+  function sizeCards() {
+    navH = getNavH();
+    var padTop    = parseFloat(getComputedStyle(section).paddingTop);
+    var gapAfter  = parseFloat(getComputedStyle(container).gap);
+    var subtitleH = subtitle.getBoundingClientRect().height;
+    var copilotH2 = copilot.querySelector('h2').getBoundingClientRect().height;
+    var cardsGap  = parseFloat(getComputedStyle(cards).gap);
+    var vh = window.innerHeight;
+    var hVh = vh - navH - padTop - subtitleH - gapAfter - copilotH2 - 96;
+    hVh = Math.max(hVh, 200);
+    agent.style.height = ''; copilot.style.height = '';
+    var hContent = agent.getBoundingClientRect().height;
+    var h = Math.max(hVh, hContent);
+    copilot.style.height = h + 'px'; agent.style.height = h + 'px';
+    var remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var copilotPad = parseFloat(getComputedStyle(copilot).paddingTop);
+    scrollDist = h + cardsGap - copilotPad - copilotH2 - 0.75 * remPx;
+    var sectionNaturalH = padTop + subtitleH + gapAfter + h + cardsGap + h;
+    var sectionH = sectionNaturalH - scrollDist;
+    section.style.height = sectionH + 'px';
+    outer.style.height   = (sectionH + scrollDist) + 'px';
+    stickyTop = navH - padTop - subtitleH - gapAfter;
+    section.style.top = stickyTop + 'px';
+  }
+
+  function tick() {
+    /* getBoundingClientRect — works correctly inside Webflow's positioned containers */
+    var outerTop = outer.getBoundingClientRect().top;
+    var scrolled = stickyTop - outerTop;
+    var progress = Math.max(0, Math.min(1, scrolled / scrollDist));
+    if (progress > 0) {
+      agent.style.transform         = 'translateY(' + (-progress * scrollDist) + 'px)';
+      copilot.style.transformOrigin = 'top center';
+      copilot.style.transform       = 'scale(' + (1 - progress * 0.15) + ')';
+    } else {
+      agent.style.transform = ''; copilot.style.transform = '';
+    }
+    requestAnimationFrame(tick);
+  }
+
+  sizeCards();
+  document.fonts.ready.then(sizeCards);
+  window.addEventListener('resize', sizeCards);
+  requestAnimationFrame(tick);
+})();
+</script>
+
+<!-- ── Form: show "Other" input for industry select ── -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var selectField = document.querySelector('#industry-select');
+  var otherInput  = document.querySelector('#industry-other-input');
+  if (selectField && otherInput) {
+    selectField.addEventListener('change', function(e) {
+      otherInput.style.display = e.target.value === 'Other' ? 'block' : 'none';
+    });
+  }
+});
+</script>
+
+<!-- ── Form: show "Other" input for birch-ai-usage select ── -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var selectField = document.querySelector('#birch-ai-usage-select');
+  var otherInput  = document.querySelector('#birch-ai-usage-other-input');
+  if (selectField && otherInput) {
+    selectField.addEventListener('change', function(e) {
+      otherInput.style.display = e.target.value === 'Other' ? 'block' : 'none';
+    });
+  }
+});
 </script>

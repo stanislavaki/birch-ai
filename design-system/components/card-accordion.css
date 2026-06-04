@@ -18,6 +18,8 @@
   user-select: none;
   /* Open: fill available flex space */
   flex: 1 1 0;
+  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Closed: hug content */
