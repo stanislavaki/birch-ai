@@ -1,0 +1,300 @@
+<style>
+
+/* ═══════════════════════════════════════════
+   TOKENS — scoped to embed wrapper × 0.9 desktop, × 1.0 mobile
+═══════════════════════════════════════════ */
+.birch-vision-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-accent-orange:  #FF7700;
+  --color-text:           #FFFFFF;
+  --color-text-inverted:  #000000;
+  --color-text-grey:      #909090;
+  --text-h2-size: 2.925rem; --text-h2-lh: 1.1; --text-h2-ls: -0.02em;
+  --text-para-xl-size: 1.35rem; --text-para-xl-lh: 1.4; --text-para-xl-ls: 0em;
+  --text-para-lg-size: 1.125rem; --text-para-lg-lh: 1.1; --text-para-lg-ls: 0em;
+  --space: 1.35rem; --space-md: 1.8rem; --space-lg: 2.7rem; --space-xl: 4.5rem;
+  --radius-2xl: 3.375rem; --radius-xl: 1.35rem;
+  /* no background — comes from Webflow */
+}
+
+@media (max-width: 767px) {
+  .birch-vision-embed {
+    --space: 1.5rem; --space-md: 2rem; --space-lg: 3rem; --space-xl: 5rem;
+    --radius-2xl: 3.75rem; --radius-xl: 1.5rem;
+    --text-h2-size: 2rem; /* mobile original */
+    --text-para-xl-size: 1.5rem;
+    --text-para-lg-size: 1.25rem;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TYPE UTILITIES
+═══════════════════════════════════════════ */
+.birch-vision-embed .t-h2 {
+  font-family: var(--font);
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-lh);
+  letter-spacing: var(--text-h2-ls);
+  font-weight: 600;
+}
+.birch-vision-embed .t-para-xl {
+  font-family: var(--font);
+  font-size: var(--text-para-xl-size);
+  line-height: var(--text-para-xl-lh);
+  letter-spacing: var(--text-para-xl-ls);
+  font-weight: 600;
+}
+.birch-vision-embed .t-para-lg {
+  font-family: var(--font);
+  font-size: var(--text-para-lg-size);
+  line-height: var(--text-para-lg-lh);
+  letter-spacing: var(--text-para-lg-ls);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.birch-vision-embed .vision-e__outer {
+  /* outer wrapper — height set by JS for scroll phase */
+}
+
+.birch-vision-embed .vision-e__section {
+  padding-top: var(--space-xl);
+  position: sticky;
+  top: var(--nav-height, 0px); /* overridden by JS sizeCards() */
+}
+
+.birch-vision-embed .vision-e__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  /* no padding-inline — comes from Webflow */
+}
+
+.birch-vision-embed .vision-e__subtitle {
+  color: var(--color-text-grey);
+  text-align: center;
+  margin: 0;
+}
+
+.birch-vision-embed .vision-e__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  width: 100%;
+}
+
+/* ── Copilot card ── */
+.birch-vision-embed .vision-e__copilot {
+  background: var(--color-accent-orange);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-lg) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  color: var(--color-text-inverted);
+}
+.birch-vision-embed .vision-e__copilot h2 { margin: 0; }
+
+.birch-vision-embed .vision-e__copilot-icon {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 22.5rem; /* 25rem × 0.9 */
+}
+.birch-vision-embed .vision-e__copilot-icon img {
+  width: 14rem;   /* 15.5625rem × 0.9 */
+  height: 13.5rem; /* 15.0625rem × 0.9 */
+  object-fit: contain;
+}
+
+/* ── Agent card ── */
+.birch-vision-embed .vision-e__agent {
+  background: #004195;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-lg) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  color: var(--color-text);
+  position: relative;
+  z-index: 1;
+}
+.birch-vision-embed .vision-e__agent h2 { margin: 0; }
+
+.birch-vision-embed .vision-e__agent-desc {
+  max-width: 45rem; /* 50rem × 0.9 */
+  text-align: center;
+  margin: 0;
+  padding-bottom: var(--space-lg);
+}
+
+.birch-vision-embed .vision-e__agent-ill {
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.birch-vision-embed .vision-e__agent-ill img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── Tablet ── */
+@media (max-width: 991px) {
+  .birch-vision-embed .vision-e__copilot,
+  .birch-vision-embed .vision-e__agent {
+    border-radius: var(--radius-xl);
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .birch-vision-embed .vision-e__agent { gap: var(--space); }
+  .birch-vision-embed .vision-e__agent .vision-e__agent-desc { font-size: 1.15rem; }
+  .birch-vision-embed .vision-e__copilot-icon img { width: 50%; height: auto; }
+  .birch-vision-embed .vision-e__agent-ill {
+    margin-inline: calc(var(--space-lg) / -2);
+    width: calc(100% + var(--space-lg));
+  }
+}
+
+</style>
+
+<div class="birch-vision-embed">
+  <div class="vision-e__outer">
+    <section class="vision-e__section">
+      <div class="vision-e__container">
+        <p class="vision-e__subtitle t-para-lg">The first step toward a bigger vision</p>
+        <div class="vision-e__cards">
+
+          <div class="vision-e__copilot">
+            <h2 class="t-h2">Today&rsquo;s co-pilot</h2>
+            <div class="vision-e__copilot-icon">
+              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f198e328ea773d95a_icon%20ai.svg" alt="AI cursor icon" width="249" height="241">
+            </div>
+          </div>
+
+          <div class="vision-e__agent">
+            <h2 class="t-h2">Tomorrow&rsquo;s agent</h2>
+            <p class="t-para-xl vision-e__agent-desc">An AI operator that understands how your accounts work: surfaces creative recommendations from your historical performance, flags rule conflicts before they run, and acts as a real second pair of eyes on your account</p>
+            <div class="vision-e__agent-ill">
+              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a21741f95feb603c8b254f9_agent-ill.svg" alt="Agent illustration">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var embed    = document.querySelector('.birch-vision-embed');
+  var outer    = embed.querySelector('.vision-e__outer');
+  var section  = embed.querySelector('.vision-e__section');
+  var container = embed.querySelector('.vision-e__container');
+  var subtitle = embed.querySelector('.vision-e__subtitle');
+  var copilot  = embed.querySelector('.vision-e__copilot');
+  var agent    = embed.querySelector('.vision-e__agent');
+  var cards    = embed.querySelector('.vision-e__cards');
+
+  var scrollDist = 0;
+  var stickyTop  = 0;
+
+  function getNavH() {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    if (raw) return parseFloat(raw) * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return 0;
+  }
+
+  function sizeCards() {
+    var navH = getNavH();
+
+    /* Normalise rem-based px values back to local (16px) scale.
+       In Webflow html font-size > 16px, so getBoundingClientRect gives
+       inflated px. Multiply by (16 / htmlFs) to match local proportions. */
+    var htmlFs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var remNorm = 16 / htmlFs; /* e.g. 16/21.3 ≈ 0.75 in Webflow */
+
+    /* Actual px values — used for stickyTop (browser positions with real px) */
+    var padTopAct    = parseFloat(getComputedStyle(section).paddingTop);
+    var gapAfterAct  = parseFloat(getComputedStyle(container).gap);
+    var subtitleHAct = subtitle.getBoundingClientRect().height;
+
+    /* Normalised values — used for hVh / card height calculation */
+    var padTop    = padTopAct    * remNorm;
+    var gapAfter  = gapAfterAct  * remNorm;
+    var subtitleH = subtitleHAct * remNorm;
+    var copilotH2 = copilot.querySelector('h2').getBoundingClientRect().height * remNorm;
+    var cardsGap  = parseFloat(getComputedStyle(cards).gap) * remNorm;
+
+    var vh  = window.innerHeight;
+    var hVh = vh - navH - padTop - subtitleH - gapAfter - copilotH2 - 96;
+    hVh = hVh * 1.2; /* +20% to compensate Webflow rem scaling */
+    hVh = Math.max(hVh, 200);
+
+    agent.style.height   = '';
+    copilot.style.height = '';
+    var hContent = agent.getBoundingClientRect().height * remNorm;
+
+    var h = Math.max(hVh, hContent);
+
+    copilot.style.height = h + 'px';
+    agent.style.height   = h + 'px';
+
+    var copilotPad = parseFloat(getComputedStyle(copilot).paddingTop) * remNorm;
+    scrollDist = h + cardsGap - copilotPad - copilotH2 - 0.75 * 16;
+
+    /* sectionNaturalH uses actual px — reflects real DOM layout */
+    var sectionNaturalH = padTopAct + subtitleHAct + gapAfterAct + h + cardsGap / remNorm + h;
+    var sectionH = sectionNaturalH - scrollDist;
+    section.style.height = sectionH + 'px';
+
+    outer.style.height = (sectionH + scrollDist) + 'px';
+
+    /* stickyTop uses actual px so orange card top lands exactly at navH */
+    stickyTop = navH - padTopAct - subtitleHAct - gapAfterAct;
+    section.style.top = stickyTop + 'px';
+  }
+
+  function tick() {
+    var outerTop = outer.getBoundingClientRect().top;
+    var scrolled = stickyTop - outerTop;
+    var progress = Math.max(0, Math.min(1, scrolled / scrollDist));
+    if (progress > 0) {
+      agent.style.transform         = 'translateY(' + (-progress * scrollDist) + 'px)';
+      copilot.style.transformOrigin = 'top center';
+      copilot.style.transform       = 'scale(' + (1 - progress * 0.15) + ')';
+    } else {
+      agent.style.transform   = '';
+      copilot.style.transform = '';
+    }
+    requestAnimationFrame(tick);
+  }
+
+  sizeCards();
+  document.fonts.ready.then(sizeCards);
+  window.addEventListener('resize', sizeCards);
+
+  /* Recalculate after agent illustration loads — its height affects card sizing */
+  var agentImg = embed.querySelector('.vision-e__agent-ill img');
+  if (agentImg && !agentImg.complete) {
+    agentImg.addEventListener('load', sizeCards);
+  }
+
+  requestAnimationFrame(tick);
+})();
+</script>

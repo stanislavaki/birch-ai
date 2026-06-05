@@ -1,0 +1,313 @@
+<style>
+
+/* ═══════════════════════════════════════════
+   TOKENS — scoped to embed wrapper
+═══════════════════════════════════════════ */
+.birch-pills-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-accent-light-blue: #59DBFF;
+  --color-accent-blue:       #1877F2;
+  --color-accent-green:      #04DE00;
+  --color-accent-indigo:     #4450F2;
+  --color-accent-purple:     #5B45CD;
+  --color-accent-pink:       #FF21A6;
+  --color-accent-red:        #FF4747;
+  --color-text:          #FFFFFF;
+  --color-text-inverted: #000000;
+  --color-text-grey:     #909090;
+  --radius-pill: 9999px;
+  --gap-sm: 0.45rem;
+  --space-md: 1.8rem;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.birch-pills-embed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 var(--space-md);
+  font-family: var(--font);
+  /* no background — comes from Webflow */
+}
+
+/* ═══════════════════════════════════════════
+   H1 COMPOSITION
+═══════════════════════════════════════════ */
+.birch-pills-embed .ph1 {
+  --ps: clamp(1.62rem, 4.5vw, 3.24rem); /* × 0.81 on desktop */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+/* Mobile staircase — hidden on desktop */
+.birch-pills-embed .ph1--mb { display: none; }
+
+.birch-pills-embed .prow {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+/* Word pills */
+.birch-pills-embed .ppill {
+  display: block;
+  padding: 0.058em 0.462em 0.154em;
+  font-family: var(--font);
+  font-size: var(--ps);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--color-text-inverted);
+}
+.birch-pills-embed .ppill--sq   { border-radius: 0.308em; }
+.birch-pills-embed .ppill--pill { border-radius: var(--radius-pill); }
+
+.birch-pills-embed .ppill--light-blue { background: var(--color-accent-light-blue); }
+.birch-pills-embed .ppill--blue       { background: var(--color-accent-blue);   color: var(--color-text); }
+.birch-pills-embed .ppill--green      { background: var(--color-accent-green);  }
+.birch-pills-embed .ppill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+/* ── Decorative columns ── */
+.birch-pills-embed .pdeco-cols {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: var(--ps);
+  width:  1.596em;
+  height: 1.312em;
+}
+.birch-pills-embed .pcol {
+  position: absolute;
+  bottom: 0;
+  width:         0.769em;
+  border-radius: 0.199em;
+}
+.birch-pills-embed .pcol--purple {
+  left:       0;
+  height:     78.9%;
+  background: var(--color-accent-purple);
+}
+.birch-pills-embed .pcol--blue {
+  left:       0.827em;
+  height:     100%;
+  background: var(--color-accent-blue);
+}
+
+/* ── Decorative bars ── */
+.birch-pills-embed .pdeco-bars {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.058em;
+  flex-shrink: 0;
+  font-size: var(--ps);
+  width:  1.654em;
+  height: 1.312em;
+}
+.birch-pills-embed .pbar {
+  height: 0.399em;
+  border-radius: var(--radius-pill);
+}
+.birch-pills-embed .pbar--lb   { width: 100%;  background: var(--color-accent-light-blue); }
+.birch-pills-embed .pbar--pink { width: 67.4%; background: var(--color-accent-pink); }
+.birch-pills-embed .pbar--red  { width: 34.9%; background: var(--color-accent-red); }
+
+/* ═══════════════════════════════════════════
+   MOBILE ≤767px — staircase
+═══════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .birch-pills-embed .ph1--dt { display: none; }
+  .birch-pills-embed .ph1--mb {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15em;
+    width: fit-content;
+    --ps: clamp(1.95rem, 11.93vw, 2.984rem); /* mobile × 1.0 — no coefficient */
+    font-size: var(--ps);
+  }
+  .birch-pills-embed .pstep {
+    display: flex;
+    align-items: center;
+    gap: 0.1em;
+    flex-shrink: 0;
+  }
+  .birch-pills-embed .pstep--c { align-self: flex-start; }
+  .birch-pills-embed .pstep--e { align-self: flex-start; }
+  .birch-pills-embed .ph1--mb .ppill--green.ppill--sq {
+    margin-right: 0.2em;
+  }
+}
+
+</style>
+
+<div class="birch-pills-embed">
+
+  <!-- Desktop: two rows -->
+  <div class="ph1 ph1--dt">
+    <div class="prow">
+      <span class="ppill ppill--light-blue ppill--sq">Built</span>
+      <div class="pdeco-cols" aria-hidden="true">
+        <div class="pcol pcol--purple"></div>
+        <div class="pcol pcol--blue"></div>
+      </div>
+      <span class="ppill ppill--blue ppill--pill">with a</span>
+      <span class="ppill ppill--green ppill--sq">performance</span>
+    </div>
+    <div class="prow">
+      <span class="ppill ppill--green ppill--sq">marketing</span>
+      <div class="pdeco-bars" aria-hidden="true">
+        <div class="pbar pbar--lb"></div>
+        <div class="pbar pbar--pink"></div>
+        <div class="pbar pbar--red"></div>
+      </div>
+      <span class="ppill ppill--indigo ppill--pill">mindset</span>
+    </div>
+  </div>
+
+  <!-- Mobile: staircase -->
+  <div class="ph1 ph1--mb" aria-label="Built with a performance marketing mindset">
+    <div class="pstep pstep--a">
+      <span class="ppill ppill--light-blue ppill--sq">Built</span>
+      <div class="pdeco-cols" aria-hidden="true">
+        <div class="pcol pcol--purple"></div>
+        <div class="pcol pcol--blue"></div>
+      </div>
+    </div>
+    <div class="pstep pstep--b">
+      <div class="pdeco-bars" aria-hidden="true">
+        <div class="pbar pbar--lb"></div>
+        <div class="pbar pbar--pink"></div>
+        <div class="pbar pbar--red"></div>
+      </div>
+      <span class="ppill ppill--blue ppill--pill">with a</span>
+    </div>
+    <div class="pstep pstep--c">
+      <span class="ppill ppill--green ppill--sq">performance</span>
+    </div>
+    <div class="pstep pstep--d">
+      <span class="ppill ppill--green ppill--sq">marketing</span>
+    </div>
+    <div class="pstep pstep--e">
+      <span class="ppill ppill--indigo ppill--pill">mindset</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+
+  /* ── Mobile staircase margins ── */
+  var STEPS = { b: 0.5, c: 0.6, d: 1.9, e: 2.8 };
+
+  function setAll(els, prop, val) {
+    for (var i = 0; i < els.length; i++) els[i].style[prop] = val;
+  }
+
+  function applySteps() {
+    var mb = document.querySelector('.ph1--mb');
+    if (!mb) return;
+    mb.querySelector('.pstep--b').style.marginLeft = STEPS.b + 'em';
+    mb.querySelector('.pstep--c').style.marginLeft = STEPS.c + 'em';
+    mb.querySelector('.pstep--d').style.marginLeft = STEPS.d + 'em';
+    mb.querySelector('.pstep--e').style.marginLeft = STEPS.e + 'em';
+  }
+  applySteps();
+
+  /* ── Icon animation configs ── */
+  var CC = { dur: 1050, pause: 1025, stagger: 105,  ease: [0.85, 0.01, 0.55, 1] };
+  var CB = { dur: 1150, pause: 775,  stagger: 135,  pinkMid: 91, ease: [0.88, -0.03, 0.43, 1.07] };
+
+  function makeBezier(x1, y1, x2, y2) {
+    return function(p) {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      var t = p, lo = 0, hi = 1;
+      for (var i = 0; i < 14; i++) {
+        var bx = 3*(1-t)*(1-t)*t*x1 + 3*(1-t)*t*t*x2 + t*t*t;
+        if (Math.abs(bx - p) < 0.0001) break;
+        if (bx < p) lo = t; else hi = t;
+        t = (lo + hi) / 2;
+      }
+      return 3*(1-t)*(1-t)*t*y1 + 3*(1-t)*t*t*y2 + t*t*t;
+    };
+  }
+
+  var _bezC = makeBezier(CC.ease[0], CC.ease[1], CC.ease[2], CC.ease[3]);
+  var _bezB = makeBezier(CB.ease[0], CB.ease[1], CB.ease[2], CB.ease[3]);
+
+  function rawPhase(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    var tLin = t < 1 ? t : 2 - t;
+    var p = (Cfg.pause / 2) / half;
+    if (tLin <= p) return 0;
+    if (tLin >= 1 - p) return 1;
+    return (tLin - p) / (1 - 2*p);
+  }
+
+  function rawTLin(now, offset, Cfg) {
+    var half = Cfg.dur + Cfg.pause;
+    var t = (((now - offset) % (2*half)) + 2*half) % (2*half) / half;
+    return t < 1 ? t : 2 - t;
+  }
+
+  function iLerp(a, b, t) { return a + (b - a) * t; }
+
+  function pw3(t, ez, v0, vm, v1) {
+    if (t < 0.5) return iLerp(v0, vm, ez(t * 2));
+    return iLerp(vm, v1, ez((t - 0.5) * 2));
+  }
+
+  var _colMinP = 39, _colMinB = 39;
+  var _colLastTLinP = 0, _colLastTLinB = 0;
+
+  var _colsPurple = document.querySelectorAll('.pcol--purple');
+  var _colsBlue   = document.querySelectorAll('.pcol--blue');
+  var _barsLB     = document.querySelectorAll('.pbar--lb');
+  var _barsPink   = document.querySelectorAll('.pbar--pink');
+  var _barsRed    = document.querySelectorAll('.pbar--red');
+
+  function tick(now) {
+    /* — Cols — */
+    var tP = rawPhase(now, 0,          CC);
+    var tB = rawPhase(now, CC.stagger, CC);
+    var tLinP = rawTLin(now, 0,          CC);
+    var tLinB = rawTLin(now, CC.stagger, CC);
+    var topP  = 1 - (CC.pause / 2) / (CC.dur + CC.pause);
+    var botP  =     (CC.pause / 2) / (CC.dur + CC.pause);
+
+    if (_colLastTLinP >= topP && tLinP < topP) _colMinP = Math.round(20 + Math.random() * 70);
+    if (_colLastTLinB <= botP && tLinB > botP) _colMinB = Math.round(20 + Math.random() * 70);
+    _colLastTLinP = tLinP;
+    _colLastTLinB = tLinB;
+
+    setAll(_colsPurple, 'height', iLerp(_colMinP, 100,     _bezC(tP)) + '%');
+    setAll(_colsBlue,   'height', iLerp(100,     _colMinB, _bezC(tB)) + '%');
+
+    /* — Bars — */
+    var tLB   = rawPhase(now, 0,             CB);
+    var tPink = rawPhase(now, CB.stagger,     CB);
+    var tRed  = rawPhase(now, CB.stagger * 2, CB);
+
+    setAll(_barsLB,   'width',      pw3(tLB,   _bezB, 100,  67.4, 34.9)       + '%');
+    setAll(_barsLB,   'marginLeft', pw3(tLB,   _bezB, 0,    16.3, 0)          + '%');
+    setAll(_barsPink, 'width',      pw3(tPink, _bezB, 67.4, CB.pinkMid, 67.4) + '%');
+    setAll(_barsPink, 'marginLeft', pw3(tPink, _bezB, 0,    16.3, 0)          + '%');
+    setAll(_barsRed,  'width',      pw3(tRed,  _bezB, 34.9, 67.4, 100)        + '%');
+    setAll(_barsRed,  'marginLeft', pw3(tRed,  _bezB, 0,    16.3, 0)          + '%');
+  }
+
+  (function loop() {
+    tick(performance.now());
+    requestAnimationFrame(loop);
+  })();
+
+})();
+</script>

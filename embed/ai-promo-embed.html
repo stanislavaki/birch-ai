@@ -174,7 +174,7 @@
     padding: var(--space-lg) var(--pad-horizontal);
     gap: var(--space-md);
     background: var(--color-bg);
-    overflow-x: clip; /* prevent staircase overflow from expanding page width */
+    overflow: hidden; /* prevent staircase overflow from expanding page width */
   }
 
 .birch-ai-embed /* Logo: "Bïrch [icon] AI  closed beta" */
@@ -679,7 +679,7 @@
 
   /* Wrapper owns the sizing — enables container queries for the card */
   .chat-card-wrap {
-    height: min(70vh, 45rem); /* 45rem = 720px */
+    height: 85vh;
     width: auto;
     aspect-ratio: 400 / 600;
     container-type: inline-size;
@@ -702,7 +702,15 @@
   }
 
 .birch-ai-embed /* Body */
-  .chat-card__
+  .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
   .chat-card__body::-webkit-scrollbar { display: none; }
 
 .birch-ai-embed /* Chrome/Safari */
@@ -2182,10 +2190,13 @@
   var navH = 0, scrollDist = 0, stickyTop = 0;
 
   function getNavH() {
-    /* Webflow sets --nav-height in em on :root; fallback 6.5rem = 104px */
-    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
-    if (raw) return parseFloat(raw) * 16;
-    return 6.5 * 16;
+    /* Webflow sets --nav-height in em on :root.
+       Multiply by actual root font-size (px) so it works with Webflow's fluid scaling. */
+    var el = document.documentElement;
+    var rootFs = parseFloat(getComputedStyle(el).fontSize);
+    var raw = getComputedStyle(el).getPropertyValue('--nav-height').trim();
+    if (raw) return parseFloat(raw) * rootFs;
+    return 6.5 * rootFs;
   }
 
   function sizeCards() {
@@ -2195,14 +2206,14 @@
     var subtitleH = subtitle.getBoundingClientRect().height;
     var copilotH2 = copilot.querySelector('h2').getBoundingClientRect().height;
     var cardsGap  = parseFloat(getComputedStyle(cards).gap);
+    var remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
     var vh = window.innerHeight;
-    var hVh = vh - navH - padTop - subtitleH - gapAfter - copilotH2 - 96;
+    var hVh = vh - navH - padTop - subtitleH - gapAfter - copilotH2 - 6 * remPx;
     hVh = Math.max(hVh, 200);
     agent.style.height = ''; copilot.style.height = '';
     var hContent = agent.getBoundingClientRect().height;
     var h = Math.max(hVh, hContent);
     copilot.style.height = h + 'px'; agent.style.height = h + 'px';
-    var remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
     var copilotPad = parseFloat(getComputedStyle(copilot).paddingTop);
     scrollDist = h + cardsGap - copilotPad - copilotH2 - 0.75 * remPx;
     var sectionNaturalH = padTop + subtitleH + gapAfter + h + cardsGap + h;

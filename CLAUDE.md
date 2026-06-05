@@ -13,6 +13,16 @@
 
 - **Webflow embed — rem-контекст** — в Webflow root `font-size` может быть не 16px, поэтому все `rem` значения внутри embed-блока пересчитываются неправильно. Решение: задать `font-size: 16px` на ВНУТРЕННЕМ контейнере карточки (например `.xxx__container`), но НЕ на внешней секции — иначе сломается `top: var(--nav-height)` (он использует `em` Webflow и должен оставаться в контексте Webflow-шрифта).
 
+- **Webflow embed — коэффициент масштаба токенов** — Webflow использует fluid `font-size` (на 1600px+ html=21.33px вместо 16px), из-за этого все `rem`-значения из local выглядят визуально больше. Правило: все десктопные rem-токены и хардкод rem-значения в embed умножать на **0.9**. На мобилке (≤767px) коэффициент **1.0** — оставлять оригинальные значения. Пример: `--space-lg: 3rem` в local → `2.7rem` в embed (десктоп), `3rem` в mobile media query.
+
+- **Webflow embed — именование классов** — Webflow имеет глобальные стили для распространённых имён классов (`.container`, `.section`, `.btn`, `.hero`, `.row`, `.col` и др.). В embed-файлах добавлять суффикс `-e` ко всем классам которые могут конфликтовать: `.container-e`, `.btn-e`, `.hero-e` и т.д. Local-версию не трогать.
+
+- **Webflow embed — горизонтальные паддинги** — горизонтальный padding на секции и внешнем контейнере приходит из Webflow. Внутренний `.container-e` в embed не должен иметь `padding-inline` — иначе будет двойной отступ.
+
+- **Webflow embed — фон** — `background-color` на секции не задавать в embed. Фон приходит из Webflow (задаётся на секции или странице). В embed ставить только `/* no background — comes from Webflow */`.
+
+- **Webflow embed — спецсимволы и emoji** — Webflow нарушает кодировку UTF-8 символов вне ASCII при сохранении embed-кода. Все emoji, тире и спецсимволы в видимом HTML-контенте и JS-строках заменять на HTML entities: `🟢` → `&#x1F7E2;`, `🔴` → `&#x1F534;`, `–` → `&ndash;`, `—` → `&mdash;`, `ï` → `&iuml;`. CSS-комментарии безопасны — там символы не рендерятся.
+
 - **Webflow embed — padding** — паддинги на accordion и step могут быть сброшены глобальным reset-ом Webflow. Задавать их с `!important`: `padding: var(--xxx-pad) !important`.
 
 - **Webflow embed — sticky scroll JS** — три обязательных правила для sticky-блоков в embed:

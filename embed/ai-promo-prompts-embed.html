@@ -1,0 +1,284 @@
+<style>
+
+/* ===================================================
+   TOKENS x0.9 desktop, x1.0 mobile
+=================================================== */
+.birch-prompts-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-text:          #FFFFFF;
+  --color-text-grey:     #909090;
+  --color-bg-grey:       #2A2A2A;
+  --color-accent-green:      #04DE00;
+  --color-accent-pink:       #FF21A6;
+  --color-accent-light-blue: #59DBFF;
+  --color-accent-purple:     #5B45CD;
+  --color-accent-indigo:     #4450F2;
+  --text-h2-size: 2.925rem; --text-h2-lh: 1.1; --text-h2-ls: -0.02em;
+  --text-h6-size: 0.9rem;   --text-h6-lh: 1.4;
+  --text-para-lg-size: 1.125rem; --text-para-lg-lh: 1.1;
+  --text-btn-size: 1.125rem; --text-btn-lh: 1; --text-btn-ls: 0em;
+  --space-md: 1.8rem; --space-lg: 2.7rem; --space-xl: 4.5rem;
+  --gap-main: 0.9rem;
+  --pad-horizontal: 1.35rem;
+  --radius-lg: 0.9rem; --radius-xl: 1.35rem; --radius-md: 0.675rem;
+  --radius-pill: 9999px;
+  /* no background — comes from Webflow */
+}
+
+@media (max-width: 767px) {
+  .birch-prompts-embed {
+    --text-h2-size: 2rem;
+    --text-h6-size: 1rem;
+    --text-para-lg-size: 1.25rem;
+    --text-btn-size: 1.125rem;
+    --space-md: 2rem; --space-lg: 3rem; --space-xl: 5rem;
+    --gap-main: 1rem;
+    --pad-horizontal: 1rem;
+    --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-md: 0.75rem;
+  }
+}
+
+/* ===================================================
+   TYPE
+=================================================== */
+.birch-prompts-embed .t-h2 {
+  font-family: var(--font);
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-lh);
+  letter-spacing: var(--text-h2-ls);
+  font-weight: 600;
+}
+.birch-prompts-embed .t-para-lg {
+  font-family: var(--font);
+  font-size: var(--text-para-lg-size);
+  line-height: var(--text-para-lg-lh);
+  font-weight: 600;
+}
+
+/* ===================================================
+   LAYOUT
+=================================================== */
+.birch-prompts-embed .prompts-e {
+  padding: var(--space-xl) 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  overflow: hidden;
+  /* no background — comes from Webflow */
+}
+
+.birch-prompts-embed .prompts-e__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-main);
+  text-align: center;
+  padding-inline: var(--pad-horizontal);
+}
+
+.birch-prompts-embed .prompts-e__title {
+  color: var(--color-text);
+  margin: 0;
+}
+
+.birch-prompts-embed .prompts-e__subtitle {
+  color: var(--color-text-grey);
+  margin: 0;
+}
+
+/* ===================================================
+   MARQUEE
+=================================================== */
+.birch-prompts-embed .prompts-e__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-main);
+  width: 100%;
+}
+
+.birch-prompts-embed .prompts-e__track {
+  width: 100%;
+  overflow: hidden;
+}
+
+.birch-prompts-embed .prompts-e__belt {
+  display: flex;
+  gap: var(--gap-main);
+  width: max-content;
+  will-change: transform;
+}
+
+.birch-prompts-embed .prompts-e__chip {
+  display: block;
+  height: 3.15rem;        /* 3.5rem x 0.9 */
+  line-height: 3.15rem;
+  padding-inline: var(--space-md);
+  background: var(--color-bg-grey);
+  border-radius: var(--radius-xl);
+  font-family: var(--font);
+  font-size: var(--text-h6-size);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  font-style: normal;
+}
+
+.birch-prompts-embed .prompts-e__kw { font-style: normal; }
+.birch-prompts-embed .prompts-e__kw--green      { color: var(--color-accent-green); }
+.birch-prompts-embed .prompts-e__kw--pink        { color: var(--color-accent-pink); }
+.birch-prompts-embed .prompts-e__kw--light-blue  { color: var(--color-accent-light-blue); }
+
+/* ===================================================
+   CTA BUTTON
+=================================================== */
+.birch-prompts-embed .prompts-e__cta {
+  padding-inline: var(--pad-horizontal);
+}
+
+.birch-prompts-embed .btn-e {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: var(--text-btn-size);
+  font-weight: 600;
+  line-height: var(--text-btn-lh);
+  letter-spacing: var(--text-btn-ls);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  white-space: nowrap;
+  padding-inline: 2.7rem; /* 3rem x 0.9 */
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+  min-height: 5.625rem; /* 6.25rem x 0.9 */
+}
+.birch-prompts-embed .btn-e:hover { opacity: 0.85; }
+
+.birch-prompts-embed .btn-stroke-e {
+  background: transparent;
+  color: var(--color-text);
+  border: 5px dotted var(--color-text) !important;
+}
+.birch-prompts-embed .btn-stroke-e:hover {
+  opacity: 1;
+  background: var(--color-accent-purple);
+  border-color: var(--color-accent-purple);
+}
+
+@media (max-width: 767px) {
+  .birch-prompts-embed .btn-e {
+    min-height: 3.75rem;
+    border-radius: var(--radius-md);
+    font-size: 1.125rem;
+  }
+}
+
+</style>
+
+<div class="birch-prompts-embed">
+  <div class="prompts-e">
+
+    <div class="prompts-e__head">
+      <h2 class="t-h2 prompts-e__title">Start fast with ready-to-use prompts</h2>
+      <p class="t-para-lg prompts-e__subtitle">Curated examples for every use case, from audits to optimization</p>
+    </div>
+
+    <div class="prompts-e__rows" aria-hidden="true">
+
+      <!-- Row 1 — left -->
+      <div class="prompts-e__track prompts-e__track--1">
+        <div class="prompts-e__belt">
+          <span class="prompts-e__chip">Show <em class="prompts-e__kw prompts-e__kw--green">Impressions</em> and <em class="prompts-e__kw prompts-e__kw--green">Frequency</em> for the last 14 days</span>
+          <span class="prompts-e__chip">Breakdown of <em class="prompts-e__kw prompts-e__kw--pink">Spend</em> for all <em class="prompts-e__kw prompts-e__kw--light-blue">ad accounts</em> in this workspace for the period from Feb 14 till Mar 14</span>
+          <span class="prompts-e__chip">Compare <em class="prompts-e__kw prompts-e__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+          <span class="prompts-e__chip">Compare <em class="prompts-e__kw prompts-e__kw--green">Reach</em> in Q1 2026 to Q1 2025 on Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+          <span class="prompts-e__chip">Recommend <em class="prompts-e__kw prompts-e__kw--light-blue">rules</em> based on my industry</span>
+          <span class="prompts-e__chip">Show <em class="prompts-e__kw prompts-e__kw--green">Impressions</em> and <em class="prompts-e__kw prompts-e__kw--green">Frequency</em> for the last 14 days</span>
+          <span class="prompts-e__chip">Breakdown of <em class="prompts-e__kw prompts-e__kw--pink">Spend</em> for all <em class="prompts-e__kw prompts-e__kw--light-blue">ad accounts</em> in this workspace for the period from Feb 14 till Mar 14</span>
+          <span class="prompts-e__chip">Compare <em class="prompts-e__kw prompts-e__kw--pink">Spend</em> by connected platforms for the last 30 days</span>
+          <span class="prompts-e__chip">Compare <em class="prompts-e__kw prompts-e__kw--green">Reach</em> in Q1 2026 to Q1 2025 on Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+          <span class="prompts-e__chip">Recommend <em class="prompts-e__kw prompts-e__kw--light-blue">rules</em> based on my industry</span>
+        </div>
+      </div>
+
+      <!-- Row 2 — right -->
+      <div class="prompts-e__track prompts-e__track--2">
+        <div class="prompts-e__belt">
+          <span class="prompts-e__chip">How is my <em class="prompts-e__kw prompts-e__kw--green">ROAS</em> this week compared to last week?</span>
+          <span class="prompts-e__chip">Which <em class="prompts-e__kw prompts-e__kw--pink">ad</em> generated the highest <em class="prompts-e__kw prompts-e__kw--green">CTR</em> this month?</span>
+          <span class="prompts-e__chip">Show overspending <em class="prompts-e__kw prompts-e__kw--light-blue">campaigns</em></span>
+          <span class="prompts-e__chip">Where are we <em class="prompts-e__kw prompts-e__kw--light-blue">scaling</em> faster: Meta or TikTok?</span>
+          <span class="prompts-e__chip">List my top 5 performing ads by <em class="prompts-e__kw prompts-e__kw--green">CTR</em></span>
+          <span class="prompts-e__chip">Create a leadership-ready <em class="prompts-e__kw prompts-e__kw--pink">dashboard</em> overviewing my monthly results</span>
+          <span class="prompts-e__chip">How is my <em class="prompts-e__kw prompts-e__kw--green">ROAS</em> this week compared to last week?</span>
+          <span class="prompts-e__chip">Which <em class="prompts-e__kw prompts-e__kw--pink">ad</em> generated the highest <em class="prompts-e__kw prompts-e__kw--green">CTR</em> this month?</span>
+          <span class="prompts-e__chip">Show overspending <em class="prompts-e__kw prompts-e__kw--light-blue">campaigns</em></span>
+          <span class="prompts-e__chip">Where are we <em class="prompts-e__kw prompts-e__kw--light-blue">scaling</em> faster: Meta or TikTok?</span>
+          <span class="prompts-e__chip">List my top 5 performing ads by <em class="prompts-e__kw prompts-e__kw--green">CTR</em></span>
+          <span class="prompts-e__chip">Create a leadership-ready <em class="prompts-e__kw prompts-e__kw--pink">dashboard</em> overviewing my monthly results</span>
+        </div>
+      </div>
+
+      <!-- Row 3 — left staggered -->
+      <div class="prompts-e__track prompts-e__track--3">
+        <div class="prompts-e__belt">
+          <span class="prompts-e__chip">Suggest 3 starter <em class="prompts-e__kw prompts-e__kw--light-blue">rules</em> for Google <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+          <span class="prompts-e__chip">Suggest the best <em class="prompts-e__kw prompts-e__kw--pink">CPA-based</em> scaling strategy for lead generation</span>
+          <span class="prompts-e__chip">Which <em class="prompts-e__kw prompts-e__kw--light-blue">ad accounts</em> have the lowest <em class="prompts-e__kw prompts-e__kw--pink">CPC</em> and <em class="prompts-e__kw prompts-e__kw--pink">CPM</em>?</span>
+          <span class="prompts-e__chip">What are the causes of performance drops in my Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em>?</span>
+          <span class="prompts-e__chip">List ad sets with <em class="prompts-e__kw prompts-e__kw--pink">Cost Per Purchase</em> under $30 for Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+          <span class="prompts-e__chip">Suggest 3 starter <em class="prompts-e__kw prompts-e__kw--light-blue">rules</em> for Google <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+          <span class="prompts-e__chip">Suggest the best <em class="prompts-e__kw prompts-e__kw--pink">CPA-based</em> scaling strategy for lead generation</span>
+          <span class="prompts-e__chip">Which <em class="prompts-e__kw prompts-e__kw--light-blue">ad accounts</em> have the lowest <em class="prompts-e__kw prompts-e__kw--pink">CPC</em> and <em class="prompts-e__kw prompts-e__kw--pink">CPM</em>?</span>
+          <span class="prompts-e__chip">What are the causes of performance drops in my Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em>?</span>
+          <span class="prompts-e__chip">List ad sets with <em class="prompts-e__kw prompts-e__kw--pink">Cost Per Purchase</em> under $30 for Meta <em class="prompts-e__kw prompts-e__kw--light-blue">ad account</em></span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var BASE_SPEED   = 0.25;
+  var SCROLL_BOOST = 0.3;
+  var DIRS    = [-1, 1, -1];
+  var OFFSETS = [0, 0.6, 0.35];
+
+  var tracks = Array.from(document.querySelectorAll('.prompts-e__track'));
+  var belts  = tracks.map(function (t) { return t.querySelector('.prompts-e__belt'); });
+
+  var halfWidths = belts.map(function (b) { return b.offsetWidth / 2; });
+
+  var positions = belts.map(function (_, i) {
+    return -(halfWidths[i] * OFFSETS[i]);
+  });
+
+  var lastScrollY = window.scrollY;
+  var scrollVel   = 0;
+
+  (function loop() {
+    var sy = window.scrollY;
+    scrollVel   = sy - lastScrollY;
+    lastScrollY = sy;
+
+    var boost = Math.abs(scrollVel) * SCROLL_BOOST;
+    var speed = BASE_SPEED + boost;
+
+    belts.forEach(function (belt, i) {
+      var hw = halfWidths[i];
+      positions[i] += DIRS[i] * speed;
+
+      if (DIRS[i] === -1 && positions[i] <= -hw) positions[i] += hw;
+      if (DIRS[i] ===  1 && positions[i] >= 0)   positions[i] -= hw;
+
+      belt.style.transform = 'translateX(' + positions[i] + 'px)';
+    });
+
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>

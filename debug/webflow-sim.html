@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Webflow Simulator</title>
+  <style>
+    /* ── Webflow fluid font-size (exact from real bir.ch site) ── */
+    html { font-size: 16px; }
+    @media (min-width: 768px)  { html { font-size: calc(0.446188px + 1.56951vw); } }
+    @media (min-width: 992px)  { html { font-size: calc(1.2px + 1.15625vw); } }
+    @media (min-width: 1280px) { html { font-size: calc(-5.32px + 1.66562vw); } }
+    @media (min-width: 1600px) { html { font-size: 21.33px; } }
+
+    /* ── Webflow global resets (from real site) ── */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    .container { max-width: 75rem; margin: 0 auto; }
+    img { border-radius: 8px; }
+
+    /* ── Simulated fixed navbar ── */
+    .sim-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5rem;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      z-index: 1000;
+      font-size: 0.9rem;
+      gap: 2rem;
+    }
+    .sim-nav__logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .sim-nav__links {
+      display: flex;
+      gap: 1.5rem;
+      color: #333;
+    }
+    .sim-nav__info {
+      margin-left: auto;
+      color: #999;
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+
+    /* ── nav-height CSS var (как в реальном Webflow) ── */
+    :root { --nav-height: 5rem; }
+
+    /* ── Webflow global element styles (from real bir.ch site) ── */
+    h1 { margin-top: 0; margin-bottom: 20px; font-size: 60px; font-weight: 600; line-height: 1.1em; }
+    h2 { font-size: 38px; line-height: 1.2em; font-weight: 700; margin-top: 0; margin-bottom: 18px; }
+    h3 { margin-top: 0; margin-bottom: 12px; font-size: 24px; font-weight: 600; line-height: 1.3em; }
+    h4 { max-width: 400px; margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight: 400; line-height: 1.3em; }
+    h5 { margin-top: 0; margin-bottom: 10px; font-size: 1.125rem; font-weight: 600; line-height: 1.5em; }
+    p  { margin-bottom: 10px; }
+    ul { margin-top: 0; margin-bottom: 10px; padding-left: 40px; }
+    ol { margin-top: 0; margin-bottom: 10px; padding-left: 40px; }
+    li { margin-bottom: 12px; }
+    @media (min-width: 1440px) {
+      h2 { font-size: 42px; }
+    }
+
+    /* ── Webflow .section (from real site) ── */
+    .section {
+      display: block;
+      position: relative;
+      background: #0D0D12; /* задаётся в Webflow на секции */
+    }
+
+    /* ── Webflow .container (from real site) ── */
+    .container {
+      width: 100%;
+      max-width: 100rem;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      display: block;
+    }
+
+    /* ── Info bar ── */
+    .sim-info {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 6px 16px;
+      display: flex;
+      gap: 2rem;
+      z-index: 2000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Simulated Webflow navbar -->
+  <nav class="sim-nav">
+    <span class="sim-nav__logo">bïrch</span>
+    <div class="sim-nav__links">
+      <span>Performance</span>
+      <span>Hub</span>
+      <span>Stage</span>
+    </div>
+    <span class="sim-nav__info" id="simNavInfo"></span>
+  </nav>
+
+  <!-- Pills embed -->
+  <section class="section">
+    <div class="container">
+      <div id="simPills"></div>
+    </div>
+  </section>
+
+  <!-- Hero embed -->
+  <section class="section">
+    <div class="container">
+      <div id="simHero"></div>
+    </div>
+  </section>
+
+  <!-- Accordion embed (has its own inner container — no outer wrapper needed) -->
+  <section class="section">
+    <div id="simAcc"></div>
+  </section>
+
+  <!-- Prompts embed -->
+  <section class="section">
+    <div id="simPrompts"></div>
+  </section>
+
+  <!-- Vision embed -->
+  <section class="section">
+    <div class="container">
+      <div id="simVision"></div>
+    </div>
+  </section>
+
+  <!-- Info bar: viewport + font-size -->
+  <div class="sim-info">
+    <span>viewport: <b id="infoVw">—</b></span>
+    <span>html font-size: <b id="infoFs">—</b></span>
+    <span>--nav-height: <b id="infoNav">—</b></span>
+    <span style="color:#aaa">← симулятор Webflow-окружения</span>
+  </div>
+
+  <script>
+    function loadEmbed(file, targetId) {
+      fetch(file)
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+          html = html
+            .replace(/<!DOCTYPE[^>]*>/i, '')
+            .replace(/<html[^>]*>/i, '')
+            .replace(/<\/html>/i, '')
+            .replace(/<head>[\s\S]*?<\/head>/i, '')
+            .replace(/<body[^>]*>/i, '')
+            .replace(/<\/body>/i, '')
+            .trim();
+          var target = document.getElementById(targetId);
+          target.innerHTML = html;
+          target.querySelectorAll('script').forEach(function(s) {
+            var newScript = document.createElement('script');
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+            s.remove();
+          });
+        })
+        .catch(function(e) {
+          document.getElementById(targetId).innerHTML =
+            '<p style="color:red;padding:2rem">Ошибка загрузки ' + file + ': ' + e + '</p>';
+        });
+    }
+
+    loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
+    loadEmbed('../embed/ai-promo-hero-embed.html', 'simHero');
+    loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
+    loadEmbed('../embed/ai-promo-prompts-embed.html', 'simPrompts');
+    loadEmbed('../embed/ai-promo-vision-embed.html', 'simVision');
+
+    // ── Info bar update ──
+    function updateInfo() {
+      var fs = parseFloat(getComputedStyle(document.documentElement).fontSize).toFixed(1);
+      var nav = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+      document.getElementById('infoVw').textContent = window.innerWidth + 'px';
+      document.getElementById('infoFs').textContent = fs + 'px';
+      document.getElementById('infoNav').textContent = nav;
+      document.getElementById('simNavInfo').textContent =
+        window.innerWidth + 'px · html=' + fs + 'px';
+    }
+    updateInfo();
+    window.addEventListener('resize', updateInfo);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">
+<div class="birch-hero-embed">
+<style>
+/* ─────────────────────────────────────────
+   BIRCH HERO EMBED
+   Scope: .birch-hero-embed
+   All tokens inlined — no external dependencies
+───────────────────────────────────────── */
+
+.birch-hero-embed {
+  font-size: 16px; /* rem-context fix: Webflow root font-size may not be 16px */
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+
+  --color-primary:          #FFE243;
+  --color-accent-red:       #FF4747;
+  --color-accent-green:     #04DE00;
+  --color-accent-pink:      #FF21A6;
+  --color-accent-blue:      #1877F2;
+  --color-accent-light-blue:#59DBFF;
+  --color-accent-purple:    #5B45CD;
+  --color-accent-indigo:    #4450F2;
+  --color-bg:               #0D0D12;
+  --color-bg-grey:          #2A2A2A;
+  --color-text:             #FFFFFF;
+  --color-text-inverted:    #000000;
+  --color-text-grey:        #909090;
+
+  --text-h3-size: 2rem;
+  --text-h3-lh:   1.0;
+  --text-h3-ls:  -0.02em;
+  --text-para-lg-size: 1.25rem;
+  --text-para-lg-lh:   1.1;
+  --text-para-lg-ls:   0em;
+  --text-body-size: 0.9rem;
+  --text-body-lh:   1.2;
+  --text-body-ls:   0em;
+  --text-btn-size: 1.5rem;
+  --text-btn-lh:   1.0;
+  --text-btn-ls:  -0.02em;
+
+  --space-md:  2rem;
+  --space-lg:  3rem;
+  --space-xl:  5rem;
+  --gap-sm:    0.5rem;
+
+  --radius-lg:   1rem;
+  --radius-md:   0.75rem;
+  --radius-pill: 9999px;
+
+  display: block;
+}
+
+/* Reset scoped to embed */
+.birch-hero-embed *, .birch-hero-embed *::before, .birch-hero-embed *::after {
+  box-sizing: border-box;
+}
+.birch-hero-embed img, .birch-hero-embed svg { display: block; max-width: 100%; }
+.birch-hero-embed img { border-radius: 0; }
+.birch-hero-embed a { color: inherit; text-decoration: none; }
+
+/* ── Button ── */
+.birch-hero-embed .btn-e {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: var(--text-btn-size);
+  font-weight: 600;
+  line-height: var(--text-btn-lh);
+  letter-spacing: var(--text-btn-ls);
+  border-radius: 0.667em; /* 16px at btn-e font-size 1.5em=24px: 16/24 */
+  cursor: pointer;
+  white-space: nowrap;
+  padding-inline: 3em;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+.birch-hero-embed .btn-e:hover { opacity: 0.85; }
+.birch-hero-embed .btn-s { min-height: 6.25em; }
+.birch-hero-embed .btn-default {
+  background: var(--color-primary);
+  color: var(--color-text-inverted);
+  border: 5px solid transparent;
+}
+.birch-hero-embed .btn-default:hover {
+  opacity: 1;
+  background: var(--color-accent-indigo);
+  color: var(--color-text);
+}
+
+/* ── Hero section ── */
+.birch-hero-embed .hero-e {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-height, 0px) + var(--space-lg)) 0 var(--space-lg);
+  gap: var(--space-md);
+  overflow-x: clip;
+}
+
+/* Logo */
+.birch-hero-embed .hero__logo-wordmark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+.birch-hero-embed .hero__logo-name {
+  font-family: var(--font);
+  font-size: var(--text-h3-size);
+  font-weight: 600;
+  line-height: var(--text-h3-lh);
+  letter-spacing: var(--text-h3-ls);
+  color: var(--color-text);
+}
+.birch-hero-embed .hero__logo-icon {
+  height: 2.8125em;
+  width: auto;
+}
+.birch-hero-embed .hero__beta {
+  position: absolute;
+  left: calc(100% + 0.375em);
+  top: 0;
+  font-family: var(--font);
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--color-text-grey);
+  white-space: nowrap;
+  padding-right: 0.5em;
+}
+
+/* Main */
+.birch-hero-embed .hero__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* H1 */
+.birch-hero-embed .hero__h1 {
+  --ps: clamp(2em, 5vw, 4em);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+.birch-hero-embed .hero__h1--mb { display: none; }
+
+.birch-hero-embed .hero__row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+/* Pills */
+.birch-hero-embed .hero__pill {
+  display: block;
+  padding: 0.058em 0.462em 0.154em;
+  font-family: var(--font);
+  font-size: var(--ps);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--color-text-inverted);
+}
+.birch-hero-embed .hero__pill--sq   { border-radius: 0.308em; }
+.birch-hero-embed .hero__pill--pill { border-radius: var(--radius-pill); }
+.birch-hero-embed .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+.birch-hero-embed .hero__pill--blue  { background: var(--color-accent-blue);   color: var(--color-text); }
+.birch-hero-embed .hero__pill--green { background: var(--color-accent-green);  }
+.birch-hero-embed .hero__pill--indigo{ background: var(--color-accent-indigo); color: var(--color-text); }
+
+/* Decorative columns */
+.birch-hero-embed .hero__deco-cols {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-size: var(--ps);
+  width:  1.596em;
+  height: 1.312em;
+}
+.birch-hero-embed .hero__col {
+  position: absolute;
+  bottom: 0;
+  width:         0.769em;
+  border-radius: 0.199em;
+  transition: height 750ms cubic-bezier(0.87, 0, 0.55, 1);
+}
+.birch-hero-embed .hero__col--purple {
+  left:       0;
+  background: var(--color-accent-purple);
+}
+.birch-hero-embed .hero__col--blue {
+  left:       0.827em;
+  background: var(--color-accent-blue);
+}
+
+/* Decorative bars */
+.birch-hero-embed .hero__deco-bars {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.058em;
+  flex-shrink: 0;
+  font-size: var(--ps);
+  width:  1.654em;
+  height: 1.312em;
+}
+.birch-hero-embed .hero__bar {
+  height: 0.399em;
+  border-radius: var(--radius-pill);
+  transition: width 750ms cubic-bezier(0.87, 0, 0.55, 1);
+}
+.birch-hero-embed .hero__bar--lb    { background: var(--color-accent-light-blue); }
+.birch-hero-embed .hero__bar--pink  { background: var(--color-accent-pink); }
+.birch-hero-embed .hero__bar--red   { background: var(--color-accent-red); }
+
+/* Subtitle */
+.birch-hero-embed .hero__subtitle {
+  font-family: var(--font);
+  font-size: var(--text-para-lg-size);
+  font-weight: 600;
+  line-height: var(--text-para-lg-lh);
+  letter-spacing: var(--text-para-lg-ls);
+  color: var(--color-text-grey);
+  text-align: center;
+  margin: 0;
+}
+
+/* CTA */
+.birch-hero-embed .hero__btn {
+  width: 7em;        /* 224px at font-size 32px */
+  min-height: 2.5em; /* 80px at font-size 32px */
+  margin-top: var(--space-md);
+  font-size: 2em;
+  border-radius: 0.5em; /* 16px at font-size 32px */
+}
+
+/* ── Mobile ≤767px ── */
+@media (max-width: 767px) {
+  .birch-hero-embed {
+    --pad-horizontal: 1em;
+    --text-para-lg-size: 1.1em;
+    --text-para-lg-lh:   1.1;
+    --text-h3-size: 1.5em;
+  }
+
+  .birch-hero-embed .hero-e {
+    min-height: unset;
+    padding-top: calc(var(--nav-height, 0px) + var(--space-xl));
+    padding-bottom: var(--space-xl);
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: flex-start;
+    gap: 0;
+  }
+
+  .birch-hero-embed .hero__logo-name { font-size: 1.25em; }
+  .birch-hero-embed .hero__logo-icon { height: 1.875em; }
+
+  .birch-hero-embed .hero__main {
+    justify-content: flex-start;
+    gap: 0;
+  }
+
+  .birch-hero-embed .hero__h1--dt { display: none; }
+  .birch-hero-embed .hero__h1--mb {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.15em;
+    margin-top: 3em;
+    margin-bottom: 3em;
+    width: fit-content;
+    --ps: clamp(1.95em, 11.93vw, 2.984em);
+    font-size: var(--ps);
+  }
+
+  .birch-hero-embed .hero__step {
+    display: flex;
+    align-items: center;
+    gap: 0.1em;
+    flex-shrink: 0;
+  }
+  .birch-hero-embed .hero__step--a { margin-left: 0; }
+  .birch-hero-embed .hero__step--b { margin-left: 0.5em; }
+  .birch-hero-embed .hero__step--c { align-self: flex-start; margin-left: 0.6em; }
+  .birch-hero-embed .hero__step--d { margin-left: 1.9em; }
+  .birch-hero-embed .hero__step--e { align-self: flex-start; margin-left: 2.8em; }
+
+  /* Inside staircase — inherit font-size from parent, no double-scaling */
+  .birch-hero-embed .hero__h1--mb .hero__pill,
+  .birch-hero-embed .hero__h1--mb .hero__deco-cols,
+  .birch-hero-embed .hero__h1--mb .hero__deco-bars {
+    font-size: 1em;
+  }
+
+  .birch-hero-embed .hero__h1--mb .hero__pill--green.hero__pill--sq {
+    margin-right: 0.2em;
+  }
+
+  .birch-hero-embed .hero__subtitle {
+    padding-bottom: 2em;
+    text-align: center;
+    max-width: 25em;
+  }
+
+  .birch-hero-embed .hero__btn {
+    width: 100%;
+    min-height: 3.75em;
+    border-radius: var(--radius-md);
+    font-size: 1.125em;
+  }
+}
+</style>
+
+<!-- ── Hero HTML ── -->
+<section class="hero-e">
+
+  <div class="hero__logo">
+    <div class="hero__logo-wordmark">
+      <span class="hero__logo-name">B&iuml;rch</span>
+      <span class="hero__logo-name">AI</span>
+      <span class="hero__beta">closed beta</span>
+    </div>
+  </div>
+
+  <div class="hero__main">
+
+    <!-- Desktop H1 -->
+    <div class="hero__h1 hero__h1--dt">
+      <div class="hero__row hero__row--1">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple" id="birchHeroColPurple"></div>
+          <div class="hero__col hero__col--blue" id="birchHeroColBlue"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+      <div class="hero__row hero__row--2">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb" id="birchHeroBarLb"></div>
+          <div class="hero__bar hero__bar--pink" id="birchHeroBarPink"></div>
+          <div class="hero__bar hero__bar--red" id="birchHeroBarRed"></div>
+        </div>
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
+    </div>
+
+    <!-- Mobile H1 -->
+    <div class="hero__h1 hero__h1--mb" aria-label="Built with a performance marketing mindset">
+      <div class="hero__step hero__step--a">
+        <span class="hero__pill hero__pill--light-blue hero__pill--sq">Built</span>
+        <div class="hero__deco-cols" aria-hidden="true">
+          <div class="hero__col hero__col--purple"></div>
+          <div class="hero__col hero__col--blue"></div>
+        </div>
+      </div>
+      <div class="hero__step hero__step--b">
+        <div class="hero__deco-bars" aria-hidden="true">
+          <div class="hero__bar hero__bar--lb"></div>
+          <div class="hero__bar hero__bar--pink"></div>
+          <div class="hero__bar hero__bar--red"></div>
+        </div>
+        <span class="hero__pill hero__pill--blue hero__pill--pill">with a</span>
+      </div>
+      <div class="hero__step hero__step--c">
+        <span class="hero__pill hero__pill--green hero__pill--sq">performance</span>
+      </div>
+      <div class="hero__step hero__step--d">
+        <span class="hero__pill hero__pill--green hero__pill--sq">marketing</span>
+      </div>
+      <div class="hero__step hero__step--e">
+        <span class="hero__pill hero__pill--indigo hero__pill--pill">mindset</span>
+      </div>
+    </div>
+
+    <p class="hero__subtitle">Built on your data. Sharper decisions across every channel &ndash; analyze, strategize, automate.</p>
+
+  </div>
+
+  <a href="#" class="btn-e btn-default btn-s hero__btn">Apply now</a>
+
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var root = document.querySelector('.birch-hero-embed');
+
+  /* ── Decorative columns — animate all instances (desktop + mobile staircase) ── */
+  var colsPurple = root.querySelectorAll('.hero__col--purple');
+  var colsBlue   = root.querySelectorAll('.hero__col--blue');
+
+  function setAll(els, prop, val, transition) {
+    els.forEach(function(el) {
+      el.style.transition = transition || 'none';
+      el.style[prop] = val;
+    });
+  }
+
+  if (colsPurple.length) {
+    var colStateA = true;
+    setAll(colsPurple, 'height', '78.9%');
+    setAll(colsBlue,   'height', '100%');
+    setInterval(function () {
+      colStateA = !colStateA;
+      var ease = 'height 750ms cubic-bezier(0.87, 0, 0.55, 1)';
+      setAll(colsPurple, 'height', colStateA ? '78.9%' : '100%', ease);
+      setAll(colsBlue,   'height', colStateA ? '100%'  : '78.9%', ease);
+    }, 1650);
+  }
+
+  /* ── Decorative bars — animate all instances ── */
+  var barsLb   = root.querySelectorAll('.hero__bar--lb');
+  var barsPink = root.querySelectorAll('.hero__bar--pink');
+  var barsRed  = root.querySelectorAll('.hero__bar--red');
+
+  if (barsLb.length) {
+    var barStateA = true;
+    setAll(barsLb,   'width', '100%');
+    setAll(barsPink, 'width', '67.4%');
+    setAll(barsRed,  'width', '34.9%');
+    setInterval(function () {
+      barStateA = !barStateA;
+      var ease = 'width 750ms cubic-bezier(0.87, 0, 0.55, 1)';
+      setAll(barsLb,   'width', barStateA ? '100%'  : '34.9%', ease);
+      setAll(barsPink, 'width', '67.4%', ease);
+      setAll(barsRed,  'width', barStateA ? '34.9%' : '100%',  ease);
+    }, 1650);
+  }
+
+})();
+</script>
+
+</div><!-- /.birch-hero-embed -->
