@@ -443,8 +443,16 @@
   }
   .birch-acc-embed .acc-mob__slide-desc {
     color: var(--color-text-inverted);
-    margin: 0 0 var(--space);
-    opacity: 0.75;
+    margin: 0 0 var(--space-md);
+    opacity: 1;
+  }
+  .birch-acc-embed .acc-mob__coming-soon {
+    display: inline-block;
+    color: #fff;
+    margin: 0 0 var(--space-md);
+  }
+  .birch-acc-embed .acc-mob__slide:last-child .acc-mob__slide-desc {
+    margin-bottom: var(--space-xs);
   }
 
   /* Last slide (purple bg)  white text */
@@ -708,7 +716,8 @@
       <div class="acc-mob__slide" data-index="3">
         <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
         <h4 class="acc-mob__slide-title t-h4">Analyze impact of rules</h4>
-        <p class="acc-mob__slide-desc t-para-lg"><span class="t-eyebrow" style="opacity:0.6;display:block;margin-bottom:0.25rem">Coming soon</span>See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+        <p class="acc-mob__slide-desc t-para-lg">See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+        <span class="acc-mob__coming-soon t-eyebrow">Coming soon</span>
         <div class="chat-card-wrap">
           <div class="chat-card">
             <div class="chat-card__body">
