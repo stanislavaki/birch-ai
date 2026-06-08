@@ -411,7 +411,7 @@
   .birch-acc-embed .acc-mob__carousel {
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-lg);
+    /* no border-radius — each slide card has its own */
     touch-action: pan-y;
     user-select: none;
     /* height set by JS */
@@ -421,6 +421,7 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
+    border-radius: var(--radius-lg); /* each card has its own radius */
     padding: 1.5rem !important; /* !important: Webflow reset */
     display: flex;
     flex-direction: column;
@@ -474,7 +475,7 @@
     align-items: center;
     gap: 0.25rem;
     padding-top: var(--space-sm);
-    padding-inline: var(--radius-lg);
+    /* width + margin-left aligned to slide via JS */
   }
   .birch-acc-embed .acc-mob__dot {
     flex: 1;
@@ -590,7 +591,7 @@
 <!-- ACCORDION  MOBILE CAROUSEL (991px) -->
 <section class="acc-mob" id="birchAccMob">
   <div class="container-e">
-    <h2 class="acc-mob__heading t-h2">Every answer sits on top of your data</h2>
+    <div style="padding-inline: 1.5rem"><h2 class="acc-mob__heading t-h2">Every answer sits on top of your data</h2></div>
     <div class="acc-mob__carousel" id="birchAccMobCarousel">
 
       <div class="acc-mob__slide" data-index="0">
@@ -909,12 +910,19 @@
   function goTo(idx, animate) {
     idx = Math.max(0, Math.min(SLIDE_COUNT - 1, idx));
     _idx = idx;
+
+    var fs     = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var PEEK   = fs * 1.5; /* 1.5rem peek — matches Webflow section padding */
+    var gap    = fs * 0.5;
+    var slideW = carousel.offsetWidth - PEEK * 2;
+
     if (!animate) slides.forEach(function (s) { s.style.transition = 'none'; });
     slides.forEach(function (s, i) {
-      s.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      var offset = PEEK + (i - idx) * (slideW + gap);
+      s.style.transform = 'translateX(' + offset + 'px)';
+      s.style.width     = slideW + 'px';
       s.style.zIndex    = i === idx ? 1 : 0;
     });
-    carousel.style.backgroundColor = BG_COLORS[idx];
     updateDots(idx);
     if (!animate) {
       requestAnimationFrame(function () {
@@ -960,31 +968,55 @@
     });
   }
 
-  /* Set carousel height = tallest slide natural height so all slides
-     behave identically with margin:auto (last slide has Coming soon).
-     Also explicitly set chat-card-wrap size in px to guarantee identical
-     dimensions across all slides (avoids aspect-ratio/flex inconsistencies). */
   var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap'); });
 
-  function sizeCarousel() {
-    /* 1. Measure natural slide heights */
-    slides.forEach(function (s) { s.style.position = 'relative'; s.style.height = 'auto'; });
-    /* Temporarily clear explicit chat dimensions so measurement is natural */
-    chatWraps.forEach(function (w) { w.style.width = ''; w.style.height = ''; });
-    var maxH = 0;
-    slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
-    slides.forEach(function (s) { s.style.position = ''; s.style.height = ''; });
-    carousel.style.height = maxH + 'px';
+  /* Set each slide's bg color once (cards are individual, no carousel bg) */
+  slides.forEach(function (s, i) { s.style.backgroundColor = BG_COLORS[i]; });
 
-    /* 2. Compute chat card size explicitly from slide inner width */
-    var pad     = parseFloat(getComputedStyle(slides[0]).paddingLeft);
-    var maxRem  = parseFloat(getComputedStyle(document.documentElement).fontSize) * 22;
-    var chatW   = Math.min(carousel.offsetWidth - pad * 2, maxRem);
-    var chatH   = Math.round(chatW * 530 / 400);
+  function sizeCarousel() {
+    var fs     = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var PEEK   = fs * 1.5;
+    var gap    = fs * 0.5;
+    var slideW = carousel.offsetWidth - PEEK * 2;
+
+    /* 1. Make slides relative + final width for measurement */
+    slides.forEach(function (s) {
+      s.style.position  = 'relative';
+      s.style.left      = '0';
+      s.style.width     = slideW + 'px';
+      s.style.height    = 'auto';
+      s.style.transform = '';
+    });
+
+    /* 2. Size chat cards FIRST so height measurement is accurate */
+    var pad    = parseFloat(getComputedStyle(slides[0]).paddingLeft);
+    var maxRem = fs * 22 * 0.9; /* desktop: apply 0.9 Webflow rem coefficient */
+    var chatW  = Math.min(slideW - pad * 2, maxRem);
+    var chatH  = Math.round(chatW * 530 / 400);
     chatWraps.forEach(function (w) {
       w.style.width  = chatW + 'px';
       w.style.height = chatH + 'px';
     });
+
+    /* 3. Measure with correct chat dimensions */
+    var maxH = 0;
+    slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
+
+    /* 4. Restore absolute positioning */
+    slides.forEach(function (s) {
+      s.style.position = '';
+      s.style.left     = '';
+      s.style.width    = '';
+      s.style.height   = '';
+    });
+    carousel.style.height = maxH + 'px';
+
+    /* 5. Align dots to slide width */
+    dotsEl.style.width      = slideW + 'px';
+    dotsEl.style.marginLeft = PEEK + 'px';
+
+    /* 6. Re-position slides */
+    goTo(_idx, false);
   }
 
   function initMobile() {
@@ -1012,9 +1044,15 @@
     stopTimer();
     if (_observer) { _observer.disconnect(); _observer = null; }
     slides.forEach(function (s) {
-      s.style.transform = ''; s.style.zIndex = ''; s.style.transition = '';
+      s.style.transform       = '';
+      s.style.zIndex          = '';
+      s.style.transition      = '';
+      s.style.width           = '';
+      s.style.backgroundColor = '';
     });
-    carousel.style.backgroundColor = '';
+    carousel.style.height   = '';
+    dotsEl.style.width      = '';
+    dotsEl.style.marginLeft = '';
   }
 
   if (MOB.matches) { initMobile(); }

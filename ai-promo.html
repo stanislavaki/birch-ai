@@ -1015,7 +1015,7 @@
     .acc-mob .chat-card-wrap {
       width: min(100%, 22rem);
       height: auto;
-      aspect-ratio: 400 / 480;
+      aspect-ratio: 400 / 530;
       margin: auto auto 0; /* push chat to bottom of slide */
       flex-shrink: 0;
     }
@@ -1682,7 +1682,7 @@
     var pad    = parseFloat(getComputedStyle(slides[0]).paddingLeft);
     var maxRem = parseFloat(getComputedStyle(document.documentElement).fontSize) * 22;
     var chatW  = Math.min(carousel.offsetWidth - pad * 2, maxRem);
-    var chatH  = Math.round(chatW * 480 / 400);
+    var chatH  = Math.round(chatW * 530 / 400);
     chatWraps.forEach(function (w) {
       w.style.width  = chatW + 'px';
       w.style.height = chatH + 'px';
