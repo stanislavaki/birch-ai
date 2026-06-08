@@ -969,9 +969,7 @@
       transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
     }
 
-    .acc-mob__slide:first-child {
-      position: relative; /* drives carousel height */
-    }
+    /* height set by JS sizeCarousel() */
 
     .acc-mob__eyebrow {
       color: var(--color-text-inverted);
@@ -979,14 +977,14 @@
     }
 
     .acc-mob__slide-title {
-      margin: 0 0 calc(var(--space-sm) / 2);
       color: var(--color-text-inverted);
+      margin: 0 0 var(--space-md);
     }
 
-    .acc-mob__slide-desc {
-      color: var(--color-text-inverted);
-      margin: 0 0 var(--space);
-      opacity: 0.75;
+    .acc-mob__coming-soon {
+      display: inline-block;
+      color: #fff;
+      margin: 0 0 var(--space-md);
     }
 
     .acc-mob__hint {
@@ -1004,10 +1002,8 @@
 
     /* Last slide (purple bg) — white text */
     .acc-mob__slide:last-child .acc-mob__eyebrow,
-    .acc-mob__slide:last-child .acc-mob__slide-title,
-    .acc-mob__slide:last-child .acc-mob__slide-desc {
-      color: #fff;
-    }
+    .acc-mob__slide:last-child .acc-mob__slide-title { color: #fff; }
+    .acc-mob__slide:last-child .acc-mob__slide-title { margin-bottom: var(--space-sm); }
 
     /* Static chat: override transitions so content shows instantly */
     .acc-mob .chat-card__bubble,
@@ -1015,12 +1011,13 @@
       transition: none !important;
     }
 
-    /* Chat card: same proportions as desktop */
+    /* Chat card */
     .acc-mob .chat-card-wrap {
       width: min(100%, 22rem);
       height: auto;
-      aspect-ratio: 400 / 600;
+      aspect-ratio: 400 / 480;
       margin: auto auto 0; /* push chat to bottom of slide */
+      flex-shrink: 0;
     }
 
     .acc-mob .chat-card {
@@ -1350,7 +1347,6 @@
       <div class="acc-mob__slide" data-index="0">
         <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
         <h4 class="acc-mob__slide-title t-h4">Get rules suggestion</h4>
-        <p class="acc-mob__slide-desc t-para-lg">Describe your performance marketing goal, and AI will turn it into a complex automation rule, explain the logic behind it, and create a draft directly in the Birch workspace.</p>
         <div class="chat-card-wrap">
           <div class="chat-card">
             <div class="chat-card__body">
@@ -1381,7 +1377,6 @@
       <div class="acc-mob__slide" data-index="1">
         <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
         <h4 class="acc-mob__slide-title t-h4">Analyze your performance</h4>
-        <p class="acc-mob__slide-desc t-para-lg">Ask about your account performance — across platforms, time ranges, campaign levels. Compare, break down, drill in, without a single dashboard.</p>
         <div class="chat-card-wrap">
           <div class="chat-card">
             <div class="chat-card__body">
@@ -1433,7 +1428,6 @@
       <div class="acc-mob__slide" data-index="2">
         <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
         <h4 class="acc-mob__slide-title t-h4">Audit your rules</h4>
-        <p class="acc-mob__slide-desc t-para-lg">AI analyzes your current setup, finds opportunities that prevent wasted spend.</p>
         <div class="chat-card-wrap">
           <div class="chat-card">
             <div class="chat-card__body">
@@ -1463,7 +1457,7 @@
       <div class="acc-mob__slide" data-index="3">
         <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
         <h4 class="acc-mob__slide-title t-h4">Analyze impact of rules</h4>
-        <p class="acc-mob__slide-desc t-para-lg"><span class="t-eyebrow" style="opacity:0.6;display:block;margin-bottom:0.25rem">Coming soon</span>See the impact of rules on your performance and fill the missing gaps to continue scaling profitably.</p>
+        <span class="acc-mob__coming-soon t-eyebrow">Coming soon</span>
         <div class="chat-card-wrap">
           <div class="chat-card">
             <div class="chat-card__body">
@@ -1672,7 +1666,28 @@
   var dots     = Array.prototype.slice.call(dotsEl.querySelectorAll('.acc-mob__dot'));
   var SLIDE_COUNT = slides.length;
 
+  var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap'); });
+
   var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+
+  /* ── Size carousel: measure all slides, set height to max ── */
+  function sizeCarousel() {
+    slides.forEach(function (s) { s.style.position = 'relative'; s.style.height = 'auto'; });
+    chatWraps.forEach(function (w) { w.style.width = ''; w.style.height = ''; });
+    var maxH = 0;
+    slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
+    slides.forEach(function (s) { s.style.position = ''; s.style.height = ''; });
+    carousel.style.height = maxH + 'px';
+
+    var pad    = parseFloat(getComputedStyle(slides[0]).paddingLeft);
+    var maxRem = parseFloat(getComputedStyle(document.documentElement).fontSize) * 22;
+    var chatW  = Math.min(carousel.offsetWidth - pad * 2, maxRem);
+    var chatH  = Math.round(chatW * 480 / 400);
+    chatWraps.forEach(function (w) {
+      w.style.width  = chatW + 'px';
+      w.style.height = chatH + 'px';
+    });
+  }
 
   /* ── Update dots ── */
   function updateDots(idx) {
@@ -1751,6 +1766,9 @@
 
   /* ── Init / destroy ── */
   function initMobile() {
+    sizeCarousel();
+    document.fonts.ready.then(sizeCarousel);
+    window.addEventListener('resize', sizeCarousel);
     goTo(0, false);
     initSwipe();
     dotsEl.classList.add('acc-mob__dots--paused');
