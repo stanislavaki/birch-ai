@@ -76,6 +76,7 @@
       display: block;
       position: relative;
       background: #0D0D12; /* задаётся в Webflow на секции */
+      padding-block: 8.75rem; /* 140px / 16 */
     }
 
     /* ── Webflow .container (from real site) ── */
@@ -123,13 +124,6 @@
   <section class="section">
     <div class="container">
       <div id="simPills"></div>
-    </div>
-  </section>
-
-  <!-- Hero embed -->
-  <section class="section">
-    <div class="container">
-      <div id="simHero"></div>
     </div>
   </section>
 
@@ -187,7 +181,6 @@
     }
 
     loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
-    loadEmbed('../embed/ai-promo-hero-embed.html', 'simHero');
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
     loadEmbed('../embed/ai-promo-prompts-embed.html', 'simPrompts');
     loadEmbed('../embed/ai-promo-vision-embed.html', 'simVision');
