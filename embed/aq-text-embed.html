@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<style>
+  /* ── aq-text v2.0 — Adquantum heading with animated inline icons ── */
+
+  .aq-text-e {
+    /* no background — comes from Webflow */
+    text-align: center;
+    font-size: 16px; /* reset rem context inside embed */
+  }
+
+  .aq-text-e__heading {
+    font-family: "TT Commons Pro Variable", Arial, sans-serif;
+    font-size: 2.925rem; /* 52px / 16 * 0.9 webflow coeff */
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    max-width: 57.125rem; /* 914px / 16 */
+    margin: 0 auto;
+  }
+
+  .aq-text-e__icon {
+    display: inline-block;
+    vertical-align: -0.03em;
+    width: 0.62em;
+    height: 0.62em;
+    margin: 0 0.03em;
+  }
+
+  .aq-text-e__icon--tight-r {
+    margin-right: 0.005em;
+  }
+
+  /* ── animated icons in "dozens" ── */
+  .aq-text-e__icon--anim {
+    width: 0;
+    margin: 0;
+    transform: scale(0);
+    transform-origin: center bottom;
+    will-change: width, transform;
+    transition:
+      width  0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      margin 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .aq-text-e__icon--anim.is-visible {
+    width: 0.62em;
+    margin: 0 0.03em;
+    transform: scale(1);
+  }
+
+  @media (max-width: 767px) {
+    .aq-text-e__heading {
+      font-size: 2rem; /* 32px */
+    }
+  }
+</style>
+
+<div class="aq-text-e">
+  <h2 class="aq-text-e__heading">
+    Whether you run<br>
+    one <span style="white-space:nowrap">acc<img class="aq-text-e__icon aq-text-e__icon--tight-r" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a3548af3d66ff59e85a9fe9_one%20account.svg" alt="">unt</span> <span style="white-space:nowrap">or d<img class="aq-text-e__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a3548ae58bbb9a0acf54c30_dooozens%201.svg" alt=""><img class="aq-text-e__icon aq-text-e__icon--anim" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a3548b0c72c8cd15a5551a3_dooozens%202.svg" alt=""><img class="aq-text-e__icon aq-text-e__icon--anim" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a3548ae182ce66b152f4d21_dooozens%203.svg" alt=""><img class="aq-text-e__icon aq-text-e__icon--anim" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a3548af67d49b6a988f52c9_dooozens%204.svg" alt="">zens &mdash;</span><br>
+    with rules less manual work, less wasted spend, more structure
+  </h2>
+</div>
+
+<script>
+(function () {
+  var DUR     = 0.5;   /* transition duration, s */
+  var STAGGER = 0.08;  /* fixed 80ms stagger between icons */
+
+  var isMobile = window.matchMedia('(max-width: 767px)').matches;
+  var icons    = document.querySelectorAll('.aq-text-e__icon--anim'); /* icons 2,3,4 */
+  var block    = document.querySelector('.aq-text-e');
+  var fired    = false;
+
+  /* assign staggered transition-delays once (STAGGER in seconds, independent of DUR) */
+  for (var i = 0; i < icons.length; i++) {
+    icons[i].style.transitionDelay = (i * STAGGER).toFixed(3) + 's';
+  }
+
+  function revealAll() {
+    for (var i = 0; i < icons.length; i++) {
+      icons[i].classList.add('is-visible');
+    }
+    fired = true;
+  }
+
+  function hideAll() {
+    for (var i = 0; i < icons.length; i++) {
+      icons[i].classList.remove('is-visible');
+    }
+    fired = false;
+  }
+
+  window.AQ_resetRevealed = hideAll;
+
+  /* trigger when top edge of block crosses bottom of viewport */
+  function onScroll() {
+    if (!fired && block.getBoundingClientRect().top <= window.innerHeight * 0.7) {
+      revealAll();
+      window.removeEventListener('scroll', onScroll);
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); /* check on load in case already in view */
+})();
+</script>
+
+</body>
+</html>
