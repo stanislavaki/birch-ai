@@ -90,6 +90,58 @@
       display: block;
     }
 
+    /* ── AQ debug panel ── */
+    .aq-dbg {
+      position: fixed;
+      top: 6rem;
+      right: 1rem;
+      background: rgba(0,0,0,0.88);
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 12px 14px;
+      z-index: 3000;
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .aq-dbg__title {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+    .aq-dbg__row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .aq-dbg__label {
+      display: flex;
+      justify-content: space-between;
+    }
+    .aq-dbg__val { color: #59DBFF; }
+    .aq-dbg input[type=range] {
+      width: 100%;
+      accent-color: #59DBFF;
+    }
+    .aq-dbg__reset {
+      background: #222;
+      border: 1px solid #444;
+      color: #aaa;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: monospace;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .aq-dbg__reset:hover { background: #333; color: #fff; }
+
     /* ── Info bar ── */
     .sim-info {
       position: fixed;
@@ -144,6 +196,49 @@
     </div>
   </section>
 
+  <!-- Footer Physics embed -->
+  <!-- Spacer for scroll testing -->
+  <div style="height: 1200px; background: #0D0D12; display: flex; align-items: center; justify-content: center;">
+    <span style="color: #333; font-family: monospace; font-size: 14px;">↕ scroll spacer 1200px</span>
+  </div>
+
+  <!-- AQ Text embed -->
+  <section class="section">
+    <div class="container">
+      <div id="simAqText"></div>
+    </div>
+  </section>
+
+  <!-- Spacer after for scroll testing -->
+  <div style="height: 1200px; background: #0D0D12; display: flex; align-items: center; justify-content: center;">
+    <span style="color: #333; font-family: monospace; font-size: 14px;">↕ scroll spacer 1200px</span>
+  </div>
+
+  <!-- Footer Physics embed -->
+  <div style="background:#0D0D12;overflow:hidden;display:block;font-size:0;line-height:0">
+    <div id="simFooter"></div>
+  </div>
+
+  <!-- AQ Text debug panel -->
+  <div class="aq-dbg">
+    <div class="aq-dbg__title">aq-text animation</div>
+    <div class="aq-dbg__row">
+      <div class="aq-dbg__label">
+        <span>start (от низа)</span>
+        <span class="aq-dbg__val" id="dbgStartVal">10%</span>
+      </div>
+      <input type="range" id="dbgStart" min="0" max="100" step="1" value="40">
+    </div>
+    <div class="aq-dbg__row">
+      <div class="aq-dbg__label">
+        <span>range (длина зоны)</span>
+        <span class="aq-dbg__val" id="dbgRangeVal">20%</span>
+      </div>
+      <input type="range" id="dbgRange" min="5" max="80" step="1" value="20">
+    </div>
+    <button class="aq-dbg__reset" id="dbgReset">сбросить</button>
+  </div>
+
   <!-- Info bar: viewport + font-size -->
   <div class="sim-info">
     <span>viewport: <b id="infoVw">—</b></span>
@@ -154,7 +249,7 @@
 
   <script>
     function loadEmbed(file, targetId) {
-      fetch(file)
+      fetch(file, { cache: 'no-store' })
         .then(function(r) { return r.text(); })
         .then(function(html) {
           html = html
@@ -184,6 +279,8 @@
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
     loadEmbed('../embed/ai-promo-prompts-embed.html', 'simPrompts');
     loadEmbed('../embed/ai-promo-vision-embed.html', 'simVision');
+    loadEmbed('../embed/aq-text-embed.html?v=' + Date.now(), 'simAqText');
+    loadEmbed('../embed/footer-physics-embed.html?v=' + Date.now(), 'simFooter');
 
     // ── Info bar update ──
     function updateInfo() {
@@ -197,6 +294,39 @@
     }
     updateInfo();
     window.addEventListener('resize', updateInfo);
+
+    // ── AQ debug panel ──
+    window.AQ_DBG_START = 0.6;
+    window.AQ_DBG_RANGE = 0.2;
+
+    function updateAqDbg() {
+      var startPct = parseInt(document.getElementById('dbgStart').value);
+      var rangePct = parseInt(document.getElementById('dbgRange').value);
+      window.AQ_DBG_START = (100 - startPct) / 100; /* from bottom → from top */
+      window.AQ_DBG_RANGE = rangePct / 100;
+      document.getElementById('dbgStartVal').textContent = startPct + '%';
+      document.getElementById('dbgRangeVal').textContent = rangePct + '%';
+    }
+
+    document.getElementById('dbgStart').addEventListener('input', updateAqDbg);
+    document.getElementById('dbgRange').addEventListener('input', updateAqDbg);
+    document.getElementById('dbgReset').addEventListener('click', function () {
+      document.getElementById('dbgStart').value = 10;
+      document.getElementById('dbgRange').value = 20;
+      updateAqDbg();
+    });
+
+    /* Reset AQ icons button */
+    var resetIconsBtn = document.createElement('button');
+    resetIconsBtn.className = 'aq-dbg__reset';
+    resetIconsBtn.textContent = 'сбросить иконки';
+    resetIconsBtn.addEventListener('click', function () {
+      document.querySelectorAll('.aq-text-e__icon--anim').forEach(function (el) {
+        el.classList.remove('is-visible');
+      });
+      if (window.AQ_resetRevealed) window.AQ_resetRevealed();
+    });
+    document.querySelector('.aq-dbg').appendChild(resetIconsBtn);
   </script>
 
 </body>

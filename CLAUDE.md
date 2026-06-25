@@ -6,6 +6,10 @@
 - **Git branch** — always create a feature branch at the start of every session before making any changes. Use the format `feature/<short-description>`. Never work directly on `main`.
 - **Embed файлы — папка `embed/`** — все embed-версии страниц хранятся в папке `embed/`. Именование: `embed/<page-name>-embed.html` (например `embed/ai-promo-embed.html`). Никогда не класть embed-файлы в корень проекта.
 
+- **Embeds каталог — `embeds.html`** — все embed-файлы документируются в `embeds.html` в корне проекта. Страница организована по названиям Webflow-страниц с заголовками. При создании нового embed — добавлять карточку туда: название блока, путь к файлу, дата последнего коммита.
+
+- **Симулятор — кэш браузера** — в `debug/webflow-sim.html` fetch embed-файлов делать с `{ cache: 'no-store' }`, иначе браузер отдаёт старую версию файла даже после редактирования. Пример: `fetch(file, { cache: 'no-store' })`. При загрузке самого симулятора добавлять `?v=N` к URL для сброса кэша.
+
 - **pbcopy после embed-файла** — всегда показывать команду для копирования embed-кода в буфер обмена после того как embed-файл готов:
   ```
   pbcopy < "путь/к/файлу.html"
@@ -38,6 +42,25 @@
   }
   ```
   `--nav-height` — CSS-переменная, которую Webflow задаёт на `:root` в формате `em` (например `6.5em`). Важно: sticky-обёртка не должна наследовать наш `font-size: 16px` (он только на внутреннем контейнере), иначе `em` посчитается неправильно. Фоллбек `0px` нужен чтобы блок работал в локальной dev-среде где переменной нет.
+
+- **Webflow embed — `--nav-height` в JS** — Webflow задаёт `--nav-height: 6.5em` на `:root`. При конвертации в px умножать на реальный root font-size, не на хардкоженные 16:
+  ```js
+  var el = document.documentElement;
+  var rootFs = parseFloat(getComputedStyle(el).fontSize);
+  var raw = getComputedStyle(el).getPropertyValue('--nav-height').trim();
+  var navH = raw ? parseFloat(raw) * rootFs : 6.5 * rootFs;
+  ```
+
+- **Webflow embed — токены контейнеров в `px`** — `--container-lg`, `--container-md`, `--container-sm` задавать в `px`, не `rem`. Иначе Webflow fluid font-size (21.33px на 1600px+) растягивает их до ~2133px вместо 1600px. Пример: `--container-lg: 1600px`.
+
+- **Webflow embed — хардкод px в JS** — любые числа в пикселях в JS (например `96` = 6rem × 16px) заменять на `N * remPx`, где `remPx` читается из реального font-size документа:
+  ```js
+  var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  var offset = 6 * remPx; // вместо 96
+  ```
+  Вычислять `remPx` до первого использования в функции.
+
+- **Webflow embed — `overflow-x: clip` ненадёжен** — в контексте Webflow `overflow-x: clip` может не работать. Использовать `overflow: hidden` для обрезки выходящего за края контента (например staircase-анимации в герое).
 
 - **Webflow embed — шрифт** — если шрифт уже загружен на Webflow-сайте, в embed ничего делать не нужно: браузер найдёт его по имени через `font-family`. Fallback-шрифты в стеке подхватятся автоматически если что-то пойдёт не так.
 
