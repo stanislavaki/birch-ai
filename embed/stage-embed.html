@@ -13,6 +13,10 @@
      ║  2. Replace IMAGE_URL_* placeholders below with          ║
      ║     the CDN URLs from Webflow Assets panel               ║
      ║                                                          ║
+     ║  WEBFLOW PLACEMENT:                                       ║
+     ║  Page: /stage  →  Embed element  .stage-hiw              ║
+     ║  Element ID: d90c60f9-58bd-b2f6-937c-afa4ba9db8c2        ║
+     ╠═══════════════════════════════════════════════════════════╣
      ║  WEBFLOW SETUP:                                          ║
      ║  • Paste into an Embed element inside a Section          ║
      ║  • The Section and all parent Divs must have             ║
@@ -41,6 +45,7 @@
     --hiw-space-xxs:    0.25rem;
     --hiw-space-xs:     0.5rem;
     --hiw-space-sm:     1rem;
+    --hiw-space-ml:     1.5rem; /* Spacing/24 */
     --hiw-space-md:     2rem;
     --hiw-space-lg:     3rem;
   }
@@ -160,7 +165,8 @@
     position: relative;
     z-index: 1;
   }
-  .hiw-e__step.is-active { flex: 1 1 0; min-height: 0; }
+  .hiw-e__step.is-active { flex: 1 1 0; min-height: 0; align-items: stretch; padding-bottom: 1.4rem !important; }
+  .hiw-e__step.is-active .hiw-e__step-num { align-self: flex-start; }
 
   .hiw-e__step-num   { flex-shrink: 0; color: var(--hiw-color-muted); }
   .hiw-e__step.is-active .hiw-e__step-num,
@@ -185,6 +191,20 @@
   }
   .hiw-e__step.is-active .hiw-e__step-desc {
     max-height: 12rem;
+    opacity: 1;
+    /* transition injected by applyTransitions() */
+  }
+
+  .hiw-e__step-note {
+    color: var(--hiw-color-muted);
+    margin: 0;
+    margin-top: auto;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+  .hiw-e__step.is-active .hiw-e__step-note {
+    max-height: 8rem;
     opacity: 1;
     /* transition injected by applyTransitions() */
   }
@@ -272,7 +292,7 @@
       display: flex;
       align-items: flex-start;
       gap: var(--hiw-gap);
-      padding: var(--hiw-space-sm) var(--hiw-space-sm) var(--hiw-space-lg);
+      padding: var(--hiw-space-sm) var(--hiw-space-sm) var(--hiw-space-ml);
       background: var(--hiw-color-bg);
       border-radius: var(--hiw-radius-lg);
       margin: var(--hiw-space-xs) var(--hiw-space-xs) 0;
@@ -289,6 +309,7 @@
     }
     .hiw-e__mob-title { margin: 0; color: var(--hiw-color-text); font-size: 1.5rem; line-height: 1; }
     .hiw-e__mob-desc  { margin: 0; color: var(--hiw-color-text); font-size: 1.25rem; line-height: 1.1; }
+    .hiw-e__mob-note  { margin: 0; margin-top: var(--hiw-space-xs); color: var(--hiw-color-muted); font-size: 1.25rem; line-height: 1.1; display: none; }
 
     .hiw-e__visual {
       flex: 1 0 0;
@@ -398,6 +419,7 @@
         <div class="hiw-e__mob-body">
           <p class="hiw-e__mob-title t-h5"></p>
           <p class="hiw-e__mob-desc t-body"></p>
+          <p class="hiw-e__mob-note t-body"></p>
         </div>
       </div>
 
@@ -418,6 +440,7 @@
           <div class="hiw-e__step-content">
             <p class="hiw-e__step-title t-h4">Connect your Google Spreadsheet</p>
             <p class="hiw-e__step-desc t-para-lg">Use your planning Sheet: your columns, your statuses, your structure.</p>
+            <p class="hiw-e__step-note t-para-lg">Creation form Google Sheets is only available for Meta now. For other platforms, simply paste your links to Google Folders or media files into Stage. You can paste multiple links at once.</p>
           </div>
         </button>
 
@@ -476,16 +499,9 @@
         </div>
         <div class="hiw-e__slide" data-idx="4">
           <picture>
-            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7d7f8bcec44f2c6107_stage_how-it-works_05_mob.webp" />
-            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a1d7d7e1f185b189a1f11fd_stage_how-it-works_05.webp" alt="Push to ad accounts automatically" />
+            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a45586ed264d551dd9a2a6b_stage_how-it-works_05_mob.webp" />
+            <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a45586e5d4819e79d6c3448_stage_how-it-works_05.webp" alt="Push to ad accounts automatically" />
           </picture>
-          <div class="hiw-e__coming-soon">
-            <span class="hiw-e__coming-soon-text t-body">More platforms coming soon</span>
-            <div class="hiw-e__platform-icons">
-              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a183997bd77904753490590_stage-hiw-tt.svg"   alt="TikTok" />
-              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a183997c527a0f357fad1c6_stage-hiw-snap.svg" alt="Snapchat" />
-            </div>
-          </div>
         </div>
 
 
@@ -563,6 +579,7 @@
     dynStyle.textContent =
       '.hiw-e__highlight { transition: top ' + T.highlightDur + 's ' + be(E.highlight) + ', height ' + T.highlightDur + 's ' + be(E.highlight) + '; }\n' +
       '.hiw-e__step.is-active .hiw-e__step-desc { transition: max-height ' + T.descDur + 's ' + be(E.desc) + ', opacity ' + (Math.round(T.descDur * 0.75 * 100) / 100) + 's ' + be(E.desc) + '; }\n' +
+      '.hiw-e__step.is-active .hiw-e__step-note { transition: max-height ' + T.descDur + 's ' + be(E.desc) + ', opacity ' + (Math.round(T.descDur * 0.75 * 100) / 100) + 's ' + be(E.desc) + '; }\n' +
       '.hiw-e__step-num, .hiw-e__step-title { transition: color ' + T.colorDur + 's ease; }\n' +
       '.hiw-e__slide { transition: transform ' + T.slideDur + 's ' + be(E.slide) + '; }\n' +
       '.hiw-e__visual { transition: background-color ' + T.bgDur + 's ' + be(E.bg) + '; }';
@@ -659,11 +676,16 @@
     var cloneNum   = clone.querySelector('.hiw-e__mob-num');
     var cloneTitle = clone.querySelector('.hiw-e__mob-title');
     var cloneDesc  = clone.querySelector('.hiw-e__mob-desc');
+    var cloneNote  = clone.querySelector('.hiw-e__mob-note');
     var maxMobH = 0;
     for (var si = 0; si < STEP_COUNT; si++) {
       if (cloneNum)   cloneNum.textContent   = stepData[si].num;
       if (cloneTitle) cloneTitle.textContent = stepData[si].title;
       if (cloneDesc)  cloneDesc.textContent  = stepData[si].desc;
+      if (cloneNote) {
+        cloneNote.textContent = stepData[si].note || '';
+        cloneNote.style.display = stepData[si].note ? 'block' : 'none';
+      }
       var h = clone.offsetHeight;
       if (h > maxMobH) maxMobH = h;
     }
@@ -786,20 +808,27 @@
   var MOB_INTERVAL = 3000;
 
   var stepData = steps.map(function (btn) {
+    var noteEl = btn.querySelector('.hiw-e__step-note');
     return {
       num:   btn.querySelector('.hiw-e__step-num').textContent,
       title: btn.querySelector('.hiw-e__step-title').textContent,
       desc:  btn.querySelector('.hiw-e__step-desc').textContent,
+      note:  noteEl ? noteEl.textContent : '',
     };
   });
 
   var mobDots    = Array.prototype.slice.call(section.querySelectorAll('.hiw-e__mob-dot'));
+  var mobNoteEl  = mobTextEl && mobTextEl.querySelector('.hiw-e__mob-note');
 
   function mobUpdateText(idx) {
     if (!mobNumEl) return;
     mobNumEl.textContent   = stepData[idx].num;
     mobTitleEl.textContent = stepData[idx].title;
     mobDescEl.textContent  = stepData[idx].desc;
+    if (mobNoteEl) {
+      mobNoteEl.textContent    = stepData[idx].note || '';
+      mobNoteEl.style.display  = stepData[idx].note ? 'block' : 'none';
+    }
   }
   function mobUpdateDots(idx) {
     mobDots.forEach(function (dot, i) {
