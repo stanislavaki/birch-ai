@@ -8,6 +8,24 @@
 
 - **Embeds каталог — `embeds.html`** — все embed-файлы документируются в `embeds.html` в корне проекта. Страница организована по названиям Webflow-страниц с заголовками. При создании нового embed — добавлять карточку туда: название блока, путь к файлу, дата последнего коммита.
 
+- **Директория страниц — `pages.html`** — при создании новой сверстанной страницы всегда добавлять карточку в `pages.html` в корне проекта: название, статичный скриншот-превью, ссылка "открыть →". Это единый обзор для дизайнера всех когда-либо сверстанных страниц.
+
+- **Генерация статичных превью — Playwright (Python)** — в проекте нет Puppeteer/Node headless браузера, используем `python3 -m playwright`:
+  ```python
+  from playwright.sync_api import sync_playwright
+  with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={'width': 1440, 'height': 900})
+    page.goto(url, wait_until='networkidle')
+    page.screenshot(path='images/pages/<name>.jpg', type='jpeg', quality=85,
+                     clip={'x':0,'y':0,'width':1440,'height':900})
+  ```
+  Скриншоты хранить в `images/pages/<slug>.jpg`. Снимать первый экран страницы (viewport 1440×900).
+
+- **Три рабочих файла и кросс-навигация** — `pages.html` (обзор сверстанных страниц), `embeds.html` (каталог embed-кодов для копирования в Webflow), `debug/webflow-sim.html` (превью embed-блоков в Webflow-окружении). В каждом файле держать одинаковый nav-блок вверху со ссылками на все три. Текущий файл — обычная ссылка (без target), остальные два — `target="_blank"`.
+
+- **Webflow page-level custom code — DOMContentLoaded** — в отличие от embed-блоков (вставляются в тело страницы через Embed-элемент), custom code заданный в настройках страницы (Page Settings → Custom Code) вставляется Webflow в `<head>`, где DOM ещё не готов. Любой такой скрипт, обращающийся к DOM (`querySelectorAll` и т.д.), оборачивать в `document.addEventListener('DOMContentLoaded', function() { ... })`. Иначе селекторы вернут пустой список и скрипт не сработает.
+
 - **Симулятор — обёртка для preview** — при создании нового embed всегда добавлять блок в `debug/webflow-sim.html` с полной обёрткой: `section` → `container` → embed, с отступами `padding-block` как в Figma (Spacing XL = `5rem`). Эта обёртка нужна только для точного preview — в итоговый embed-файл она не входит, так как `section` и `container` добавляются на стороне Webflow.
 
 - **Симулятор — кэш браузера** — в `debug/webflow-sim.html` fetch embed-файлов делать с `{ cache: 'no-store' }`, иначе браузер отдаёт старую версию файла даже после редактирования. Пример: `fetch(file, { cache: 'no-store' })`. При загрузке самого симулятора добавлять `?v=N` к URL для сброса кэша.
