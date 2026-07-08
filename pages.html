@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Birch — Pages</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", monospace, sans-serif;
+      background: #0D0D12;
+      color: #fff;
+      padding: 3rem 2rem 6rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: #555;
+      margin-bottom: 3rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .nav-links a {
+      font-size: 0.75rem;
+      color: #444;
+      text-decoration: none;
+      font-family: monospace;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #888; }
+    .nav-links a.is-active { color: #59DBFF; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .page-card {
+      background: #13131a;
+      border: 1px solid #1e1e2a;
+      border-radius: 8px;
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      transition: border-color 0.15s;
+    }
+    .page-card:hover { border-color: #2e2e3e; }
+    .page-card__preview {
+      aspect-ratio: 16 / 10;
+      background: #1e1e2a;
+      overflow: hidden;
+    }
+    .page-card__preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+    .page-card__body {
+      padding: 0.875rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .page-card__name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #ccc;
+    }
+    .page-card__link {
+      font-size: 0.72rem;
+      color: #444;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pages</h1>
+  <p class="subtitle">Все сверстанные страницы проекта.</p>
+
+  <nav class="nav-links">
+    <a href="pages.html" class="is-active">Pages</a>
+    <a href="embeds.html" target="_blank">Embeds</a>
+    <a href="debug/webflow-sim.html" target="_blank">Simulator</a>
+  </nav>
+
+  <div class="grid">
+
+    <a class="page-card" href="index.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/index.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">Birch AI Assistant</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+    <a class="page-card" href="ai-promo.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/ai-promo.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">AI Promo</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+    <a class="page-card" href="stage.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/stage.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">Stage</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+    <a class="page-card" href="acc-mob-dev.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/acc-mob-dev.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">Accordion Mobile</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+    <a class="page-card" href="experiments.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/experiments.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">Experiments</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+    <a class="page-card" href="design-system/styleguide.html" target="_blank">
+      <div class="page-card__preview"><img src="images/pages/styleguide.jpg" alt=""></div>
+      <div class="page-card__body">
+        <span class="page-card__name">Styleguide</span>
+        <span class="page-card__link">открыть →</span>
+      </div>
+    </a>
+
+  </div>
+
+</body>
+</html>
