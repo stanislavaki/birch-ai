@@ -15,10 +15,15 @@
   font-style: normal;
 }
 
-/* ── Webflow fluid font-size (from .fluid-css.w-embed, reused on all pages) ── */
+/* ── Webflow fluid font-size (from .fluid-css.w-embed, reused on all pages) ──
+   Matches the real Webflow site's current code exactly (confirmed 2026-07-09).
+   Note: 768px and 992px breakpoints each restart from their own base value
+   instead of continuing the previous segment, so there's a real downward jump
+   at both (768: 16→12.5px, 992: ~16.02→12.67px). Not a bug here — mirroring
+   the actual site. 1280px and 1600px are continuous (no jump). */
 html { font-size: 16px; }
 @media (min-width: 768px)  { html { font-size: calc(12.5px + 3.5 * ((100vw - 768px) / 223)); } }
-@media (min-width: 992px)  { html { font-size: calc(16px + 0 * ((100vw - 992px) / 288)); } }
+@media (min-width: 992px)  { html { font-size: calc(12.67px + 3.33 * ((100vw - 992px) / 288)); } }
 @media (min-width: 1280px) { html { font-size: calc(16px + 3.2 * ((100vw - 1280px) / 320)); } }
 @media (min-width: 1600px) { html { font-size: 19.2px; } }
 

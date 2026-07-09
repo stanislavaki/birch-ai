@@ -1,0 +1,190 @@
+<style>
+
+/* ═══════════════════════════════════════════
+   TOKENS — scoped to embed wrapper
+   No 0.9 desktop-coefficient / no font-size:16px pinning —
+   testing the fluid-font-size Webflow update directly (see CLAUDE.md).
+═══════════════════════════════════════════ */
+.manage-pills-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-accent-light-blue: #59DBFF;
+  --color-accent-blue:       #1877F2;
+  --color-accent-green:      #04DE00;
+  --color-accent-indigo:     #4450F2;
+  --color-text:          #FFFFFF;
+  --color-text-inverted: #000000;
+  --radius-pill: 9999px;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.manage-pills-embed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font);
+  /* no background — comes from Webflow */
+}
+
+/* ═══════════════════════════════════════════
+   DESKTOP — two centered rows
+═══════════════════════════════════════════ */
+.manage-pills-embed .mp-h1--dt {
+  --ps: clamp(1.625rem, 4.0625vw, 3.25rem); /* 52px @ 1280 — same token as tokens.css --text-pill-size */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.365em; /* 19 / 52 */
+  font-size: var(--ps);
+}
+.manage-pills-embed .mp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.154em; /* 8 / 52 */
+}
+
+/* ═══════════════════════════════════════════
+   PILLS
+═══════════════════════════════════════════ */
+.manage-pills-embed .mp-pill {
+  display: block;
+  font-size: var(--ps);
+  padding: 0.058em 0.462em 0.154em; /* pt=3px px=24px pb=8px at 52px design */
+  font-family: var(--font);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--color-text-inverted);
+}
+.manage-pills-embed .mp-pill--sq   { border-radius: 0.308em; } /* 16px / 52px */
+.manage-pills-embed .mp-pill--pill { border-radius: var(--radius-pill); }
+.manage-pills-embed .mp-pill--dotted {
+  background: transparent;
+  color: var(--color-text);
+  border: 0.108em dotted var(--color-text); /* 5.6px / 52px */
+  padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em);
+}
+.manage-pills-embed .mp-pill--light-blue { background: var(--color-accent-light-blue); }
+.manage-pills-embed .mp-pill--green      { background: var(--color-accent-green); }
+.manage-pills-embed .mp-pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+/* ═══════════════════════════════════════════
+   "Scale" FLAG — ribbon shape, flat left / pointed right
+═══════════════════════════════════════════ */
+.manage-pills-embed .mp-flag {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.25em;   /* 169 / 52 */
+  height: 1.481em; /* 77 / 52 */
+  font-size: var(--ps);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.manage-pills-embed .mp-flag::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: -0.212em;    /* -11 / 52 */
+  bottom: -0.172em; /* 97 - 77 - 11 = 9 → 9 / 52 */
+  background: #FBBC04; /* hardcoded — one-off decorative color, not a design token */
+  clip-path: polygon(100% 85.567%, 0% 100%, 0% 0%, 100% 14.433%);
+}
+.manage-pills-embed .mp-flag span {
+  position: relative;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text-inverted);
+}
+
+/* ═══════════════════════════════════════════
+   CAMPAIGN ICON
+═══════════════════════════════════════════ */
+.manage-pills-embed .mp-icon {
+  flex-shrink: 0;
+  width: 1.481em;  /* 77 / 52 */
+  height: 1.481em;
+  font-size: var(--ps);
+  border-radius: 0.308em;
+  background: var(--color-accent-light-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.manage-pills-embed .mp-icon svg {
+  width: 1.0385em; /* 54 / 52 */
+  height: 1.0385em;
+  stroke: var(--color-accent-blue);
+}
+
+/* Mobile staircase hidden on desktop */
+.manage-pills-embed .mp-h1--mb { display: none; }
+
+/* ═══════════════════════════════════════════
+   MOBILE ≤767px — absolute staircase
+═══════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .manage-pills-embed .mp-h1--dt { display: none; }
+  .manage-pills-embed .mp-h1--mb {
+    display: block;
+    position: relative;
+    --ps: clamp(1.875rem, 9.375vw, 4.4941rem); /* 30px @ 320 → ~72px @ 767 — same token as tokens.css --text-pill-size-mobile */
+    font-size: var(--ps);
+    width: 8.068em;  /* 233 / 28.889 */
+    height: 8.517em; /* 246 / 28.889 */
+  }
+  .manage-pills-embed .mp-h1--mb .mp-flag,
+  .manage-pills-embed .mp-h1--mb .mp-pill,
+  .manage-pills-embed .mp-h1--mb .mp-icon {
+    position: absolute;
+  }
+  .manage-pills-embed .mp-mflag       { left: 2.389em; top: 0.227em; }
+  .manage-pills-embed .mp-mcampaigns  { left: 0.208em; top: 2.008em; }
+  .manage-pills-embed .mp-micon       { left: 1.800em; top: 3.635em; }
+  .manage-pills-embed .mp-mwith       { left: 3.462em; top: 3.635em; }
+  .manage-pills-embed .mp-mai         { left: 0;       top: 5.401em; }
+  .manage-pills-embed .mp-mad         { left: 6.012em; top: 5.401em; }
+  .manage-pills-embed .mp-mautomation { left: 1.142em; top: 7.026em; }
+}
+
+</style>
+
+<div class="manage-pills-embed">
+
+  <!-- Shared icon symbol -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mp-icon-campaign" viewBox="0 0 54 54" fill="none">
+      <path d="M2.99927 24.0002V45.0002C2.99927 48.3139 5.68556 51.0002 8.99927 51.0002H44.9993C48.313 51.0002 50.9993 48.3139 50.9993 45.0002V24.0002C50.9993 20.6865 48.313 18.0002 44.9993 18.0002H8.99927C5.68556 18.0002 2.99927 20.6865 2.99927 24.0002ZM2.99927 24.0002V12.0002C2.99927 8.68647 5.68556 6.00018 8.99927 6.00018H28.2623C32.0139 6.00018 35.372 8.32734 36.6892 11.8401L38.9993 18.0002M17.9993 35.0456L23.6243 40.5002L35.9993 28.5002" stroke-width="5.0625" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <!-- Desktop: two rows -->
+  <div class="mp-h1--dt">
+    <div class="mp-row">
+      <div class="mp-flag"><span>Scale</span></div>
+      <div class="mp-icon"><svg><use href="#mp-icon-campaign" /></svg></div>
+      <span class="mp-pill mp-pill--light-blue mp-pill--sq">your campaigns</span>
+    </div>
+    <div class="mp-row">
+      <span class="mp-pill mp-pill--dotted mp-pill--pill">with</span>
+      <span class="mp-pill mp-pill--green mp-pill--sq">AI-powered</span>
+      <span class="mp-pill mp-pill--indigo mp-pill--pill">ad</span>
+      <span class="mp-pill mp-pill--indigo mp-pill--pill">automation</span>
+    </div>
+  </div>
+
+  <!-- Mobile: staircase -->
+  <div class="mp-h1--mb" aria-label="Scale your campaigns with AI-powered ad automation">
+    <div class="mp-flag mp-mflag"><span>Scale</span></div>
+    <span class="mp-pill mp-pill--light-blue mp-pill--sq mp-mcampaigns">your campaigns</span>
+    <div class="mp-icon mp-micon"><svg><use href="#mp-icon-campaign" /></svg></div>
+    <span class="mp-pill mp-pill--dotted mp-pill--pill mp-mwith">with</span>
+    <span class="mp-pill mp-pill--green mp-pill--sq mp-mai">AI-powered</span>
+    <span class="mp-pill mp-pill--indigo mp-pill--pill mp-mad">ad</span>
+    <span class="mp-pill mp-pill--indigo mp-pill--pill mp-mautomation">automation</span>
+  </div>
+
+</div>

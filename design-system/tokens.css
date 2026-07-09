@@ -93,6 +93,16 @@
   --text-btn-lh:   1.0;
   --text-btn-ls:  -0.02em;
 
+  /* ---- Typography: Pill/chip text (word-pill hero compositions, e.g. ai-promo, manage) ---- */
+  /* Fluid: scales with viewport, plateaus at 52px once the 1280px design width is reached */
+  --text-pill-size: clamp(1.625rem, 4.0625vw, 3.25rem); /* 52px @ 1280 */
+  --text-pill-lh:   1.1;
+  --text-pill-ls:  -0.02em;
+
+  /* Mobile counterpart — 30px (design base) at the 320px narrowest phone, scaling
+     continuously (no plateau anywhere in range) up to ~72px at the 767px ceiling */
+  --text-pill-size-mobile: clamp(1.875rem, 9.375vw, 4.4941rem); /* 30px @ 320 → ~72px @ 767 */
+
   /* ---- Spacing — mirrors Figma "Spacing/*" variables ---- */
   --space-xxs: 0.25rem;  /*  4px — Spacing XXS */
   --space-xs:  0.5rem;   /*  8px — Spacing XS  */

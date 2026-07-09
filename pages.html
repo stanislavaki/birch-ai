@@ -46,7 +46,6 @@
       border: 1px solid #1e1e2a;
       border-radius: 8px;
       overflow: hidden;
-      text-decoration: none;
       display: block;
       transition: border-color 0.15s;
     }
@@ -55,6 +54,7 @@
       aspect-ratio: 16 / 10;
       background: #1e1e2a;
       overflow: hidden;
+      display: block;
     }
     .page-card__preview img {
       width: 100%;
@@ -68,17 +68,26 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.5rem;
     }
     .page-card__name {
       font-size: 0.875rem;
       font-weight: 500;
       color: #ccc;
     }
+    .page-card__links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
     .page-card__link {
       font-size: 0.72rem;
       color: #444;
       font-family: monospace;
+      text-decoration: none;
     }
+    .page-card__link:hover { color: #888; }
   </style>
 </head>
 <body>
@@ -95,53 +104,75 @@
 
   <div class="grid">
 
-    <a class="page-card" href="index.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/index.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="index.html" target="_blank"><img src="images/pages/index.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">Birch AI Assistant</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="index.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
 
-    <a class="page-card" href="ai-promo.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/ai-promo.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="ai-promo.html" target="_blank"><img src="images/pages/ai-promo.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">AI Promo</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="ai-promo.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
 
-    <a class="page-card" href="stage.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/stage.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="stage.html" target="_blank"><img src="images/pages/stage.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">Stage</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="stage.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
 
-    <a class="page-card" href="acc-mob-dev.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/acc-mob-dev.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="acc-mob-dev.html" target="_blank"><img src="images/pages/acc-mob-dev.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">Accordion Mobile</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="acc-mob-dev.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
 
-    <a class="page-card" href="experiments.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/experiments.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="experiments.html" target="_blank"><img src="images/pages/experiments.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">Experiments</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="experiments.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
 
-    <a class="page-card" href="design-system/styleguide.html" target="_blank">
-      <div class="page-card__preview"><img src="images/pages/styleguide.jpg" alt=""></div>
+    <div class="page-card">
+      <a class="page-card__preview" href="design-system/styleguide.html" target="_blank"><img src="images/pages/styleguide.jpg" alt=""></a>
       <div class="page-card__body">
         <span class="page-card__name">Styleguide</span>
-        <span class="page-card__link">открыть →</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="design-system/styleguide.html" target="_blank">открыть →</a>
+        </div>
       </div>
-    </a>
+    </div>
+
+    <div class="page-card">
+      <a class="page-card__preview" href="manage.html" target="_blank"><img src="images/pages/manage.jpg" alt=""></a>
+      <div class="page-card__body">
+        <span class="page-card__name">Manage — Hero</span>
+        <div class="page-card__links">
+          <a class="page-card__link" href="manage.html" target="_blank">открыть →</a>
+        </div>
+      </div>
+    </div>
 
   </div>
 
