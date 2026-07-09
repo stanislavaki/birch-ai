@@ -1,0 +1,34 @@
+Category,Token,Webflow @1280px,Figma / tokens.css,Diff / Note,Embed (x0.9)
+Typography,H1,5.5em = 88px,6rem = 96px,up 8px - Figma larger than real Webflow,5.4rem = 86.4px
+Typography,H2,3.8em = 60.8px,3.25rem = 52px,down 9px - Figma smaller than real Webflow,2.925rem = 46.8px
+Typography,H3,2em = 32px,2rem = 32px,match,1.8rem = 28.8px
+Typography,H4,1.5em = 24px,1.5rem = 24px,match,1.35rem = 21.6px
+Typography,H5,1.2em = 19.2px,1.2rem = 19.2px,match,1.08rem = 17.3px
+Typography,H6,1em = 16px,1rem = 16px,match,0.9rem = 14.4px
+Typography,Para XL,1.5rem = 24px,1.5rem = 24px,match,1.35rem = 21.6px
+Typography,Para LG,1.25rem = 20px,1.25rem = 20px,match,1.125rem = 18px
+Typography,Body,0.9rem = 14.4px,0.9rem = 14.4px,match - no embed reduction applied,0.9rem = 14.4px
+Typography,Para SM,0.875rem = 14px,0.875rem = 14px,match - no embed reduction applied,0.875rem = 14px
+Typography,Eyebrow,0.8rem = 12.8px,0.8rem = 12.8px,match - no embed reduction applied,0.8rem = 12.8px
+Spacing,Space XXS,not set in Webflow,0.25rem = 4px,-,0.225rem = 3.6px
+Spacing,Space XS,not set in Webflow,0.5rem = 8px,-,0.45rem = 7.2px
+Spacing,Space SM,not set in Webflow,1rem = 16px,-,0.9rem = 14.4px
+Spacing,Space (base),not set in Webflow,1.5rem = 24px,-,1.35rem = 21.6px
+Spacing,Space MD,not set in Webflow,2rem = 32px,-,1.8rem = 28.8px
+Spacing,Space LG,not set in Webflow,3rem = 48px,-,2.7rem = 43.2px
+Spacing,Space XL,not set in Webflow,5rem = 80px,-,4.5rem = 72px
+Gaps & Padding,Gap main,1rem = 16px,1rem = 16px,match,0.9rem = 14.4px
+Gaps & Padding,Pad section,1rem = 16px,1rem = 16px,match,0.9rem = 14.4px
+Gaps & Padding,Pad horizontal,1.5rem = 24px,1.5rem = 24px,match,1.35rem = 21.6px
+Gaps & Padding,Pad card,1.5rem = 24px,1.5rem = 24px,match,1.35rem = 21.6px
+Containers,Container LG,"75rem (Webflow has only ONE container, scales with fluid root font-size: 1200px@1280 / 1600px@1600+)",100rem = 1600px,should be hardcoded as 1600px in px (not rem) - see CLAUDE.md container px rule,1600px (embed uses px directly)
+Containers,Container MD,"not set - Webflow uses the single 75rem container everywhere, no md variant",80rem = 1280px,should be hardcoded as 1280px in px (not rem),1280px
+Containers,Container SM,"not set - Webflow uses the single 75rem container everywhere, no sm variant",64rem = 1024px,should be hardcoded as 1024px in px (not rem),1024px
+
+Root font-size recalculation,Breakpoint,Formula (Webflow fluid-css),html font-size at range start,html font-size at range end,
+Root font-size recalculation,< 768px,16px (fixed),16px,16px,
+Root font-size recalculation,768-991px,calc(12.5px + 3.5 * ((100vw - 768px) / 223)),12.5px,16px,
+Root font-size recalculation,992-1279px,calc(12.67px + 3.33 * ((100vw - 992px) / 288)),12.67px,16px,
+Root font-size recalculation,1280-1599px,calc(16px + 5.33 * ((100vw - 1280px) / 320)),16px,21.33px,
+Root font-size recalculation,>= 1600px,21.33px (fixed),21.33px,21.33px,
+Root font-size recalculation,Note,"Only exactly at 1280px does 1rem in Webflow equal 16px. Real measured Webflow em/rem values above are taken directly from the live site's computed styles, not derived from this formula - hence the H1/H2 mismatches with Figma.",,,,

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Birch — Tokens Comparison</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", monospace, sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 3rem 2rem 6rem;
+  }
+  h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .subtitle { font-size: 0.875rem; color: #888; margin-bottom: 2rem; }
+  .nav-links { display: flex; gap: 1.5rem; margin-bottom: 2rem; }
+  .nav-links a { font-size: 0.75rem; color: #999; text-decoration: none; font-family: monospace; }
+  .nav-links a:hover { color: #333; }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    z-index: 3;
+    padding-top: 0.5rem;
+    padding-bottom: 1rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+    color: #888;
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .tab:hover { border-color: #ccc; color: #333; }
+  .tab.is-active {
+    background: #eaf7fc;
+    border-color: #0aa3d1;
+    color: #0aa3d1;
+  }
+  .root-fs-info {
+    font-size: 0.75rem;
+    color: #0aa3d1;
+    font-family: monospace;
+    margin-bottom: 2rem;
+  }
+
+  .group-title td {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0aa3d1;
+    padding: 1.25rem 0.75rem 0.5rem;
+    border-bottom: 1px solid #e5e5e5;
+    background: #ffffff;
+  }
+  .group-title:hover td { background: #ffffff; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  thead th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #999;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    box-shadow: inset 0 -2px 0 0 #bbbbbb;
+    position: sticky;
+    top: var(--thead-top, 0px);
+    background: #ffffff;
+    z-index: 2;
+  }
+  tbody td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    white-space: nowrap;
+  }
+  tbody tr:hover td { background: #f7f7f7; }
+  .token-name { color: #1a1a1a; font-weight: 500; }
+  .unit { color: #999; font-size: 0.72rem; }
+  .px { font-weight: 600; }
+  .px.diff { color: #d9480f; }
+  .px sup {
+    font-size: 0.62em;
+    font-weight: 500;
+    margin-left: 0.2em;
+    opacity: 0.85;
+  }
+  .na { color: #ccc; font-style: italic; }
+  .col-sep { border-right: 1px solid #e5e5e5; }
+</style>
+</head>
+<body>
+
+  <h1>Tokens Comparison</h1>
+  <p class="subtitle">Webflow (реальные измерения) vs Figma / tokens.css vs Embed. Переключай брейкпоинт — Webflow-значения фактически меняются вместе с fluid root font-size, Figma/Embed пересчитываются от фиксированной базы 16px.</p>
+
+  <nav class="nav-links">
+    <a href="../pages.html">Pages</a>
+    <a href="../embeds.html">Embeds</a>
+    <a href="../debug/webflow-sim.html">Simulator</a>
+  </nav>
+
+  <div class="sticky-header" id="stickyHeader">
+    <div class="tabs" id="tabs"></div>
+    <div class="root-fs-info" id="rootFsInfo"></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Webflow</th>
+        <th class="col-sep">Webflow px</th>
+        <th>Figma (rem)</th>
+        <th class="col-sep">Figma px</th>
+        <th>Embed (rem)</th>
+        <th>Embed px</th>
+      </tr>
+    </thead>
+    <tbody id="typographyBody"></tbody>
+    <tbody id="containersBody"></tbody>
+    <tbody id="paddingBody"></tbody>
+    <tbody id="spacingBody"></tbody>
+  </table>
+
+<script>
+  // ── breakpoints, root font-size formulas taken from real Webflow fluid-css block ──
+  var BREAKPOINTS = [
+    { label: 'Mobile', sub: '<768px', refWidth: 375, rootFs: function() { return 16; } },
+    { label: 'Tablet', sub: '768–991px', refWidth: 768, rootFs: function(w) { return 12.5 + 3.5 * ((w - 768) / 223); } },
+    { label: 'Desktop S', sub: '992–1279px', refWidth: 992, rootFs: function(w) { return 12.67 + 3.33 * ((w - 992) / 288); } },
+    { label: 'Desktop L', sub: '1280–1599px', refWidth: 1280, rootFs: function(w) { return 16 + 5.33 * ((w - 1280) / 320); } },
+    { label: 'XL', sub: '≥1600px', refWidth: 1600, rootFs: function() { return 21.33; } },
+  ];
+  var activeTab = 3; // default: Desktop L @1280 — matches original reference table
+
+  // ── typography tokens: webflowValue = real measured multiplier (em/rem) of root font-size ──
+  // figmaRemDesktop/Mobile = tokens.css values; embedCoeffDesktop/Mobile per CLAUDE.md embed scale rule
+  var TYPOGRAPHY = [
+    { name: 'H1',       unit: 'em',  webflowValue: 5.5,   figmaDesktop: 6,     figmaMobile: 2.8,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'H2',       unit: 'em',  webflowValue: 3.8,   figmaDesktop: 3.25,  figmaMobile: 2,    embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'H3',       unit: 'em',  webflowValue: 2,     figmaDesktop: 2,     figmaMobile: 1.5,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'H4',       unit: 'em',  webflowValue: 1.5,   figmaDesktop: 1.5,   figmaMobile: 1.5,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'H5',       unit: 'em',  webflowValue: 1.2,   figmaDesktop: 1.2,   figmaMobile: 1.2,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'H6',       unit: 'em',  webflowValue: 1,     figmaDesktop: 1,     figmaMobile: 1,    embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'Para XL',  unit: 'rem', webflowValue: 1.5,   figmaDesktop: 1.5,   figmaMobile: 1.2,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'Para LG',  unit: 'rem', webflowValue: 1.25,  figmaDesktop: 1.25,  figmaMobile: 1.1,  embedCoeffD: 0.9, embedCoeffM: 1.0 },
+    { name: 'Body',     unit: 'rem', webflowValue: 0.9,   figmaDesktop: 0.9,   figmaMobile: 0.9,  embedCoeffD: 1.0, embedCoeffM: 1.0 },
+    { name: 'Para SM',  unit: 'rem', webflowValue: 0.875, figmaDesktop: 0.875, figmaMobile: 0.875, embedCoeffD: 1.0, embedCoeffM: 1.0 },
+    { name: 'Eyebrow',  unit: 'rem', webflowValue: 0.8,   figmaDesktop: 0.8,   figmaMobile: 0.8,  embedCoeffD: 1.0, embedCoeffM: 1.0 },
+  ];
+
+  var CONTAINERS = [
+    { name: 'Container LG', webflowRem: 75,   figmaRem: 100 },
+    { name: 'Container MD', webflowRem: null, figmaRem: 80  },
+    { name: 'Container SM', webflowRem: null, figmaRem: 64  },
+  ];
+
+  // Gaps & Padding — discrete per-breakpoint rem values straight from tokens.css media queries
+  // breakpoint index mapping: 0 Mobile, 1 Tablet, 2 Desktop S, 3 Desktop L, 4 XL
+  var PADDING = [
+    { name: 'Gap main',       remByBp: [1, 1, 1, 1, 1] },
+    { name: 'Pad section',    remByBp: [1, 1, 1, 1, 1] },
+    { name: 'Pad horizontal', remByBp: [1, 1, 1.25, 1.5, 1.5] },
+    { name: 'Pad card',       remByBp: [1.5, 1.5, 1.5, 1.5, 1.5] },
+    { name: 'Pad gutter',     remByBp: [1, 1, 1.5, 1.5, 1.5] },
+  ];
+
+  var SPACING = [
+    { name: 'Space XXS',  rem: 0.25 },
+    { name: 'Space XS',   rem: 0.5  },
+    { name: 'Space SM',   rem: 1    },
+    { name: 'Space (base)', rem: 1.5 },
+    { name: 'Space MD',   rem: 2    },
+    { name: 'Space LG',   rem: 3    },
+    { name: 'Space XL',   rem: 5    },
+  ];
+
+  function fmtPx(n) {
+    var r = Math.round(n * 100) / 100;
+    return (r % 1 === 0 ? r.toFixed(0) : r.toFixed(2).replace(/0$/, '')) + 'px';
+  }
+  function fmtNum(n) {
+    var r = Math.round(n * 1000) / 1000;
+    return r % 1 === 0 ? r.toFixed(0) : String(r);
+  }
+
+  function renderTabs() {
+    var el = document.getElementById('tabs');
+    el.innerHTML = '';
+    BREAKPOINTS.forEach(function(bp, i) {
+      var btn = document.createElement('button');
+      btn.className = 'tab' + (i === activeTab ? ' is-active' : '');
+      btn.textContent = bp.label + ' (' + bp.sub + ')';
+      btn.addEventListener('click', function() { activeTab = i; renderAll(); });
+      el.appendChild(btn);
+    });
+  }
+
+  function renderAll() {
+    renderTabs();
+    var bp = BREAKPOINTS[activeTab];
+    var rootFs = bp.rootFs(bp.refWidth);
+    var isMobile = activeTab === 0;
+
+    document.getElementById('rootFsInfo').textContent =
+      'root font-size @ ' + bp.refWidth + 'px = ' + fmtPx(rootFs) + '  →  1rem/1em = ' + fmtPx(rootFs);
+
+    function groupTitleRow(label) {
+      var tr = document.createElement('tr');
+      tr.className = 'group-title';
+      tr.innerHTML = '<td colspan="7">' + label + '</td>';
+      return tr;
+    }
+
+    // Typography
+    var tBody = document.getElementById('typographyBody');
+    tBody.innerHTML = '';
+    tBody.appendChild(groupTitleRow('Typography'));
+    TYPOGRAPHY.forEach(function(t) {
+      var webflowPx = t.webflowValue * rootFs;
+      var figmaRem = isMobile ? t.figmaMobile : t.figmaDesktop;
+      var figmaPx = figmaRem * 16;
+      var embedCoeff = isMobile ? t.embedCoeffM : t.embedCoeffD;
+      var embedRem = figmaRem * embedCoeff;
+      var embedPx = embedRem * 16;
+      var diff = webflowPx - figmaPx;
+      var isMatch = Math.abs(diff) < 0.5;
+      var diffSup = isMatch ? '' : '<sup>' + (diff > 0 ? '+' : '') + fmtPx(diff) + '</sup>';
+
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="token-name">' + t.name + '</td>' +
+        '<td>' + fmtNum(t.webflowValue) + t.unit + '</td>' +
+        '<td class="px col-sep ' + (isMatch ? '' : 'diff') + '">' + fmtPx(webflowPx) + diffSup + '</td>' +
+        '<td>' + fmtNum(figmaRem) + 'rem</td>' +
+        '<td class="px col-sep">' + fmtPx(figmaPx) + '</td>' +
+        '<td>' + fmtNum(embedRem) + 'rem</td>' +
+        '<td class="px">' + fmtPx(embedPx) + '</td>';
+      tBody.appendChild(tr);
+    });
+
+    // Containers
+    var cBody = document.getElementById('containersBody');
+    cBody.innerHTML = '';
+    cBody.appendChild(groupTitleRow('Containers'));
+    CONTAINERS.forEach(function(c) {
+      var figmaPx = c.figmaRem * 16;
+      var webflowPx = c.webflowRem !== null ? c.webflowRem * rootFs : null;
+      var diff = webflowPx !== null ? webflowPx - figmaPx : null;
+      var isMatch = diff !== null && Math.abs(diff) < 1;
+      var diffSup = (diff === null || isMatch) ? '' : '<sup>' + (diff > 0 ? '+' : '') + fmtPx(diff) + '</sup>';
+
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="token-name">' + c.name + '</td>' +
+        '<td>' + (c.webflowRem !== null ? c.webflowRem + 'rem' : '<span class="na">not set</span>') + '</td>' +
+        '<td class="px col-sep ' + (webflowPx === null ? '' : (isMatch ? '' : 'diff')) + '">' + (webflowPx !== null ? fmtPx(webflowPx) + diffSup : '<span class="na">—</span>') + '</td>' +
+        '<td>' + c.figmaRem + 'rem</td>' +
+        '<td class="px col-sep">' + fmtPx(figmaPx) + '</td>' +
+        '<td><span class="na">—</span></td>' +
+        '<td class="px">' + fmtPx(figmaPx) + ' <span class="unit">(embed uses px directly)</span></td>';
+      cBody.appendChild(tr);
+    });
+
+    // Padding & Gaps (discrete, not truly fluid, but breakpoint-dependent)
+    var pBody = document.getElementById('paddingBody');
+    pBody.innerHTML = '';
+    pBody.appendChild(groupTitleRow('Gaps & Padding (переключаются по брейкпоинту, дискретно из tokens.css)'));
+    PADDING.forEach(function(p) {
+      var figmaRem = p.remByBp[activeTab];
+      var figmaPx = figmaRem * 16;
+      var embedCoeff = isMobile ? 1.0 : 0.9;
+      var embedRem = figmaRem * embedCoeff;
+      var embedPx = embedRem * 16;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="token-name">' + p.name + '</td>' +
+        '<td><span class="na">not set</span></td>' +
+        '<td class="px col-sep"><span class="na">—</span></td>' +
+        '<td>' + fmtNum(figmaRem) + 'rem</td>' +
+        '<td class="px col-sep">' + fmtPx(figmaPx) + '</td>' +
+        '<td>' + fmtNum(embedRem) + 'rem</td>' +
+        '<td class="px">' + fmtPx(embedPx) + '</td>';
+      pBody.appendChild(tr);
+    });
+
+    // Spacing (constant, no breakpoint dependency)
+    var sBody = document.getElementById('spacingBody');
+    sBody.innerHTML = '';
+    sBody.appendChild(groupTitleRow('Spacing (не зависит от брейкпоинта)'));
+    SPACING.forEach(function(s) {
+      var figmaPx = s.rem * 16;
+      var embedCoeff = isMobile ? 1.0 : 0.9;
+      var embedRem = s.rem * embedCoeff;
+      var embedPx = embedRem * 16;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="token-name">' + s.name + '</td>' +
+        '<td><span class="na">not set</span></td>' +
+        '<td class="px col-sep"><span class="na">—</span></td>' +
+        '<td>' + s.rem + 'rem</td>' +
+        '<td class="px col-sep">' + fmtPx(figmaPx) + '</td>' +
+        '<td>' + fmtNum(embedRem) + 'rem</td>' +
+        '<td class="px">' + fmtPx(embedPx) + '</td>';
+      sBody.appendChild(tr);
+    });
+  }
+
+  function updateStickyOffset() {
+    var h = document.getElementById('stickyHeader').offsetHeight;
+    document.documentElement.style.setProperty('--thead-top', h + 'px');
+  }
+
+  renderAll();
+  updateStickyOffset();
+  window.addEventListener('resize', updateStickyOffset);
+</script>
+
+</body>
+</html>
