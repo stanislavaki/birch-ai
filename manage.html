@@ -6,6 +6,7 @@
 <title>Bïrch — Manage</title>
 <link rel="stylesheet" href="design-system/tokens.css" />
 <link rel="stylesheet" href="design-system/webflow-env.css" />
+<link rel="stylesheet" href="design-system/components/card-accordion.css" />
 <style>
   html, body { margin: 0; padding: 0; }
   body {
@@ -147,101 +148,266 @@
     .hero__mautomation  { left: 1.142em; top: 7.026em; }
   }
 
+
   /* ─────────────────────────────────────────
-     AI-PROMO PILLS — comparison block
-     Same composition as ai-promo.html hero, reusing the shared
-     --text-pill-size / --text-pill-size-mobile tokens.
-     Namespaced "promo__" so it doesn't collide with .hero__* above.
-     Mobile variant only shows via the ≤767px media query, same as hero.
+     AI STATEMENT — full-screen contrast block (Figma 17814:12909)
   ───────────────────────────────────────── */
-  .promo {
-    padding: var(--space-xl) var(--pad-horizontal);
+  .ais {
+    position: relative;
+    height: calc(100svh - var(--nav-height, 0px));
     display: flex;
     align-items: center;
     justify-content: center;
-    border-top: 1px dashed #2a2a2a;
-  }
-  .promo__pill {
-    display: block;
-    font-size: var(--ps);
-    padding: 0.058em 0.462em 0.154em;
-    font-family: var(--font);
-    font-weight: 600;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-    color: var(--color-text-inverted);
-  }
-  .promo__pill--sq   { border-radius: 0.308em; }
-  .promo__pill--pill { border-radius: var(--radius-pill); }
-  .promo__pill--light-blue { background: var(--color-accent-light-blue); }
-  .promo__pill--blue       { background: var(--color-accent-blue);   color: var(--color-text); }
-  .promo__pill--green      { background: var(--color-accent-green); }
-  .promo__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
-
-  .promo__deco-cols {
-    position: relative;
-    flex-shrink: 0;
     overflow: hidden;
-    font-size: var(--ps);
-    width:  1.596em;
-    height: 1.312em;
   }
-  .promo__col {
-    position: absolute;
-    bottom: 0;
-    width:         0.769em;
-    border-radius: 0.199em;
-  }
-  .promo__col--purple { left: 0;       height: 78.9%; background: var(--color-accent-purple); }
-  .promo__col--blue   { left: 0.827em; height: 100%;  background: var(--color-accent-blue); }
 
-  .promo__deco-bars {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.058em;
-    flex-shrink: 0;
-    font-size: var(--ps);
-    width:  1.654em;
-    height: 1.312em;
-  }
-  .promo__bar { height: 0.399em; border-radius: var(--radius-pill); }
-  .promo__bar--lb   { width: 100%;  background: var(--color-accent-light-blue); }
-  .promo__bar--pink { width: 67.4%; background: var(--color-accent-pink); }
-  .promo__bar--red  { width: 34.9%; background: var(--color-accent-red); }
-
-  .promo__h1--dt {
-    --ps: var(--text-pill-size);
+  .ais__content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--gap-sm);
-    font-size: var(--ps);
+    margin-top: -5rem; /* shift up so card doesn't clip at bottom */
   }
-  .promo__row { display: flex; align-items: center; gap: var(--gap-sm); }
 
-  .promo__h1--mb { display: none; }
+  .ais__heading {
+    text-align: center;
+    line-height: 0.92;
+    position: relative;
+    z-index: 1;
+  }
 
-  @media (max-width: 767px) {
-    .promo__h1--dt { display: none; }
-    .promo__h1--mb {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 0.15em;
-      width: fit-content;
-      --ps: var(--text-pill-size-mobile);
-      font-size: var(--ps);
-    }
-    .promo__step { display: flex; align-items: center; gap: 0.1em; flex-shrink: 0; }
-    .promo__step--a { margin-left: 0; }
-    .promo__step--b { margin-left: 0.5em; }
-    .promo__step--c { align-self: flex-start; margin-left: 0.6em; }
-    .promo__step--d { margin-left: 1.9em; }
-    .promo__step--e { align-self: flex-start; margin-left: 2.8em; }
-    .promo__h1--mb .promo__pill--green.promo__pill--sq { margin-right: 0.2em; }
+  .ais__card {
+    width: min(38.5rem, 80%);
+    transform: rotate(-7.19deg);
+    background: var(--color-accent-green);
+    border-radius: var(--radius-xl);
+    padding: 0.625rem;
+    margin-top: -5rem; /* overlap with last heading line */
+    position: relative;
+    z-index: 2;
+  }
+
+  .ais__card-inner {
+    border: 0.3125rem dashed var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 9.875rem;
+  }
+
+  .ais__card-text {
+    text-align: center;
+    color: var(--color-bg);
+    margin: 0;
+  }
+
+  .ais__robot {
+    position: absolute;
+    width: 10.5rem;
+    transform: rotate(-13.59deg);
+    left: 8vw;
+    top: calc(50% - 14rem);
+    pointer-events: none;
+  }
+
+  .ais__alien {
+    position: absolute;
+    width: 14.375rem;
+    transform: rotate(-16.84deg);
+    right: 3vw;
+    top: calc(50% + 1rem);
+    pointer-events: none;
+  }
+
+
+  /* ─────────────────────────────────────────
+     AI CHAT — 3-column showcase (Figma 17891:3017)
+     Col 1: image placeholder (image added later)
+     Col 2: chat card, reused from ai-promo.html "Analyze performance" dialogue
+     Col 3: accordion, reused from ai-promo.html card-accordion, auto-cycling
+  ───────────────────────────────────────── */
+  .aichat {
+    padding: var(--space-xl) 0;
+  }
+
+  /* Col 1: placeholder */
+  .aichat__placeholder {
+    background: var(--color-accent-indigo);
+    border-radius: var(--radius-xl);
+    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout — desktop grid stretch overrides */
+  }
+
+  /* Col 2: chat card (same component as ai-promo.html) */
+  .aichat__chat-col .chat-card-wrap {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout */
+    container-type: inline-size;
+  }
+  @media (min-width: 768px) {
+    .aichat__chat-col .chat-card-wrap { aspect-ratio: unset; } /* desktop: grid stretch drives height */
+  }
+
+  .aichat .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1.5em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.25vw, 1.25rem); /* fallback */
+    font-size: 4.55cqi;                          /* 18px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+  .aichat .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .aichat .chat-card__body::-webkit-scrollbar { display: none; }
+  .aichat .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+  .aichat .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+  .aichat .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .aichat .chat-card__bubble.is-visible { opacity: 1; transform: translateY(0); }
+  .aichat .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .aichat .chat-card__response.is-visible { opacity: 1; transform: translateY(0); }
+  .aichat .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .aichat .chat-card__response-content p { margin: 0 0 0.4em; }
+  .aichat .chat-card__response-content p:last-child { margin-bottom: 0; }
+  .aichat .chat-card__response-content strong { font-weight: 700; }
+  .aichat .chat-card__table { width: 100%; margin-bottom: 0.625em; }
+  .aichat .chat-card__table-header,
+  .aichat .chat-card__table-row { display: flex; align-items: center; }
+  .aichat .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .aichat .chat-card__table-col:first-child { padding-left: 0.875em; }
+  .aichat .chat-card__table-col:last-child  { flex: 0 0 5em; }
+  .aichat .chat-card__table-header .chat-card__table-col { color: #636363; font-weight: 500; }
+  .aichat .chat-card__table-row { border-radius: 0.75em; }
+  .aichat .chat-card__table-row--alt { background: #fafafa; }
+  .aichat .chat-card__input-area { flex-shrink: 0; padding: 1em; position: relative; }
+  .aichat .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .aichat .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .aichat .chat-card__text-flow { flex: 1; min-width: 0; line-height: inherit; }
+  .aichat .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .aichat .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .aichat .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .aichat .chat-card__cursor.is-blinking { animation: aichatCursorBlink 0.9s step-end infinite; }
+  @keyframes aichatCursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .aichat .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .aichat .chat-card__send.is-active { background: #161616; cursor: pointer; }
+  .aichat .chat-card__send svg { width: 1em; height: 1em; }
+
+  /* Col 3: accordion */
+  .aichat__accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+  }
+  .aichat__accordion .card-accordion {
+    background: var(--color-bg-grey); /* Figma: distinct grey card, not page-bg */
   }
 </style>
 </head>
@@ -322,62 +488,268 @@
 </section>
 
 <!-- ─────────────────────────────────────────
-     AI-PROMO PILLS — comparison block (same composition as ai-promo.html hero)
-     Mobile staircase only shows via the ≤767px media query, same as hero above.
+     AI STATEMENT — full-screen contrast block (Figma 17814:12909)
 ───────────────────────────────────────── -->
-<section class="promo">
-
-  <!-- Desktop: two rows -->
-  <div class="promo__h1--dt">
-    <div class="promo__row">
-      <span class="promo__pill promo__pill--light-blue promo__pill--sq">Built</span>
-      <div class="promo__deco-cols" aria-hidden="true">
-        <div class="promo__col promo__col--purple"></div>
-        <div class="promo__col promo__col--blue"></div>
+<section class="ais" id="ais">
+  <div class="ais__content">
+    <h2 class="ais__heading t-h1">
+      A lot of ad tools<br>
+      are racing to make AI<br>
+      fully autonomous
+    </h2>
+    <div class="ais__card">
+      <div class="ais__card-inner">
+        <p class="ais__card-text t-h3">We think that&rsquo;s the wrong goal<br>when it comes to budget decisions</p>
       </div>
-      <span class="promo__pill promo__pill--blue promo__pill--pill">with a</span>
-      <span class="promo__pill promo__pill--green promo__pill--sq">performance</span>
-    </div>
-    <div class="promo__row">
-      <span class="promo__pill promo__pill--green promo__pill--sq">marketing</span>
-      <div class="promo__deco-bars" aria-hidden="true">
-        <div class="promo__bar promo__bar--lb"></div>
-        <div class="promo__bar promo__bar--pink"></div>
-        <div class="promo__bar promo__bar--red"></div>
-      </div>
-      <span class="promo__pill promo__pill--indigo promo__pill--pill">mindset</span>
     </div>
   </div>
-
-  <!-- Mobile: staircase -->
-  <div class="promo__h1--mb" aria-label="Built with a performance marketing mindset">
-    <div class="promo__step promo__step--a">
-      <span class="promo__pill promo__pill--light-blue promo__pill--sq">Built</span>
-      <div class="promo__deco-cols" aria-hidden="true">
-        <div class="promo__col promo__col--purple"></div>
-        <div class="promo__col promo__col--blue"></div>
-      </div>
-    </div>
-    <div class="promo__step promo__step--b">
-      <div class="promo__deco-bars" aria-hidden="true">
-        <div class="promo__bar promo__bar--lb"></div>
-        <div class="promo__bar promo__bar--pink"></div>
-        <div class="promo__bar promo__bar--red"></div>
-      </div>
-      <span class="promo__pill promo__pill--blue promo__pill--pill">with a</span>
-    </div>
-    <div class="promo__step promo__step--c">
-      <span class="promo__pill promo__pill--green promo__pill--sq">performance</span>
-    </div>
-    <div class="promo__step promo__step--d">
-      <span class="promo__pill promo__pill--green promo__pill--sq">marketing</span>
-    </div>
-    <div class="promo__step promo__step--e">
-      <span class="promo__pill promo__pill--indigo promo__pill--pill">mindset</span>
-    </div>
-  </div>
-
+  <img class="ais__robot" src="images/ais-robot.png" alt="" aria-hidden="true">
+  <img class="ais__alien" src="images/ais-alien.png" alt="" aria-hidden="true">
 </section>
+
+<!-- ─────────────────────────────────────────
+     AI CHAT — 3-column showcase (Figma 17891:3017)
+───────────────────────────────────────── -->
+<section class="aichat" id="aichat">
+  <div class="container">
+    <div class="grid">
+
+      <!-- Col 1: image placeholder — image added later -->
+      <div class="col-4 aichat__placeholder" aria-hidden="true"></div>
+
+      <!-- Col 2: chat card — reused from ai-promo.html, "Analyze performance" dialogue -->
+      <div class="col-4 aichat__chat-col">
+        <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body" id="aichatBody">
+              <div class="chat-card__feed" id="aichatFeed"></div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="aichatPlaceholder">Ask anything</span><span class="chat-card__typed" id="aichatTyped"></span><span class="chat-card__cursor" id="aichatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="aichatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, auto-cycling -->
+      <div class="col-4 aichat__accordion" id="aichatAccordion">
+        <div class="card-accordion" data-index="0">
+          <h4 class="t-h4">Your existing rules are the starting point</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Bïrch's AI studies the automation rules you've already built—understanding your logic, your thresholds, and your goals—before it suggests anything new.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar0"></div></div>
+          </div>
+        </div>
+        <div class="card-accordion is-closed" data-index="1">
+          <h4 class="t-h4">It surfaces opportunities, not actions</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">The AI identifies automation gaps and inefficiencies in your campaigns, then presents them as suggestions with clear reasoning. It never adjusts a budget or pauses an ad on its own.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar1"></div></div>
+          </div>
+        </div>
+        <div class="card-accordion is-closed" data-index="2">
+          <h4 class="t-h4">You review, approve, and stay in control</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Every suggestion requires your sign-off before it becomes a rule. You can modify the conditions, adjust the thresholds, or dismiss it entirely. The final call is always yours.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar2"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+
+  /* ══════════════════════════════════════════════════════════
+     ACCORDION — auto-cycling, 3 cards, starts/pauses on visibility
+  ══════════════════════════════════════════════════════════ */
+  var COLORS = [
+    'var(--color-accent-green)',
+    'var(--color-accent-light-blue)',
+    'var(--color-accent-purple)',
+  ];
+  var ACC_DURATION = 5000; /* ms each card stays active */
+
+  var accBox = document.getElementById('aichatAccordion');
+  var accCards = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion'));
+  var accBars  = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion__bar-fill'));
+  var accActive  = 0;
+  var accStartMs = null;
+  var accRunning = false;
+  accBox.style.setProperty('--acc-color', COLORS[0]);
+
+  function accSetActive(idx) {
+    accCards.forEach(function (c) { c.classList.add('is-closed'); });
+    accCards[idx].classList.remove('is-closed');
+    accBox.style.setProperty('--acc-color', COLORS[idx]);
+    accBars.forEach(function (b) { b.style.width = '0%'; });
+    accActive  = idx;
+    accStartMs = null;
+  }
+
+  accCards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { accSetActive(idx); });
+  });
+
+  (function accTick(now) {
+    if (accRunning) {
+      if (accStartMs === null) accStartMs = now;
+      var elapsed  = now - accStartMs;
+      var progress = Math.min(elapsed / ACC_DURATION, 1);
+      accBars[accActive].style.width = (progress * 100).toFixed(1) + '%';
+      if (elapsed >= ACC_DURATION) accSetActive((accActive + 1) % accCards.length);
+    }
+    requestAnimationFrame(accTick);
+  })(performance.now());
+
+  /* Start/pause auto-cycle only while the block is on screen (project convention) */
+  var accObserver = new IntersectionObserver(function (entries) {
+    accRunning = entries[0].isIntersecting;
+    if (accRunning) accStartMs = null; /* resume cleanly, no jump */
+  }, { threshold: 0.1 });
+  accObserver.observe(accBox);
+
+  /* ══════════════════════════════════════════════════════════
+     CHAT — plays once, when the section is fully visible
+  ══════════════════════════════════════════════════════════ */
+  var CHAT_TYPING_MS = 15;
+  var PAUSE_SEND = 500;
+  var RESP_DELAY = 700;
+  var INIT_DELAY = 300;
+
+  var userMsg = 'Analyze my performance by platform';
+  var aiHtml = [
+    '<div class="chat-card__response-content">',
+      '<div class="chat-card__table">',
+        '<div class="chat-card__table-header">',
+          '<span class="chat-card__table-col">Platform</span>',
+          '<span class="chat-card__table-col">Ad Account</span>',
+          '<span class="chat-card__table-col">Spend</span>',
+        '</div>',
+        '<div class="chat-card__table-row chat-card__table-row--alt">',
+          '<span class="chat-card__table-col">Google Ads</span>',
+          '<span class="chat-card__table-col">Birch</span>',
+          '<span class="chat-card__table-col">🟢 $3.94M</span>',
+        '</div>',
+        '<div class="chat-card__table-row">',
+          '<span class="chat-card__table-col">Meta Ads</span>',
+          '<span class="chat-card__table-col">Bir.ch Marketing</span>',
+          '<span class="chat-card__table-col">🔴 $5K</span>',
+        '</div>',
+        '<div class="chat-card__table-row chat-card__table-row--alt">',
+          '<span class="chat-card__table-col">TikTok Ads</span>',
+          '<span class="chat-card__table-col">Bir.ch Tiktok</span>',
+          '<span class="chat-card__table-col">⚪ $40.6K</span>',
+        '</div>',
+      '</div>',
+      '<p><strong>🔍 Key Findings</strong></p>',
+      '<p>Google Ads Efficiency 🟢<br>',
+      'This high efficiency signals your campaigns are capturing high-intent traffic that converts at minimal cost relative to revenue.</p>',
+    '</div>'
+  ].join('');
+
+  var chatFeed     = document.getElementById('aichatFeed');
+  var chatBody     = document.getElementById('aichatBody');
+  var placeholder  = document.getElementById('aichatPlaceholder');
+  var typedEl      = document.getElementById('aichatTyped');
+  var inputCursor  = document.getElementById('aichatCursor');
+  var sendBtn      = document.getElementById('aichatSendBtn');
+  typedEl.style.display = 'none';
+
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent = '';
+    typedEl.style.display = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() { chatBody.scrollTop = chatBody.scrollHeight; }
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  function type(charIdx) {
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = userMsg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+    if (charIdx < userMsg.length) {
+      setTimeout(function () { type(charIdx + 1); }, CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      setTimeout(doSend, PAUSE_SEND);
+    }
+  }
+  function doSend() {
+    clearInput();
+    var bubbleEl = createBubble(userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        bubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    setTimeout(startResponse, RESP_DELAY);
+  }
+  function startResponse() {
+    var respEl = createResponse(aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        respEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+  }
+
+  /* Fire once, when the whole section is 100% visible */
+  var chatSection = document.getElementById('aichat');
+  var chatObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) {
+      chatObserver.disconnect();
+      setTimeout(function () { type(0); }, INIT_DELAY);
+    }
+  }, { threshold: 1.0 });
+  chatObserver.observe(chatSection);
+
+})();
+</script>
 
 </body>
 </html>
