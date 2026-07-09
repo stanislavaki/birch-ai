@@ -1,0 +1,182 @@
+/* ============================================================
+   WEBFLOW DEV ENVIRONMENT
+   Shared context for local dev pages so they match the real
+   Webflow site (fluid font-size, nav, container/section, resets)
+   without needing to cross-check debug/webflow-sim.html.
+
+   Usage: <link rel="stylesheet" href="design-system/webflow-env.css" />
+   Pair with the nav markup in design-system/webflow-env-nav.html.
+   ============================================================ */
+
+@font-face {
+  font-family: "Tt Commons Pro Variable";
+  src: url("../fonts/TT_Commons_Pro_Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+/* ── Webflow fluid font-size (from .fluid-css.w-embed, reused on all pages) ── */
+html { font-size: 16px; }
+@media (min-width: 768px)  { html { font-size: calc(12.5px + 3.5 * ((100vw - 768px) / 223)); } }
+@media (min-width: 992px)  { html { font-size: calc(16px + 0 * ((100vw - 992px) / 288)); } }
+@media (min-width: 1280px) { html { font-size: calc(16px + 3.2 * ((100vw - 1280px) / 320)); } }
+@media (min-width: 1600px) { html { font-size: 19.2px; } }
+
+/* ── nav-height CSS var (как в реальном Webflow) ── */
+:root { --nav-height: 6.5em; }
+
+/* ── Global resets (from real site) ── */
+*, *::before, *::after { box-sizing: border-box; }
+* {
+  /* Fix italic on variable fonts in Safari (mobile) */
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-variation-settings: "ital" 0, "slnt" 0;
+}
+
+body {
+  margin: 0;
+  font-family: "Tt Commons Pro Variable", Arial, sans-serif;
+  background: #0D0D12;
+  color: var(--color-text);
+}
+img { border-radius: 8px; }
+
+/* ── Webflow .section (from real site) ── */
+.section {
+  position: relative;
+  display: block;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+/* ── Webflow .container (from real site) ── */
+.container {
+  display: block;
+  width: 100%;
+  max-width: 90rem; /* dev env only — embeds use px, see CLAUDE.md */
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+  transition: all 525ms ease;
+}
+@media (max-width: 767px) {
+  .container {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+}
+
+/* ── Simulated fixed navbar (matches real bir.ch nav structure) ── */
+.sim-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-height);
+  background: transparent;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  color: #fff;
+  font-family: "Tt Commons Pro Variable", Arial, sans-serif;
+}
+.sim-nav__inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+}
+.sim-nav__logo {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  flex: none;
+  text-decoration: none;
+  color: #fff;
+}
+.sim-nav__logo svg { height: 100%; width: auto; }
+.sim-nav__center {
+  position: absolute;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.sim-nav__center-links {
+  display: flex;
+  align-items: center;
+  pointer-events: all;
+}
+.sim-nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1em 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.sim-nav__link:hover { opacity: 0.7; }
+.sim-nav__link-dot {
+  position: absolute;
+  bottom: 0.3em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0.5rem; height: 0.5rem;
+  border-radius: 100vw;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.sim-nav__link:hover .sim-nav__link-dot { opacity: 1; }
+.sim-nav__badge {
+  position: absolute;
+  top: 0.3em;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ffe243;
+}
+.sim-nav__right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.sim-nav__link-lg {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  line-height: 1;
+  transition: background-color 0.35s;
+}
+.sim-nav__link-lg:hover { background: #2a2a2a; }
+.sim-nav__btn {
+  display: flex;
+  align-items: center;
+  margin-left: 0.7rem;
+  padding: 0.75rem 1.25rem;
+  background: #ffe243;
+  color: #0b0b0b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.35s;
+}
+.sim-nav__btn:hover { background: #4551f2; color: #fff; }
