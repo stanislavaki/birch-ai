@@ -157,7 +157,7 @@
   ───────────────────────────────────────── */
   .ais-rail {
     position: relative;
-    height: 280vh; /* 100vh section + 180vh runway: card entry 0→65%, park 65→100% */
+    height: 200vh; /* 100vh section + 100vh runway: card at 25%, ~25vh park */
     overflow-x: clip;
   }
 
@@ -180,12 +180,18 @@
     margin-top: -6rem; /* shift heading above visual center */
   }
 
+  /* On desktop: transparent wrapper so characters still position vs .ais__content */
+  .ais__chars { display: contents; }
+
   .ais__heading {
     text-align: center;
     line-height: 0.92;
     position: relative;
     z-index: 1;
+    transition: transform 1s cubic-bezier(0.34, 1.12, 0.64, 1);
+    transform-origin: center top;
   }
+  .ais__heading--small { transform: scale(0.8); }
   .ais__heading-mb { display: none; }
 
   /* Card: absolute in .ais, centered, overlapping heading bottom */
@@ -196,8 +202,8 @@
     left: 0;
     right: 0;
     margin: auto;
-    top: calc(50% + 4rem);
-    transform: rotate(-7.19deg);
+    top: 0; /* overridden by JS: positioned relative to heading bottom */
+    transform: rotate(-3.595deg);
     background: var(--color-accent-green);
     border-radius: var(--radius-xl);
     padding: 0.625rem;
@@ -223,11 +229,11 @@
   /* Card: starts off-screen, animates in via CSS when --visible class added */
   .ais__card {
     will-change: transform;
-    transform: rotate(-7.19deg) translateY(120vh);
+    transform: rotate(-3.595deg) translateY(120vh);
   }
   @keyframes ais-card-in {
     from { transform: rotate(-25deg) translateY(120vh); }
-    to   { transform: rotate(-7.19deg) translateY(0); }
+    to   { transform: rotate(-3.595deg) translateY(0); }
   }
   .ais__card--visible {
     animation: ais-card-in 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
@@ -316,43 +322,97 @@
   }
 
   @media (max-width: 767px) {
+    .ais-rail { height: auto; }
+
+    .ais {
+      position: relative;
+      top: auto;
+      height: auto;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 2rem;
+      padding-bottom: 4rem;
+    }
+
+    .ais__content { width: 100%; margin-top: 0; position: static; }
+
+    /* Characters block: takes up space in normal flow, characters absolute inside */
+    .ais__chars {
+      display: block;
+      position: relative;
+      width: 100%;
+      height: 12rem;
+      margin-bottom: 1.5rem;
+    }
+
     .ais__heading-dt { display: none; }
     .ais__heading-mb { display: inline; }
-
     .ais__heading-wrap {
       width: 100%;
-      max-width: 23.4375rem; /* 375px */
+      max-width: 23.4375rem;
       padding-inline: var(--pad-horizontal);
     }
-    .ais__heading {
-      width: 100%;
-    }
+    .ais__heading { width: 100%; }
 
-    .ais__content {
-      width: 100%;
-    }
-
-    /* Card: mobile heading ~3 lines × 2.375rem × 0.92lh ≈ 6.5rem; half = 3.25rem → top = 50% + 1.5rem */
-    .ais__card {
-      width: min(30rem, 87.5%);
-      top: calc(50% + 1.5rem);
-    }
-    .ais__card-inner {
-      padding: 1.5rem;
-      min-height: 0;
-    }
-
+    /* Robot: starts centered, shifts left when grouped with alien */
     .ais__robot {
-      width: 5.125rem; /* 82px */
-      left: -1.25rem;
-      top: -10rem;
-    }
-    .ais__alien {
-      width: 7.0625rem; /* 113px */
-      left: 66.67%;
+      width: 7.6875rem;
+      left: 50%;
+      margin-left: -3.84375rem; /* -half-width */
       right: auto;
       top: 2rem;
+      transform: rotate(-13.59deg) translateY(-1.5rem);
+      transition: opacity 0.5s ease,
+                  transform 0.5s ease,
+                  left 0.7s cubic-bezier(0.34, 1.12, 0.64, 1) 0.7s,
+                  margin-left 0.7s cubic-bezier(0.34, 1.12, 0.64, 1) 0.7s;
     }
+    .ais__robot--visible {
+      opacity: 1;
+      transform: rotate(-13.59deg) translateY(0);
+    }
+    /* group: robot+alien centered together; half-group = (7.6875 + 0.5 + 10.59375)/2 ≈ 9.39rem */
+    .ais--grouped .ais__robot {
+      left: calc(50% - 9.39rem);
+      margin-left: 0;
+    }
+
+    /* Alien: slides in from right to its group position */
+    .ais__alien {
+      width: 10.59375rem;
+      left: calc(50% - 1.2rem); /* 50% - 9.39rem + 7.6875rem + 0.5rem */
+      right: auto;
+      top: 1.5rem;
+      transform: rotate(-16.84deg) translateX(150%);
+      transition: opacity 0.5s ease 0.8s,
+                  transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.8s;
+    }
+    .ais__alien--visible {
+      opacity: 1;
+      transform: rotate(-16.84deg) translateX(0);
+    }
+
+    /* Card: Figma mobile uses -7.19deg rotation */
+    .ais__card {
+      width: 87.5%;
+      transform: rotate(-7.19deg) translateY(60vh);
+    }
+    .ais__card-inner { padding: 1.5rem; min-height: 0; }
+
+    @keyframes ais-card-in-mb {
+      from { transform: rotate(-20deg) translateY(60vh); }
+      to   { transform: rotate(-7.19deg) translateY(0); }
+    }
+    .ais__card--visible {
+      animation: ais-card-in-mb 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+    }
+
+    /* Eye sizes scaled to 1.5× mobile characters (≈ 0.73× desktop) */
+    .ais__eye { width: 1rem; height: 1rem; }
+    .ais__alien .ais__eye { width: 0.7rem; height: 1.175rem; }
+    .ais__pupil { width: 0.5rem; height: 0.5rem; }
+    .ais__alien .ais__pupil { width: 0.45rem; height: 0.45rem; }
   }
 
 
@@ -628,25 +688,27 @@
 <div class="ais-rail">
   <section class="ais" id="ais">
     <div class="ais__content">
+      <div class="ais__chars">
+        <div class="ais__robot" aria-hidden="true">
+          <div class="ais__char-body">
+            <img src="images/ai-robot-1.png" alt="">
+            <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
+            <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+          </div>
+        </div>
+        <div class="ais__alien" aria-hidden="true">
+          <div class="ais__char-body">
+            <img src="images/ai-robot-2.png" alt="">
+            <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
+            <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+          </div>
+        </div>
+      </div>
       <div class="ais__heading-wrap">
         <h2 class="ais__heading t-display">
           <span class="ais__heading-dt">A lot of ad tools<br>are racing to make AI<br>fully autonomous</span>
           <span class="ais__heading-mb">A lot of ad tools are racing to make AI fully autonomous</span>
         </h2>
-      </div>
-      <div class="ais__robot" aria-hidden="true">
-        <div class="ais__char-body">
-          <img src="images/ai-robot-1.png" alt="">
-          <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
-          <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
-        </div>
-      </div>
-      <div class="ais__alien" aria-hidden="true">
-        <div class="ais__char-body">
-          <img src="images/ai-robot-2.png" alt="">
-          <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
-          <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
-        </div>
       </div>
     </div>
     <div class="ais__card">
@@ -909,17 +971,36 @@
   var rail    = document.querySelector('.ais-rail');
   var section = document.querySelector('.ais');
   var card    = document.querySelector('.ais__card');
+  var heading = document.querySelector('.ais__heading');
   var robot   = document.querySelector('.ais__robot');
   var alien   = document.querySelector('.ais__alien');
+
+  function positionCard() {
+    var isMobile = window.innerWidth <= 767;
+    var sectionTop    = section.getBoundingClientRect().top;
+    var headingBottom = heading.getBoundingClientRect().bottom;
+    var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var offset = isMobile ? remPx * 0.5 : -remPx; /* +0.5rem gap mobile, -1rem overlap desktop */
+    var cardTop = headingBottom - sectionTop + offset;
+    card.style.top = cardTop + 'px';
+    if (isMobile) {
+      /* shrink section to fit content — card is absolute so doesn't contribute to height */
+      section.style.minHeight = (cardTop + card.offsetHeight + remPx * 2) + 'px';
+    }
+  }
+  positionCard();
+  document.fonts.ready.then(positionCard);
+  window.addEventListener('resize', positionCard, { passive: true });
 
   /* emojis appear when section is 50% in viewport */
   var emojiObserver = new IntersectionObserver(function (entries) {
     if (entries[0].isIntersecting) {
       robot.classList.add('ais__robot--visible');
       alien.classList.add('ais__alien--visible');
+      section.classList.add('ais--grouped');
       emojiObserver.disconnect();
     }
-  }, { threshold: 0.5 });
+  }, { threshold: 0.3 });
   emojiObserver.observe(section);
 
   /* card appears after user scrolls 40% through the rail */
@@ -929,17 +1010,30 @@
     return raw ? parseFloat(raw) * fs : 0;
   }
 
-  function checkCard() {
-    var railTop = rail.getBoundingClientRect().top;
-    var range   = rail.offsetHeight - section.offsetHeight;
-    if (range <= 0) return;
-    var p = Math.max(0, (getNavH() - railTop) / range);
-    if (p >= 0.4) {
-      card.classList.add('ais__card--visible');
-      window.removeEventListener('scroll', checkCard, { passive: true });
-    }
+  function showCard(withHeadingSmall) {
+    card.classList.add('ais__card--visible');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
   }
-  window.addEventListener('scroll', checkCard, { passive: true });
+
+  var range = rail.offsetHeight - section.offsetHeight;
+  if (range <= 0) {
+    /* mobile: no scroll range — trigger card by intersection */
+    var cardObserver = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) { showCard(false); cardObserver.disconnect(); }
+    }, { threshold: 0.3 });
+    cardObserver.observe(section);
+  } else {
+    /* desktop: trigger card at 25% scroll through rail */
+    function checkCard() {
+      var railTop = rail.getBoundingClientRect().top;
+      var p = Math.max(0, (getNavH() - railTop) / range);
+      if (p >= 0.25) {
+        showCard(true);
+        window.removeEventListener('scroll', checkCard, { passive: true });
+      }
+    }
+    window.addEventListener('scroll', checkCard, { passive: true });
+  }
 })();
 </script>
 
@@ -953,14 +1047,15 @@
   var ROT_ALIEN = -16.84 * Math.PI / 180;
 
   /* pupils — robot: snappy; alien: calmer */
-  var EYE_K = 0.3, EYE_D = 0.8;
-  var EYE_K_ALIEN = 0.12, EYE_D_ALIEN = 0.90;
-
   /* body — slow graceful drift */
   var BODY_K      = 0.035;
   var BODY_D      = 0.88;
+
+  /* pupils — robot: snappy; alien: matches body spring for sync movement */
+  var EYE_K = 0.3, EYE_D = 0.8;
+  var EYE_K_ALIEN = 0.2, EYE_D_ALIEN = 0.82;
   var MAX_OFFSET  = 14; /* px */
-  var MAX_TILT    = 4;  /* deg */
+  var MAX_TILT    = 10; /* deg */
 
   function toLocal(nx, ny, rad) {
     var a = -rad, c = Math.cos(a), s = Math.sin(a);
@@ -985,6 +1080,18 @@
   /* last known cursor position — updated on every mousemove */
   var _mx = -9999, _my = -9999;
 
+  /* default eye direction: look toward title (above section center) */
+  requestAnimationFrame(function () {
+    var sr  = section.getBoundingClientRect();
+    var fakeX = sr.left + sr.width / 2;
+    var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
+    updateTargets(fakeX, fakeY);
+  });
+
+  /* last close-proximity direction per character — for residual tilt memory */
+  var _lastNx = [0, 0];
+  var MIN_HOLD = [0.4, 0.8]; /* per-char: robot=0.4, alien=0.8 (alien 2× more memory) */
+
   var charEls = [section.querySelector('.ais__robot'), section.querySelector('.ais__alien')];
   var chars   = [
     { el: charEls[0], rot: ROT_ROBOT, isAlien: false },
@@ -1003,9 +1110,11 @@
       var prox = Math.max(0, 1 - dist / 480);
       var nx   = dist > 1 ? cdx / dist : 0;
       var ny   = dist > 1 ? cdy / dist : 0;
+      if (prox > 0.1) _lastNx[j] = nx; /* remember direction while cursor is close */
+      var tiltNx = prox > 0.1 ? nx : _lastNx[j];
       bodies[j]._sp.tx   = -nx * MAX_OFFSET * prox;
       bodies[j]._sp.ty   = -ny * MAX_OFFSET * 0.6 * prox;
-      bodies[j]._sp.trot = -snx * MAX_TILT * (0.15 + prox * 0.85);
+      bodies[j]._sp.trot = -tiltNx * MAX_TILT * Math.max(prox, MIN_HOLD[j]);
     }
 
     /* eye targets — direction from CHARACTER center so both eyes look the same way */
@@ -1021,7 +1130,8 @@
         continue;
       }
       var nx  = cdx / clen, ny = cdy / clen;
-      var loc = toLocal(nx, ny, ch.rot);
+      var bodyRot = bodies[c]._sp.rot * Math.PI / 180;
+      var loc = toLocal(nx, ny, ch.rot + bodyRot);
       var ces = ch.el.querySelectorAll('.ais__eye');
       for (var k = 0; k < ces.length; k++) {
         var eye  = ces[k];
@@ -1057,6 +1167,22 @@
     }
   }, { threshold: 0.1 });
   eyeObserver.observe(section);
+
+  /* Mobile: robot looks at title by default; when alien slides in, switches to alien */
+  if (window.innerWidth <= 767) {
+    var _alienVis = new MutationObserver(function () {
+      if (alienEl.classList.contains('ais__alien--visible')) {
+        _alienVis.disconnect();
+        setTimeout(function () {
+          var ar = alienEl.getBoundingClientRect();
+          _mx = ar.left + ar.width  / 2;
+          _my = ar.top  + ar.height / 2;
+          updateTargets(_mx, _my);
+        }, 1800); /* robot shift 0.7s+0.7s, alien 0.8s+0.8s — wait for both to settle */
+      }
+    });
+    _alienVis.observe(alienEl, { attributes: true, attributeFilter: ['class'] });
+  }
 
   (function loop() {
     /* bodies first — apply spring step */
