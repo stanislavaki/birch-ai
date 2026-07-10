@@ -211,7 +211,7 @@
   }
 
   .ais__card-inner {
-    border: 0.3125rem dashed var(--color-bg);
+    border: 0.3125rem dotted var(--color-bg);
     border-radius: var(--radius-lg);
     padding: 2rem 2.5rem;
     display: flex;
@@ -237,6 +237,10 @@
   }
   .ais__card--visible {
     animation: ais-card-in 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+  }
+  /* Snap to final position with no animation (page reloaded already in view) */
+  .ais__card--instant {
+    transform: rotate(-3.595deg) translateY(0);
   }
 
   /* Emojis: absolute relative to .ais__content, appear on scroll-in */
@@ -345,7 +349,7 @@
       align-items: flex-start;
       gap: 0.5rem;
       width: 100%;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0;
     }
 
     .ais__heading-dt { display: none; }
@@ -386,19 +390,26 @@
       transform: rotate(-16.84deg) translateX(0);
     }
 
-    /* Card: Figma mobile uses -7.19deg rotation */
+    /* Card: in-flow under heading on mobile */
     .ais__card {
-      width: 87.5%;
-      transform: rotate(-7.19deg) translateY(60vh);
+      position: relative;
+      top: auto; left: auto; right: auto;
+      margin: 1.5rem auto 0;
+      width: 70%;
+      transform: rotate(-7.19deg) translateY(100vh);
     }
     .ais__card-inner { padding: 1.5rem; min-height: 0; }
 
     @keyframes ais-card-in-mb {
-      from { transform: rotate(-20deg) translateY(60vh); }
+      from { transform: rotate(-20deg) translateY(100vh); }
       to   { transform: rotate(-7.19deg) translateY(0); }
     }
     .ais__card--visible {
       animation: ais-card-in-mb 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+    }
+    .ais__card--instant {
+      animation: none;
+      transform: rotate(-7.19deg) translateY(0);
     }
 
     /* Eye sizes scaled to 1.5× mobile characters (≈ 0.73× desktop) */
@@ -969,17 +980,11 @@
   var alien   = document.querySelector('.ais__alien');
 
   function positionCard() {
-    var isMobile = window.innerWidth <= 767;
+    if (window.innerWidth <= 767) return; /* mobile: card is in-flow, no JS needed */
     var sectionTop    = section.getBoundingClientRect().top;
     var headingBottom = heading.getBoundingClientRect().bottom;
     var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    var offset = isMobile ? remPx * 0.5 : -remPx; /* +0.5rem gap mobile, -1rem overlap desktop */
-    var cardTop = headingBottom - sectionTop + offset;
-    card.style.top = cardTop + 'px';
-    if (isMobile) {
-      /* shrink section to fit content — card is absolute so doesn't contribute to height */
-      section.style.minHeight = (cardTop + card.offsetHeight + remPx * 2) + 'px';
-    }
+    card.style.top = (headingBottom - sectionTop - remPx) + 'px';
   }
   positionCard();
   document.fonts.ready.then(positionCard);
@@ -1006,12 +1011,29 @@ emojiObserver.disconnect();
     card.classList.add('ais__card--visible');
     if (withHeadingSmall) heading.classList.add('ais__heading--small');
   }
+  function snapCard(withHeadingSmall) {
+    card.classList.add('ais__card--instant');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
+  }
+
+  /* On reload the browser restores scroll position AFTER this script runs, so
+     the card trigger can fire with the section already in view — replaying the
+     fly-in makes the card "jump" out of sync with the scroll. Fix: only animate
+     after a real user gesture. Scroll restoration and programmatic scrolls emit
+     no wheel/touch/key events, so `armed` stays false on reload-into-view and we
+     snap instead. */
+  var armed = false;
+  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
+  });
 
   var range = rail.offsetHeight - section.offsetHeight;
   if (range <= 0) {
     /* mobile: no scroll range — trigger card by intersection */
     var cardObserver = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) { showCard(false); cardObserver.disconnect(); }
+      if (!entries[0].isIntersecting) return;
+      if (armed) showCard(false); else snapCard(false);
+      cardObserver.disconnect();
     }, { threshold: 0.3 });
     cardObserver.observe(section);
   } else {
@@ -1020,11 +1042,13 @@ emojiObserver.disconnect();
       var railTop = rail.getBoundingClientRect().top;
       var p = Math.max(0, (getNavH() - railTop) / range);
       if (p >= 0.25) {
-        showCard(true);
+        if (armed) showCard(true); else snapCard(true);
         window.removeEventListener('scroll', checkCard, { passive: true });
       }
     }
     window.addEventListener('scroll', checkCard, { passive: true });
+    /* fire once in case we load already past the trigger (no scroll event) */
+    requestAnimationFrame(checkCard);
   }
 })();
 </script>
