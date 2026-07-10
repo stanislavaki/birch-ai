@@ -151,21 +151,33 @@
 
   /* ─────────────────────────────────────────
      AI STATEMENT — full-screen contrast block (Figma 17814:12909)
+     Structure: .ais-rail (scroll runway) → .ais (sticky) →
+       .ais__content (heading + emojis, position:relative)
+       .ais__card    (absolute in section, animates in on scroll)
   ───────────────────────────────────────── */
-  .ais {
+  .ais-rail {
     position: relative;
+    height: 280vh; /* 100vh section + 180vh runway: card entry 0→65%, park 65→100% */
+    overflow-x: clip;
+  }
+
+  .ais {
+    position: sticky;
+    top: var(--nav-height, 0px);
     height: calc(100svh - var(--nav-height, 0px));
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    /* no overflow: hidden — card enters from below, clipped by viewport naturally */
   }
 
+  /* Heading + emojis — positioning context for emoji absolute coords */
   .ais__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: -5rem; /* shift up so card doesn't clip at bottom */
+    margin-top: -6rem; /* shift heading above visual center */
   }
 
   .ais__heading {
@@ -174,15 +186,21 @@
     position: relative;
     z-index: 1;
   }
+  .ais__heading-mb { display: none; }
 
+  /* Card: absolute in .ais, centered, overlapping heading bottom */
+  /* Heading: 3 lines × 5rem × 0.92lh = 13.8rem; half = 6.9rem → top = 50% + 6.9rem - 3rem overlap */
   .ais__card {
+    position: absolute;
     width: min(38.5rem, 80%);
+    left: 0;
+    right: 0;
+    margin: auto;
+    top: calc(50% + 4rem);
     transform: rotate(-7.19deg);
     background: var(--color-accent-green);
     border-radius: var(--radius-xl);
     padding: 0.625rem;
-    margin-top: -5rem; /* overlap with last heading line */
-    position: relative;
     z-index: 2;
   }
 
@@ -202,22 +220,123 @@
     margin: 0;
   }
 
+  /* Card: starts off-screen below, JS animates in via translateY */
+  .ais__card {
+    will-change: transform;
+    transform: rotate(-7.19deg) translateY(120vh);
+  }
+
+  /* Emojis: absolute relative to .ais__content, appear on scroll-in */
   .ais__robot {
     position: absolute;
     width: 10.5rem;
-    transform: rotate(-13.59deg);
-    left: 8vw;
-    top: calc(50% - 14rem);
+    aspect-ratio: 1 / 1;
+    left: -6rem;
+    top: 0;
     pointer-events: none;
+    opacity: 0;
+    transform: rotate(-13.59deg) translateY(1.5rem);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .ais__robot--visible {
+    opacity: 1;
+    transform: rotate(-13.59deg) translateY(0);
   }
 
   .ais__alien {
     position: absolute;
     width: 14.375rem;
-    transform: rotate(-16.84deg);
-    right: 3vw;
-    top: calc(50% + 1rem);
+    aspect-ratio: 175 / 149;
+    right: -11rem;
+    top: 12rem;
     pointer-events: none;
+    opacity: 0;
+    transform: rotate(-16.84deg) translateY(1.5rem);
+    transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+  }
+  .ais__alien--visible {
+    opacity: 1;
+    transform: rotate(-16.84deg) translateY(0);
+  }
+
+  .ais__robot img,
+  .ais__alien img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* Eye overlay: positioned div on top of image, pupil moves toward cursor */
+  .ais__eye {
+    position: absolute;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .ais__alien .ais__eye {
+    width: 0.95rem;
+    height: 1.6rem;
+    border-radius: 0;
+  }
+  .ais__pupil {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: rgba(10, 10, 20, 0.75);
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  .ais__alien .ais__pupil {
+    background: rgba(255, 255, 255, 0.9);
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 0;
+  }
+
+  @media (max-width: 767px) {
+    .ais__heading-dt { display: none; }
+    .ais__heading-mb { display: inline; }
+
+    .ais__heading-wrap {
+      width: 100%;
+      max-width: 23.4375rem; /* 375px */
+      padding-inline: var(--pad-horizontal);
+    }
+    .ais__heading {
+      width: 100%;
+    }
+
+    .ais__content {
+      width: 100%;
+    }
+
+    /* Card: mobile heading ~3 lines × 2.375rem × 0.92lh ≈ 6.5rem; half = 3.25rem → top = 50% + 1.5rem */
+    .ais__card {
+      width: min(30rem, 87.5%);
+      top: calc(50% + 1.5rem);
+    }
+    .ais__card-inner {
+      padding: 1.5rem;
+      min-height: 0;
+    }
+
+    .ais__robot {
+      width: 5.125rem; /* 82px */
+      left: -1.25rem;
+      top: -10rem;
+    }
+    .ais__alien {
+      width: 7.0625rem; /* 113px */
+      left: 66.67%;
+      right: auto;
+      top: 2rem;
+    }
   }
 
 
@@ -490,22 +609,33 @@
 <!-- ─────────────────────────────────────────
      AI STATEMENT — full-screen contrast block (Figma 17814:12909)
 ───────────────────────────────────────── -->
-<section class="ais" id="ais">
-  <div class="ais__content">
-    <h2 class="ais__heading t-h1">
-      A lot of ad tools<br>
-      are racing to make AI<br>
-      fully autonomous
-    </h2>
+<div class="ais-rail">
+  <section class="ais" id="ais">
+    <div class="ais__content">
+      <div class="ais__heading-wrap">
+        <h2 class="ais__heading t-display">
+          <span class="ais__heading-dt">A lot of ad tools<br>are racing to make AI<br>fully autonomous</span>
+          <span class="ais__heading-mb">A lot of ad tools are racing to make AI fully autonomous</span>
+        </h2>
+      </div>
+      <div class="ais__robot" aria-hidden="true">
+        <img src="images/ai-robot-1.png" alt="">
+        <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
+        <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+      </div>
+      <div class="ais__alien" aria-hidden="true">
+        <img src="images/ai-robot-2.png" alt="">
+        <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
+        <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+      </div>
+    </div>
     <div class="ais__card">
       <div class="ais__card-inner">
         <p class="ais__card-text t-h3">We think that&rsquo;s the wrong goal<br>when it comes to budget decisions</p>
       </div>
     </div>
-  </div>
-  <img class="ais__robot" src="images/ais-robot.png" alt="" aria-hidden="true">
-  <img class="ais__alien" src="images/ais-alien.png" alt="" aria-hidden="true">
-</section>
+  </section>
+</div>
 
 <!-- ─────────────────────────────────────────
      AI CHAT — 3-column showcase (Figma 17891:3017)
@@ -748,6 +878,107 @@
   }, { threshold: 1.0 });
   chatObserver.observe(chatSection);
 
+})();
+</script>
+
+<script>
+/* ─── AIS: scroll-driven card + emoji appear ─── */
+(function () {
+  'use strict';
+
+  var rail    = document.querySelector('.ais-rail');
+  var section = document.querySelector('.ais');
+  var card    = document.querySelector('.ais__card');
+  var robot   = document.querySelector('.ais__robot');
+  var alien   = document.querySelector('.ais__alien');
+
+  var LERP      = 0.1;
+  var currentP  = 0;
+  var targetP   = 0;
+  var _rafReady = false;
+
+  function getNavH() {
+    var fs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    return raw ? parseFloat(raw) * fs : 0;
+  }
+
+  /* progress 0 = card starts, 1 = card landed */
+  function scrollProgress() {
+    var railTop = rail.getBoundingClientRect().top;
+    var range   = rail.offsetHeight - section.offsetHeight;
+    if (range <= 0) return 0;
+    return Math.max(0, Math.min(1, (getNavH() - railTop) / range));
+  }
+
+  function tick(p) {
+    var cardP  = Math.min(p / 0.65, 1.0); /* card lands at 65% scroll, parks until 100% */
+    var startY = window.innerHeight * 1.2;
+    card.style.transform = 'rotate(-7.19deg) translateY(' + (startY * (1 - cardP)) + 'px)';
+  }
+
+  /* emojis appear when section is 50% in viewport */
+  var emojiObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) {
+      robot.classList.add('ais__robot--visible');
+      alien.classList.add('ais__alien--visible');
+      emojiObserver.disconnect();
+    }
+  }, { threshold: 0.5 });
+  emojiObserver.observe(section);
+
+  /* rAF loop — snap on first frame per CLAUDE.md */
+  (function loop() {
+    targetP = scrollProgress();
+    if (!_rafReady) { currentP = targetP; _rafReady = true; }
+    currentP += (targetP - currentP) * LERP;
+    tick(currentP);
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+
+<script>
+/* ─── AIS: eye tracking — pupils follow cursor ─── */
+(function () {
+  'use strict';
+  var eyes = document.querySelectorAll('.ais__eye');
+
+  window.addEventListener('mousemove', function (e) {
+    for (var i = 0; i < eyes.length; i++) {
+      var eye    = eyes[i];
+      var rect   = eye.getBoundingClientRect();
+      var cx     = rect.left + rect.width  / 2;
+      var cy     = rect.top  + rect.height / 2;
+      var dx     = e.clientX - cx;
+      var dy     = e.clientY - cy;
+      var pupil  = eye.querySelector('.ais__pupil');
+      var px, py;
+
+      if (eye.closest('.ais__alien')) {
+        /* perimeter movement: pupil always sits on rectangle outline */
+        var pRect = pupil.getBoundingClientRect();
+        var halfW = (rect.width  - pRect.width)  / 2;
+        var halfH = (rect.height - pRect.height) / 2;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
+          px = 0; py = 0;
+        } else {
+          var s = Math.max(Math.abs(dx) / halfW, Math.abs(dy) / halfH);
+          px = dx / s;
+          py = dy / s;
+        }
+      } else {
+        /* circular clamp: move up to 40% of eye radius */
+        var dist   = Math.sqrt(dx * dx + dy * dy);
+        var radius = Math.min(rect.width, rect.height) / 2;
+        var scale  = dist > 0 ? Math.min(dist, radius * 0.4) / dist : 0;
+        px = dx * scale;
+        py = dy * scale;
+      }
+
+      pupil.style.transform = 'translate(-50%, -50%) translate(' + px + 'px, ' + py + 'px)';
+    }
+  }, { passive: true });
 })();
 </script>
 
