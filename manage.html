@@ -337,12 +337,15 @@
 
     .ais__content { width: 100%; margin-top: 0; position: static; }
 
-    /* Characters block: takes up space in normal flow, characters absolute inside */
+    /* Characters row: flex so height is defined by the images themselves */
     .ais__chars {
-      display: block;
-      position: relative;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.5rem;
       width: 100%;
-      height: 12rem;
+      overflow: hidden;
       margin-bottom: 1.5rem;
     }
 
@@ -355,38 +358,29 @@
     }
     .ais__heading { width: 100%; }
 
-    /* Robot: starts centered, shifts left when grouped with alien */
+    /* Robot: in-flow, slides in from left */
     .ais__robot {
+      position: relative;
       width: 7.6875rem;
-      left: 50%;
-      margin-left: -3.84375rem; /* -half-width */
-      right: auto;
-      top: 2rem;
-      transform: rotate(-13.59deg) translateY(-1.5rem);
-      transition: opacity 0.5s ease,
-                  transform 0.5s ease,
-                  left 0.7s cubic-bezier(0.34, 1.12, 0.64, 1) 0.7s,
-                  margin-left 0.7s cubic-bezier(0.34, 1.12, 0.64, 1) 0.7s;
+      left: auto; right: auto; top: auto;
+      margin-left: 0;
+      flex-shrink: 0;
+      transform: rotate(-13.59deg) translateX(-120%);
+      transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.34, 1.12, 0.64, 1);
     }
     .ais__robot--visible {
       opacity: 1;
-      transform: rotate(-13.59deg) translateY(0);
-    }
-    /* group: robot+alien centered together; half-group = (7.6875 + 0.5 + 10.59375)/2 ≈ 9.39rem */
-    .ais--grouped .ais__robot {
-      left: calc(50% - 9.39rem);
-      margin-left: 0;
+      transform: rotate(-13.59deg) translateX(0);
     }
 
-    /* Alien: slides in from right to its group position */
+    /* Alien: in-flow, slides in from right with slight delay */
     .ais__alien {
+      position: relative;
       width: 10.59375rem;
-      left: calc(50% - 1.2rem); /* 50% - 9.39rem + 7.6875rem + 0.5rem */
-      right: auto;
-      top: 1.5rem;
-      transform: rotate(-16.84deg) translateX(150%);
-      transition: opacity 0.5s ease 0.8s,
-                  transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.8s;
+      left: auto; right: auto; top: auto;
+      flex-shrink: 0;
+      transform: rotate(-16.84deg) translateX(120%);
+      transition: opacity 0.5s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.3s;
     }
     .ais__alien--visible {
       opacity: 1;
@@ -997,8 +991,7 @@
     if (entries[0].isIntersecting) {
       robot.classList.add('ais__robot--visible');
       alien.classList.add('ais__alien--visible');
-      section.classList.add('ais--grouped');
-      emojiObserver.disconnect();
+emojiObserver.disconnect();
     }
   }, { threshold: 0.3 });
   emojiObserver.observe(section);
