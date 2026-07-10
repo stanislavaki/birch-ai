@@ -220,10 +220,17 @@
     margin: 0;
   }
 
-  /* Card: starts off-screen below, JS animates in via translateY */
+  /* Card: starts off-screen, animates in via CSS when --visible class added */
   .ais__card {
     will-change: transform;
     transform: rotate(-7.19deg) translateY(120vh);
+  }
+  @keyframes ais-card-in {
+    from { transform: rotate(-25deg) translateY(120vh); }
+    to   { transform: rotate(-7.19deg) translateY(0); }
+  }
+  .ais__card--visible {
+    animation: ais-card-in 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
   }
 
   /* Emojis: absolute relative to .ais__content, appear on scroll-in */
@@ -233,6 +240,7 @@
     aspect-ratio: 1 / 1;
     left: -6rem;
     top: 0;
+    z-index: 3;
     pointer-events: none;
     opacity: 0;
     transform: rotate(-13.59deg) translateY(1.5rem);
@@ -249,6 +257,7 @@
     aspect-ratio: 175 / 149;
     right: -11rem;
     top: 12rem;
+    z-index: 3;
     pointer-events: none;
     opacity: 0;
     transform: rotate(-16.84deg) translateY(1.5rem);
@@ -257,6 +266,13 @@
   .ais__alien--visible {
     opacity: 1;
     transform: rotate(-16.84deg) translateY(0);
+  }
+
+  .ais__char-body {
+    position: relative; /* containing block for eye absolutes */
+    width: 100%;
+    height: 100%;
+    will-change: transform;
   }
 
   .ais__robot img,
@@ -619,14 +635,18 @@
         </h2>
       </div>
       <div class="ais__robot" aria-hidden="true">
-        <img src="images/ai-robot-1.png" alt="">
-        <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
-        <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+        <div class="ais__char-body">
+          <img src="images/ai-robot-1.png" alt="">
+          <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
+          <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+        </div>
       </div>
       <div class="ais__alien" aria-hidden="true">
-        <img src="images/ai-robot-2.png" alt="">
-        <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
-        <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+        <div class="ais__char-body">
+          <img src="images/ai-robot-2.png" alt="">
+          <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
+          <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+        </div>
       </div>
     </div>
     <div class="ais__card">
@@ -882,7 +902,7 @@
 </script>
 
 <script>
-/* ─── AIS: scroll-driven card + emoji appear ─── */
+/* ─── AIS: emoji + card appear on scroll ─── */
 (function () {
   'use strict';
 
@@ -891,31 +911,6 @@
   var card    = document.querySelector('.ais__card');
   var robot   = document.querySelector('.ais__robot');
   var alien   = document.querySelector('.ais__alien');
-
-  var LERP      = 0.1;
-  var currentP  = 0;
-  var targetP   = 0;
-  var _rafReady = false;
-
-  function getNavH() {
-    var fs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
-    return raw ? parseFloat(raw) * fs : 0;
-  }
-
-  /* progress 0 = card starts, 1 = card landed */
-  function scrollProgress() {
-    var railTop = rail.getBoundingClientRect().top;
-    var range   = rail.offsetHeight - section.offsetHeight;
-    if (range <= 0) return 0;
-    return Math.max(0, Math.min(1, (getNavH() - railTop) / range));
-  }
-
-  function tick(p) {
-    var cardP  = Math.min(p / 0.65, 1.0); /* card lands at 65% scroll, parks until 100% */
-    var startY = window.innerHeight * 1.2;
-    card.style.transform = 'rotate(-7.19deg) translateY(' + (startY * (1 - cardP)) + 'px)';
-  }
 
   /* emojis appear when section is 50% in viewport */
   var emojiObserver = new IntersectionObserver(function (entries) {
@@ -927,14 +922,24 @@
   }, { threshold: 0.5 });
   emojiObserver.observe(section);
 
-  /* rAF loop — snap on first frame per CLAUDE.md */
-  (function loop() {
-    targetP = scrollProgress();
-    if (!_rafReady) { currentP = targetP; _rafReady = true; }
-    currentP += (targetP - currentP) * LERP;
-    tick(currentP);
-    requestAnimationFrame(loop);
-  })();
+  /* card appears after user scrolls 40% through the rail */
+  function getNavH() {
+    var fs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    return raw ? parseFloat(raw) * fs : 0;
+  }
+
+  function checkCard() {
+    var railTop = rail.getBoundingClientRect().top;
+    var range   = rail.offsetHeight - section.offsetHeight;
+    if (range <= 0) return;
+    var p = Math.max(0, (getNavH() - railTop) / range);
+    if (p >= 0.4) {
+      card.classList.add('ais__card--visible');
+      window.removeEventListener('scroll', checkCard, { passive: true });
+    }
+  }
+  window.addEventListener('scroll', checkCard, { passive: true });
 })();
 </script>
 
@@ -944,41 +949,137 @@
   'use strict';
   var eyes = document.querySelectorAll('.ais__eye');
 
-  window.addEventListener('mousemove', function (e) {
-    for (var i = 0; i < eyes.length; i++) {
-      var eye    = eyes[i];
-      var rect   = eye.getBoundingClientRect();
-      var cx     = rect.left + rect.width  / 2;
-      var cy     = rect.top  + rect.height / 2;
-      var dx     = e.clientX - cx;
-      var dy     = e.clientY - cy;
-      var pupil  = eye.querySelector('.ais__pupil');
-      var px, py;
+  var ROT_ROBOT = -13.59 * Math.PI / 180;
+  var ROT_ALIEN = -16.84 * Math.PI / 180;
 
-      if (eye.closest('.ais__alien')) {
-        /* perimeter movement: pupil always sits on rectangle outline */
-        var pRect = pupil.getBoundingClientRect();
-        var halfW = (rect.width  - pRect.width)  / 2;
-        var halfH = (rect.height - pRect.height) / 2;
-        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) {
-          px = 0; py = 0;
-        } else {
-          var s = Math.max(Math.abs(dx) / halfW, Math.abs(dy) / halfH);
-          px = dx / s;
-          py = dy / s;
-        }
-      } else {
-        /* circular clamp: move up to 40% of eye radius */
-        var dist   = Math.sqrt(dx * dx + dy * dy);
-        var radius = Math.min(rect.width, rect.height) / 2;
-        var scale  = dist > 0 ? Math.min(dist, radius * 0.4) / dist : 0;
-        px = dx * scale;
-        py = dy * scale;
-      }
+  /* pupils — robot: snappy; alien: calmer */
+  var EYE_K = 0.3, EYE_D = 0.8;
+  var EYE_K_ALIEN = 0.12, EYE_D_ALIEN = 0.90;
 
-      pupil.style.transform = 'translate(-50%, -50%) translate(' + px + 'px, ' + py + 'px)';
+  /* body — slow graceful drift */
+  var BODY_K      = 0.035;
+  var BODY_D      = 0.88;
+  var MAX_OFFSET  = 14; /* px */
+  var MAX_TILT    = 4;  /* deg */
+
+  function toLocal(nx, ny, rad) {
+    var a = -rad, c = Math.cos(a), s = Math.sin(a);
+    return { x: nx * c - ny * s, y: nx * s + ny * c };
+  }
+
+  var section = document.querySelector('.ais');
+  var bodies  = section.querySelectorAll('.ais__char-body');
+  var alienEl = section.querySelector('.ais__alien');
+
+  for (var i = 0; i < eyes.length; i++) {
+    var isAlienEye = alienEl.contains(eyes[i]);
+    eyes[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, tx: 0, ty: 0,
+                    k: isAlienEye ? EYE_K_ALIEN : EYE_K,
+                    d: isAlienEye ? EYE_D_ALIEN : EYE_D };
+  }
+  for (var i = 0; i < bodies.length; i++) {
+    bodies[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, rot: 0, vrot: 0,
+                      tx: 0, ty: 0, trot: 0 };
+  }
+
+  /* last known cursor position — updated on every mousemove */
+  var _mx = -9999, _my = -9999;
+
+  var charEls = [section.querySelector('.ais__robot'), section.querySelector('.ais__alien')];
+  var chars   = [
+    { el: charEls[0], rot: ROT_ROBOT, isAlien: false },
+    { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
+  ];
+
+  function updateTargets(clientX, clientY) {
+    /* body targets — each char flees cursor; strength scales with proximity */
+    var sr  = section.getBoundingClientRect();
+    var snx = (clientX - sr.left - sr.width / 2) / (sr.width / 2);
+    for (var j = 0; j < bodies.length; j++) {
+      var cr   = charEls[j].getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var dist = Math.sqrt(cdx * cdx + cdy * cdy);
+      var prox = Math.max(0, 1 - dist / 480);
+      var nx   = dist > 1 ? cdx / dist : 0;
+      var ny   = dist > 1 ? cdy / dist : 0;
+      bodies[j]._sp.tx   = -nx * MAX_OFFSET * prox;
+      bodies[j]._sp.ty   = -ny * MAX_OFFSET * 0.6 * prox;
+      bodies[j]._sp.trot = -snx * MAX_TILT * (0.15 + prox * 0.85);
     }
+
+    /* eye targets — direction from CHARACTER center so both eyes look the same way */
+    for (var c = 0; c < chars.length; c++) {
+      var ch   = chars[c];
+      var cr   = ch.el.getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var clen = Math.sqrt(cdx * cdx + cdy * cdy);
+      if (clen < 1) {
+        var ces = ch.el.querySelectorAll('.ais__eye');
+        for (var k = 0; k < ces.length; k++) { ces[k]._sp.tx = 0; ces[k]._sp.ty = 0; }
+        continue;
+      }
+      var nx  = cdx / clen, ny = cdy / clen;
+      var loc = toLocal(nx, ny, ch.rot);
+      var ces = ch.el.querySelectorAll('.ais__eye');
+      for (var k = 0; k < ces.length; k++) {
+        var eye  = ces[k];
+        var rect = eye.getBoundingClientRect();
+        var sp   = eye._sp;
+        var pu   = eye.querySelector('.ais__pupil');
+        var pr   = pu.getBoundingClientRect();
+        if (ch.isAlien) {
+          var hw  = (rect.width  - pr.width)  / 2;
+          var hh  = (rect.height - pr.height) / 2;
+          var lx  = loc.x;
+          var ly  = loc.y > 0 ? loc.y : loc.y - 0.65;
+          var s   = Math.max(Math.abs(lx) / hw, Math.abs(ly) / hh);
+          sp.tx = lx / s; sp.ty = ly / s;
+        } else {
+          var rad = Math.min(rect.width, rect.height) / 2;
+          var mx  = rad - Math.min(pr.width, pr.height) / 2;
+          sp.tx = loc.x * mx; sp.ty = loc.y * mx;
+        }
+      }
+    }
+  }
+
+  window.addEventListener('mousemove', function (e) {
+    _mx = e.clientX; _my = e.clientY;
+    updateTargets(_mx, _my);
   }, { passive: true });
+
+  /* when section enters viewport, immediately sync pupils to last known cursor */
+  var eyeObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting && _mx !== -9999) {
+      updateTargets(_mx, _my);
+    }
+  }, { threshold: 0.1 });
+  eyeObserver.observe(section);
+
+  (function loop() {
+    /* bodies first — apply spring step */
+    for (var j = 0; j < bodies.length; j++) {
+      var b = bodies[j]._sp;
+      b.vx   += (b.tx   - b.px)  * BODY_K; b.vx   *= BODY_D; b.px  += b.vx;
+      b.vy   += (b.ty   - b.py)  * BODY_K; b.vy   *= BODY_D; b.py  += b.vy;
+      b.vrot += (b.trot - b.rot) * BODY_K; b.vrot *= BODY_D; b.rot += b.vrot;
+      bodies[j].style.transform =
+        'translate(' + b.px + 'px,' + b.py + 'px) rotate(' + b.rot + 'deg)';
+    }
+    /* recompute pupil targets after body has moved this frame */
+    if (_mx !== -9999) updateTargets(_mx, _my);
+    /* pupils */
+    for (var i = 0; i < eyes.length; i++) {
+      var sp = eyes[i]._sp;
+      sp.vx += (sp.tx - sp.px) * sp.k; sp.vx *= sp.d; sp.px += sp.vx;
+      sp.vy += (sp.ty - sp.py) * sp.k; sp.vy *= sp.d; sp.py += sp.vy;
+      eyes[i].querySelector('.ais__pupil').style.transform =
+        'translate(-50%,-50%) translate(' + sp.px + 'px,' + sp.py + 'px)';
+    }
+    requestAnimationFrame(loop);
+  })();
 })();
 </script>
 
