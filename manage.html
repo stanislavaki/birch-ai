@@ -248,8 +248,11 @@
     position: absolute;
     width: 10.5rem;
     aspect-ratio: 1 / 1;
-    left: -6rem;
-    top: 0;
+    /* anchored to the heading's top-left corner — right edge sits ~1rem into
+       the heading regardless of heading width, so it never covers the text */
+    left: auto;
+    right: calc(100% - 3rem);
+    top: -5rem;
     z-index: 3;
     pointer-events: none;
     opacity: 0;
@@ -265,8 +268,12 @@
     position: absolute;
     width: 14.375rem;
     aspect-ratio: 175 / 149;
-    right: -11rem;
-    top: 12rem;
+    /* anchored to the heading's bottom-right corner — left edge ~2rem into the
+       heading, extending down toward the card */
+    right: auto;
+    left: calc(100% - 3rem);
+    top: auto;
+    bottom: -7rem;
     z-index: 3;
     pointer-events: none;
     opacity: 0;
@@ -336,7 +343,7 @@
       justify-content: flex-start;
       align-items: center;
       padding-top: 2rem;
-      padding-bottom: 4rem;
+      padding-bottom: 0;
     }
 
     .ais__content { width: 100%; margin-top: 0; position: static; }
@@ -359,7 +366,7 @@
       max-width: 23.4375rem;
       padding-inline: var(--pad-horizontal);
     }
-    .ais__heading { width: 100%; }
+    .ais__heading { width: 100%; margin-bottom: 0; } /* drop default h2 bottom margin on mobile */
 
     /* Robot: in-flow, slides in from left */
     .ais__robot {
@@ -380,7 +387,7 @@
     .ais__alien {
       position: relative;
       width: 10.59375rem;
-      left: auto; right: auto; top: auto;
+      left: auto; right: auto; top: auto; bottom: auto;
       flex-shrink: 0;
       transform: rotate(-16.84deg) translateX(120%);
       transition: opacity 0.5s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.3s;
@@ -424,33 +431,83 @@
      AI CHAT — 3-column showcase (Figma 17891:3017)
      Col 1: image placeholder (image added later)
      Col 2: chat card, reused from ai-promo.html "Analyze performance" dialogue
-     Col 3: accordion, reused from ai-promo.html card-accordion, auto-cycling
+     Col 3: accordion, reused from ai-promo.html card-accordion, click to switch
   ───────────────────────────────────────── */
   .aichat {
     padding: var(--space-xl) 0;
   }
 
-  /* Col 1: placeholder */
-  .aichat__placeholder {
+  /* Col 1: word-pill promo. The composition keeps a fixed 400/530 proportion
+     (.aichat__promo-inner) so pills+bird never drift apart; the column stretches
+     to the grid row and centers it (extra blue above/below on narrow screens).
+     The inner box gives the column its MINIMUM height — one of the two drivers
+     of the block height (the other is the accordion, reserved in JS). */
+  .aichat__promo {
+    position: relative;
     background: var(--color-accent-indigo);
     border-radius: var(--radius-xl);
-    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout — desktop grid stretch overrides */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .aichat__promo-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 400 / 530;
+    flex-shrink: 0;
+  }
+  .aichat__promo-pills {
+    position: absolute;
+    left: 5.75%;   /* 23 / 400 */
+    top: 10.19%;   /* 53.98 / 530 */
+    width: 88.5%;  /* 354 / 400 */
+    height: auto;
+  }
+  .aichat__promo-bird {
+    position: absolute;
+    left: 60.25%;
+    top: 51.95%;
+    width: 32.2%;
+    height: auto;
   }
 
-  /* Col 2: chat card (same component as ai-promo.html) */
+  /* Mobile: landscape pill composition (Figma 17967:2311, col1 280×195).
+     Pills img is swapped via <picture>; positions recalculated as % of 280×195. */
+  @media (max-width: 767px) {
+    .aichat__promo-inner { aspect-ratio: 280 / 195; }
+    .aichat__promo-pills {
+      left: 7.14%;    /* 20 / 280 */
+      top: 11.36%;    /* centered group: 7.69% + 3.67% */
+      width: 86.07%;  /* 241 / 280 */
+    }
+    .aichat__promo-bird {
+      left: 65.07%;
+      top: 8.98%;      /* centered group: 5.31% + 3.67% */
+      width: 27.29%;
+    }
+  }
+
+  /* Col 2: green container stretches to the block height (driven by col 1) and
+     centers the white chat card inside; the chat keeps the 400/530 proportion. */
+  .aichat__chat-col { display: flex; }
   .aichat__chat-col .chat-card-wrap {
     width: 100%;
     height: 100%;
-    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout */
     container-type: inline-size;
-  }
-  @media (min-width: 768px) {
-    .aichat__chat-col .chat-card-wrap { aspect-ratio: unset; } /* desktop: grid stretch drives height */
+    background: var(--color-accent-green);
+    border-radius: var(--radius-xl);
+    padding: 9.5% 12%; /* 38/400 vertical, 48/400 horizontal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .aichat .chat-card {
     width: 100%;
-    height: 100%;
+    height: auto;
+    max-height: 100%;
+    aspect-ratio: 303 / 455; /* chat's own proportion; centered if the green is taller */
     background: #fff;
     border-radius: 1.5em;
     display: flex;
@@ -730,8 +787,17 @@
   <div class="container">
     <div class="grid">
 
-      <!-- Col 1: image placeholder — image added later -->
-      <div class="col-4 aichat__placeholder" aria-hidden="true"></div>
+      <!-- Col 1: word-pill promo composition (pills + bird), positioned per Figma 17829:5229 -->
+      <div class="col-4 aichat__promo">
+        <div class="aichat__promo-inner">
+          <picture>
+            <!-- mobile: landscape pill layout (Figma 17967:2311) -->
+            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a550c61b6e82bbcd162cafe_manage-ai-powered-mob%20%E2%80%93%20SVG%20ready.svg">
+            <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
+          </picture>
+          <img class="aichat__promo-bird" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e4625b903a2fa511af8c_manage-bird.svg" alt="" aria-hidden="true" width="135" height="135">
+        </div>
+      </div>
 
       <!-- Col 2: chat card — reused from ai-promo.html, "Analyze performance" dialogue -->
       <div class="col-4 aichat__chat-col">
@@ -754,27 +820,24 @@
         </div>
       </div>
 
-      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, auto-cycling -->
+      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, click to switch -->
       <div class="col-4 aichat__accordion" id="aichatAccordion">
         <div class="card-accordion" data-index="0">
           <h4 class="t-h4">Your existing rules are the starting point</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Bïrch's AI studies the automation rules you've already built—understanding your logic, your thresholds, and your goals—before it suggests anything new.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar0"></div></div>
           </div>
         </div>
         <div class="card-accordion is-closed" data-index="1">
           <h4 class="t-h4">It surfaces opportunities, not actions</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">The AI identifies automation gaps and inefficiencies in your campaigns, then presents them as suggestions with clear reasoning. It never adjusts a budget or pauses an ad on its own.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar1"></div></div>
           </div>
         </div>
         <div class="card-accordion is-closed" data-index="2">
           <h4 class="t-h4">You review, approve, and stay in control</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Every suggestion requires your sign-off before it becomes a rule. You can modify the conditions, adjust the thresholds, or dismiss it entirely. The final call is always yours.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar2"></div></div>
           </div>
         </div>
       </div>
@@ -787,53 +850,59 @@
 (function () {
 
   /* ══════════════════════════════════════════════════════════
-     ACCORDION — auto-cycling, 3 cards, starts/pauses on visibility
+     ACCORDION — click to switch (no auto-cycle)
   ══════════════════════════════════════════════════════════ */
-  var COLORS = [
-    'var(--color-accent-green)',
-    'var(--color-accent-light-blue)',
-    'var(--color-accent-purple)',
-  ];
-  var ACC_DURATION = 5000; /* ms each card stays active */
-
-  var accBox = document.getElementById('aichatAccordion');
+  var accBox   = document.getElementById('aichatAccordion');
   var accCards = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion'));
-  var accBars  = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion__bar-fill'));
-  var accActive  = 0;
-  var accStartMs = null;
-  var accRunning = false;
-  accBox.style.setProperty('--acc-color', COLORS[0]);
 
-  function accSetActive(idx) {
-    accCards.forEach(function (c) { c.classList.add('is-closed'); });
-    accCards[idx].classList.remove('is-closed');
-    accBox.style.setProperty('--acc-color', COLORS[idx]);
-    accBars.forEach(function (b) { b.style.width = '0%'; });
-    accActive  = idx;
-    accStartMs = null;
-  }
-
-  accCards.forEach(function (card, idx) {
-    card.addEventListener('click', function () { accSetActive(idx); });
+  accCards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      accCards.forEach(function (c) { c.classList.add('is-closed'); });
+      card.classList.remove('is-closed');
+    });
   });
 
-  (function accTick(now) {
-    if (accRunning) {
-      if (accStartMs === null) accStartMs = now;
-      var elapsed  = now - accStartMs;
-      var progress = Math.min(elapsed / ACC_DURATION, 1);
-      accBars[accActive].style.width = (progress * 100).toFixed(1) + '%';
-      if (elapsed >= ACC_DURATION) accSetActive((accActive + 1) % accCards.length);
+  /* Reserve the TALLEST single-open state as the accordion column's min-height,
+     so on narrow 3-col widths the block grows to fit the longest expanded item
+     (no text overflow) and the height never jumps when switching tabs. Measured
+     from parts: a card's title + its body content (children lay out at full width
+     even while the body is collapsed, so this works without opening each card). */
+  function accBodyContentH(body) {
+    var g = parseFloat(getComputedStyle(body).rowGap) || 0, h = 0, n = body.children.length;
+    for (var k = 0; k < n; k++) h += body.children[k].offsetHeight;
+    if (n > 1) h += (n - 1) * g;
+    return h;
+  }
+  function reserveAccordionHeight() {
+    var gap = parseFloat(getComputedStyle(accBox).rowGap) || 0;
+    var openCard = null;
+    accCards.forEach(function (c) { if (!openCard && !c.classList.contains('is-closed')) openCard = c; });
+    var bodyPadTop = openCard
+      ? parseFloat(getComputedStyle(openCard.querySelector('.card-accordion__body')).paddingTop) || 0
+      : 0;
+    var expanded = [], collapsed = [], totalCollapsed = 0;
+    accCards.forEach(function (card) {
+      var cs = getComputedStyle(card);
+      var padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      var titleH = (card.querySelector('h4') || card.firstElementChild).offsetHeight;
+      var bodyH = accBodyContentH(card.querySelector('.card-accordion__body'));
+      var e = padY + titleH + bodyPadTop + bodyH, c = padY + titleH;
+      expanded.push(e); collapsed.push(c); totalCollapsed += c;
+    });
+    var max = 0;
+    for (var i = 0; i < accCards.length; i++) {
+      var h = expanded[i] + (totalCollapsed - collapsed[i]) + (accCards.length - 1) * gap;
+      if (h > max) max = h;
     }
-    requestAnimationFrame(accTick);
-  })(performance.now());
-
-  /* Start/pause auto-cycle only while the block is on screen (project convention) */
-  var accObserver = new IntersectionObserver(function (entries) {
-    accRunning = entries[0].isIntersecting;
-    if (accRunning) accStartMs = null; /* resume cleanly, no jump */
-  }, { threshold: 0.1 });
-  accObserver.observe(accBox);
+    accBox.style.minHeight = Math.ceil(max) + 'px';
+  }
+  reserveAccordionHeight();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserveAccordionHeight);
+  var _accRaf = null;
+  window.addEventListener('resize', function () {
+    if (_accRaf) return;
+    _accRaf = requestAnimationFrame(function () { _accRaf = null; reserveAccordionHeight(); });
+  }, { passive: true });
 
   /* ══════════════════════════════════════════════════════════
      CHAT — plays once, when the section is fully visible
@@ -954,14 +1023,15 @@
     });
   }
 
-  /* Fire once, when the whole section is 100% visible */
+  /* Fire once, when the section is 40% visible (matches the block's other observers;
+     threshold:1.0 also never fired if the section was taller than the viewport) */
   var chatSection = document.getElementById('aichat');
   var chatObserver = new IntersectionObserver(function (entries) {
     if (entries[0].isIntersecting) {
       chatObserver.disconnect();
       setTimeout(function () { type(0); }, INIT_DELAY);
     }
-  }, { threshold: 1.0 });
+  }, { threshold: 0.4 });
   chatObserver.observe(chatSection);
 
 })();
@@ -1106,7 +1176,7 @@
     var sr  = section.getBoundingClientRect();
     var fakeX = sr.left + sr.width / 2;
     var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
-    updateTargets(fakeX, fakeY);
+    updateTargets(fakeX, fakeY, true); /* eyes only — don't shift the bodies on load */
   });
 
   /* last close-proximity direction per character — for residual tilt memory */
@@ -1119,11 +1189,13 @@
     { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
   ];
 
-  function updateTargets(clientX, clientY) {
-    /* body targets — each char flees cursor; strength scales with proximity */
+  function updateTargets(clientX, clientY, eyesOnly) {
+    /* body targets — each char flees cursor; strength scales with proximity.
+       eyesOnly: a synthetic "look" (initial title glance) moves only the eyes,
+       leaving the body at its CSS position — no flee translate, no residual tilt. */
     var sr  = section.getBoundingClientRect();
-    var snx = (clientX - sr.left - sr.width / 2) / (sr.width / 2);
     for (var j = 0; j < bodies.length; j++) {
+      if (eyesOnly) { bodies[j]._sp.tx = 0; bodies[j]._sp.ty = 0; bodies[j]._sp.trot = 0; continue; }
       var cr   = charEls[j].getBoundingClientRect();
       var cdx  = clientX - (cr.left + cr.width  / 2);
       var cdy  = clientY - (cr.top  + cr.height / 2);

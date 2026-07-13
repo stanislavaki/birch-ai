@@ -121,8 +121,11 @@
   position: absolute;
   width: 10.5rem;
   aspect-ratio: 1 / 1;
-  left: -6rem;
-  top: 0;
+  /* anchored to the heading's top-left corner — right edge sits ~2rem into the
+     heading regardless of heading width, so it never covers the text */
+  left: auto;
+  right: calc(100% - 3rem);
+  top: -5rem;
   z-index: 3;
   pointer-events: none;
   opacity: 0;
@@ -137,8 +140,12 @@
   position: absolute;
   width: 14.375rem;
   aspect-ratio: 175 / 149;
-  right: -11rem;
-  top: 12rem;
+  /* anchored to the heading's bottom-right corner — left edge ~3rem into the
+     heading, extending down toward the card */
+  right: auto;
+  left: calc(100% - 3rem);
+  top: auto;
+  bottom: -7rem;
   z-index: 3;
   pointer-events: none;
   opacity: 0;
@@ -215,7 +222,7 @@
     justify-content: flex-start;
     align-items: center;
     padding-top: 2rem;
-    padding-bottom: 4rem;
+    padding-bottom: 0;
   }
 
   .manage-ais-embed .ais__content { width: 100%; margin-top: 0; position: static; }
@@ -238,7 +245,7 @@
     max-width: 23.4375rem;
     padding-inline: var(--pad-horizontal);
   }
-  .manage-ais-embed .ais__heading { width: 100%; }
+  .manage-ais-embed .ais__heading { width: 100%; margin-bottom: 0; } /* drop default h2 bottom margin on mobile */
 
   /* Robot: in-flow, slides in from left */
   .manage-ais-embed .ais__robot {
@@ -259,7 +266,7 @@
   .manage-ais-embed .ais__alien {
     position: relative;
     width: 10.59375rem;
-    left: auto; right: auto; top: auto;
+    left: auto; right: auto; top: auto; bottom: auto;
     flex-shrink: 0;
     transform: rotate(-16.84deg) translateX(120%);
     transition: opacity 0.5s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.3s;
@@ -481,7 +488,7 @@
     var sr  = section.getBoundingClientRect();
     var fakeX = sr.left + sr.width / 2;
     var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
-    updateTargets(fakeX, fakeY);
+    updateTargets(fakeX, fakeY, true); /* eyes only — don't shift the bodies on load */
   });
 
   /* last close-proximity direction per character — for residual tilt memory */
@@ -494,10 +501,13 @@
     { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
   ];
 
-  function updateTargets(clientX, clientY) {
-    /* body targets — each char flees cursor; strength scales with proximity */
+  function updateTargets(clientX, clientY, eyesOnly) {
+    /* body targets — each char flees cursor; strength scales with proximity.
+       eyesOnly: a synthetic "look" (initial title glance) moves only the eyes,
+       leaving the body at its CSS position — no flee translate, no residual tilt. */
     var sr  = section.getBoundingClientRect();
     for (var j = 0; j < bodies.length; j++) {
+      if (eyesOnly) { bodies[j]._sp.tx = 0; bodies[j]._sp.ty = 0; bodies[j]._sp.trot = 0; continue; }
       var cr   = charEls[j].getBoundingClientRect();
       var cdx  = clientX - (cr.left + cr.width  / 2);
       var cdy  = clientY - (cr.top  + cr.height / 2);

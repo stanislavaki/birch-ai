@@ -56,11 +56,16 @@ img { border-radius: 8px; }
   padding-bottom: 5rem;
 }
 
-/* ── Webflow .container (from real site) ── */
+/* ── Webflow .container (from real site) ──
+   max-width is 80rem (fluid), NOT 90rem — confirmed against the live site
+   bir.ch/manage-upd on 2026-07-13: container computed 1280px @ root16 (1280px vw)
+   and 1536px @ root19.2 (1728px vw), i.e. 80rem at both. The old 90rem made every
+   dev block ~10rem (~192px) wider than the deployed site. padding-inline 1.5rem
+   (= 28.8px @ root19.2) matches the live container. */
 .container {
   display: block;
   width: 100%;
-  max-width: 90rem; /* dev env only — embeds use px, see CLAUDE.md */
+  max-width: 80rem; /* dev env only — embeds use px, see CLAUDE.md */
   margin-right: auto;
   margin-left: auto;
   padding-right: 1.5rem;
