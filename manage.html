@@ -437,14 +437,25 @@
     padding: var(--space-xl) 0;
   }
 
-  /* Col 1: word-pill promo — DRIVES the block height via aspect-ratio (400×530).
-     Pills + bird are positioned as % of that column (Figma 17829:5229). */
+  /* Col 1: word-pill promo. The composition keeps a fixed 400/530 proportion
+     (.aichat__promo-inner) so pills+bird never drift apart; the column stretches
+     to the grid row and centers it (extra blue above/below on narrow screens).
+     The inner box gives the column its MINIMUM height — one of the two drivers
+     of the block height (the other is the accordion, reserved in JS). */
   .aichat__promo {
     position: relative;
-    aspect-ratio: 400 / 530;
     background: var(--color-accent-indigo);
     border-radius: var(--radius-xl);
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .aichat__promo-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 400 / 530;
+    flex-shrink: 0;
   }
   .aichat__promo-pills {
     position: absolute;
@@ -762,8 +773,10 @@
 
       <!-- Col 1: word-pill promo composition (pills + bird), positioned per Figma 17829:5229 -->
       <div class="col-4 aichat__promo">
-        <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
-        <img class="aichat__promo-bird" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e4625b903a2fa511af8c_manage-bird.svg" alt="" aria-hidden="true" width="135" height="135">
+        <div class="aichat__promo-inner">
+          <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
+          <img class="aichat__promo-bird" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e4625b903a2fa511af8c_manage-bird.svg" alt="" aria-hidden="true" width="135" height="135">
+        </div>
       </div>
 
       <!-- Col 2: chat card — reused from ai-promo.html, "Analyze performance" dialogue -->
@@ -828,6 +841,48 @@
       card.classList.remove('is-closed');
     });
   });
+
+  /* Reserve the TALLEST single-open state as the accordion column's min-height,
+     so on narrow 3-col widths the block grows to fit the longest expanded item
+     (no text overflow) and the height never jumps when switching tabs. Measured
+     from parts: a card's title + its body content (children lay out at full width
+     even while the body is collapsed, so this works without opening each card). */
+  function accBodyContentH(body) {
+    var g = parseFloat(getComputedStyle(body).rowGap) || 0, h = 0, n = body.children.length;
+    for (var k = 0; k < n; k++) h += body.children[k].offsetHeight;
+    if (n > 1) h += (n - 1) * g;
+    return h;
+  }
+  function reserveAccordionHeight() {
+    var gap = parseFloat(getComputedStyle(accBox).rowGap) || 0;
+    var openCard = null;
+    accCards.forEach(function (c) { if (!openCard && !c.classList.contains('is-closed')) openCard = c; });
+    var bodyPadTop = openCard
+      ? parseFloat(getComputedStyle(openCard.querySelector('.card-accordion__body')).paddingTop) || 0
+      : 0;
+    var expanded = [], collapsed = [], totalCollapsed = 0;
+    accCards.forEach(function (card) {
+      var cs = getComputedStyle(card);
+      var padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      var titleH = (card.querySelector('h4') || card.firstElementChild).offsetHeight;
+      var bodyH = accBodyContentH(card.querySelector('.card-accordion__body'));
+      var e = padY + titleH + bodyPadTop + bodyH, c = padY + titleH;
+      expanded.push(e); collapsed.push(c); totalCollapsed += c;
+    });
+    var max = 0;
+    for (var i = 0; i < accCards.length; i++) {
+      var h = expanded[i] + (totalCollapsed - collapsed[i]) + (accCards.length - 1) * gap;
+      if (h > max) max = h;
+    }
+    accBox.style.minHeight = Math.ceil(max) + 'px';
+  }
+  reserveAccordionHeight();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserveAccordionHeight);
+  var _accRaf = null;
+  window.addEventListener('resize', function () {
+    if (_accRaf) return;
+    _accRaf = requestAnimationFrame(function () { _accRaf = null; reserveAccordionHeight(); });
+  }, { passive: true });
 
   /* ══════════════════════════════════════════════════════════
      CHAT — plays once, when the section is fully visible
