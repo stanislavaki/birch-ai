@@ -472,6 +472,22 @@
     height: auto;
   }
 
+  /* Mobile: landscape pill composition (Figma 17967:2311, col1 280×195).
+     Pills img is swapped via <picture>; positions recalculated as % of 280×195. */
+  @media (max-width: 767px) {
+    .aichat__promo-inner { aspect-ratio: 280 / 195; }
+    .aichat__promo-pills {
+      left: 7.14%;    /* 20 / 280 */
+      top: 7.69%;     /* 15 / 195 */
+      width: 86.07%;  /* 241 / 280 */
+    }
+    .aichat__promo-bird {
+      left: 72.07%;   /* 201.79 / 280 */
+      top: 22.31%;    /* 43.5 / 195 */
+      width: 28.29%;  /* 79.21 / 280 */
+    }
+  }
+
   /* Col 2: green container stretches to the block height (driven by col 1) and
      centers the white chat card inside; the chat keeps the 400/530 proportion. */
   .aichat__chat-col { display: flex; }
@@ -774,7 +790,11 @@
       <!-- Col 1: word-pill promo composition (pills + bird), positioned per Figma 17829:5229 -->
       <div class="col-4 aichat__promo">
         <div class="aichat__promo-inner">
-          <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
+          <picture>
+            <!-- mobile: landscape pill layout (Figma 17967:2311) -->
+            <source media="(max-width: 767px)" srcset="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a550c61b6e82bbcd162cafe_manage-ai-powered-mob%20%E2%80%93%20SVG%20ready.svg">
+            <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
+          </picture>
           <img class="aichat__promo-bird" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e4625b903a2fa511af8c_manage-bird.svg" alt="" aria-hidden="true" width="135" height="135">
         </div>
       </div>
