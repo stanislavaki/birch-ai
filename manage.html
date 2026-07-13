@@ -437,10 +437,27 @@
     padding: var(--space-xl) 0;
   }
 
-  /* Col 1: placeholder — stretches to the grid row (height driven by col 2) */
-  .aichat__placeholder {
+  /* Col 1: word-pill promo — stretches to the grid row (height driven by col 2).
+     Pills + bird are positioned as % of the 400×530 column (Figma 17829:5229). */
+  .aichat__promo {
+    position: relative;
     background: var(--color-accent-indigo);
     border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+  .aichat__promo-pills {
+    position: absolute;
+    left: 5.75%;   /* 23 / 400 */
+    top: 10.19%;   /* 53.98 / 530 */
+    width: 88.5%;  /* 354 / 400 */
+    height: auto;
+  }
+  .aichat__promo-bird {
+    position: absolute;
+    left: 57.25%;  /* 229 / 400 */
+    top: 51.95%;   /* 275.35 / 530 */
+    width: 37.2%;  /* 148.78 / 400 */
+    height: auto;
   }
 
   /* Col 2: green container drives the block height via aspect-ratio; the white
@@ -616,9 +633,9 @@
     background: var(--color-bg-grey); /* Figma: distinct grey card, not page-bg */
   }
 
-  /* Mobile stacked: placeholder needs its own height (no grid row to stretch to) */
+  /* Mobile stacked: col1 needs its own height (no grid row to stretch to) */
   @media (max-width: 767px) {
-    .aichat__placeholder { aspect-ratio: 400 / 530; }
+    .aichat__promo { aspect-ratio: 400 / 530; }
   }
 </style>
 </head>
@@ -742,8 +759,11 @@
   <div class="container">
     <div class="grid">
 
-      <!-- Col 1: image placeholder — image added later -->
-      <div class="col-4 aichat__placeholder" aria-hidden="true"></div>
+      <!-- Col 1: word-pill promo composition (pills + bird), positioned per Figma 17829:5229 -->
+      <div class="col-4 aichat__promo">
+        <img class="aichat__promo-pills" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e462392145753430d7f2_manage-ai-powered.svg" alt="AI-powered advertising automation fully in your control" width="354" height="428">
+        <img class="aichat__promo-bird" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a54e4625b903a2fa511af8c_manage-bird.svg" alt="" aria-hidden="true" width="135" height="135">
+      </div>
 
       <!-- Col 2: chat card — reused from ai-promo.html, "Analyze performance" dialogue -->
       <div class="col-4 aichat__chat-col">
