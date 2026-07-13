@@ -26,18 +26,19 @@
 
 - **Webflow page-level custom code — DOMContentLoaded** — в отличие от embed-блоков (вставляются в тело страницы через Embed-элемент), custom code заданный в настройках страницы (Page Settings → Custom Code) вставляется Webflow в `<head>`, где DOM ещё не готов. Любой такой скрипт, обращающийся к DOM (`querySelectorAll` и т.д.), оборачивать в `document.addEventListener('DOMContentLoaded', function() { ... })`. Иначе селекторы вернут пустой список и скрипт не сработает.
 
-- **Симулятор — обёртка для preview** — при создании нового embed всегда добавлять блок в `debug/webflow-sim.html` с полной обёрткой: `section` → `container` → embed, с отступами `padding-block` как в Figma (Spacing XL = `5rem`). Эта обёртка нужна только для точного preview — в итоговый embed-файл она не входит, так как `section` и `container` добавляются на стороне Webflow.
+- **Симулятор (`debug/webflow-sim.html`) — больше не обязательный шаг** — раньше требовался, потому что локальные dev-страницы не воспроизводили Webflow fluid font-size точно. Теперь `design-system/webflow-env.css` даёт точное совпадение с реальным Webflow (см. «Webflow embed — root font-size синхронизирован» ниже, подтверждено тестом в самом Webflow 09.07.2026) — можно проверять embed прямо в dev-странице (например `manage.html`) или сразу в реальном Webflow. Файл всё ещё в репозитории, но заводить в него новый блок при каждом embed больше не обязательно.
 
-- **Симулятор — кэш браузера** — в `debug/webflow-sim.html` fetch embed-файлов делать с `{ cache: 'no-store' }`, иначе браузер отдаёт старую версию файла даже после редактирования. Пример: `fetch(file, { cache: 'no-store' })`. При загрузке самого симулятора добавлять `?v=N` к URL для сброса кэша.
+- **preview_screenshot — артефакт после скролла с fixed-навбаром** — `position: fixed` навбар с `backdrop-filter: blur` ломает `preview_screenshot` после программного `window.scrollTo()` / `scrollIntoView()`: скриншот рендерится чёрным или с артефактами блюра. Это баг превью-тула, не вёрстки. Скрытие навбара (`document.querySelector('.sim-nav').style.display = 'none'`) не помогает. **Надёжный обходной путь — Chrome MCP**: загрузить инструменты через `ToolSearch("select:mcp__claude-in-chrome__tabs_context_mcp,mcp__claude-in-chrome__navigate,mcp__claude-in-chrome__computer,mcp__claude-in-chrome__javascript_tool")`, открыть страницу через `navigate`, скроллить через `javascript_tool`, снять через `computer { action: "screenshot" }`.
 
 - **pbcopy после embed-файла** — всегда показывать команду для копирования embed-кода в буфер обмена после того как embed-файл готов:
   ```
   pbcopy < "путь/к/файлу.html"
   ```
 
-- **Webflow embed — rem-контекст** — в Webflow root `font-size` может быть не 16px, поэтому все `rem` значения внутри embed-блока пересчитываются неправильно. Решение: задать `font-size: 16px` на ВНУТРЕННЕМ контейнере карточки (например `.xxx__container`), но НЕ на внешней секции — иначе сломается `top: var(--nav-height)` (он использует `em` Webflow и должен оставаться в контексте Webflow-шрифта).
-
-- **Webflow embed — коэффициент масштаба токенов** — Webflow использует fluid `font-size` (на 1600px+ html=21.33px вместо 16px), из-за этого все `rem`-значения из local выглядят визуально больше. Правило: все десктопные rem-токены и хардкод rem-значения в embed умножать на **0.9**. На мобилке (≤767px) коэффициент **1.0** — оставлять оригинальные значения. Пример: `--space-lg: 3rem` в local → `2.7rem` в embed (десктоп), `3rem` в mobile media query.
+- **Webflow embed — root font-size синхронизирован, коэффициент и pinning не нужны** — `design-system/webflow-env.css` теперь побайтово повторяет формулу fluid `font-size` реального Webflow-сайта (точные значения и обе точки разрыва — см. комментарий в `webflow-env.css`; подтверждено тестом в самом Webflow 09.07.2026). Раз local и real дают одинаковый root font-size на любой ширине, `rem`-значения в embed резолвятся идентично в обеих средах. Из этого следует:
+  - **Коэффициент 0.9 для десктопных rem-токенов не нужен** — использовать те же значения, что в local, без умножения.
+  - **`font-size: 16px`-пиннинг на внутреннем контейнере карточки не нужен** — не задавать его вообще, пусть `rem` резолвится от реального root font-size Webflow напрямую.
+  - Если формула fluid font-size на реальном Webflow снова изменится — в первую очередь обновить `webflow-env.css`, иначе расхождение между local и embed вернётся и коэффициент/pinning придётся возвращать.
 
 - **Webflow embed — именование классов** — Webflow имеет глобальные стили для распространённых имён классов (`.container`, `.section`, `.btn`, `.hero`, `.row`, `.col` и др.). В embed-файлах добавлять суффикс `-e` ко всем классам которые могут конфликтовать: `.container-e`, `.btn-e`, `.hero-e` и т.д. Local-версию не трогать.
 
@@ -71,7 +72,7 @@
   var navH = raw ? parseFloat(raw) * rootFs : 6.5 * rootFs;
   ```
 
-- **Webflow embed — токены контейнеров в `px`** — `--container-lg`, `--container-md`, `--container-sm` задавать в `px`, не `rem`. Иначе Webflow fluid font-size (21.33px на 1600px+) растягивает их до ~2133px вместо 1600px. Пример: `--container-lg: 1600px`.
+- **Webflow embed — токены контейнеров в `px`** — `--container-lg`, `--container-md`, `--container-sm` задавать в `px`, не `rem`. Иначе fluid font-size (19.2px на 1600px+, см. правило про root font-size выше) растягивает их до ~1920px вместо 1600px. Пример: `--container-lg: 1600px`. Это видно уже в локальной dev-среде — `webflow-env.css` теперь точно повторяет реальный Webflow, так что баг проявится и там, не только после вставки в embed.
 
 - **Webflow embed — хардкод px в JS** — любые числа в пикселях в JS (например `96` = 6rem × 16px) заменять на `N * remPx`, где `remPx` читается из реального font-size документа:
   ```js
@@ -87,11 +88,11 @@
 - **Универсальные решения** — если для задачи есть более универсальный или гибкий подход (например `min()`, `clamp()`, относительные единицы вместо фиксированных), сначала предложи варианты с объяснением, не применяй сразу.
 
 - **Дефолтная dev-среда — `design-system/webflow-env.css`** — при создании новой страницы (или dev/test-страницы) подключать `design-system/webflow-env.css` вместо ручного копирования fluid font-size / nav / reset кода. Файл даёт единый Webflow-подобный контекст без необходимости сверяться с симулятором:
-  - fluid font-size формулы (16px → 19.2px между 1280–1600px, плато на Desktop S 992–1279px)
+  - fluid font-size формулы — точная копия текущего кода реального Webflow (подтверждено 09.07.2026). Точные формулы по брейкпоинтам и комментарий про два скачка вниз на 768px и 992px (особенность реального сайта, не баг) — см. `design-system/webflow-env.css`.
   - `--nav-height: 6.5em` на `:root`
   - global reset для variable fonts в Safari
   - тёмный фон страницы, `@font-face` TT Commons Pro Variable
-  - `.section`/`.container` обёртка (паддинги как на реальном сайте), `.container { max-width: 90rem }` — **в rem**, осознанно (это dev-инструмент, не финальный embed; правило про px-контейнеры для embed см. отдельно, актуальность уточняется)
+  - `.section`/`.container` обёртка (паддинги как на реальном сайте), `.container { max-width: 90rem }` — **в rem**, осознанно (это dev-инструмент, не финальный embed; для самого embed контейнерные токены задавать в `px`, см. «Webflow embed — токены контейнеров в `px`» выше)
 
   Nav-меню (HTML-разметка `.sim-nav`) — отдельный partial `design-system/webflow-env-nav.html`, вставляется сразу после `<body>`. Первая секция страницы должна получить дополнительный `padding-top` под высоту нава, например `padding-top: calc(<исходный паддинг> + var(--nav-height));`.
 
@@ -105,6 +106,12 @@
   - **Неясности**: любые значения или поведения которые не очевидны из макета
 
 - **Media queries — каскад брейкпоинтов** — диапазонные запросы (`min-width AND max-width`) использовать только когда стиль нужен **исключительно** на одном брейкпоинте и не должен применяться ниже. Если стиль должен работать на данном брейкпоинте и всех меньших — использовать только `max-width` без нижней границы: `@media (max-width: 991px)` покрывает планшет и мобилку автоматически. Это предотвращает ситуацию когда правило «не доходит» до меньших брейкпоинтов и его приходится дублировать.
+
+- **Мобилка — это вертикальный поток, а не «адаптив десктопного absolute-макета»** — если на десктопе блок построен на `position: absolute` + JS-позиционировании (sticky-scroll композиция, наложения, вылеты за края), на мобилке **не переносить эту систему**. Мобильную версию верстать с нуля как обычный вертикальный flow: `position: relative`/`static`, элементы стопкой (block/flex-column), высота контейнеров приходит от контента (не хардкодить `height`), горизонтальные вылеты убираются. Absolute+JS оставлять строго под десктопную композицию, которая этого требует. Признак что свернул не туда: начал считать `padding-top`-распорки, `margin-top: -Nrem` или `calc(nav-height + …)` офсеты, чтобы «подвинуть» элемент под другой — в потоке это не нужно, элементы и так стоят друг за другом. Именно эти хаки на мобилке почти всегда потом переделываются.
+
+- **Сброс десктопных offset/position в мобильном media query** — десктопные значения `position`, `margin`, `top/left/right/bottom`, `transform`-смещения протекают в мобилку, если их явно не сбросить. При переходе блока в мобильный flow в `@media (max-width: 767px)` явно перекрывать всё что задавалось на десктопе для позиционирования: `position: static/relative`, `inset: auto` (или `top/left/right/bottom: auto`), `margin: 0`. Не рассчитывать что «оно само» — CSS-каскад тянет десктопное правило вниз.
+
+- **`overflow: hidden` обрезает повёрнутый/`transform`-контент** — не ставить `overflow: hidden` на контейнер рефлекторно: если внутри есть повёрнутые (`rotate`) или вылезающие декоративные элементы (персонажи, флаги, бейджи), он отрежет их углы. Ставить только когда обрезка осознанно нужна. Если цель была спрятать элемент до анимации — он обычно уже скрыт через `opacity: 0`, и `overflow` избыточен.
 
 - **Статика перед анимацией** — сначала добиться правильного вида на всех брейкпоинтах без переходов и анимаций — только потом добавлять `transition`, `transform`, LERP и т.д. Нельзя отлаживать layout и анимацию одновременно: непонятно что именно сломано.
 
@@ -161,6 +168,10 @@ All UI work in this project uses the Birch Design System located in `design-syst
 - **Styleguide is the reference** — check `design-system/styleguide.html` to see all available tokens, utility classes, and components before writing any CSS.
 - **Grid** — always use the 12-column grid system from `tokens.css` for layout. Use `.container` to center content, `.grid` for column layouts, and `.col-{n}` span helpers. Use `--gap-main`, `--pad-horizontal`, and `--pad-gutter` tokens for spacing — never hardcode gutters or margins. On mobile (≤767px) the grid collapses to a single column automatically. The default `.container` caps at `1600px` (`--container-lg`); use `.container-sm` (1024px) or target `--container-md` (1280px) for narrower sections.
 - **Fluid scaling with clamp()** — visual containers should scale across screen widths using `clamp(min, preferred, max)` rather than a single fixed width. The preferred value should be a `vw` unit calibrated to the designed width (e.g. if the design is 1280px and the container is 1120px wide, use `87.5vw`). Always pair with `max-width: calc(100vw - 3rem)` as overflow protection on small screens. Use `aspect-ratio` instead of a fixed height so the container grows proportionally. Example: `width: clamp(56.25rem, 87.5vw, 90rem); max-width: calc(100vw - 3rem); aspect-ratio: 16 / 10;`
+
+- **Shared pill/chip text tokens** — for word-pill hero compositions (e.g. `ai-promo.html`, `manage.html`), drive the pill font-size from the shared tokens in `tokens.css` — `--text-pill-size` (desktop) / `--text-pill-size-mobile` (mobile) — instead of a local `clamp()` per file. Every pill/flag/icon dimension and staircase offset in these compositions is expressed in `em` relative to this token, so pointing a new page at the same token keeps its kegl in sync with existing pages automatically, and rescaling the composition later is a one-line token change.
+
+- **Mobile clamp() calibration — anchor at the narrowest width, no plateau** — for mobile fluid tokens like `--text-pill-size-mobile`, calibrate the `vw` coefficient so the design-base value is reached at the **narrowest realistic mobile width (320px)**, not at the Figma mobile frame width (e.g. 402px). Formula: `vw = base_px / 320 * 100`. Let it scale continuously up to the 767px breakpoint ceiling — don't add a separate `max` unless the resulting size at 767px visually overshoots (verify in browser first). Anchoring at the Figma frame width instead causes the value to hit its cap early and stay flat for the rest of the mobile range, which reads as static/non-scalable.
 
 - **Subgrid для выравнивания строк карточек** — когда несколько карточек в ряду должны выравнивать внутренние строки (заголовок, медиа, описание) друг относительно друга, использовать CSS Subgrid. На родительском `.grid` задать `grid-template-rows: auto 1fr auto` (по числу строк внутри карточки). На каждой карточке: `grid-row: span 3; display: grid; grid-template-rows: subgrid`. Тогда браузер выравнивает соответствующие строки всех карточек по высоте самой высокой. Применять только на десктопе (`min-width: 768px`) — на мобилке карточки одна под другой, subgrid не нужен.
 
@@ -300,3 +311,20 @@ let _rafReady = false;
 
 The same pattern applies to every additional lerp channel (e.g. `currentPws`).
 Remove the `scroll` event listener — `targetP` is read every rAF frame, which is sufficient.
+
+### Scroll/IO-триггерная анимация входа — снап при reload-in-view
+Та же корневая проблема (браузер восстанавливает скролл **после** выполнения скрипта), но для **class-триггерной** entrance-анимации (карточка выезжает при `.--visible`, которую вешает scroll-листенер или `IntersectionObserver`). При перезагрузке на середине секции триггер срабатывает, когда блок уже в зоне видимости, и проигрывает анимацию заново — элемент «подлетает» рассинхронно со скроллом.
+
+Правило: анимация входа должна различать «загружен уже в зоне видимости» (**снап**, без анимации) и «доскроллил живьём» (**анимация**). Надёжный сигнал различия — **реальный жест пользователя**. Восстановление скролла и программные `scrollTo` не генерят `wheel`/`touchmove`/`keydown`/`pointerdown`, поэтому:
+
+```js
+var armed = false; // «пользователь реально начал скроллить»
+['wheel','touchmove','keydown','pointerdown'].forEach(function (ev) {
+  window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
+});
+// в триггере (scroll-листенер ИЛИ IntersectionObserver-колбэк):
+if (armed) showEl();   // добавить .--visible → CSS-анимация
+else       snapEl();   // добавить .--instant → transform: …translateY(0), animation: none
+```
+
+Класс `--instant` задаёт финальный `transform` и `animation: none` (иначе элемент упадёт в базовый off-screen `transform`). Почему жест, а не `requestAnimationFrame`-задержка или таймер: rAF/таймеры гонятся с восстановлением скролла и с таймингом колбэка `IntersectionObserver` (IO-колбэк может прийти позже 2 кадров) — именно из-за этой гонки элемент и подлетает. Жест-gate детерминирован. Известный компромисс: перетаскивание скроллбара мышью не даёт `wheel`/`touch` → в этом редком кейсе будет снап вместо анимации (приемлемо).

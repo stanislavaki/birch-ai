@@ -1,0 +1,1234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bïrch — Manage</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<link rel="stylesheet" href="design-system/components/card-accordion.css" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ─────────────────────────────────────────
+     HERO — pills only (bg / subtitle / CTA added in Webflow)
+     Figma: desktop 1280 (node 17900:3089) / mobile (node 17906:3401)
+  ───────────────────────────────────────── */
+
+  .hero {
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    overflow: hidden; /* clip flag tip / staircase from expanding page width */
+  }
+
+  /* Word pills — shared visual base for both desktop rows and mobile staircase */
+  .hero__pill {
+    display: block;
+    font-size: var(--ps);
+    padding: 0.058em 0.462em 0.154em; /* pt=3px px=24px pb=8px at 52px design */
+    font-family: var(--font);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--color-text-inverted);
+  }
+  .hero__pill--sq   { border-radius: 0.308em; } /* 16px / 52px */
+  .hero__pill--pill { border-radius: var(--radius-pill); }
+  .hero__pill--dotted {
+    background: transparent;
+    color: var(--color-text);
+    border: 0.108em dotted var(--color-text); /* 5.6px / 52px */
+    padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em); /* border eats into padding so box stays same size */
+  }
+
+  .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+  .hero__pill--green      { background: var(--color-accent-green); }
+  .hero__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+  /* "Scale" flag — ribbon shape, flat left edge / pointed right edge */
+  .hero__flag {
+    position: relative;
+    flex-shrink: 0;
+    width: 3.25em;   /* 169 / 52 */
+    height: 1.481em; /* 77 / 52 */
+    font-size: var(--ps);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero__flag::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: -0.212em;    /* -11 / 52 */
+    bottom: -0.172em; /* 97 - 77 - 11 = 9 → 9 / 52 */
+    background: #FBBC04; /* hardcoded — one-off decorative color, not a design token */
+    clip-path: polygon(100% 85.567%, 0% 100%, 0% 0%, 100% 14.433%);
+  }
+  .hero__flag span {
+    position: relative;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--color-text-inverted);
+  }
+
+  /* Campaign icon square */
+  .hero__icon {
+    flex-shrink: 0;
+    width: 1.481em;  /* 77 / 52 */
+    height: 1.481em;
+    font-size: var(--ps);
+    border-radius: 0.308em;
+    background: var(--color-accent-light-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hero__icon svg {
+    width: 1.0385em; /* 54 / 52 */
+    height: 1.0385em;
+    stroke: var(--color-accent-blue);
+  }
+
+  /* ── Desktop — two centered rows ── */
+  .hero__h1--dt {
+    --ps: var(--text-pill-size); /* shared token — design-system/tokens.css */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.365em; /* 19 / 52 */
+    font-size: var(--ps);
+  }
+  .hero__row {
+    display: flex;
+    align-items: center;
+    gap: 0.154em; /* 8 / 52 */
+  }
+
+  /* Mobile staircase hidden on desktop */
+  .hero__h1--mb { display: none; }
+
+  /* ─────────────────────────────────────────
+     MOBILE ≤767px — absolute staircase
+     (composition differs from ai-promo — exact per-element positions)
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero__h1--dt { display: none; }
+    .hero__h1--mb {
+      display: block;
+      position: relative;
+      --ps: var(--text-pill-size-mobile); /* shared token — design-system/tokens.css */
+      font-size: var(--ps);
+      width: 8.068em;  /* 233 / 28.889 */
+      height: 8.517em; /* 246 / 28.889 */
+    }
+    .hero__h1--mb .hero__flag,
+    .hero__h1--mb .hero__pill,
+    .hero__h1--mb .hero__icon {
+      position: absolute;
+    }
+    .hero__mflag        { left: 2.389em; top: 0.227em; }
+    .hero__mcampaigns   { left: 0.208em; top: 2.008em; }
+    .hero__micon        { left: 1.800em; top: 3.635em; }
+    .hero__mwith        { left: 3.462em; top: 3.635em; }
+    .hero__mai          { left: 0;       top: 5.401em; }
+    .hero__mad          { left: 6.012em; top: 5.401em; }
+    .hero__mautomation  { left: 1.142em; top: 7.026em; }
+  }
+
+
+  /* ─────────────────────────────────────────
+     AI STATEMENT — full-screen contrast block (Figma 17814:12909)
+     Structure: .ais-rail (scroll runway) → .ais (sticky) →
+       .ais__content (heading + emojis, position:relative)
+       .ais__card    (absolute in section, animates in on scroll)
+  ───────────────────────────────────────── */
+  .ais-rail {
+    position: relative;
+    height: 200vh; /* 100vh section + 100vh runway: card at 25%, ~25vh park */
+    overflow-x: clip;
+  }
+
+  .ais {
+    position: sticky;
+    top: var(--nav-height, 0px);
+    height: calc(100svh - var(--nav-height, 0px));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* no overflow: hidden — card enters from below, clipped by viewport naturally */
+  }
+
+  /* Heading + emojis — positioning context for emoji absolute coords */
+  .ais__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -6rem; /* shift heading above visual center */
+  }
+
+  /* On desktop: transparent wrapper so characters still position vs .ais__content */
+  .ais__chars { display: contents; }
+
+  .ais__heading {
+    text-align: center;
+    line-height: 0.92;
+    position: relative;
+    z-index: 1;
+    transition: transform 1s cubic-bezier(0.34, 1.12, 0.64, 1);
+    transform-origin: center top;
+  }
+  .ais__heading--small { transform: scale(0.8); }
+  .ais__heading-mb { display: none; }
+
+  /* Card: absolute in .ais, centered, overlapping heading bottom */
+  /* Heading: 3 lines × 5rem × 0.92lh = 13.8rem; half = 6.9rem → top = 50% + 6.9rem - 3rem overlap */
+  .ais__card {
+    position: absolute;
+    width: min(38.5rem, 80%);
+    left: 0;
+    right: 0;
+    margin: auto;
+    top: 0; /* overridden by JS: positioned relative to heading bottom */
+    transform: rotate(-3.595deg);
+    background: var(--color-accent-green);
+    border-radius: var(--radius-xl);
+    padding: 0.625rem;
+    z-index: 2;
+  }
+
+  .ais__card-inner {
+    border: 0.3125rem dotted var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 9.875rem;
+  }
+
+  .ais__card-text {
+    text-align: center;
+    color: var(--color-bg);
+    margin: 0;
+  }
+
+  /* Card: starts off-screen, animates in via CSS when --visible class added */
+  .ais__card {
+    will-change: transform;
+    transform: rotate(-3.595deg) translateY(120vh);
+  }
+  @keyframes ais-card-in {
+    from { transform: rotate(-25deg) translateY(120vh); }
+    to   { transform: rotate(-3.595deg) translateY(0); }
+  }
+  .ais__card--visible {
+    animation: ais-card-in 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+  }
+  /* Snap to final position with no animation (page reloaded already in view) */
+  .ais__card--instant {
+    transform: rotate(-3.595deg) translateY(0);
+  }
+
+  /* Emojis: absolute relative to .ais__content, appear on scroll-in */
+  .ais__robot {
+    position: absolute;
+    width: 10.5rem;
+    aspect-ratio: 1 / 1;
+    left: -6rem;
+    top: 0;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transform: rotate(-13.59deg) translateY(1.5rem);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .ais__robot--visible {
+    opacity: 1;
+    transform: rotate(-13.59deg) translateY(0);
+  }
+
+  .ais__alien {
+    position: absolute;
+    width: 14.375rem;
+    aspect-ratio: 175 / 149;
+    right: -11rem;
+    top: 12rem;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transform: rotate(-16.84deg) translateY(1.5rem);
+    transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+  }
+  .ais__alien--visible {
+    opacity: 1;
+    transform: rotate(-16.84deg) translateY(0);
+  }
+
+  .ais__char-body {
+    position: relative; /* containing block for eye absolutes */
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+  }
+
+  .ais__robot img,
+  .ais__alien img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* Eye overlay: positioned div on top of image, pupil moves toward cursor */
+  .ais__eye {
+    position: absolute;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .ais__alien .ais__eye {
+    width: 0.95rem;
+    height: 1.6rem;
+    border-radius: 0;
+  }
+  .ais__pupil {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: rgba(10, 10, 20, 0.75);
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+  .ais__alien .ais__pupil {
+    background: rgba(255, 255, 255, 0.9);
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 0;
+  }
+
+  @media (max-width: 767px) {
+    .ais-rail { height: auto; }
+
+    .ais {
+      position: relative;
+      top: auto;
+      height: auto;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 2rem;
+      padding-bottom: 4rem;
+    }
+
+    .ais__content { width: 100%; margin-top: 0; position: static; }
+
+    /* Characters row: flex so height is defined by the images themselves */
+    .ais__chars {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.5rem;
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    .ais__heading-dt { display: none; }
+    .ais__heading-mb { display: inline; }
+    .ais__heading-wrap {
+      width: 100%;
+      max-width: 23.4375rem;
+      padding-inline: var(--pad-horizontal);
+    }
+    .ais__heading { width: 100%; }
+
+    /* Robot: in-flow, slides in from left */
+    .ais__robot {
+      position: relative;
+      width: 7.6875rem;
+      left: auto; right: auto; top: auto;
+      margin-left: 0;
+      flex-shrink: 0;
+      transform: rotate(-13.59deg) translateX(-120%);
+      transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.34, 1.12, 0.64, 1);
+    }
+    .ais__robot--visible {
+      opacity: 1;
+      transform: rotate(-13.59deg) translateX(0);
+    }
+
+    /* Alien: in-flow, slides in from right with slight delay */
+    .ais__alien {
+      position: relative;
+      width: 10.59375rem;
+      left: auto; right: auto; top: auto;
+      flex-shrink: 0;
+      transform: rotate(-16.84deg) translateX(120%);
+      transition: opacity 0.5s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.3s;
+    }
+    .ais__alien--visible {
+      opacity: 1;
+      transform: rotate(-16.84deg) translateX(0);
+    }
+
+    /* Card: in-flow under heading on mobile */
+    .ais__card {
+      position: relative;
+      top: auto; left: auto; right: auto;
+      margin: 1.5rem auto 0;
+      width: 70%;
+      transform: rotate(-7.19deg) translateY(100vh);
+    }
+    .ais__card-inner { padding: 1.5rem; min-height: 0; }
+
+    @keyframes ais-card-in-mb {
+      from { transform: rotate(-20deg) translateY(100vh); }
+      to   { transform: rotate(-7.19deg) translateY(0); }
+    }
+    .ais__card--visible {
+      animation: ais-card-in-mb 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+    }
+    .ais__card--instant {
+      animation: none;
+      transform: rotate(-7.19deg) translateY(0);
+    }
+
+    /* Eye sizes scaled to 1.5× mobile characters (≈ 0.73× desktop) */
+    .ais__eye { width: 1rem; height: 1rem; }
+    .ais__alien .ais__eye { width: 0.7rem; height: 1.175rem; }
+    .ais__pupil { width: 0.5rem; height: 0.5rem; }
+    .ais__alien .ais__pupil { width: 0.45rem; height: 0.45rem; }
+  }
+
+
+  /* ─────────────────────────────────────────
+     AI CHAT — 3-column showcase (Figma 17891:3017)
+     Col 1: image placeholder (image added later)
+     Col 2: chat card, reused from ai-promo.html "Analyze performance" dialogue
+     Col 3: accordion, reused from ai-promo.html card-accordion, auto-cycling
+  ───────────────────────────────────────── */
+  .aichat {
+    padding: var(--space-xl) 0;
+  }
+
+  /* Col 1: placeholder */
+  .aichat__placeholder {
+    background: var(--color-accent-indigo);
+    border-radius: var(--radius-xl);
+    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout — desktop grid stretch overrides */
+  }
+
+  /* Col 2: chat card (same component as ai-promo.html) */
+  .aichat__chat-col .chat-card-wrap {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout */
+    container-type: inline-size;
+  }
+  @media (min-width: 768px) {
+    .aichat__chat-col .chat-card-wrap { aspect-ratio: unset; } /* desktop: grid stretch drives height */
+  }
+
+  .aichat .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1.5em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.25vw, 1.25rem); /* fallback */
+    font-size: 4.55cqi;                          /* 18px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+  .aichat .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .aichat .chat-card__body::-webkit-scrollbar { display: none; }
+  .aichat .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+  .aichat .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+  .aichat .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .aichat .chat-card__bubble.is-visible { opacity: 1; transform: translateY(0); }
+  .aichat .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .aichat .chat-card__response.is-visible { opacity: 1; transform: translateY(0); }
+  .aichat .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .aichat .chat-card__response-content p { margin: 0 0 0.4em; }
+  .aichat .chat-card__response-content p:last-child { margin-bottom: 0; }
+  .aichat .chat-card__response-content strong { font-weight: 700; }
+  .aichat .chat-card__table { width: 100%; margin-bottom: 0.625em; }
+  .aichat .chat-card__table-header,
+  .aichat .chat-card__table-row { display: flex; align-items: center; }
+  .aichat .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .aichat .chat-card__table-col:first-child { padding-left: 0.875em; }
+  .aichat .chat-card__table-col:last-child  { flex: 0 0 5em; }
+  .aichat .chat-card__table-header .chat-card__table-col { color: #636363; font-weight: 500; }
+  .aichat .chat-card__table-row { border-radius: 0.75em; }
+  .aichat .chat-card__table-row--alt { background: #fafafa; }
+  .aichat .chat-card__input-area { flex-shrink: 0; padding: 1em; position: relative; }
+  .aichat .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .aichat .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .aichat .chat-card__text-flow { flex: 1; min-width: 0; line-height: inherit; }
+  .aichat .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .aichat .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .aichat .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .aichat .chat-card__cursor.is-blinking { animation: aichatCursorBlink 0.9s step-end infinite; }
+  @keyframes aichatCursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .aichat .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .aichat .chat-card__send.is-active { background: #161616; cursor: pointer; }
+  .aichat .chat-card__send svg { width: 1em; height: 1em; }
+
+  /* Col 3: accordion */
+  .aichat__accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+  }
+  .aichat__accordion .card-accordion {
+    background: var(--color-bg-grey); /* Figma: distinct grey card, not page-bg */
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Webflow dev environment nav (design-system/webflow-env-nav.html) ── -->
+<nav class="sim-nav">
+  <div class="sim-nav__inner">
+    <a class="sim-nav__logo" href="#">
+      <svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/>
+        <path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/>
+        <path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/>
+        <path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/>
+        <path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/>
+        <path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/>
+      </svg>
+    </a>
+    <div class="sim-nav__center">
+      <div class="sim-nav__center-links">
+        <a class="sim-nav__link" href="#">Performance<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Hub<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Stage<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#" style="position:relative;padding-top:1.4em;">
+          <span class="sim-nav__badge">New</span>AI<div class="sim-nav__link-dot"></div>
+        </a>
+        <a class="sim-nav__link" href="#">Cases<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Blog<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Pricing<div class="sim-nav__link-dot"></div></a>
+      </div>
+    </div>
+    <div class="sim-nav__right">
+      <a class="sim-nav__link-lg" href="#">Book demo</a>
+      <a class="sim-nav__link-lg" href="#">Log in</a>
+      <a class="sim-nav__btn" href="#">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Shared icon symbol -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="icon-campaign" viewBox="0 0 54 54" fill="none">
+    <path d="M2.99927 24.0002V45.0002C2.99927 48.3139 5.68556 51.0002 8.99927 51.0002H44.9993C48.313 51.0002 50.9993 48.3139 50.9993 45.0002V24.0002C50.9993 20.6865 48.313 18.0002 44.9993 18.0002H8.99927C5.68556 18.0002 2.99927 20.6865 2.99927 24.0002ZM2.99927 24.0002V12.0002C2.99927 8.68647 5.68556 6.00018 8.99927 6.00018H28.2623C32.0139 6.00018 35.372 8.32734 36.6892 11.8401L38.9993 18.0002M17.9993 35.0456L23.6243 40.5002L35.9993 28.5002" stroke-width="5.0625" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<!-- ─────────────────────────────────────────
+     HERO — pills only
+───────────────────────────────────────── -->
+<section class="hero">
+
+  <!-- Desktop: two rows -->
+  <div class="hero__h1--dt">
+    <div class="hero__row">
+      <div class="hero__flag"><span>Scale</span></div>
+      <div class="hero__icon"><svg><use href="#icon-campaign" /></svg></div>
+      <span class="hero__pill hero__pill--light-blue hero__pill--sq">your campaigns</span>
+    </div>
+    <div class="hero__row">
+      <span class="hero__pill hero__pill--dotted hero__pill--pill">with</span>
+      <span class="hero__pill hero__pill--green hero__pill--sq">AI-powered</span>
+      <span class="hero__pill hero__pill--indigo hero__pill--pill">ad</span>
+      <span class="hero__pill hero__pill--indigo hero__pill--pill">automation</span>
+    </div>
+  </div>
+
+  <!-- Mobile: staircase -->
+  <div class="hero__h1--mb" aria-label="Scale your campaigns with AI-powered ad automation">
+    <div class="hero__flag hero__mflag"><span>Scale</span></div>
+    <span class="hero__pill hero__pill--light-blue hero__pill--sq hero__mcampaigns">your campaigns</span>
+    <div class="hero__icon hero__micon"><svg><use href="#icon-campaign" /></svg></div>
+    <span class="hero__pill hero__pill--dotted hero__pill--pill hero__mwith">with</span>
+    <span class="hero__pill hero__pill--green hero__pill--sq hero__mai">AI-powered</span>
+    <span class="hero__pill hero__pill--indigo hero__pill--pill hero__mad">ad</span>
+    <span class="hero__pill hero__pill--indigo hero__pill--pill hero__mautomation">automation</span>
+  </div>
+
+</section>
+
+<!-- ─────────────────────────────────────────
+     AI STATEMENT — full-screen contrast block (Figma 17814:12909)
+───────────────────────────────────────── -->
+<div class="ais-rail">
+  <section class="ais" id="ais">
+    <div class="ais__content">
+      <div class="ais__chars">
+        <div class="ais__robot" aria-hidden="true">
+          <div class="ais__char-body">
+            <img src="images/ai-robot-1.png" alt="">
+            <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
+            <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+          </div>
+        </div>
+        <div class="ais__alien" aria-hidden="true">
+          <div class="ais__char-body">
+            <img src="images/ai-robot-2.png" alt="">
+            <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
+            <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ais__heading-wrap">
+        <h2 class="ais__heading t-display">
+          <span class="ais__heading-dt">A lot of ad tools<br>are racing to make AI<br>fully autonomous</span>
+          <span class="ais__heading-mb">A lot of ad tools are racing to make AI fully autonomous</span>
+        </h2>
+      </div>
+    </div>
+    <div class="ais__card">
+      <div class="ais__card-inner">
+        <p class="ais__card-text t-h3">We think that&rsquo;s the wrong goal when it comes to budget decisions</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─────────────────────────────────────────
+     AI CHAT — 3-column showcase (Figma 17891:3017)
+───────────────────────────────────────── -->
+<section class="aichat" id="aichat">
+  <div class="container">
+    <div class="grid">
+
+      <!-- Col 1: image placeholder — image added later -->
+      <div class="col-4 aichat__placeholder" aria-hidden="true"></div>
+
+      <!-- Col 2: chat card — reused from ai-promo.html, "Analyze performance" dialogue -->
+      <div class="col-4 aichat__chat-col">
+        <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body" id="aichatBody">
+              <div class="chat-card__feed" id="aichatFeed"></div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="aichatPlaceholder">Ask anything</span><span class="chat-card__typed" id="aichatTyped"></span><span class="chat-card__cursor" id="aichatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="aichatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, auto-cycling -->
+      <div class="col-4 aichat__accordion" id="aichatAccordion">
+        <div class="card-accordion" data-index="0">
+          <h4 class="t-h4">Your existing rules are the starting point</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Bïrch's AI studies the automation rules you've already built—understanding your logic, your thresholds, and your goals—before it suggests anything new.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar0"></div></div>
+          </div>
+        </div>
+        <div class="card-accordion is-closed" data-index="1">
+          <h4 class="t-h4">It surfaces opportunities, not actions</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">The AI identifies automation gaps and inefficiencies in your campaigns, then presents them as suggestions with clear reasoning. It never adjusts a budget or pauses an ad on its own.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar1"></div></div>
+          </div>
+        </div>
+        <div class="card-accordion is-closed" data-index="2">
+          <h4 class="t-h4">You review, approve, and stay in control</h4>
+          <div class="card-accordion__body">
+            <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Every suggestion requires your sign-off before it becomes a rule. You can modify the conditions, adjust the thresholds, or dismiss it entirely. The final call is always yours.</p>
+            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar2"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+
+  /* ══════════════════════════════════════════════════════════
+     ACCORDION — auto-cycling, 3 cards, starts/pauses on visibility
+  ══════════════════════════════════════════════════════════ */
+  var COLORS = [
+    'var(--color-accent-green)',
+    'var(--color-accent-light-blue)',
+    'var(--color-accent-purple)',
+  ];
+  var ACC_DURATION = 5000; /* ms each card stays active */
+
+  var accBox = document.getElementById('aichatAccordion');
+  var accCards = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion'));
+  var accBars  = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion__bar-fill'));
+  var accActive  = 0;
+  var accStartMs = null;
+  var accRunning = false;
+  accBox.style.setProperty('--acc-color', COLORS[0]);
+
+  function accSetActive(idx) {
+    accCards.forEach(function (c) { c.classList.add('is-closed'); });
+    accCards[idx].classList.remove('is-closed');
+    accBox.style.setProperty('--acc-color', COLORS[idx]);
+    accBars.forEach(function (b) { b.style.width = '0%'; });
+    accActive  = idx;
+    accStartMs = null;
+  }
+
+  accCards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { accSetActive(idx); });
+  });
+
+  (function accTick(now) {
+    if (accRunning) {
+      if (accStartMs === null) accStartMs = now;
+      var elapsed  = now - accStartMs;
+      var progress = Math.min(elapsed / ACC_DURATION, 1);
+      accBars[accActive].style.width = (progress * 100).toFixed(1) + '%';
+      if (elapsed >= ACC_DURATION) accSetActive((accActive + 1) % accCards.length);
+    }
+    requestAnimationFrame(accTick);
+  })(performance.now());
+
+  /* Start/pause auto-cycle only while the block is on screen (project convention) */
+  var accObserver = new IntersectionObserver(function (entries) {
+    accRunning = entries[0].isIntersecting;
+    if (accRunning) accStartMs = null; /* resume cleanly, no jump */
+  }, { threshold: 0.1 });
+  accObserver.observe(accBox);
+
+  /* ══════════════════════════════════════════════════════════
+     CHAT — plays once, when the section is fully visible
+  ══════════════════════════════════════════════════════════ */
+  var CHAT_TYPING_MS = 15;
+  var PAUSE_SEND = 500;
+  var RESP_DELAY = 700;
+  var INIT_DELAY = 300;
+
+  var userMsg = 'Analyze my performance by platform';
+  var aiHtml = [
+    '<div class="chat-card__response-content">',
+      '<div class="chat-card__table">',
+        '<div class="chat-card__table-header">',
+          '<span class="chat-card__table-col">Platform</span>',
+          '<span class="chat-card__table-col">Ad Account</span>',
+          '<span class="chat-card__table-col">Spend</span>',
+        '</div>',
+        '<div class="chat-card__table-row chat-card__table-row--alt">',
+          '<span class="chat-card__table-col">Google Ads</span>',
+          '<span class="chat-card__table-col">Birch</span>',
+          '<span class="chat-card__table-col">🟢 $3.94M</span>',
+        '</div>',
+        '<div class="chat-card__table-row">',
+          '<span class="chat-card__table-col">Meta Ads</span>',
+          '<span class="chat-card__table-col">Bir.ch Marketing</span>',
+          '<span class="chat-card__table-col">🔴 $5K</span>',
+        '</div>',
+        '<div class="chat-card__table-row chat-card__table-row--alt">',
+          '<span class="chat-card__table-col">TikTok Ads</span>',
+          '<span class="chat-card__table-col">Bir.ch Tiktok</span>',
+          '<span class="chat-card__table-col">⚪ $40.6K</span>',
+        '</div>',
+      '</div>',
+      '<p><strong>🔍 Key Findings</strong></p>',
+      '<p>Google Ads Efficiency 🟢<br>',
+      'This high efficiency signals your campaigns are capturing high-intent traffic that converts at minimal cost relative to revenue.</p>',
+    '</div>'
+  ].join('');
+
+  var chatFeed     = document.getElementById('aichatFeed');
+  var chatBody     = document.getElementById('aichatBody');
+  var placeholder  = document.getElementById('aichatPlaceholder');
+  var typedEl      = document.getElementById('aichatTyped');
+  var inputCursor  = document.getElementById('aichatCursor');
+  var sendBtn      = document.getElementById('aichatSendBtn');
+  typedEl.style.display = 'none';
+
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent = '';
+    typedEl.style.display = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() { chatBody.scrollTop = chatBody.scrollHeight; }
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  function type(charIdx) {
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = userMsg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+    if (charIdx < userMsg.length) {
+      setTimeout(function () { type(charIdx + 1); }, CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      setTimeout(doSend, PAUSE_SEND);
+    }
+  }
+  function doSend() {
+    clearInput();
+    var bubbleEl = createBubble(userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        bubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    setTimeout(startResponse, RESP_DELAY);
+  }
+  function startResponse() {
+    var respEl = createResponse(aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        respEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+  }
+
+  /* Fire once, when the whole section is 100% visible */
+  var chatSection = document.getElementById('aichat');
+  var chatObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) {
+      chatObserver.disconnect();
+      setTimeout(function () { type(0); }, INIT_DELAY);
+    }
+  }, { threshold: 1.0 });
+  chatObserver.observe(chatSection);
+
+})();
+</script>
+
+<script>
+/* ─── AIS: emoji + card appear on scroll ─── */
+(function () {
+  'use strict';
+
+  var rail    = document.querySelector('.ais-rail');
+  var section = document.querySelector('.ais');
+  var card    = document.querySelector('.ais__card');
+  var heading = document.querySelector('.ais__heading');
+  var robot   = document.querySelector('.ais__robot');
+  var alien   = document.querySelector('.ais__alien');
+
+  /* Reload restores scroll AFTER this script runs, so scroll/IO triggers can fire
+     with the section already in view and replay entrance animations out of sync
+     with the scroll. Fix: only animate after a real user gesture — scroll
+     restoration and programmatic scrolls emit none of these, so `armed` stays
+     false on reload-into-view and we snap instead. Shared by characters + card. */
+  var armed = false;
+  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
+  });
+
+  function positionCard() {
+    if (window.innerWidth <= 767) { card.style.top = ''; return; } /* mobile: in-flow — clear any desktop inline top */
+    var sectionTop    = section.getBoundingClientRect().top;
+    var headingBottom = heading.getBoundingClientRect().bottom;
+    var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    card.style.top = (headingBottom - sectionTop - remPx) + 'px';
+  }
+  positionCard();
+  document.fonts.ready.then(positionCard);
+  window.addEventListener('resize', positionCard, { passive: true });
+
+  /* characters appear when section is 30% in viewport — animate if armed, else snap */
+  function showChars(instant) {
+    if (instant) { robot.style.transition = 'none'; alien.style.transition = 'none'; }
+    robot.classList.add('ais__robot--visible');
+    alien.classList.add('ais__alien--visible');
+  }
+  var emojiObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) {
+      showChars(!armed);
+      emojiObserver.disconnect();
+    }
+  }, { threshold: 0.3 });
+  emojiObserver.observe(section);
+
+  /* card appears after user scrolls 40% through the rail */
+  function getNavH() {
+    var fs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    return raw ? parseFloat(raw) * fs : 0;
+  }
+
+  function showCard(withHeadingSmall) {
+    card.classList.add('ais__card--visible');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
+  }
+  function snapCard(withHeadingSmall) {
+    card.classList.add('ais__card--instant');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
+  }
+
+  var range = rail.offsetHeight - section.offsetHeight;
+  if (range <= 0) {
+    /* mobile: no scroll range — trigger card by intersection */
+    var cardObserver = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      if (armed) showCard(false); else snapCard(false);
+      cardObserver.disconnect();
+    }, { threshold: 0.3 });
+    cardObserver.observe(section);
+  } else {
+    /* desktop: trigger card at 25% scroll through rail */
+    function checkCard() {
+      var railTop = rail.getBoundingClientRect().top;
+      var p = Math.max(0, (getNavH() - railTop) / range);
+      if (p >= 0.25) {
+        if (armed) showCard(true); else snapCard(true);
+        window.removeEventListener('scroll', checkCard, { passive: true });
+      }
+    }
+    window.addEventListener('scroll', checkCard, { passive: true });
+    /* fire once in case we load already past the trigger (no scroll event) */
+    requestAnimationFrame(checkCard);
+  }
+})();
+</script>
+
+<script>
+/* ─── AIS: eye tracking — pupils follow cursor ─── */
+(function () {
+  'use strict';
+  var eyes = document.querySelectorAll('.ais__eye');
+
+  var ROT_ROBOT = -13.59 * Math.PI / 180;
+  var ROT_ALIEN = -16.84 * Math.PI / 180;
+
+  /* pupils — robot: snappy; alien: calmer */
+  /* body — slow graceful drift */
+  var BODY_K      = 0.035;
+  var BODY_D      = 0.88;
+
+  /* pupils — robot: snappy; alien: matches body spring for sync movement */
+  var EYE_K = 0.3, EYE_D = 0.8;
+  var EYE_K_ALIEN = 0.2, EYE_D_ALIEN = 0.82;
+  var MAX_OFFSET  = 14; /* px */
+  var MAX_TILT    = 10; /* deg */
+
+  function toLocal(nx, ny, rad) {
+    var a = -rad, c = Math.cos(a), s = Math.sin(a);
+    return { x: nx * c - ny * s, y: nx * s + ny * c };
+  }
+
+  var section = document.querySelector('.ais');
+  var bodies  = section.querySelectorAll('.ais__char-body');
+  var alienEl = section.querySelector('.ais__alien');
+
+  for (var i = 0; i < eyes.length; i++) {
+    var isAlienEye = alienEl.contains(eyes[i]);
+    eyes[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, tx: 0, ty: 0,
+                    k: isAlienEye ? EYE_K_ALIEN : EYE_K,
+                    d: isAlienEye ? EYE_D_ALIEN : EYE_D };
+  }
+  for (var i = 0; i < bodies.length; i++) {
+    bodies[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, rot: 0, vrot: 0,
+                      tx: 0, ty: 0, trot: 0 };
+  }
+
+  /* last known cursor position — updated on every mousemove */
+  var _mx = -9999, _my = -9999;
+  /* section visibility — pause the spring loop + target reads when off-screen */
+  var _inView = false;
+
+  /* default eye direction: look toward title (above section center) */
+  requestAnimationFrame(function () {
+    var sr  = section.getBoundingClientRect();
+    var fakeX = sr.left + sr.width / 2;
+    var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
+    updateTargets(fakeX, fakeY);
+  });
+
+  /* last close-proximity direction per character — for residual tilt memory */
+  var _lastNx = [0, 0];
+  var MIN_HOLD = [0.4, 0.8]; /* per-char: robot=0.4, alien=0.8 (alien 2× more memory) */
+
+  var charEls = [section.querySelector('.ais__robot'), section.querySelector('.ais__alien')];
+  var chars   = [
+    { el: charEls[0], rot: ROT_ROBOT, isAlien: false },
+    { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
+  ];
+
+  function updateTargets(clientX, clientY) {
+    /* body targets — each char flees cursor; strength scales with proximity */
+    var sr  = section.getBoundingClientRect();
+    var snx = (clientX - sr.left - sr.width / 2) / (sr.width / 2);
+    for (var j = 0; j < bodies.length; j++) {
+      var cr   = charEls[j].getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var dist = Math.sqrt(cdx * cdx + cdy * cdy);
+      var prox = Math.max(0, 1 - dist / 480);
+      var nx   = dist > 1 ? cdx / dist : 0;
+      var ny   = dist > 1 ? cdy / dist : 0;
+      if (prox > 0.1) _lastNx[j] = nx; /* remember direction while cursor is close */
+      var tiltNx = prox > 0.1 ? nx : _lastNx[j];
+      bodies[j]._sp.tx   = -nx * MAX_OFFSET * prox;
+      bodies[j]._sp.ty   = -ny * MAX_OFFSET * 0.6 * prox;
+      bodies[j]._sp.trot = -tiltNx * MAX_TILT * Math.max(prox, MIN_HOLD[j]);
+    }
+
+    /* eye targets — direction from CHARACTER center so both eyes look the same way */
+    for (var c = 0; c < chars.length; c++) {
+      var ch   = chars[c];
+      var cr   = ch.el.getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var clen = Math.sqrt(cdx * cdx + cdy * cdy);
+      if (clen < 1) {
+        var ces = ch.el.querySelectorAll('.ais__eye');
+        for (var k = 0; k < ces.length; k++) { ces[k]._sp.tx = 0; ces[k]._sp.ty = 0; }
+        continue;
+      }
+      var nx  = cdx / clen, ny = cdy / clen;
+      var bodyRot = bodies[c]._sp.rot * Math.PI / 180;
+      var loc = toLocal(nx, ny, ch.rot + bodyRot);
+      var ces = ch.el.querySelectorAll('.ais__eye');
+      for (var k = 0; k < ces.length; k++) {
+        var eye  = ces[k];
+        var rect = eye.getBoundingClientRect();
+        var sp   = eye._sp;
+        var pu   = eye.querySelector('.ais__pupil');
+        var pr   = pu.getBoundingClientRect();
+        if (ch.isAlien) {
+          var hw  = (rect.width  - pr.width)  / 2;
+          var hh  = (rect.height - pr.height) / 2;
+          var lx  = loc.x;
+          var ly  = loc.y > 0 ? loc.y : loc.y - 0.65;
+          var s   = Math.max(Math.abs(lx) / hw, Math.abs(ly) / hh);
+          sp.tx = lx / s; sp.ty = ly / s;
+        } else {
+          var rad = Math.min(rect.width, rect.height) / 2;
+          var mx  = rad - Math.min(pr.width, pr.height) / 2;
+          sp.tx = loc.x * mx; sp.ty = loc.y * mx;
+        }
+      }
+    }
+  }
+
+  window.addEventListener('mousemove', function (e) {
+    _mx = e.clientX; _my = e.clientY;
+    if (_inView) updateTargets(_mx, _my);
+  }, { passive: true });
+
+  /* track visibility; when section enters viewport, sync pupils to last cursor */
+  var eyeObserver = new IntersectionObserver(function (entries) {
+    _inView = entries[0].isIntersecting;
+    if (_inView && _mx !== -9999) updateTargets(_mx, _my);
+  }, { threshold: 0.1 });
+  eyeObserver.observe(section);
+
+  /* Mobile: robot looks at title by default; when alien slides in, switches to alien */
+  if (window.innerWidth <= 767) {
+    var _alienVis = new MutationObserver(function () {
+      if (alienEl.classList.contains('ais__alien--visible')) {
+        _alienVis.disconnect();
+        setTimeout(function () {
+          var ar = alienEl.getBoundingClientRect();
+          _mx = ar.left + ar.width  / 2;
+          _my = ar.top  + ar.height / 2;
+          updateTargets(_mx, _my);
+        }, 1800); /* robot shift 0.7s+0.7s, alien 0.8s+0.8s — wait for both to settle */
+      }
+    });
+    _alienVis.observe(alienEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  (function loop() {
+    if (!_inView) { requestAnimationFrame(loop); return; } /* skip work while off-screen */
+    /* bodies first — apply spring step */
+    for (var j = 0; j < bodies.length; j++) {
+      var b = bodies[j]._sp;
+      b.vx   += (b.tx   - b.px)  * BODY_K; b.vx   *= BODY_D; b.px  += b.vx;
+      b.vy   += (b.ty   - b.py)  * BODY_K; b.vy   *= BODY_D; b.py  += b.vy;
+      b.vrot += (b.trot - b.rot) * BODY_K; b.vrot *= BODY_D; b.rot += b.vrot;
+      bodies[j].style.transform =
+        'translate(' + b.px + 'px,' + b.py + 'px) rotate(' + b.rot + 'deg)';
+    }
+    /* recompute pupil targets after body has moved this frame */
+    if (_mx !== -9999) updateTargets(_mx, _my);
+    /* pupils */
+    for (var i = 0; i < eyes.length; i++) {
+      var sp = eyes[i]._sp;
+      sp.vx += (sp.tx - sp.px) * sp.k; sp.vx *= sp.d; sp.px += sp.vx;
+      sp.vy += (sp.ty - sp.py) * sp.k; sp.vy *= sp.d; sp.py += sp.vy;
+      eyes[i].querySelector('.ais__pupil').style.transform =
+        'translate(-50%,-50%) translate(' + sp.px + 'px,' + sp.py + 'px)';
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+
+</body>
+</html>

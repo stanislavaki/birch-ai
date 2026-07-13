@@ -1,0 +1,605 @@
+<style>
+
+/* ═══════════════════════════════════════════
+   TOKENS — scoped to embed wrapper
+   No font-size:16px pinning — rem/em resolve against Webflow's
+   fluid root font-size directly (see CLAUDE.md).
+═══════════════════════════════════════════ */
+.manage-ais-embed {
+  --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+  --color-accent-green: #04DE00;
+  --color-bg:           #0D0D12;
+  --radius-lg: 1rem;    /* 16px */
+  --radius-xl: 1.5rem;  /* 24px */
+  --pad-horizontal: 1.5rem;      /* inner heading padding, mobile */
+  --text-display-size: 5rem;     /* 80px */
+  --text-display-ls:  -0.02em;
+  --text-h3-size: 2rem;          /* 32px */
+  --text-h3-ls:  -0.02em;
+  font-family: var(--font);
+  /* no background — comes from Webflow */
+}
+
+/* ═══════════════════════════════════════════
+   RAIL + STICKY SECTION
+   .ais-rail = scroll runway (200vh), .ais sticks within it.
+   overflow-x: clip (NOT hidden) — hidden would make the rail a
+   scroll container and break position: sticky.
+═══════════════════════════════════════════ */
+.manage-ais-embed .ais-rail {
+  position: relative;
+  height: 200vh;
+  overflow-x: clip;
+}
+.manage-ais-embed .ais {
+  position: sticky;
+  top: var(--nav-height, 0px);
+  height: calc(100svh - var(--nav-height, 0px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Heading + emojis — positioning context for emoji absolute coords */
+.manage-ais-embed .ais__content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -6rem; /* shift heading above visual center */
+}
+
+/* Desktop: transparent wrapper so characters still position vs .ais__content */
+.manage-ais-embed .ais__chars { display: contents; }
+
+.manage-ais-embed .ais__heading {
+  text-align: center;
+  font-size: var(--text-display-size);
+  line-height: 0.92;
+  letter-spacing: var(--text-display-ls);
+  font-weight: 600;
+  color: var(--color-text, #FFFFFF);
+  position: relative;
+  z-index: 1;
+  transition: transform 1s cubic-bezier(0.34, 1.12, 0.64, 1);
+  transform-origin: center top;
+}
+.manage-ais-embed .ais__heading--small { transform: scale(0.8); }
+.manage-ais-embed .ais__heading-mb { display: none; }
+
+/* Card: absolute in .ais, centered, overlapping heading bottom.
+   Starts off-screen (translateY 120vh), animates in via CSS class. */
+.manage-ais-embed .ais__card {
+  position: absolute;
+  width: min(38.5rem, 80%);
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 0; /* overridden by JS: positioned relative to heading bottom */
+  background: var(--color-accent-green);
+  border-radius: var(--radius-xl);
+  padding: 0.625rem;
+  z-index: 2;
+  will-change: transform;
+  transform: rotate(-3.595deg) translateY(120vh);
+}
+@keyframes mais-card-in {
+  from { transform: rotate(-25deg)   translateY(120vh); }
+  to   { transform: rotate(-3.595deg) translateY(0); }
+}
+.manage-ais-embed .ais__card--visible {
+  animation: mais-card-in 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+}
+/* Snap to final position with no animation (reloaded already in view) */
+.manage-ais-embed .ais__card--instant {
+  transform: rotate(-3.595deg) translateY(0);
+}
+
+.manage-ais-embed .ais__card-inner {
+  border: 0.3125rem dotted var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 9.875rem;
+}
+.manage-ais-embed .ais__card-text {
+  text-align: center;
+  font-size: var(--text-h3-size);
+  line-height: 1.0;
+  letter-spacing: var(--text-h3-ls);
+  font-weight: 600;
+  color: var(--color-bg);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════
+   CHARACTERS (robot + alien) — absolute vs .ais__content on desktop
+═══════════════════════════════════════════ */
+.manage-ais-embed .ais__robot {
+  position: absolute;
+  width: 10.5rem;
+  aspect-ratio: 1 / 1;
+  left: -6rem;
+  top: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(-13.59deg) translateY(1.5rem);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.manage-ais-embed .ais__robot--visible {
+  opacity: 1;
+  transform: rotate(-13.59deg) translateY(0);
+}
+.manage-ais-embed .ais__alien {
+  position: absolute;
+  width: 14.375rem;
+  aspect-ratio: 175 / 149;
+  right: -11rem;
+  top: 12rem;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(-16.84deg) translateY(1.5rem);
+  transition: opacity 0.7s ease 0.15s, transform 0.7s ease 0.15s;
+}
+.manage-ais-embed .ais__alien--visible {
+  opacity: 1;
+  transform: rotate(-16.84deg) translateY(0);
+}
+.manage-ais-embed .ais__char-body {
+  position: relative; /* containing block for eye absolutes */
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+.manage-ais-embed .ais__robot img,
+.manage-ais-embed .ais__alien img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* Eye overlay: positioned div on top of image, pupil moves toward cursor */
+.manage-ais-embed .ais__eye {
+  position: absolute;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.manage-ais-embed .ais__alien .ais__eye {
+  width: 0.95rem;
+  height: 1.6rem;
+  border-radius: 0;
+}
+.manage-ais-embed .ais__pupil {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: rgba(10, 10, 20, 0.75);
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+.manage-ais-embed .ais__alien .ais__pupil {
+  background: rgba(255, 255, 255, 0.9);
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 0;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE ≤767px — vertical flow (chars row → heading → card)
+═══════════════════════════════════════════ */
+@media (max-width: 767px) {
+  .manage-ais-embed {
+    --pad-horizontal: 1rem;
+    --text-display-size: 2.375rem; /* 38px */
+    --text-h3-size: 1.5rem;        /* 24px */
+  }
+
+  .manage-ais-embed .ais-rail { height: auto; }
+
+  .manage-ais-embed .ais {
+    position: relative;
+    top: auto;
+    height: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+
+  .manage-ais-embed .ais__content { width: 100%; margin-top: 0; position: static; }
+
+  /* Characters row: flex so height is defined by the images themselves */
+  .manage-ais-embed .ais__chars {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .manage-ais-embed .ais__heading-dt { display: none; }
+  .manage-ais-embed .ais__heading-mb { display: inline; }
+  .manage-ais-embed .ais__heading-wrap {
+    width: 100%;
+    max-width: 23.4375rem;
+    padding-inline: var(--pad-horizontal);
+  }
+  .manage-ais-embed .ais__heading { width: 100%; }
+
+  /* Robot: in-flow, slides in from left */
+  .manage-ais-embed .ais__robot {
+    position: relative;
+    width: 7.6875rem;
+    left: auto; right: auto; top: auto;
+    margin-left: 0;
+    flex-shrink: 0;
+    transform: rotate(-13.59deg) translateX(-120%);
+    transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.34, 1.12, 0.64, 1);
+  }
+  .manage-ais-embed .ais__robot--visible {
+    opacity: 1;
+    transform: rotate(-13.59deg) translateX(0);
+  }
+
+  /* Alien: in-flow, slides in from right with slight delay */
+  .manage-ais-embed .ais__alien {
+    position: relative;
+    width: 10.59375rem;
+    left: auto; right: auto; top: auto;
+    flex-shrink: 0;
+    transform: rotate(-16.84deg) translateX(120%);
+    transition: opacity 0.5s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) 0.3s;
+  }
+  .manage-ais-embed .ais__alien--visible {
+    opacity: 1;
+    transform: rotate(-16.84deg) translateX(0);
+  }
+
+  /* Card: in-flow under heading on mobile */
+  .manage-ais-embed .ais__card {
+    position: relative;
+    top: auto; left: auto; right: auto;
+    margin: 1.5rem auto 0;
+    width: 70%;
+    transform: rotate(-7.19deg) translateY(100vh);
+  }
+  .manage-ais-embed .ais__card-inner { padding: 1.5rem; min-height: 0; }
+
+  @keyframes mais-card-in-mb {
+    from { transform: rotate(-20deg)  translateY(100vh); }
+    to   { transform: rotate(-7.19deg) translateY(0); }
+  }
+  .manage-ais-embed .ais__card--visible {
+    animation: mais-card-in-mb 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+  }
+  .manage-ais-embed .ais__card--instant {
+    animation: none;
+    transform: rotate(-7.19deg) translateY(0);
+  }
+
+  /* Eye sizes scaled to 1.5x mobile characters */
+  .manage-ais-embed .ais__eye { width: 1rem; height: 1rem; }
+  .manage-ais-embed .ais__alien .ais__eye { width: 0.7rem; height: 1.175rem; }
+  .manage-ais-embed .ais__pupil { width: 0.5rem; height: 0.5rem; }
+  .manage-ais-embed .ais__alien .ais__pupil { width: 0.45rem; height: 0.45rem; }
+}
+
+</style>
+
+<div class="manage-ais-embed">
+  <div class="ais-rail">
+    <section class="ais" id="ais">
+      <div class="ais__content">
+        <div class="ais__chars">
+          <div class="ais__robot" aria-hidden="true">
+            <div class="ais__char-body">
+              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a514a28062bc23feba216f4_ai-robot-1.webp" alt="">
+              <div class="ais__eye" style="left:29%;top:49.6%"><div class="ais__pupil"></div></div>
+              <div class="ais__eye" style="left:71.4%;top:49.6%"><div class="ais__pupil"></div></div>
+            </div>
+          </div>
+          <div class="ais__alien" aria-hidden="true">
+            <div class="ais__char-body">
+              <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a514a28b98c5da2d2064fa5_ai-robot-2.webp" alt="">
+              <div class="ais__eye" style="left:35.7%;top:50.7%"><div class="ais__pupil"></div></div>
+              <div class="ais__eye" style="left:64.9%;top:50.7%"><div class="ais__pupil"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="ais__heading-wrap">
+          <h2 class="ais__heading">
+            <span class="ais__heading-dt">A lot of ad tools<br>are racing to make AI<br>fully autonomous</span>
+            <span class="ais__heading-mb">A lot of ad tools are racing to make AI fully autonomous</span>
+          </h2>
+        </div>
+      </div>
+      <div class="ais__card">
+        <div class="ais__card-inner">
+          <p class="ais__card-text">We think that&rsquo;s the wrong goal when it comes to budget decisions</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ─── AIS: emoji + card appear on scroll ─── */
+(function () {
+  'use strict';
+
+  var rail    = document.querySelector('.manage-ais-embed .ais-rail');
+  var section = document.querySelector('.manage-ais-embed .ais');
+  var card    = document.querySelector('.manage-ais-embed .ais__card');
+  var heading = document.querySelector('.manage-ais-embed .ais__heading');
+  var robot   = document.querySelector('.manage-ais-embed .ais__robot');
+  var alien   = document.querySelector('.manage-ais-embed .ais__alien');
+  if (!rail || !section || !card) return;
+
+  /* Reload restores scroll AFTER this script runs, so scroll/IO triggers can fire
+     with the section already in view and replay entrance animations out of sync.
+     Fix: only animate after a real user gesture — restoration/programmatic scrolls
+     emit none, so `armed` stays false on reload-into-view and we snap instead.
+     Shared by characters + card. */
+  var armed = false;
+  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
+  });
+
+  function positionCard() {
+    if (window.innerWidth <= 767) { card.style.top = ''; return; } /* mobile: in-flow — clear any desktop inline top */
+    var sectionTop    = section.getBoundingClientRect().top;
+    var headingBottom = heading.getBoundingClientRect().bottom;
+    var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    card.style.top = (headingBottom - sectionTop - remPx) + 'px';
+  }
+  positionCard();
+  document.fonts.ready.then(positionCard);
+  window.addEventListener('resize', positionCard, { passive: true });
+
+  /* characters appear when section is 30% in viewport — animate if armed, else snap */
+  function showChars(instant) {
+    if (instant) { robot.style.transition = 'none'; alien.style.transition = 'none'; }
+    robot.classList.add('ais__robot--visible');
+    alien.classList.add('ais__alien--visible');
+  }
+  var emojiObserver = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) {
+      showChars(!armed);
+      emojiObserver.disconnect();
+    }
+  }, { threshold: 0.3 });
+  emojiObserver.observe(section);
+
+  /* --nav-height comes from Webflow :root in em — convert with real root font-size */
+  function getNavH() {
+    var fs  = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    return raw ? parseFloat(raw) * fs : 0;
+  }
+
+  function showCard(withHeadingSmall) {
+    card.classList.add('ais__card--visible');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
+  }
+  function snapCard(withHeadingSmall) {
+    card.classList.add('ais__card--instant');
+    if (withHeadingSmall) heading.classList.add('ais__heading--small');
+  }
+
+  var range = rail.offsetHeight - section.offsetHeight;
+  if (range <= 0) {
+    /* mobile: no scroll range — trigger card by intersection */
+    var cardObserver = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      if (armed) showCard(false); else snapCard(false);
+      cardObserver.disconnect();
+    }, { threshold: 0.3 });
+    cardObserver.observe(section);
+  } else {
+    /* desktop: trigger card at 25% scroll through rail */
+    function checkCard() {
+      var railTop = rail.getBoundingClientRect().top;
+      var p = Math.max(0, (getNavH() - railTop) / range);
+      if (p >= 0.25) {
+        if (armed) showCard(true); else snapCard(true);
+        window.removeEventListener('scroll', checkCard, { passive: true });
+      }
+    }
+    window.addEventListener('scroll', checkCard, { passive: true });
+    /* fire once in case we load already past the trigger (no scroll event) */
+    requestAnimationFrame(checkCard);
+  }
+})();
+</script>
+
+<script>
+/* ─── AIS: eye tracking — pupils follow cursor ─── */
+(function () {
+  'use strict';
+  var root = document.querySelector('.manage-ais-embed');
+  if (!root) return;
+  var eyes = root.querySelectorAll('.ais__eye');
+
+  var ROT_ROBOT = -13.59 * Math.PI / 180;
+  var ROT_ALIEN = -16.84 * Math.PI / 180;
+
+  /* body — slow graceful drift */
+  var BODY_K = 0.035;
+  var BODY_D = 0.88;
+
+  /* pupils — robot: snappy; alien: matches body spring for sync movement */
+  var EYE_K = 0.3, EYE_D = 0.8;
+  var EYE_K_ALIEN = 0.2, EYE_D_ALIEN = 0.82;
+
+  /* px constants scaled to real root font-size (fluid on Webflow) */
+  var remPx      = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  var MAX_OFFSET = 0.875 * remPx; /* 14px @16 — body flee distance */
+  var PROX_R     = 30 * remPx;    /* 480px @16 — cursor proximity radius */
+  var MAX_TILT   = 10;            /* deg */
+
+  function toLocal(nx, ny, rad) {
+    var a = -rad, c = Math.cos(a), s = Math.sin(a);
+    return { x: nx * c - ny * s, y: nx * s + ny * c };
+  }
+
+  var section = root.querySelector('.ais');
+  var bodies  = section.querySelectorAll('.ais__char-body');
+  var alienEl = section.querySelector('.ais__alien');
+
+  for (var i = 0; i < eyes.length; i++) {
+    var isAlienEye = alienEl.contains(eyes[i]);
+    eyes[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, tx: 0, ty: 0,
+                    k: isAlienEye ? EYE_K_ALIEN : EYE_K,
+                    d: isAlienEye ? EYE_D_ALIEN : EYE_D };
+  }
+  for (var i = 0; i < bodies.length; i++) {
+    bodies[i]._sp = { px: 0, py: 0, vx: 0, vy: 0, rot: 0, vrot: 0,
+                      tx: 0, ty: 0, trot: 0 };
+  }
+
+  /* last known cursor position — updated on every mousemove */
+  var _mx = -9999, _my = -9999;
+  /* section visibility — pause the spring loop + target reads when off-screen */
+  var _inView = false;
+
+  /* default eye direction: look toward title (above section center) */
+  requestAnimationFrame(function () {
+    var sr  = section.getBoundingClientRect();
+    var fakeX = sr.left + sr.width / 2;
+    var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
+    updateTargets(fakeX, fakeY);
+  });
+
+  /* last close-proximity direction per character — for residual tilt memory */
+  var _lastNx = [0, 0];
+  var MIN_HOLD = [0.4, 0.8]; /* per-char: robot=0.4, alien=0.8 (alien 2x more memory) */
+
+  var charEls = [section.querySelector('.ais__robot'), section.querySelector('.ais__alien')];
+  var chars   = [
+    { el: charEls[0], rot: ROT_ROBOT, isAlien: false },
+    { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
+  ];
+
+  function updateTargets(clientX, clientY) {
+    /* body targets — each char flees cursor; strength scales with proximity */
+    var sr  = section.getBoundingClientRect();
+    for (var j = 0; j < bodies.length; j++) {
+      var cr   = charEls[j].getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var dist = Math.sqrt(cdx * cdx + cdy * cdy);
+      var prox = Math.max(0, 1 - dist / PROX_R);
+      var nx   = dist > 1 ? cdx / dist : 0;
+      var ny   = dist > 1 ? cdy / dist : 0;
+      if (prox > 0.1) _lastNx[j] = nx; /* remember direction while cursor is close */
+      var tiltNx = prox > 0.1 ? nx : _lastNx[j];
+      bodies[j]._sp.tx   = -nx * MAX_OFFSET * prox;
+      bodies[j]._sp.ty   = -ny * MAX_OFFSET * 0.6 * prox;
+      bodies[j]._sp.trot = -tiltNx * MAX_TILT * Math.max(prox, MIN_HOLD[j]);
+    }
+
+    /* eye targets — direction from CHARACTER center so both eyes look the same way */
+    for (var c = 0; c < chars.length; c++) {
+      var ch   = chars[c];
+      var cr   = ch.el.getBoundingClientRect();
+      var cdx  = clientX - (cr.left + cr.width  / 2);
+      var cdy  = clientY - (cr.top  + cr.height / 2);
+      var clen = Math.sqrt(cdx * cdx + cdy * cdy);
+      if (clen < 1) {
+        var ces = ch.el.querySelectorAll('.ais__eye');
+        for (var k = 0; k < ces.length; k++) { ces[k]._sp.tx = 0; ces[k]._sp.ty = 0; }
+        continue;
+      }
+      var nx  = cdx / clen, ny = cdy / clen;
+      var bodyRot = bodies[c]._sp.rot * Math.PI / 180;
+      var loc = toLocal(nx, ny, ch.rot + bodyRot);
+      var ces = ch.el.querySelectorAll('.ais__eye');
+      for (var k = 0; k < ces.length; k++) {
+        var eye  = ces[k];
+        var rect = eye.getBoundingClientRect();
+        var sp   = eye._sp;
+        var pu   = eye.querySelector('.ais__pupil');
+        var pr   = pu.getBoundingClientRect();
+        if (ch.isAlien) {
+          var hw  = (rect.width  - pr.width)  / 2;
+          var hh  = (rect.height - pr.height) / 2;
+          var lx  = loc.x;
+          var ly  = loc.y > 0 ? loc.y : loc.y - 0.65;
+          var s   = Math.max(Math.abs(lx) / hw, Math.abs(ly) / hh);
+          sp.tx = lx / s; sp.ty = ly / s;
+        } else {
+          var rad = Math.min(rect.width, rect.height) / 2;
+          var mx  = rad - Math.min(pr.width, pr.height) / 2;
+          sp.tx = loc.x * mx; sp.ty = loc.y * mx;
+        }
+      }
+    }
+  }
+
+  window.addEventListener('mousemove', function (e) {
+    _mx = e.clientX; _my = e.clientY;
+    if (_inView) updateTargets(_mx, _my);
+  }, { passive: true });
+
+  /* track visibility; when section enters viewport, sync pupils to last cursor */
+  var eyeObserver = new IntersectionObserver(function (entries) {
+    _inView = entries[0].isIntersecting;
+    if (_inView && _mx !== -9999) updateTargets(_mx, _my);
+  }, { threshold: 0.1 });
+  eyeObserver.observe(section);
+
+  /* Mobile: robot looks at title by default; when alien slides in, switches to alien */
+  if (window.innerWidth <= 767) {
+    var _alienVis = new MutationObserver(function () {
+      if (alienEl.classList.contains('ais__alien--visible')) {
+        _alienVis.disconnect();
+        setTimeout(function () {
+          var ar = alienEl.getBoundingClientRect();
+          _mx = ar.left + ar.width  / 2;
+          _my = ar.top  + ar.height / 2;
+          updateTargets(_mx, _my);
+        }, 1800); /* robot shift 0.7s+0.7s, alien 0.8s+0.8s — wait for both to settle */
+      }
+    });
+    _alienVis.observe(alienEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  (function loop() {
+    if (!_inView) { requestAnimationFrame(loop); return; } /* skip work while off-screen */
+    /* bodies first — apply spring step */
+    for (var j = 0; j < bodies.length; j++) {
+      var b = bodies[j]._sp;
+      b.vx   += (b.tx   - b.px)  * BODY_K; b.vx   *= BODY_D; b.px  += b.vx;
+      b.vy   += (b.ty   - b.py)  * BODY_K; b.vy   *= BODY_D; b.py  += b.vy;
+      b.vrot += (b.trot - b.rot) * BODY_K; b.vrot *= BODY_D; b.rot += b.vrot;
+      bodies[j].style.transform =
+        'translate(' + b.px + 'px,' + b.py + 'px) rotate(' + b.rot + 'deg)';
+    }
+    /* recompute pupil targets after body has moved this frame */
+    if (_mx !== -9999) updateTargets(_mx, _my);
+    /* pupils */
+    for (var i = 0; i < eyes.length; i++) {
+      var sp = eyes[i]._sp;
+      sp.vx += (sp.tx - sp.px) * sp.k; sp.vx *= sp.d; sp.px += sp.vx;
+      sp.vy += (sp.ty - sp.py) * sp.k; sp.vy *= sp.d; sp.py += sp.vy;
+      eyes[i].querySelector('.ais__pupil').style.transform =
+        'translate(-50%,-50%) translate(' + sp.px + 'px,' + sp.py + 'px)';
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>

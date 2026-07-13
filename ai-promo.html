@@ -84,8 +84,7 @@
 
   /* H1 composition */
   .hero__h1 {
-    /* --ps = pill size: scales from 2rem at ~490px up to 3.25rem (52px) at 1280px */
-    --ps: clamp(2rem, 5vw, 4rem);
+    --ps: var(--text-pill-size); /* shared token — design-system/tokens.css */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -229,7 +228,7 @@
       flex: 1;                  /* takes all space above subtitle */
       gap: 0.15em;
       width: fit-content;
-      --ps: clamp(1.95rem, 11.93vw, 2.984rem); /* +30% from original */
+      --ps: var(--text-pill-size-mobile); /* shared token — design-system/tokens.css */
       font-size: var(--ps);
     }
     .hero__step {
