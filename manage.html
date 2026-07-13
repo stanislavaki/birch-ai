@@ -979,8 +979,18 @@
   var robot   = document.querySelector('.ais__robot');
   var alien   = document.querySelector('.ais__alien');
 
+  /* Reload restores scroll AFTER this script runs, so scroll/IO triggers can fire
+     with the section already in view and replay entrance animations out of sync
+     with the scroll. Fix: only animate after a real user gesture — scroll
+     restoration and programmatic scrolls emit none of these, so `armed` stays
+     false on reload-into-view and we snap instead. Shared by characters + card. */
+  var armed = false;
+  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
+  });
+
   function positionCard() {
-    if (window.innerWidth <= 767) return; /* mobile: card is in-flow, no JS needed */
+    if (window.innerWidth <= 767) { card.style.top = ''; return; } /* mobile: in-flow — clear any desktop inline top */
     var sectionTop    = section.getBoundingClientRect().top;
     var headingBottom = heading.getBoundingClientRect().bottom;
     var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -990,12 +1000,16 @@
   document.fonts.ready.then(positionCard);
   window.addEventListener('resize', positionCard, { passive: true });
 
-  /* emojis appear when section is 50% in viewport */
+  /* characters appear when section is 30% in viewport — animate if armed, else snap */
+  function showChars(instant) {
+    if (instant) { robot.style.transition = 'none'; alien.style.transition = 'none'; }
+    robot.classList.add('ais__robot--visible');
+    alien.classList.add('ais__alien--visible');
+  }
   var emojiObserver = new IntersectionObserver(function (entries) {
     if (entries[0].isIntersecting) {
-      robot.classList.add('ais__robot--visible');
-      alien.classList.add('ais__alien--visible');
-emojiObserver.disconnect();
+      showChars(!armed);
+      emojiObserver.disconnect();
     }
   }, { threshold: 0.3 });
   emojiObserver.observe(section);
@@ -1015,17 +1029,6 @@ emojiObserver.disconnect();
     card.classList.add('ais__card--instant');
     if (withHeadingSmall) heading.classList.add('ais__heading--small');
   }
-
-  /* On reload the browser restores scroll position AFTER this script runs, so
-     the card trigger can fire with the section already in view — replaying the
-     fly-in makes the card "jump" out of sync with the scroll. Fix: only animate
-     after a real user gesture. Scroll restoration and programmatic scrolls emit
-     no wheel/touch/key events, so `armed` stays false on reload-into-view and we
-     snap instead. */
-  var armed = false;
-  ['wheel', 'touchmove', 'keydown', 'pointerdown'].forEach(function (ev) {
-    window.addEventListener(ev, function () { armed = true; }, { once: true, passive: true });
-  });
 
   var range = rail.offsetHeight - section.offsetHeight;
   if (range <= 0) {
@@ -1095,6 +1098,8 @@ emojiObserver.disconnect();
 
   /* last known cursor position — updated on every mousemove */
   var _mx = -9999, _my = -9999;
+  /* section visibility — pause the spring loop + target reads when off-screen */
+  var _inView = false;
 
   /* default eye direction: look toward title (above section center) */
   requestAnimationFrame(function () {
@@ -1173,14 +1178,13 @@ emojiObserver.disconnect();
 
   window.addEventListener('mousemove', function (e) {
     _mx = e.clientX; _my = e.clientY;
-    updateTargets(_mx, _my);
+    if (_inView) updateTargets(_mx, _my);
   }, { passive: true });
 
-  /* when section enters viewport, immediately sync pupils to last known cursor */
+  /* track visibility; when section enters viewport, sync pupils to last cursor */
   var eyeObserver = new IntersectionObserver(function (entries) {
-    if (entries[0].isIntersecting && _mx !== -9999) {
-      updateTargets(_mx, _my);
-    }
+    _inView = entries[0].isIntersecting;
+    if (_inView && _mx !== -9999) updateTargets(_mx, _my);
   }, { threshold: 0.1 });
   eyeObserver.observe(section);
 
@@ -1201,6 +1205,7 @@ emojiObserver.disconnect();
   }
 
   (function loop() {
+    if (!_inView) { requestAnimationFrame(loop); return; } /* skip work while off-screen */
     /* bodies first — apply spring step */
     for (var j = 0; j < bodies.length; j++) {
       var b = bodies[j]._sp;
