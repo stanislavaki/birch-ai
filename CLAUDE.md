@@ -92,7 +92,7 @@
   - `--nav-height: 6.5em` на `:root`
   - global reset для variable fonts в Safari
   - тёмный фон страницы, `@font-face` TT Commons Pro Variable
-  - `.section`/`.container` обёртка (паддинги как на реальном сайте), `.container { max-width: 90rem }` — **в rem**, осознанно (это dev-инструмент, не финальный embed; для самого embed контейнерные токены задавать в `px`, см. «Webflow embed — токены контейнеров в `px`» выше)
+  - `.section`/`.container` обёртка (паддинги как на реальном сайте), `.container { max-width: 80rem }` — **в rem**, точное значение реального Webflow-контейнера (`.container.centered.u-w-100` = `80rem` fluid, подтверждено против live-сайта bir.ch/manage-upd 13.07.2026: контейнер = 1280px @ root16 и 1536px @ root19.2, т.е. 80rem на обеих ширинах). **Не 90rem** — старое значение делало каждый dev-блок ~10rem (~192px) шире задеплоенного сайта. `padding-inline: 1.5rem` (= 28.8px @ root19.2) тоже совпадает с live. Это dev-инструмент, не финальный embed; для самого embed контейнерные токены задавать в `px`, см. «Webflow embed — токены контейнеров в `px`» выше. Примечание: `tokens.css` `.container` = `--container-lg` (100rem) — на dev-страницах перебивается `webflow-env.css` (80rem, грузится позже); если понадобится, дизайн-систему можно свести к 80rem отдельно.
 
   Nav-меню (HTML-разметка `.sim-nav`) — отдельный partial `design-system/webflow-env-nav.html`, вставляется сразу после `<body>`. Первая секция страницы должна получить дополнительный `padding-top` под высоту нава, например `padding-top: calc(<исходный паддинг> + var(--nav-height));`.
 
