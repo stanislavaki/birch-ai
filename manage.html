@@ -948,14 +948,15 @@
     });
   }
 
-  /* Fire once, when the whole section is 100% visible */
+  /* Fire once, when the section is 40% visible (matches the block's other observers;
+     threshold:1.0 also never fired if the section was taller than the viewport) */
   var chatSection = document.getElementById('aichat');
   var chatObserver = new IntersectionObserver(function (entries) {
     if (entries[0].isIntersecting) {
       chatObserver.disconnect();
       setTimeout(function () { type(0); }, INIT_DELAY);
     }
-  }, { threshold: 1.0 });
+  }, { threshold: 0.4 });
   chatObserver.observe(chatSection);
 
 })();
