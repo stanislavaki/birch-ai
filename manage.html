@@ -424,28 +424,28 @@
      AI CHAT — 3-column showcase (Figma 17891:3017)
      Col 1: image placeholder (image added later)
      Col 2: chat card, reused from ai-promo.html "Analyze performance" dialogue
-     Col 3: accordion, reused from ai-promo.html card-accordion, auto-cycling
+     Col 3: accordion, reused from ai-promo.html card-accordion, click to switch
   ───────────────────────────────────────── */
   .aichat {
     padding: var(--space-xl) 0;
   }
 
-  /* Col 1: placeholder */
+  /* Col 1: placeholder — stretches to the grid row (height driven by col 2) */
   .aichat__placeholder {
     background: var(--color-accent-indigo);
     border-radius: var(--radius-xl);
-    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout — desktop grid stretch overrides */
   }
 
-  /* Col 2: chat card (same component as ai-promo.html) */
+  /* Col 2: green container drives the block height via aspect-ratio; the white
+     chat card sits inside with padding (Figma: white 303×455 inset in 400×530 →
+     48px horizontal / 38px vertical, expressed as % of width so it scales). */
   .aichat__chat-col .chat-card-wrap {
     width: 100%;
-    height: 100%;
-    aspect-ratio: 400 / 530; /* fallback for mobile stacked layout */
+    aspect-ratio: 400 / 530;
     container-type: inline-size;
-  }
-  @media (min-width: 768px) {
-    .aichat__chat-col .chat-card-wrap { aspect-ratio: unset; } /* desktop: grid stretch drives height */
+    background: var(--color-accent-green);
+    border-radius: var(--radius-xl);
+    padding: 9.5% 12%; /* 38/400 vertical, 48/400 horizontal */
   }
 
   .aichat .chat-card {
@@ -608,6 +608,11 @@
   .aichat__accordion .card-accordion {
     background: var(--color-bg-grey); /* Figma: distinct grey card, not page-bg */
   }
+
+  /* Mobile stacked: placeholder needs its own height (no grid row to stretch to) */
+  @media (max-width: 767px) {
+    .aichat__placeholder { aspect-ratio: 400 / 530; }
+  }
 </style>
 </head>
 <body>
@@ -754,27 +759,24 @@
         </div>
       </div>
 
-      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, auto-cycling -->
+      <!-- Col 3: accordion — reused from ai-promo.html, texts from Figma 17891:3005, click to switch -->
       <div class="col-4 aichat__accordion" id="aichatAccordion">
         <div class="card-accordion" data-index="0">
           <h4 class="t-h4">Your existing rules are the starting point</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Bïrch's AI studies the automation rules you've already built—understanding your logic, your thresholds, and your goals—before it suggests anything new.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar0"></div></div>
           </div>
         </div>
         <div class="card-accordion is-closed" data-index="1">
           <h4 class="t-h4">It surfaces opportunities, not actions</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">The AI identifies automation gaps and inefficiencies in your campaigns, then presents them as suggestions with clear reasoning. It never adjusts a budget or pauses an ad on its own.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar1"></div></div>
           </div>
         </div>
         <div class="card-accordion is-closed" data-index="2">
           <h4 class="t-h4">You review, approve, and stay in control</h4>
           <div class="card-accordion__body">
             <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Every suggestion requires your sign-off before it becomes a rule. You can modify the conditions, adjust the thresholds, or dismiss it entirely. The final call is always yours.</p>
-            <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="aichatBar2"></div></div>
           </div>
         </div>
       </div>
@@ -787,53 +789,17 @@
 (function () {
 
   /* ══════════════════════════════════════════════════════════
-     ACCORDION — auto-cycling, 3 cards, starts/pauses on visibility
+     ACCORDION — click to switch (no auto-cycle)
   ══════════════════════════════════════════════════════════ */
-  var COLORS = [
-    'var(--color-accent-green)',
-    'var(--color-accent-light-blue)',
-    'var(--color-accent-purple)',
-  ];
-  var ACC_DURATION = 5000; /* ms each card stays active */
-
-  var accBox = document.getElementById('aichatAccordion');
+  var accBox   = document.getElementById('aichatAccordion');
   var accCards = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion'));
-  var accBars  = Array.prototype.slice.call(accBox.querySelectorAll('.card-accordion__bar-fill'));
-  var accActive  = 0;
-  var accStartMs = null;
-  var accRunning = false;
-  accBox.style.setProperty('--acc-color', COLORS[0]);
 
-  function accSetActive(idx) {
-    accCards.forEach(function (c) { c.classList.add('is-closed'); });
-    accCards[idx].classList.remove('is-closed');
-    accBox.style.setProperty('--acc-color', COLORS[idx]);
-    accBars.forEach(function (b) { b.style.width = '0%'; });
-    accActive  = idx;
-    accStartMs = null;
-  }
-
-  accCards.forEach(function (card, idx) {
-    card.addEventListener('click', function () { accSetActive(idx); });
+  accCards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      accCards.forEach(function (c) { c.classList.add('is-closed'); });
+      card.classList.remove('is-closed');
+    });
   });
-
-  (function accTick(now) {
-    if (accRunning) {
-      if (accStartMs === null) accStartMs = now;
-      var elapsed  = now - accStartMs;
-      var progress = Math.min(elapsed / ACC_DURATION, 1);
-      accBars[accActive].style.width = (progress * 100).toFixed(1) + '%';
-      if (elapsed >= ACC_DURATION) accSetActive((accActive + 1) % accCards.length);
-    }
-    requestAnimationFrame(accTick);
-  })(performance.now());
-
-  /* Start/pause auto-cycle only while the block is on screen (project convention) */
-  var accObserver = new IntersectionObserver(function (entries) {
-    accRunning = entries[0].isIntersecting;
-    if (accRunning) accStartMs = null; /* resume cleanly, no jump */
-  }, { threshold: 0.1 });
-  accObserver.observe(accBox);
 
   /* ══════════════════════════════════════════════════════════
      CHAT — plays once, when the section is fully visible
