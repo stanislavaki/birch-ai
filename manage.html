@@ -1072,7 +1072,7 @@
     var sr  = section.getBoundingClientRect();
     var fakeX = sr.left + sr.width / 2;
     var fakeY = sr.top - sr.height * 0.3; /* point above section = title area */
-    updateTargets(fakeX, fakeY);
+    updateTargets(fakeX, fakeY, true); /* eyes only — don't shift the bodies on load */
   });
 
   /* last close-proximity direction per character — for residual tilt memory */
@@ -1085,11 +1085,13 @@
     { el: charEls[1], rot: ROT_ALIEN, isAlien: true  }
   ];
 
-  function updateTargets(clientX, clientY) {
-    /* body targets — each char flees cursor; strength scales with proximity */
+  function updateTargets(clientX, clientY, eyesOnly) {
+    /* body targets — each char flees cursor; strength scales with proximity.
+       eyesOnly: a synthetic "look" (initial title glance) moves only the eyes,
+       leaving the body at its CSS position — no flee translate, no residual tilt. */
     var sr  = section.getBoundingClientRect();
-    var snx = (clientX - sr.left - sr.width / 2) / (sr.width / 2);
     for (var j = 0; j < bodies.length; j++) {
+      if (eyesOnly) { bodies[j]._sp.tx = 0; bodies[j]._sp.ty = 0; bodies[j]._sp.trot = 0; continue; }
       var cr   = charEls[j].getBoundingClientRect();
       var cdx  = clientX - (cr.left + cr.width  / 2);
       var cdy  = clientY - (cr.top  + cr.height / 2);
