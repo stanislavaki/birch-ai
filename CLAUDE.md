@@ -155,6 +155,38 @@
   - Все ли компоненты (кнопки, карточки и т.д.) берутся из `design-system/components/`? Если стиль отличается — это новый вариант компонента или отдельный?
   - Есть ли значения в макете которые не на токенах — обсудить как с ними поступить прежде чем писать CSS
 
+## Webflow MCP — сборка нативными элементами
+
+Раздел про прямую сборку блоков в Webflow через Webflow MCP (не embed, не dev-страница). Перед любыми тулами один раз вызвать `webflow_guide_tool`. `site_id` не угадывать — брать из `list_sites` (текущий: bir.ch = `6716718ea408f53194adf9a9`). Designer-тулы требуют, чтобы вкладка Webflow Designer была открыта и на переднем плане; data-тулы (builder/style) работают headless по `pageId`.
+
+### Возможности тулинга (что можно и что нельзя через API)
+
+- **Можно через API:** создавать элементы (`data_element_builder`, в т.ч. вложенные деревья через `children[]`), создавать/править стили и combo-классы (`data_style_tool`), ставить иконку сразу при создании (`type: "Image"` + `set_image_asset`), загружать ассеты (`asset_tool`), снимать снапшоты элементов (`element_snapshot_tool`).
+- **Нельзя через API (только руками в Designer):** **читать дерево страницы**, **перемещать** и **удалять** элементы (нет `data_element_tool`); **создавать компоненты, пропы, варианты** и задавать значения пропов у экземпляров (нет `data_component_tool`); **править кастом-код страницы** (нет `data_scripts_tool`). Следствие: перекладку/удаление карточек, чистку дублей, «Create Component» и вставку JS делает пользователь. Компонент с текст-пропами + авто-заполнение мной — взаимоисключающи; если нужно, чтобы контент проставлял я, работаем обычными (не компонентными) элементами.
+- **id колонок/контейнеров** для дозаписи брать из ответов `data_element_builder` (`return_element_info: true`) или из `get_selected_element` (попросить пользователя кликнуть нужный элемент) — прочитать дерево нечем.
+
+### Webflow-гочи (подтверждено на практике)
+
+- `font-family` через переменную — только с префиксом: `variable_as_value: "variable-<id>"` (без префикса `create_style` падает internal error).
+- **Кастомные CSS-свойства (`--foo`) `data_style_tool` не принимает.** Цветовые токены/варианты — через combo-классы с прямым `background-color`, не через `var()`.
+- `alt` — зарезервированный атрибут; на `<img>` через `set_attributes` не ставится и роняет весь билд. Alt задавать в Designer или опускать.
+- Кастомный `<img src>` Webflow превращает в свой `Image`-элемент и требует `set_image_asset` (asset id), сырой `src` игнорируется. Для иконок использовать `type: "Image"` + `set_image_asset`.
+- **asset id = 24-символьный хэш в начале имени файла на CDN** (`.../<hash>_Name.svg`). Иконки/картинки, уже загруженные на сайт, ставятся сразу по этому id — повторная загрузка не нужна (`upload_image_by_url` для существующего вернёт тот же id).
+- Заголовок/описание наследуют `text-align` со страницы (часто `center`) — задавать `text-align: left` явно, если нужно по левому краю.
+
+### Паттерн «скролл-стена карточек» (native + cqi + параллакс-колонки)
+
+- **Скейл (шрифты тянутся с шириной):** `container-type: inline-size` на обёртке; ширину карточки диктует колонка (`width: 100%`); `font-size` на карточке — **чистый `cqi`** (напр. `3.9cqi` = 16px при дизайн-ширине 410px), **без `rem`-границ в `clamp`** — иначе fluid root-font-size Webflow ломает соотношение и перенос строк «прыгает» между брейкпоинтами. Все внутренние размеры (padding, radius, gap, иконка, кегль заголовка/описания) — в `em`. Один драйвер (ширина карточки) → всё внутри масштабируется пропорционально, JS не нужен.
+- **Единый размер карточек при разном контенте:** фиксированная `height` карточки в `em` под худший кейс (напр. `18.5em` под 3-строчный заголовок + 3-строчное описание), контент по центру (`align-items/justify-content: center`), **без обрезки текста** (line-clamp не нужен; у коротких карточек просто больше цветного поля вокруг тёмной плашки).
+- **Параллакс-колонки:** секция `overflow: hidden` + фикс-высота (клип, напр. `37rem`); колонки `position: absolute; top: 50%; left: 0/33.333/66.666%; width: 33.333%; transform: translateY(-50%)`. JS: `amp = (col.scrollHeight − section.clientHeight) / 2`; чередование направлений (col1 ↑, col2 ↓, col3 ↑); прогресс через `getBoundingClientRect` (не `offsetTop`); снап на первом кадре (иначе прыжок при reload); LERP-сглаживание; множитель `SPEED` c клампом target в `[-1, 1]` (быстрее без щелей по краям). Скрипт — в **Page Settings → Custom Code → Before `</body>`** (вставляет пользователь, т.к. `data_scripts_tool` недоступен). Разные высоты колонок дают staircase-сдвиг сами (каждая центрируется по своей высоте).
+- **Мобилка — смена оси (вертикальные колонки → горизонтальные ряды):** на узких экранах вертикальные колонки делают карточки слишком узкими (при `cqi`-кегле текст ~7px). Решение — **переиспользовать колонки как горизонтальные ряды**, DOM не трогая: на `small` (≤767) секция → `display: flex; flex-direction: column` (стек рядов, вертикальные паддинги = зазору между рядами), колонки → `position: static; flex-direction: row; width: max-content` (лента карточек), 3-ю колонку `display: none` (её контент просто не показываем на мобилке, перенос не нужен), карточке — фикс-ширина `width: min(80vw, 20rem)` (чтобы `cqi`-кегль не улетал на верхнем крае 767px), единую высоту вернуть. JS делаем **responsive по оси**: `matchMedia('(max-width:767px)')` → на мобилке `translateX` c `amp = (col.scrollWidth − section.clientWidth)/2` и центрированием `translateX(-amp + dir·cur·amp)`; на десктопе `translateY(calc(-50% + …))`. Пересчитывать режим и амплитуды на `resize`; `SPEED` держать отдельно для мобилки (горизонтальный пролёт длиннее). Скрытая колонка/ряд (`display:none`) сама выпадает — в `measure()` вернуть для неё `amp = 0`.
+- **Не городить фикс-высоту + «пол шрифта» одновременно на узких экранах:** фикс-высота карточки (`18.5em`) держится только при **чистом `cqi`** (соотношение текст↔ширина как в дизайне). Если на мобилке зафлорить шрифт (`max(rem, cqi)`) при узкой карточке — текст переносится в разы больше и вылезает за фикс-высоту. Либо чистый `cqi` + фикс-высота (текст мельче, но ровно), либо `height: auto` (растёт под контент). В горизонтальных рядах ширину карточки фиксируем через `min(vw, rem)` → `cqi` стабилен → фикс-высота снова работает.
+- **Проверка:** снапшот секции показывает статику; сам скролл проверяется только в Preview/стейджинге (headless-снапшот движение не покажет).
+
+### Проектная заметка — контент карточек стратегий на manage
+
+Карточки стратегий на странице **Manage UPD** (`manage-upd`) берутся со **статической** (НЕ CMS) страницы `/strategies`. Там каждый пункт — `.str_frame` с `.str_h3` (заголовок), `.str_text` (описание) и `<img class="str_icon">` (иконка-SVG на CDN). **Цвет иконки-семейства задаёт цвет враппера карточки на manage** (мэппинг по префиксу имени файла иконки): `Time` → 🟢 green `#9be300`, `Pause` → 🔵 blue `#579bff`, `Scale`/`00_Scale` → 🟠 orange `#ffbf00`, `Optimise` → 🟣 violet `#9571ff` (иконки Optimise по факту пурпурно-розовые `#E965FF` — сопоставление по смыслу, не один-в-один). Исключаются семейства `Quick Start` и `Best Practices` (PNG без цвета). Плашка иконки в карточке приходит из самого SVG (в нём вшит фон-`rect`), поэтому цвет плашки совпадает с семейством автоматически.
+
 ## Design system
 
 All UI work in this project uses the Birch Design System located in `design-system/`.
@@ -163,6 +195,8 @@ All UI work in this project uses the Birch Design System located in `design-syst
 
 - **Tokens only** — use CSS custom properties from `design-system/tokens.css` exclusively. Never hardcode colors, font sizes, spacing, border-radius, or any other value that exists as a token.
 - **Type classes** — always apply utility classes (`.t-h1`, `.t-h2`, `.t-para-xl`, etc.) directly on HTML elements instead of repeating font-size/line-height/letter-spacing in component CSS. This ensures a single source of truth: changing a token in `tokens.css` propagates everywhere.
+
+- **Заголовки — `text-wrap: balance`** — на все заголовки по умолчанию задавать `text-wrap: balance` (браузер сам выравнивает длину строк, без «длинная строка + одно слово»; работает до ~6 строк, пересчитывается на ресайзе, деградирует безопасно в старых браузерах). Для длинных абзацев/body — `text-wrap: pretty` (убирает «сироту»). Ручной `<br class="…">` со скрытием на брейкпоинте — только для арт-дирекшн-переноса строго после конкретного слова; для «просто разложи красиво» `balance` избавляет от `<br>` совсем (один класс работает на всех размерах). В Webflow: **Typography → Text Wrap → Balance/Pretty** (если контрол есть), иначе через MCP `data_style_tool` (принимает `text-wrap` как обычное свойство) или custom-code `<style>`.
 - **No px** — never use `px` units in CSS or inline styles. Use `rem` for all fixed sizes (spacing, radius, font sizes), `%` for widths relative to a parent container, and `vw`/`vh` for viewport-relative sizes. Convert Figma px values: divide by 16 for rem (e.g. 24px → 1.5rem). For elements inside a fixed-width container, express widths as `elementPx / containerPx * 100%`.
 - **JS animations** — never hardcode pixel offsets in animation scripts. Compute them from the rendered element size (e.g. `el.offsetWidth * ratio`) so they scale when the container resizes.
 - **Component classes only** — use classes from `design-system/components/` for any UI pattern that has a component file. Don't rewrite styles that are already defined there.
