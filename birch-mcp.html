@@ -1,0 +1,1917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bïrch — MCP</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<link rel="stylesheet" href="design-system/components/card-accordion.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
+<link rel="stylesheet" href="debug/panel.css" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ─────────────────────────────────────────
+     HERO SECTION
+  ───────────────────────────────────────── */
+
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) var(--pad-horizontal);
+    gap: var(--space-md);
+    background: var(--color-bg);
+    overflow-x: clip; /* prevent staircase overflow from expanding page width */
+  }
+
+  /* Logo: "Bïrch [icon] AI  closed beta" */
+  .hero__logo {
+    /* semantic wrapper — .hero's align-items:center centers the wordmark */
+  }
+
+  /* Inner wordmark: Bïrch + icon + AI, inline-flex so it's only as wide as content */
+  .hero__logo-wordmark {
+    position: relative;      /* anchor for .hero__beta absolute positioning */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;            /* 4px — tight gap between text and icon */
+  }
+
+  .hero__logo-name {
+    font-family: var(--font);
+    font-size: var(--text-h3-size);
+    font-weight: 600;
+    line-height: var(--text-h3-lh);
+    letter-spacing: var(--text-h3-ls);
+    color: var(--color-text);
+  }
+
+  .hero__logo-icon {
+    height: 2.8125rem; /* 45px */
+    width: auto;
+  }
+
+  /* "closed beta" — absolute badge to the right of the wordmark, doesn't affect its width */
+  .hero__beta {
+    position: absolute;
+    left: calc(100% + 0.375rem);
+    top: 0;
+    color: var(--color-text-grey);
+    white-space: nowrap;
+    line-height: 1;
+    padding-right: 0.5rem;
+  }
+
+
+  /* Main: wraps h1 + subtitle — used for mobile vertical centering */
+  .hero__main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  /* H1 composition */
+  .hero__h1 {
+    --ps: var(--text-pill-size); /* shared token — design-system/tokens.css */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-sm);
+  }
+  /* Mobile staircase variant — hidden on desktop */
+  .hero__h1--mb { display: none; }
+
+  .hero__row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-sm); /* 8px ≈ Figma 10px */
+  }
+
+  /* Word pills */
+  .hero__pill {
+    display: block;
+    /* Optical compensation: TT Commons cap-height sits high → extra bottom padding balances visually */
+    padding: 0.058em 0.462em 0.154em; /* pt=3px  px=24px  pb=8px at 52px — scales with --ps */
+    font-family: var(--font);
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--color-text-inverted); /* dark text by default */
+  }
+  .hero__pill--sq   { border-radius: 0.308em; } /* 16px / 52px — scales with --ps */
+  .hero__pill--pill { border-radius: var(--radius-pill); }
+
+  .hero__pill--light-blue { background: var(--color-accent-light-blue); }
+  .hero__pill--blue       { background: var(--color-accent-blue);   color: var(--color-text); }
+  .hero__pill--green      { background: var(--color-accent-green);  }
+  .hero__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
+
+  /* ── Decorative columns (Row 1) ──
+     Two columns, bottom-aligned, that swap heights on a gentle loop.
+     Sized in em relative to --ps so they scale proportionally with the pills. */
+  .hero__deco-cols {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-size: var(--ps);   /* sets em reference for children */
+    width:  1.596em;        /* 83 / 52 */
+    height: 1.312em;        /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
+  }
+  .hero__col {
+    position: absolute;
+    bottom: 0;
+    width:         0.769em;  /* 40 / 52 */
+    border-radius: 0.199em;  /* 10.34 / 52 */
+  }
+  .hero__col--purple {
+    left:       0;
+    height:     78.9%;
+    background: var(--color-accent-purple);
+  }
+  .hero__col--blue {
+    left:       0.827em;  /* 43 / 52 */
+    height:     100%;
+    background: var(--color-accent-blue);
+  }
+
+  /* ── Decorative bars (Row 2) ──
+     Three horizontal capsules. Animation: A (left-aligned) → center → B (left-aligned, widths swapped).
+     Bars: duration 750ms + pause 900ms = 1650ms total half-cycle
+     Hold at extremes: 0–27.27% and 72.73–100%  mid at 50%
+     ease: cubic-bezier(0.87, 0, 0.55, 1) */
+  .hero__deco-bars {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.058em;             /* 1.694px / 29.365px — Figma proportion */
+    flex-shrink: 0;
+    font-size: var(--ps);
+    width:  1.654em;          /* 86 / 52 */
+    height: 1.312em;          /* matches pill height: line-height 1.1 + pt 0.058 + pb 0.154 */
+  }
+  .hero__bar {
+    height: 0.399em;          /* (1.312 - 2×0.058) / 3 */
+    border-radius: var(--radius-pill);
+  }
+  .hero__bar--lb {
+    width:      100%;
+    background: var(--color-accent-light-blue);
+  }
+  .hero__bar--pink {
+    width:      67.4%;
+    background: var(--color-accent-pink);
+  }
+  .hero__bar--red {
+    width:      34.9%;
+    background: var(--color-accent-red);
+  }
+
+  .hero__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+  /* CTA — 4 of 12 cols ≈ 400px at 1280px */
+  .hero__btn {
+    width: 14rem;
+    height: 5rem;
+    margin-top: var(--space-md);
+    font-size: 2em;
+  }
+
+  /* ─────────────────────────────────────────
+     HERO — MOBILE ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .hero {
+      height: 100svh;
+      min-height: unset;
+      padding-top: var(--space-xl);
+      padding-bottom: var(--space-md);
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    /* Smaller logo on mobile */
+    .hero__logo-name { font-size: 1.25rem; }  /* 20px vs 32px desktop */
+    .hero__logo-icon { height: 1.875rem; }    /* 30px vs 45px desktop */
+
+    /* h1 fills available space (centering itself), subtitle pinned to bottom above button */
+    .hero__main {
+      flex: 1;
+      justify-content: flex-start;
+      gap: 0;
+    }
+
+    /* Desktop H1 hidden; mobile staircase shown */
+    .hero__h1--dt { display: none; }
+    .hero__h1--mb {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;  /* centers staircase vertically in remaining space */
+      flex: 1;                  /* takes all space above subtitle */
+      gap: 0.15em;
+      width: fit-content;
+      --ps: var(--text-pill-size-mobile); /* shared token — design-system/tokens.css */
+      font-size: var(--ps);
+    }
+    .hero__step {
+      display: flex;
+      align-items: center;
+      gap: 0.1em;
+      flex-shrink: 0;
+    }
+    .hero__step--a { margin-left: 0; }
+    .hero__step--b { margin-left: 0.5em; }
+    .hero__step--c { align-self: flex-start; margin-left: 0.6em; }
+    .hero__step--d { margin-left: 1.9em; }
+    .hero__step--e { align-self: flex-start; margin-left: 2.8em; }
+
+    .hero__h1--mb .hero__pill--green.hero__pill--sq {
+      margin-right: 0.2em;
+    }
+
+    .hero__subtitle {
+      padding-bottom: 2rem; /* gap to button */
+      text-align: center;
+      max-width: 25rem; /* 400px */
+    }
+
+    .hero__btn {
+      width: 100%;
+      /* min-height, border-radius, font-size handled by .btn-s mobile rule in button.css */
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     PROVEPOINTS SECTION  (Figma 330:1455)
+  ───────────────────────────────────────── */
+
+  .provepoints {
+    padding: var(--space-xl) 0 var(--space-lg);
+    background: var(--color-bg);
+  }
+
+  .provepoints__heading {
+    text-align: center;
+    color: var(--color-text);
+    margin: 0 0 var(--space-md);
+  }
+
+  /* Card */
+  .provepoints__card {
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .provepoints__card-title {
+    text-align: left;
+    color: var(--color-text);
+    margin: 0;
+    flex-shrink: 0;
+    /* Reserve 2-line height so all titles align regardless of length */
+    min-height: calc(2 * var(--text-h3-size)); /* 2 × 2rem = 4rem (lh=1) */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  /* Middle image area — fills space between title and description */
+  .provepoints__media {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-sm) 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .provepoints__media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Subgrid: align title / media / desc rows across all three cards */
+  @media (min-width: 768px) {
+    .provepoints .grid {
+      grid-template-rows: auto minmax(18rem, 1fr) auto;
+    }
+    .provepoints__card {
+      grid-row: span 3;
+      display: grid;
+      grid-template-rows: subgrid;
+      min-height: unset;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      align-self: start;
+    }
+    .provepoints__media {
+      flex: unset;
+      height: 22rem;
+    }
+    .provepoints__media img {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+    }
+    .provepoints__card:nth-child(1) .provepoints__media img,
+    .provepoints__card:nth-child(3) .provepoints__media img {
+      height: 80%;
+    }
+    .provepoints__card:nth-child(2) .provepoints__media img {
+      height: 120%;
+    }
+    .provepoints__desc {
+      align-self: end;
+    }
+  }
+
+  @media (max-width: 991px) {
+    .provepoints .grid {
+      grid-template-rows: unset;
+    }
+    .provepoints__card {
+      grid-column: span 12;
+      grid-row: unset;
+      display: flex;
+      flex-direction: column;
+    }
+    .provepoints__media {
+      margin: 0;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .provepoints__card {
+      min-height: unset;
+    }
+    .provepoints__card-title {
+      min-height: unset;
+      display: block;
+    }
+    .provepoints__media {
+      flex: none;
+      padding: var(--space-md) 0;
+    }
+  }
+
+  /* Card 02: rule icon — SVG has its own layered card design */
+  .provepoints__rule-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .provepoints__rule-wrap img {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+  }
+
+  /* Description — grey, centered */
+  .provepoints__desc {
+    text-align: left;
+    color: var(--color-text-grey);
+    margin: 0;
+    flex-shrink: 0;
+    padding-inline: 0;
+    width: 100%;
+  }
+
+
+  /* ── Test blocks ── */
+  .test-block {
+    height: 75rem; /* 1200px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-grey);
+    border-top: 1px solid #2a2a2a;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  /* ─────────────────────────────────────────
+     ACCORDION SECTION
+  ───────────────────────────────────────── */
+
+  .acc {
+    padding: var(--space-xl) 0 4rem;
+  }
+
+  .acc__title {
+    color: var(--color-text);
+    text-align: center;
+    margin: 0 0 3rem;
+  }
+
+  .acc__hint {
+    text-align: center;
+    color: var(--color-text-grey);
+    margin: var(--space-sm) 0 0;
+  }
+
+  @media (max-width: 991px) {
+    .acc__hint { display: none; }
+  }
+
+  /* Colored rounded box — full container width, fixed proportions from Figma (1232 × 656) */
+  .acc__box {
+    width: 100%;
+    background-color: var(--color-accent-green);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    overflow: hidden;
+    contain: layout;            /* internal layout changes don't affect elements outside */
+    overflow-anchor: none;      /* prevent browser scroll-anchoring from compensating */
+    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .acc__layout {
+    display: flex;
+    align-items: stretch;
+    gap: var(--gap-main);
+  }
+
+  /* Left col: 553 / 1213 of inner frame ≈ 45.6% */
+  .acc__left {
+    width: 45.59%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Right col: takes the rest */
+  .acc__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .acc__eyebrow {
+    color: var(--color-text-inverted);
+    margin: 0 0 1rem;
+  }
+
+  .acc__cards {
+    flex: 1;           /* fills remaining left-col space after eyebrow */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Placeholder rectangle — same aspect ratio as the Birch AI window (463 × 592) */
+  .acc__placeholder {
+    display: none;
+    width: 70.15%;    /* 463 / 660 of right col */
+    aspect-ratio: 463 / 592;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-xl);
+  }
+
+  /* ─────────────────────────────────────────
+     CHAT CARD
+  ───────────────────────────────────────── */
+
+  /* Wrapper owns the sizing — enables container queries for the card */
+  .chat-card-wrap {
+    height: min(70vh, 45rem); /* 45rem = 720px */
+    width: auto;
+    aspect-ratio: 400 / 600;
+    container-type: inline-size;
+  }
+
+  .chat-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1.5em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font);
+    font-size: clamp(0.625rem, 1.25vw, 1.25rem);    /* fallback */
+    font-size: 4.55cqi;                             /* 18px @ 395px card width */
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Body */
+  .chat-card__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE/Edge */
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-card__body::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  /* Feed — wraps all exchanges */
+  .chat-card__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+
+  /* Messages group */
+  .chat-card__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+
+  /* User bubble */
+  .chat-card__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* AI response area — fades + floats in after send */
+  .chat-card__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card__response.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Inner content — base text styles for AI responses */
+  .chat-card__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .chat-card__response-content p {
+    margin: 0 0 0.4em;
+  }
+  .chat-card__response-content p:last-child { margin-bottom: 0; }
+  .chat-card__response-content strong { font-weight: 700; }
+  /* Tool chip — shows which connectors Claude reached */
+  .chat-card__tools {
+    display: inline-block;
+    font-size: 0.75em;
+    line-height: 1.2;
+    color: var(--color-text-grey);
+    background: #f4f4f5;
+    border: 1px solid #e6e6e8;
+    border-radius: 999px;
+    padding: 0.28em 0.66em;
+    margin: 0 0 0.75em;
+    white-space: nowrap;
+  }
+  .chat-card__tools strong { font-weight: 600; color: var(--color-text); }
+  .chat-card__response-content ul {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+  }
+  .chat-card__response-content li { margin-bottom: 0.2em; }
+
+  /* "Review rule" link — card 0 only */
+  .chat-card__review-link {
+    display: block;
+    color: #0067ed;
+    line-height: 1.467;
+    margin-top: 0.375em;
+    cursor: pointer;
+  }
+
+  /* ── Performance table (card 1 response) ── */
+  .chat-card__table {
+    width: 100%;
+    margin-bottom: 0.625em;
+  }
+  .chat-card__table-header,
+  .chat-card__table-row {
+    display: flex;
+    align-items: center;
+  }
+  .chat-card__table-col {
+    flex: 1;
+    padding: 0.5em 0.375em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-card__table-col:first-child { padding-left: 0.875em; }
+  .chat-card__table-col:last-child  { flex: 0 0 5em; }
+  .chat-card__table-header .chat-card__table-col {
+    color: #636363;
+    font-weight: 500;
+  }
+  .chat-card__table-row {
+    border-radius: 0.75em;
+  }
+  .chat-card__table-row--alt { background: #fafafa; }
+
+  /* Input area */
+  .chat-card__input-area {
+    flex-shrink: 0;
+    padding: 1em;
+    position: relative;
+  }
+  /* Fade gradient above input */
+  .chat-card__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .chat-card__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 0.9375em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .chat-card__text-flow {
+    flex: 1;
+    min-width: 0;
+    line-height: inherit;
+  }
+  .chat-card__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .chat-card__typed {
+    color: #161616;
+    font-weight: 500;
+    /* visibility toggled via inline style in JS — no display:none here */
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-card__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .chat-card__cursor.is-blinking {
+    animation: cursorBlink 0.9s step-end infinite;
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  /* Send button — inside the textarea, absolute.
+     bottom = (padding-top + line-height + padding-bottom - button-height) / 2
+            = (0.9 + 1.4 + 0.9 - 2) / 2 = 0.6em  → centers in single-line input,
+     stays pinned to bottom when input grows to multiple lines. */
+  .chat-card__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .chat-card__send.is-active {
+    background: #161616;
+    cursor: pointer;
+  }
+  .chat-card__send svg {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* ─────────────────────────────────────────
+     PROMPTS SECTION
+  ───────────────────────────────────────── */
+
+  .prompts {
+    padding: var(--space-xl) 0 var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    overflow: hidden;
+  }
+
+  .prompts__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-main);
+    text-align: center;
+    padding-inline: var(--pad-horizontal);
+  }
+
+  .prompts__title {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .prompts__subtitle {
+    color: var(--color-text-grey);
+    margin: 0;
+  }
+
+  /* Marquee rows */
+  .prompts__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+    width: 100%;
+  }
+
+  .prompts__track {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .prompts__belt {
+    display: flex;
+    gap: var(--gap-main);
+    width: max-content;
+    will-change: transform;
+  }
+
+  /* Row 2 starts visually offset — achieved via JS translateX on init */
+
+  .prompts__chip {
+    /* display: block so it's a block-level flex item — text nodes inside are in normal
+       inline formatting context, which preserves spaces around <em> keywords.
+       display: inline-flex strips boundary whitespace from anonymous flex items. */
+    display: block;
+    height: 3.5rem;              /* 56px */
+    line-height: 3.5rem;         /* vertically centers single-line text */
+    padding-inline: var(--space-md); /* 32px */
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-xl);
+    font-family: var(--font);
+    font-size: var(--text-h6-size);
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    font-style: normal;
+  }
+
+  .prompts__kw { font-style: normal; }
+  .prompts__kw--green      { color: var(--color-accent-green);      }
+  .prompts__kw--pink       { color: var(--color-accent-pink);       }
+  .prompts__kw--light-blue        { color: var(--color-accent-red);        }
+  .prompts__kw--light-blue { color: var(--color-accent-light-blue); }
+
+  .prompts__cta {
+    padding-inline: var(--pad-horizontal);
+  }
+
+  /* ─────────────────────────────────────────
+     VISION
+  ───────────────────────────────────────── */
+  .vision {
+    padding-top: var(--space-xl);
+    position: sticky;
+    top: 0; /* overridden by JS sizeCards() */
+  }
+
+  .vision__agent {
+    position: relative;
+    z-index: 1;
+  }
+
+  .vision .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .vision__subtitle {
+    color: var(--color-text-grey);
+    text-align: center;
+    margin: 0;
+  }
+
+  .vision__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);   /* 24px между карточками */
+    width: 100%;
+  }
+
+  .vision__copilot {
+    background: var(--color-accent-orange);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text-inverted);
+  }
+
+  .vision__copilot h2 { margin: 0; }
+
+  .vision__copilot-icon {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 25rem;
+  }
+
+  .vision__copilot-icon img {
+    width: 15.5625rem;   /* 249px */
+    height: 15.0625rem;  /* 241px */
+    object-fit: contain;
+  }
+
+  .vision__agent {
+    background: #004195;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    width: 100%;
+    color: var(--color-text);
+  }
+
+  .vision__agent h2 { margin: 0; }
+
+  .vision__agent-desc {
+    max-width: 50rem;   /* 800px */
+    text-align: center;
+    margin: 0;
+    padding-bottom: var(--space-lg); /* 48px */
+  }
+
+  .vision__agent-ill {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vision__agent-ill img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* ─────────────────────────────────────────
+     TABLET  768–991px
+  ───────────────────────────────────────── */
+  @media (max-width: 991px) {
+    .acc__box {
+      aspect-ratio: auto;
+    }
+    .vision__copilot,
+    .vision__agent {
+      border-radius: var(--radius-xl);
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     ACCORDION MOBILE CAROUSEL  ≤991px
+  ───────────────────────────────────────── */
+
+  .acc-mob { display: none; }
+
+  @media (max-width: 991px) {
+
+    /* Hide desktop version */
+    .acc__box  { display: none !important; }
+    .acc__title { display: none; }
+
+    .acc-mob {
+      display: block;
+      padding: var(--space-xl) 0 4rem;
+    }
+
+    .acc-mob__heading {
+      text-align: center;
+      margin: 0 0 var(--space-md);
+    }
+
+    /* Carousel viewport */
+    .acc-mob__carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      touch-action: pan-y;
+      user-select: none;
+      /* height set by JS */
+    }
+
+    /* Each slide */
+    .acc-mob__slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      box-sizing: border-box;
+      transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+    }
+
+    /* height set by JS sizeCarousel() */
+
+    .acc-mob__eyebrow {
+      color: var(--color-text-inverted);
+      margin: 0 0 var(--space-sm);
+    }
+
+    .acc-mob__slide-title {
+      color: var(--color-text-inverted);
+      margin: 0 0 var(--space-md);
+    }
+
+    .acc-mob__coming-soon {
+      display: inline-block;
+      color: #fff;
+      margin: 0 0 var(--space-md);
+    }
+
+    .acc-mob__hint {
+      display: none;
+    }
+
+    @media (max-width: 991px) {
+      .acc-mob__hint {
+        display: block;
+        text-align: center;
+        color: var(--color-text-grey);
+        margin: var(--space-sm) 0 0;
+      }
+    }
+
+    /* Last slide (purple bg) — white text */
+    .acc-mob__slide:last-child .acc-mob__eyebrow,
+    .acc-mob__slide:last-child .acc-mob__slide-title { color: #fff; }
+    .acc-mob__slide:last-child .acc-mob__slide-title { margin-bottom: var(--space-sm); }
+
+    /* Static chat: override transitions so content shows instantly */
+    .acc-mob .chat-card__bubble,
+    .acc-mob .chat-card__response {
+      transition: none !important;
+    }
+
+    /* Chat card */
+    .acc-mob .chat-card-wrap {
+      width: min(100%, 22rem);
+      height: auto;
+      aspect-ratio: 400 / 530;
+      margin: auto auto 0; /* push chat to bottom of slide */
+      flex-shrink: 0;
+    }
+
+    .acc-mob .chat-card {
+      height: 100%;
+    }
+
+    .acc-mob .chat-card__body {
+      overflow-y: auto;
+    }
+
+    /* Progress dots */
+    @keyframes acc-mob-dot-fill {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(0); }
+    }
+
+    .acc-mob__dots {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding-top: var(--space-sm);
+      padding-inline: var(--radius-lg);
+    }
+
+    .acc-mob__dot {
+      flex: 1;
+      min-width: 0;
+      height: 0.25rem;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .acc-mob__dots--paused .acc-mob__dot.is-active::after {
+      animation-play-state: paused;
+    }
+
+    .acc-mob__dot.is-active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-100%);
+      animation: acc-mob-dot-fill 7s linear forwards;
+      border-radius: var(--radius-pill);
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     CTA LAST
+  ───────────────────────────────────────── */
+
+  .cta-last {
+    padding-top: calc(var(--space-xl) * 2);
+    padding-bottom: 0;
+  }
+
+  .cta-last .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space);
+    text-align: center;
+  }
+
+  .cta-last__heading {
+    max-width: 62.125rem; /* 994px */
+    margin: 0;
+  }
+
+  .cta-last__sub {
+    color: var(--color-text-grey);
+    max-width: 62.125rem;
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .cta-last__heading,
+    .cta-last__sub { max-width: 100%; }
+  }
+
+  /* ─────────────────────────────────────────
+     MOBILE  ≤767px
+  ───────────────────────────────────────── */
+  @media (max-width: 767px) {
+
+  @media (max-width: 767px) {
+    .vision__agent { gap: var(--space); }
+
+    .vision__copilot-icon img { width: 50%; }
+
+    .vision__agent-ill {
+      margin-inline: calc(var(--space-lg) / -2);
+      width: calc(100% + var(--space-lg));
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ── Webflow dev environment nav (design-system/webflow-env-nav.html) ── -->
+<nav class="sim-nav">
+  <div class="sim-nav__inner">
+    <a class="sim-nav__logo" href="#">
+      <svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/>
+        <path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/>
+        <path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/>
+        <path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/>
+        <path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/>
+        <path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/>
+      </svg>
+    </a>
+    <div class="sim-nav__center">
+      <div class="sim-nav__center-links">
+        <a class="sim-nav__link" href="#">Performance<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Hub<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Stage<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#" style="position:relative;padding-top:1.4em;">
+          <span class="sim-nav__badge">New</span>AI<div class="sim-nav__link-dot"></div>
+        </a>
+        <a class="sim-nav__link" href="#">Cases<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Blog<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Pricing<div class="sim-nav__link-dot"></div></a>
+      </div>
+    </div>
+    <div class="sim-nav__right">
+      <a class="sim-nav__link-lg" href="#">Book demo</a>
+      <a class="sim-nav__link-lg" href="#">Log in</a>
+      <a class="sim-nav__btn" href="#">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Birch MCP — accordion + animated chat cards (adapted from ai-promo.html) -->
+<section class="acc" style="padding-top: calc(var(--space-xl) + var(--nav-height));">
+  <div class="container">
+
+    <h2 class="acc__title t-h2">One conversation, all your context</h2>
+
+    <div class="acc__box" id="accBox">
+      <div class="acc__layout">
+
+        <!-- Left: eyebrow + cards -->
+        <div class="acc__left">
+          <p class="acc__eyebrow t-eyebrow">Use Cases</p>
+          <div class="acc__cards">
+
+            <div class="card-accordion" data-index="0">
+              <h4 class="t-h4">Connect it to the rest of your workflow</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Bïrch MCP is one of the tools Claude can reach. Ask a question that pulls your automation data alongside your analytics, your project tracker, your planning docs — whatever else you've connected. The context lives in one conversation instead of four tabs.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar0"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="1">
+              <h4 class="t-h4">Pressure-test 100 rules in 7 words</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Ask "Audit my automations — what's actually working?" Claude reads every rule on the account, checks execution history, and classifies them: firing usefully, running but never matching, erroring silently, or sitting disabled. Every mature account accumulates zombie rules — find them before they cost you.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar1"></div></div>
+              </div>
+            </div>
+
+            <div class="card-accordion is-closed" data-index="2">
+              <h4 class="t-h4">Know what happened before your first call</h4>
+              <div class="card-accordion__body">
+                <p class="t-para-lg" style="color:var(--color-text-grey);margin:0">Let Claude read your execution logs and trace which rule fired, what triggered it, and how rules interacted — the investigation that used to mean opening Bïrch and piecing it together yourself. Now it's a question in the same conversation where you're already planning your day. Schedule it for a regular check-in.</p>
+                <div class="card-accordion__bar"><div class="card-accordion__bar-fill" id="accBar2"></div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Birch AI chat card -->
+        <div class="acc__right">
+          <!-- Chat card -->
+          <div class="chat-card-wrap">
+          <div class="chat-card">
+            <!-- Messages area -->
+            <div class="chat-card__body" id="chatBody">
+              <div class="chat-card__feed" id="chatFeed"></div>
+            </div>
+            <!-- Input area -->
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow">
+                  <span class="chat-card__placeholder" id="chatPlaceholder">Ask anything</span><span class="chat-card__typed" id="chatTyped"></span><span class="chat-card__cursor" id="chatCursor"></span>
+                </div>
+                <button class="chat-card__send" id="chatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div><!-- /.chat-card-wrap -->
+        </div>
+
+      </div>
+    </div>
+    <p class="acc__hint t-para-sm">Hold to pause auto-switching</p>
+
+  </div>
+</section>
+
+<!-- ── Mobile accordion carousel (≤991px) ── -->
+<section class="acc-mob" id="accMob">
+  <div class="container">
+    <h2 class="acc-mob__heading t-h2">One conversation, all your context</h2>
+    <div class="acc-mob__carousel" id="accMobCarousel">
+
+      <!-- Slide 0: Get rules suggestion -->
+      <div class="acc-mob__slide" data-index="0">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Connect it to the rest of your workflow</h4>
+        <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body">
+              <div class="chat-card__feed">
+                <div class="chat-card__messages">
+                  <div class="chat-card__bubble is-visible">Why did Meta spend jump yesterday? Check analytics and what we shipped.</div>
+                </div>
+                <div class="chat-card__response is-visible">
+                  <div class="chat-card__response-content">
+                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong> · Analytics · Linear</p>
+                    <p>Three things line up:</p>
+                    <ul>
+                      <li><strong>Bïrch</strong> — "Scale winners" fired 6× on Q4 Prospecting</li>
+                      <li><strong>Analytics</strong> — paid sessions +38%, checkout flat</li>
+                      <li><strong>Linear</strong> — "New PDP layout" shipped Tuesday</li>
+                    </ul>
+                    <p>Your scaling rule reacted to Tuesday's launch — watch conversion, not just ROAS.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+                <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 1: Analyze your performance -->
+      <div class="acc-mob__slide" data-index="1">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Pressure-test 100 rules in 7 words</h4>
+        <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body">
+              <div class="chat-card__feed">
+                <div class="chat-card__messages">
+                  <div class="chat-card__bubble is-visible">Audit my automations — what's actually working?</div>
+                </div>
+                <div class="chat-card__response is-visible">
+                  <div class="chat-card__response-content">
+                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>
+                    <p><strong>🔍 87 rules scanned</strong></p>
+                    <ul>
+                      <li>🟢 Firing usefully — 41</li>
+                      <li>⚪ Running, never matching — 23</li>
+                      <li>🔴 Erroring silently — 5</li>
+                      <li>⚫ Disabled — 18</li>
+                    </ul>
+                    <p>28 rules are dead weight or broken — your cleanup list.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+                <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Audit your rules -->
+      <div class="acc-mob__slide" data-index="2">
+        <p class="acc-mob__eyebrow t-eyebrow">Use Cases</p>
+        <h4 class="acc-mob__slide-title t-h4">Know what happened before your first call</h4>
+        <div class="chat-card-wrap">
+          <div class="chat-card">
+            <div class="chat-card__body">
+              <div class="chat-card__feed">
+                <div class="chat-card__messages">
+                  <div class="chat-card__bubble is-visible">What happened on the account overnight?</div>
+                </div>
+                <div class="chat-card__response is-visible">
+                  <div class="chat-card__response-content">
+                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>
+                    <p><strong>🔍 3 rules fired · 11pm–7am</strong></p>
+                    <ul>
+                      <li><strong>2:14am</strong> — Paused 4 ad sets (spend &gt; $50, 0 leads)</li>
+                      <li><strong>4:40am</strong> — Budget capped at 90% of target</li>
+                      <li><strong>6:02am</strong> — Scaling blocked by the guardrail above</li>
+                    </ul>
+                    <p>Your guardrail is overriding your scaler at night.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+                <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.acc-mob__carousel -->
+
+    <div class="acc-mob__dots acc-mob__dots--paused" id="accMobDots">
+      <span class="acc-mob__dot is-active"></span>
+      <span class="acc-mob__dot"></span>
+      <span class="acc-mob__dot"></span>
+    </div>
+    <p class="acc-mob__hint t-para-sm">Hold to pause auto-switching</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  /* ── Config ── */
+  var _root = getComputedStyle(document.documentElement);
+  function token(name) { return _root.getPropertyValue(name).trim(); }
+  var COLORS = [
+    token('--color-accent-green'),       /* card 0 */
+    token('--color-accent-pink'),        /* card 1 */
+    token('--color-accent-light-blue'),  /* card 2 */
+    token('--color-accent-purple'),      /* card 3 */
+  ];
+  var DURATION = 7000; /* ms each card stays active — must cover the longest chat cycle */
+
+  var box   = document.getElementById('accBox');
+  var cards = Array.prototype.slice.call(box.querySelectorAll('.card-accordion'));
+  var bars  = Array.prototype.slice.call(box.querySelectorAll('.card-accordion__bar-fill'));
+  var active  = 0;
+  var startMs = null;
+  box.style.setProperty('--acc-color', COLORS[0]); /* seed on load */
+
+  /* ── Switch to a card ── */
+  function setActive(idx) {
+    /* component convention: default = open, is-closed = collapsed */
+    cards.forEach(function (c) { c.classList.add('is-closed'); });
+    cards[idx].classList.remove('is-closed');
+    box.style.backgroundColor = COLORS[idx];
+    box.style.setProperty('--acc-color', COLORS[idx]);
+    bars.forEach(function (b) { b.style.width = '0%'; });
+    active  = idx;
+    startMs = null; /* reset on next rAF tick */
+    /* Notify chat animation — guard: chat script loads after this one */
+    if (window.switchChat) window.switchChat(idx);
+  }
+
+  /* ── Hold to pause ── */
+  var _paused   = false;
+  var _pausedAt = null;
+
+  box.addEventListener('pointerdown', function () {
+    _paused   = true;
+    _pausedAt = performance.now();
+  });
+  document.addEventListener('pointerup', function () {
+    if (!_paused) return;
+    _paused = false;
+    /* shift startMs forward by the time we were paused so progress continues from where it stopped */
+    if (startMs !== null && _pausedAt !== null) {
+      startMs += performance.now() - _pausedAt;
+    }
+    _pausedAt = null;
+  });
+  document.addEventListener('pointercancel', function () {
+    if (!_paused) return;
+    _paused = false;
+    if (startMs !== null && _pausedAt !== null) {
+      startMs += performance.now() - _pausedAt;
+    }
+    _pausedAt = null;
+  });
+
+  /* ── rAF loop: drives the progress bar and auto-advance ── */
+  (function tick(now) {
+    if (!_paused) {
+      if (startMs === null) startMs = now;
+      var elapsed  = now - startMs;
+      var progress = Math.min(elapsed / DURATION, 1);
+      bars[active].style.width = (progress * 100).toFixed(1) + '%';
+      if (elapsed >= DURATION) {
+        setActive((active + 1) % cards.length);
+      }
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
+
+  /* ── Click to manually jump to a card ── */
+  cards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { setActive(idx); });
+  });
+
+  /* ── Size acc__box: ensure all open-card states fit without clipping ──
+     For each card scenario (card i open, others closed), measure the natural
+     cards-column height. Set min-height (desktop) or height (tablet) on the
+     box to prevent jumps when switching cards.                               */
+  var accCards = box.querySelector('.acc__cards');
+  var accLeft  = box.querySelector('.acc__left');
+  var eyebrow  = box.querySelector('.acc__eyebrow');
+
+  function sizeAccBox() {
+    /* 1. Kill transitions so measurement is instant */
+    var animated = [box].concat(cards).concat(
+      cards.map(function (c) { return c.querySelector('.card-accordion__body'); })
+    );
+    animated.forEach(function (el) { if (el) el.style.transition = 'none'; });
+
+    /* 2. Save card states */
+    var wasClosed = cards.map(function (c) { return c.classList.contains('is-closed'); });
+
+    /* 3. Remove flex:1 from accCards → natural stacking height */
+    accCards.style.flex = 'none';
+
+    /* 4. Measure each scenario */
+    var maxCardsH = 0;
+    cards.forEach(function (_, openIdx) {
+      cards.forEach(function (c, i) {
+        c.classList.toggle('is-closed', i !== openIdx);
+        c.style.flex = (i === openIdx) ? '0 0 auto' : '';
+      });
+      void box.offsetHeight; /* force reflow */
+      if (accCards.offsetHeight > maxCardsH) maxCardsH = accCards.offsetHeight;
+    });
+
+    /* 5. Restore card states and flex */
+    cards.forEach(function (c, i) {
+      c.style.flex = '';
+      c.classList.toggle('is-closed', wasClosed[i]);
+    });
+    accCards.style.flex = '';
+
+    /* 6. Restore transitions */
+    animated.forEach(function (el) { if (el) el.style.transition = ''; });
+
+    /* 7. Compute and apply height
+          box padding (V) + eyebrow height + gap (flex gap + eyebrow margin-bottom) + cards */
+    var cs       = getComputedStyle(box);
+    var boxPadV  = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var eyebrowH = eyebrow.offsetHeight;
+    var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap)
+                   + parseFloat(getComputedStyle(eyebrow).marginBottom);
+    var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+
+    /* Chat card rendered height (CSS clamps it to min(80vh, 45rem)) */
+    var chatWrap   = box.querySelector('.chat-card-wrap');
+    var chatMinH   = boxPadV + chatWrap.offsetHeight;
+
+    var minH = Math.max(leftColMinH, chatMinH);
+
+    /* All breakpoints: fix height so switching cards doesn't cause jumps */
+    box.style.minHeight = minH + 'px';
+    box.style.height    = minH + 'px';
+  }
+
+  sizeAccBox();
+  /* Re-measure after fonts render — custom font metrics differ from fallback */
+  document.fonts.ready.then(function () { sizeAccBox(); });
+  window.addEventListener('resize', sizeAccBox);
+
+})();
+</script>
+
+<!-- ── Mobile accordion carousel JS ── -->
+<script>
+(function () {
+  var _root = getComputedStyle(document.documentElement);
+  function token(name) { return _root.getPropertyValue(name).trim(); }
+
+  var BG_COLORS = [
+    token('--color-accent-green'),
+    token('--color-accent-pink'),
+    token('--color-accent-light-blue'),
+    token('--color-accent-purple')
+  ];
+  var MOB_INTERVAL = 7000;
+  var MOB = window.matchMedia('(max-width: 991px)');
+
+  var section  = document.getElementById('accMob');
+  var carousel = document.getElementById('accMobCarousel');
+  var dotsEl   = document.getElementById('accMobDots');
+  var slides   = Array.prototype.slice.call(carousel.querySelectorAll('.acc-mob__slide'));
+  var dots     = Array.prototype.slice.call(dotsEl.querySelectorAll('.acc-mob__dot'));
+  var SLIDE_COUNT = slides.length;
+
+  var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap'); });
+
+  var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+
+  /* ── Size carousel: measure all slides, set height to max ── */
+  function sizeCarousel() {
+    slides.forEach(function (s) { s.style.position = 'relative'; s.style.height = 'auto'; });
+    chatWraps.forEach(function (w) { w.style.width = ''; w.style.height = ''; });
+    var maxH = 0;
+    slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
+    slides.forEach(function (s) { s.style.position = ''; s.style.height = ''; });
+    carousel.style.height = maxH + 'px';
+
+    var pad    = parseFloat(getComputedStyle(slides[0]).paddingLeft);
+    var maxRem = parseFloat(getComputedStyle(document.documentElement).fontSize) * 22;
+    var chatW  = Math.min(carousel.offsetWidth - pad * 2, maxRem);
+    var chatH  = Math.round(chatW * 530 / 400);
+    chatWraps.forEach(function (w) {
+      w.style.width  = chatW + 'px';
+      w.style.height = chatH + 'px';
+    });
+  }
+
+  /* ── Update dots ── */
+  function updateDots(idx) {
+    dots.forEach(function (d, i) {
+      if (i === idx) {
+        d.classList.remove('is-active');
+        d.offsetWidth; /* reflow → restart animation */
+        d.classList.add('is-active');
+      } else {
+        d.classList.remove('is-active');
+      }
+    });
+  }
+
+  /* ── Go to slide ── */
+  function goTo(idx, animate) {
+    idx = Math.max(0, Math.min(SLIDE_COUNT - 1, idx));
+    _idx = idx;
+
+    if (!animate) {
+      slides.forEach(function (s) { s.style.transition = 'none'; });
+    }
+    slides.forEach(function (s, i) {
+      s.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      s.style.zIndex    = i === idx ? 1 : 0;
+    });
+    carousel.style.backgroundColor = BG_COLORS[idx];
+    updateDots(idx);
+
+    if (!animate) {
+      requestAnimationFrame(function () {
+        slides.forEach(function (s) { s.style.transition = ''; });
+      });
+    }
+  }
+
+  /* ── Timer ── */
+  function stopTimer() { if (_timer) { clearInterval(_timer); _timer = null; } }
+  function startTimer() {
+    stopTimer();
+    _timer = setInterval(function () { goTo((_idx + 1) % SLIDE_COUNT, true); }, MOB_INTERVAL);
+  }
+
+  /* ── Swipe (added only once) ── */
+  function initSwipe() {
+    if (_swipeInited) return;
+    _swipeInited = true;
+    var startX = 0, startY = 0, _down = false;
+
+    carousel.addEventListener('pointerdown', function (e) {
+      startX = e.clientX; startY = e.clientY; _down = true;
+      carousel.setPointerCapture(e.pointerId);
+      stopTimer();
+      dotsEl.classList.add('acc-mob__dots--paused');
+    });
+    carousel.addEventListener('pointerup', function (e) {
+      if (!_down) return; _down = false;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      dotsEl.classList.remove('acc-mob__dots--paused');
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        goTo(dx < 0 ? _idx + 1 : _idx - 1, true);
+      } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        var midX = carousel.getBoundingClientRect().left + carousel.offsetWidth / 2;
+        goTo(e.clientX < midX ? _idx - 1 : _idx + 1, true);
+      } else {
+        updateDots(_idx);
+      }
+      startTimer();
+    });
+    carousel.addEventListener('pointercancel', function () {
+      if (!_down) return; _down = false;
+      dotsEl.classList.remove('acc-mob__dots--paused');
+      startTimer();
+    });
+  }
+
+  /* ── Init / destroy ── */
+  function initMobile() {
+    sizeCarousel();
+    document.fonts.ready.then(sizeCarousel);
+    window.addEventListener('resize', sizeCarousel);
+    goTo(0, false);
+    initSwipe();
+    dotsEl.classList.add('acc-mob__dots--paused');
+    if (_observer) _observer.disconnect();
+    _observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        dotsEl.classList.remove('acc-mob__dots--paused');
+        updateDots(_idx);
+        startTimer();
+      } else {
+        dotsEl.classList.add('acc-mob__dots--paused');
+        stopTimer();
+      }
+    }, { threshold: 0.1 });
+    _observer.observe(section);
+  }
+
+  function destroyMobile() {
+    stopTimer();
+    if (_observer) { _observer.disconnect(); _observer = null; }
+    slides.forEach(function (s) {
+      s.style.transform  = '';
+      s.style.zIndex     = '';
+      s.style.transition = '';
+    });
+    carousel.style.backgroundColor = '';
+  }
+
+  if (MOB.matches) { initMobile(); }
+  MOB.addEventListener('change', function (e) { if (e.matches) initMobile(); else destroyMobile(); });
+})();
+</script>
+
+<!-- ── Chat animation: type → send → bubble → AI response → loop ── -->
+<script>
+(function () {
+
+  /* ══════════════════════════════════════════════════════════
+     CHATS — content for each accordion tab (0 / 1 / 2)
+  ══════════════════════════════════════════════════════════ */
+  var CHATS = [
+    /* 0 — Connect it to the rest of your workflow */
+    {
+      userMsg: 'Why did Meta spend jump yesterday? Check analytics and what we shipped.',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong> · Analytics · Linear</p>',
+          '<p>Three things line up:</p>',
+          '<ul>',
+            '<li><strong>Bïrch</strong> — "Scale winners" fired 6× on Q4 Prospecting</li>',
+            '<li><strong>Analytics</strong> — paid sessions +38%, checkout flat</li>',
+            '<li><strong>Linear</strong> — "New PDP layout" shipped Tuesday</li>',
+          '</ul>',
+          '<p>Your scaling rule reacted to Tuesday\'s launch — watch conversion, not just ROAS.</p>',
+        '</div>'
+      ].join('')
+    },
+    /* 1 — Pressure-test 100 rules in 7 words */
+    {
+      userMsg: 'Audit my automations — what\'s actually working?',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>',
+          '<p><strong>🔍 87 rules scanned</strong></p>',
+          '<ul>',
+            '<li>🟢 Firing usefully — 41</li>',
+            '<li>⚪ Running, never matching — 23</li>',
+            '<li>🔴 Erroring silently — 5</li>',
+            '<li>⚫ Disabled — 18</li>',
+          '</ul>',
+          '<p>28 rules are dead weight or broken — your cleanup list.</p>',
+        '</div>'
+      ].join('')
+    },
+    /* 2 — Know what happened before your first call */
+    {
+      userMsg: 'What happened on the account overnight?',
+      aiHtml: [
+        '<div class="chat-card__response-content">',
+          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>',
+          '<p><strong>🔍 3 rules fired · 11pm–7am</strong></p>',
+          '<ul>',
+            '<li><strong>2:14am</strong> — Paused 4 ad sets (spend &gt; $50, 0 leads)</li>',
+            '<li><strong>4:40am</strong> — Budget capped at 90% of target</li>',
+            '<li><strong>6:02am</strong> — Scaling blocked by the guardrail above</li>',
+          '</ul>',
+          '<p>Your guardrail is overriding your scaler at night.</p>',
+        '</div>'
+      ].join('')
+    }
+  ];
+
+  /* ══════════════════════════════════════════════════════════
+     TIMING
+  ══════════════════════════════════════════════════════════ */
+  if (window.CHAT_TYPING_MS === undefined) window.CHAT_TYPING_MS = 15;
+  var PAUSE_SEND   = 500;
+  var RESP_DELAY   = 700;
+  var FULL_PAUSE   = 1800;
+  var FADE_MS      = 350;
+  var IDLE_PAUSE   = 400;
+  var INIT_DELAY   = 1400;
+
+  /* ══════════════════════════════════════════════════════════
+     ELEMENTS
+  ══════════════════════════════════════════════════════════ */
+  var chatBody    = document.getElementById('chatBody');
+  var chatFeed    = document.getElementById('chatFeed');
+  var placeholder = document.getElementById('chatPlaceholder');
+  var typedEl     = document.getElementById('chatTyped');
+  var inputCursor = document.getElementById('chatCursor');
+  var sendBtn     = document.getElementById('chatSendBtn');
+
+  /* Hide typed span initially (CSS no longer does this) */
+  typedEl.style.display = 'none';
+
+  /* ══════════════════════════════════════════════════════════
+     STATE
+  ══════════════════════════════════════════════════════════ */
+  var currentIdx      = 0;
+  var pendingTimers   = [];
+  var currentBubbleEl = null;
+  var currentRespEl   = null;
+  var phase = 'idle';
+
+  /* ══════════════════════════════════════════════════════════
+     HELPERS
+  ══════════════════════════════════════════════════════════ */
+  function addTimer(fn, ms) {
+    var t = setTimeout(fn, ms);
+    pendingTimers.push(t);
+    return t;
+  }
+  function cancelTimers() {
+    pendingTimers.forEach(function (t) { clearTimeout(t); });
+    pendingTimers = [];
+  }
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent    = '';
+    typedEl.style.display  = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     DOM FACTORY
+  ══════════════════════════════════════════════════════════ */
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     RESET — fade out everything and start fresh
+  ══════════════════════════════════════════════════════════ */
+  function resetChat(nextIdx) {
+    phase           = 'clearing';
+    currentIdx      = nextIdx;
+    currentBubbleEl = null;
+    currentRespEl   = null;
+    clearInput();
+
+    /* Fade out any visible bubbles / responses */
+    var els = chatFeed.querySelectorAll('.chat-card__bubble, .chat-card__response');
+    els.forEach(function (el) { el.classList.remove('is-visible'); });
+
+    /* After fade completes, clear feed and start typing immediately */
+    addTimer(function () {
+      chatFeed.innerHTML = '';
+      phase = 'idle';
+      type(0);
+    }, FADE_MS + 50);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 1 — User types in the input field
+  ══════════════════════════════════════════════════════════ */
+  function type(charIdx) {
+    phase = 'typing';
+    var msg = CHATS[currentIdx].userMsg;
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display     = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = msg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+
+    if (charIdx < msg.length) {
+      addTimer(function () { type(charIdx + 1); }, window.CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      phase = 'sending';
+      addTimer(doSend, PAUSE_SEND);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 2 — Send: input clears, bubble floats in
+  ══════════════════════════════════════════════════════════ */
+  function doSend() {
+    clearInput();
+    currentBubbleEl = createBubble(CHATS[currentIdx].userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentBubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    phase = 'responding';
+    addTimer(startResponse, RESP_DELAY);
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 3 — AI response appears (fade + float)
+  ══════════════════════════════════════════════════════════ */
+  function startResponse() {
+    currentRespEl = createResponse(CHATS[currentIdx].aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentRespEl.classList.add('is-visible');
+        scrollToBottom();
+        phase = 'viewing';
+        addTimer(onExchangeComplete, FULL_PAUSE);
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PHASE 4 — Exchange done
+  ══════════════════════════════════════════════════════════ */
+  function onExchangeComplete() {
+    phase = 'idle';
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     PUBLIC — called by accordion on every tab switch
+  ══════════════════════════════════════════════════════════ */
+  window.switchChat = function (nextIdx) {
+    cancelTimers();
+    resetChat(nextIdx);
+  };
+
+  /* ── Kick off first exchange after page settles ── */
+  addTimer(function () { type(0); }, INIT_DELAY);
+
+})();
+</script>
+
+</body>
+</html>
