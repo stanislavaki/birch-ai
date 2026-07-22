@@ -1322,40 +1322,63 @@
     top: 0.048em;               /* (0.154em - 0.058em) / 2 */
   }
 
-  /* ── Reel: the last pill cycles through the AI tools ──
-     Each variant is a whole pill inside a clipped window, so colour and icon
-     swap with the drum movement itself instead of cross-fading. */
-  .hero-mcp__reel {
+  /* ── Swap: the last pill cycles through the AI tools ──
+     Variants are absolutely positioned and nothing clips them, so the overshoot
+     is thrown clear of the row instead of being eaten by a window. */
+  .hero-mcp__swap {
+    position: relative;
     flex: 0 0 auto;
-    overflow: hidden;
     /* exactly one pill tall: line-height 1.1 + padding 0.058 + 0.154 */
     height: 1.312em;
-    border-radius: 0.308em;      /* window owns the radius */
-    /* width follows the active variant — overshoot easing gives it the snap */
-    transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1;                  /* overshoot rides above the neighbouring pills */
+    /* width is driven per-frame from JS (rounded), never by a CSS transition */
   }
-  .hero-mcp__reel-track {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;        /* each variant fills the window, never a gap */
-    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .hero-mcp__swap .hero-mcp__pill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* rotation reads as a toss only when it pivots on the centre */
+    transform-origin: 50% 50%;
+    transition:
+      transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity   0.45s ease;
   }
-  /* variants sit flush inside the window */
-  .hero-mcp__reel .hero-mcp__pill {
-    flex: 0 0 auto;
-    border-radius: 0;
+
+  /* incoming: waits below, tilted the other way */
+  .hero-mcp__swap .hero-mcp__pill.is-enter {
+    transform: translateY(60%) rotate(-3deg);
+    opacity: 0;
   }
-  /* while measuring natural widths */
-  .hero-mcp__reel.is-measuring { width: auto !important; }
-  .hero-mcp__reel.is-measuring .hero-mcp__reel-track {
-    width: max-content;
-    align-items: flex-start;
+  /* outgoing: tossed up and out */
+  .hero-mcp__swap .hero-mcp__pill.is-leave {
+    transform: translateY(-60%) rotate(3deg);
+    opacity: 0;
+  }
+  /* resting */
+  .hero-mcp__swap .hero-mcp__pill.is-active {
+    transform: none;
+    opacity: 1;
+  }
+
+  /* parked variants stay out of the way until their turn */
+  .hero-mcp__swap .hero-mcp__pill:not(.is-active):not(.is-enter):not(.is-leave) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* while measuring natural widths: let every variant hug its own text */
+  .hero-mcp__swap.is-measuring { width: auto !important; }
+  .hero-mcp__swap.is-measuring .hero-mcp__pill {
+    position: static;
+    display: inline-flex;
+    opacity: 0;
     transition: none;
+    transform: none;
   }
-  .hero-mcp__reel-track.is-instant { transition: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-mcp__reel, .hero-mcp__reel-track { transition: none; }
+    .hero-mcp__swap .hero-mcp__pill { transition: none; }
   }
 
   @media (max-width: 767px) {
@@ -1433,16 +1456,12 @@
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
       <span class="hero-mcp__pill hero-mcp__pill--dotted hero-mcp__pill--pill">from</span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
-      <!-- reel: cycles Claude -> Chat GPT -> Perplexity -> your AI tool -> …
-           last item repeats the first so the wrap has nothing to jump over -->
-      <span class="hero-mcp__reel" id="heroReel">
-        <span class="hero-mcp__reel-track" id="heroReelTrack">
-          <span class="hero-mcp__pill hero-mcp__pill--salmon"><i class="hero-mcp__icon"></i>Claude</span>
-          <span class="hero-mcp__pill hero-mcp__pill--purple"><i class="hero-mcp__icon"></i>Chat GPT</span>
-          <span class="hero-mcp__pill hero-mcp__pill--light-blue"><i class="hero-mcp__icon"></i>Perplexity</span>
-          <span class="hero-mcp__pill hero-mcp__pill--pink">your AI tool</span>
-          <span class="hero-mcp__pill hero-mcp__pill--salmon"><i class="hero-mcp__icon"></i>Claude</span>
-        </span>
+      <!-- swap: cycles Claude -> Chat GPT -> Perplexity -> your AI tool -> … -->
+      <span class="hero-mcp__swap" id="heroSwap">
+        <span class="hero-mcp__pill hero-mcp__pill--salmon is-active"><i class="hero-mcp__icon"></i>Claude</span>
+        <span class="hero-mcp__pill hero-mcp__pill--purple"><i class="hero-mcp__icon"></i>Chat GPT</span>
+        <span class="hero-mcp__pill hero-mcp__pill--light-blue"><i class="hero-mcp__icon"></i>Perplexity</span>
+        <span class="hero-mcp__pill hero-mcp__pill--pink">your AI tool</span>
       </span>
     </div>
   </div>
@@ -2218,43 +2237,75 @@
 })();
 </script>
 
-<!-- ── Hero reel: the last pill cycles through the AI tools ── -->
+<!-- ── Hero swap: the last pill cycles through the AI tools ── -->
 <script>
 (function () {
   var HOLD  = 1800;   /* how long each variant stays */
   var TRANS = 450;    /* must match the CSS transition duration */
 
+  /* same curve as the CSS transition, so width and toss travel together */
+  function easeOutBack(t) {
+    var c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+
   function init() {
-    var reel  = document.getElementById('heroReel');
-    var track = document.getElementById('heroReelTrack');
-    if (!reel || !track) return;
+    var swap = document.getElementById('heroSwap');
+    if (!swap) return;
 
-    var items = [].slice.call(track.children);
-    var real  = items.length - 1;          /* last item is a clone of the first */
-    var widths = [];
-    var stepRem = 0;                       /* one pill height, in rem */
+    var items = [].slice.call(swap.children);
+    var widths = [];          /* natural width of each variant, in px */
+    var index  = 0;
+    var raf    = null;
 
-    /* natural width of each variant, in rem so it survives the fluid type scale */
-    function measure() {
-      var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      reel.classList.add('is-measuring');
-      widths = items.map(function (it) { return it.getBoundingClientRect().width / remPx; });
-      reel.classList.remove('is-measuring');
-      stepRem = reel.getBoundingClientRect().height / remPx;
-      apply(index, true);
+    function remPx() {
+      return parseFloat(getComputedStyle(document.documentElement).fontSize);
     }
 
-    var index = 0;
+    /* width is written in rem (fluid type scale) but rounded in px:
+       an even integer keeps the centred row on whole pixels, so the dotted
+       border on "from" never re-rasterises mid-animation */
+    function setWidth(px) {
+      var even = Math.round(px / 2) * 2;
+      swap.style.width = (even / remPx()).toFixed(4) + 'rem';
+    }
 
-    function apply(i, instant) {
-      if (instant) track.classList.add('is-instant');
-      reel.style.width = widths[i].toFixed(4) + 'rem';
-      /* step by one pill — a % here would resolve against the whole track */
-      track.style.transform = 'translateY(-' + (i * stepRem).toFixed(4) + 'rem)';
-      if (instant) {
-        void track.offsetHeight;            /* flush, so the next move animates */
-        track.classList.remove('is-instant');
-      }
+    function measure() {
+      swap.classList.add('is-measuring');
+      widths = items.map(function (it) { return it.getBoundingClientRect().width; });
+      swap.classList.remove('is-measuring');
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      setWidth(widths[index]);
+    }
+
+    function animateWidth(from, to) {
+      if (raf) cancelAnimationFrame(raf);
+      if (Math.round(from) === Math.round(to)) { setWidth(to); return; }
+      var t0 = performance.now();
+      (function frame(now) {
+        var p = Math.min((now - t0) / TRANS, 1);
+        setWidth(from + (to - from) * easeOutBack(p));
+        if (p < 1) raf = requestAnimationFrame(frame);
+        else { raf = null; setWidth(to); }
+      })(t0);
+    }
+
+    function swapTo(next) {
+      var out = items[index];
+      var incoming = items[next];
+
+      animateWidth(widths[index], widths[next]);
+
+      out.classList.remove('is-active');
+      out.classList.add('is-leave');
+
+      incoming.classList.add('is-enter');
+      void incoming.offsetHeight;            /* paint the start state first */
+      incoming.classList.remove('is-enter');
+      incoming.classList.add('is-active');
+
+      setTimeout(function () { out.classList.remove('is-leave'); }, TRANS);
+      index = next;
     }
 
     measure();
@@ -2266,12 +2317,7 @@
 
     var timer = null;
     function step() {
-      index += 1;
-      apply(index, false);
-      if (index === real) {
-        /* landed on the clone — snap back to the real first item once it settles */
-        setTimeout(function () { index = 0; apply(0, true); }, TRANS + 20);
-      }
+      swapTo((index + 1) % items.length);
       timer = setTimeout(step, HOLD);
     }
 
@@ -2286,7 +2332,7 @@
         }
       });
     }, { threshold: 0.5 });
-    io.observe(reel);
+    io.observe(swap);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
