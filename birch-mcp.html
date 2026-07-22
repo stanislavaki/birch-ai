@@ -945,7 +945,9 @@
 
   @media (max-width: 991px) {
 
-    /* Hide desktop version */
+    /* Hide desktop version — the whole section, not just its contents:
+       leaving it in flow kept its vertical padding as dead space above the carousel */
+    .acc { display: none; }
     .acc__box  { display: none !important; }
     .acc__title { display: none; }
 
