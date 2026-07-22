@@ -1233,6 +1233,27 @@
     .mcp-st__pill { transition: none; }
   }
 
+  /* ── mobile: logos step out of the input and sit below it ── */
+  @media (max-width: 767px) {
+    .mcp-st__pill {
+      flex-direction: column;
+      gap: var(--space-sm);
+      /* the wrapper stops being the input… */
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: 0;
+    }
+    /* …the field becomes it, hugging the phrase */
+    .mcp-st__field {
+      max-width: 100%;
+      padding: 0.3846em 0.6538em;
+      background: var(--color-bg-grey);
+      border: 0.125rem solid var(--color-border-subtle);
+      border-radius: var(--radius-lg);
+    }
+  }
+
   /* ── dev-only runway above the statement ── */
   .mcp-runway {
     min-height: 100vh;
