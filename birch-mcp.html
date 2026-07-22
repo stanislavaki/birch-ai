@@ -1118,8 +1118,6 @@
      MOBILE  ≤767px
   ───────────────────────────────────────── */
   @media (max-width: 767px) {
-
-  @media (max-width: 767px) {
     .vision__agent { gap: var(--space); }
 
     .vision__copilot-icon img { width: 50%; }
@@ -1130,6 +1128,124 @@
     }
   }
 
+  /* ─────────────────────────────────────────
+     MCP STATEMENT — typing headline + platform logos
+  ───────────────────────────────────────── */
+  .mcp-st { padding: var(--space-xl) 0; }
+
+  .mcp-st__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .mcp-st__title {
+    max-width: 55.5rem;        /* 887px in the mockup */
+    margin: 0;
+    color: var(--color-text);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* Pill inherits the h2 type scale, so every inner em-value scales with it */
+  .mcp-st__pill {
+    display: flex;
+    align-items: center;
+    gap: 0.3077em;             /* 16px @ 52px */
+    padding: 0.3846em 0.6538em; /* 20px 34px @ 52px */
+    background: var(--color-bg-grey);
+    /* stroke a touch lighter than the fill — reads as an input field */
+    border: 0.125rem solid var(--color-border-subtle);   /* 2px */
+    border-radius: var(--radius-lg);
+    /* rises into place before typing starts */
+    opacity: 0;
+    transform: translateY(1.25rem);
+    will-change: opacity, transform;
+    transition:
+      opacity   0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: var(--font);
+    font-size: var(--text-h2-size);
+    font-weight: 600;
+    line-height: var(--text-h2-lh);
+    letter-spacing: var(--text-h2-ls);
+  }
+
+  .mcp-st__field {
+    display: flex;
+    align-items: center;
+    gap: 0.1346em;             /* 7px @ 52px */
+  }
+
+  .mcp-st__typed {
+    color: var(--color-text);
+    white-space: nowrap;
+  }
+  /* zero-width space keeps a full line box before the first character,
+     so the pill height doesn't jump the moment typing starts */
+  .mcp-st__typed::before { content: '\200B'; }
+
+  /* plain text caret, like a real input */
+  .mcp-st__caret {
+    flex: 0 0 auto;
+    width: 0.06em;
+    height: 0.78em;
+    border-radius: 0.0625rem;  /* 1px */
+    background: var(--color-text);
+    animation: mcpCaretBlink 1.06s steps(1) infinite;
+  }
+  @keyframes mcpCaretBlink { 0%, 50% { opacity: 1 } 50.01%, 100% { opacity: 0 } }
+
+  /* caret retires once the sentence is typed */
+  .mcp-st.is-typed .mcp-st__caret {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /* widths are reserved up front, so logos fade in place instead of pushing the pill */
+  .mcp-st__logos {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);      /* 8px */
+  }
+
+  .mcp-st__logo {
+    flex: 0 0 auto;
+    width: 2.5rem;             /* 40px placeholder — real assets pending */
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    background: #3a3a3a;
+    opacity: 0;
+    transform: scale(0.6);
+    will-change: opacity, transform;
+    transition:
+      opacity   0.45s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mcp-st__logo.is-visible { opacity: 1; transform: scale(1); }
+
+  /* pill has landed */
+  .mcp-st.is-in .mcp-st__pill { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mcp-st__pill { transition: none; }
+  }
+
+  /* ── dev-only runway above the statement ── */
+  .mcp-runway {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mcp-runway__hint { margin: 0; color: var(--color-text-grey); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mcp-st__caret { animation: none; }
+    .mcp-st__logo { transition: none; }
+  }
 </style>
 </head>
 <body>
@@ -1168,11 +1284,37 @@
   </div>
 </nav>
 
-<!-- Birch MCP — accordion + animated chat cards (adapted from ai-promo.html) -->
-<section class="acc" style="padding-top: calc(var(--space-xl) + var(--nav-height));">
-  <div class="container">
+<!-- ── Dev-only runway: gives room to scroll into the statement animation ── -->
+<section class="mcp-runway" style="padding-top: calc(var(--space-xl) + var(--nav-height));">
+  <p class="mcp-runway__hint t-para-sm">Scroll down to trigger the animation ↓</p>
+</section>
 
-    <h2 class="acc__title t-h2">One conversation, all your context</h2>
+<!-- ── MCP statement — typing headline + platform logos ── -->
+<section class="mcp-st" id="mcpStatement">
+  <div class="container">
+    <div class="mcp-st__inner">
+      <h2 class="mcp-st__title t-h2">Analyze your automation the way you analyze everything else</h2>
+
+      <div class="mcp-st__pill">
+        <div class="mcp-st__field" id="mcpField">
+          <span class="mcp-st__typed" id="mcpTyped"></span><span class="mcp-st__caret" id="mcpCaret"></span>
+        </div>
+        <div class="mcp-st__logos" id="mcpLogos">
+          <!-- placeholders 40px — swap for real platform marks when assets land -->
+          <span class="mcp-st__logo"></span>
+          <span class="mcp-st__logo"></span>
+          <span class="mcp-st__logo"></span>
+          <span class="mcp-st__logo"></span>
+          <span class="mcp-st__logo"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Birch MCP — accordion + animated chat cards (adapted from ai-promo.html) -->
+<section class="acc">
+  <div class="container">
 
     <div class="acc__box" id="accBox">
       <div class="acc__layout">
@@ -1243,7 +1385,6 @@
 <!-- ── Mobile accordion carousel (≤991px) ── -->
 <section class="acc-mob" id="accMob">
   <div class="container">
-    <h2 class="acc-mob__heading t-h2">One conversation, all your context</h2>
     <div class="acc-mob__carousel" id="accMobCarousel">
 
       <!-- Slide 0: Get rules suggestion -->
@@ -1910,6 +2051,96 @@
   /* ── Kick off first exchange after page settles ── */
   addTimer(function () { type(0); }, INIT_DELAY);
 
+})();
+</script>
+
+<!-- ── MCP statement: type the phrase, then stagger the logos in ── -->
+<script>
+(function () {
+  var TEXT        = 'ask your AI assistant';
+  var TYPE_MS     = 68;    /* per character */
+  var START_DELAY = 620;   /* lets the pill finish rising (0.55s) before typing starts */
+  var STAGGER     = 0.08;  /* 80ms between logos */
+
+  function init() {
+    var section = document.getElementById('mcpStatement');
+    var typedEl = document.getElementById('mcpTyped');
+    var field   = document.getElementById('mcpField');
+    if (!section || !typedEl || !field) return;
+    var logos = [].slice.call(section.querySelectorAll('.mcp-st__logo'));
+
+    /* Reserve the final width up front so the pill never grows while typing.
+       Re-run after fonts load and on resize — the type scale is fluid. */
+    function reserveWidth() {
+      var prev = typedEl.textContent;
+      field.style.minWidth = '';
+      typedEl.textContent = TEXT;
+      var w = field.getBoundingClientRect().width;
+      typedEl.textContent = prev;
+      /* store in rem, not px — the type scale is fluid */
+      var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      field.style.minWidth = (w / remPx).toFixed(4) + 'rem';
+    }
+    reserveWidth();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserveWidth);
+    window.addEventListener('resize', reserveWidth);
+
+    /* fixed stagger, assigned once and independent of the transition duration */
+    logos.forEach(function (el, i) {
+      el.style.transitionDelay = (i * STAGGER).toFixed(3) + 's';
+    });
+
+    function revealLogos() {
+      logos.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+    function finish() {
+      section.classList.add('is-in');
+      typedEl.textContent = TEXT;
+      section.classList.add('is-typed');
+      revealLogos();
+    }
+
+    /* reduced motion: land on the final state, skip the reveal */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+
+    function type(i) {
+      typedEl.textContent = TEXT.slice(0, i);
+      if (i < TEXT.length) {
+        setTimeout(function () { type(i + 1); }, TYPE_MS);
+      } else {
+        section.classList.add('is-typed');  /* retire the caret */
+        revealLogos();
+      }
+    }
+
+    /* fire once, when the block comes into view */
+    var fired = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !fired) {
+          fired = true;
+          io.disconnect();
+          /* Let the start state (opacity 0 + offset) paint first. On a reload with
+             the block already in view the observer fires immediately, and adding
+             the class in that same frame would skip the transition entirely. */
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              section.classList.add('is-in');                      /* pill rises in */
+              setTimeout(function () { type(0); }, START_DELAY);   /* then it types */
+            });
+          });
+        }
+      });
+      /* Watch the pill itself, not the section — the section clears its threshold
+         while the pill is still below the fold, so the rise played off-screen.
+         The negative bottom margin holds the start until the pill has travelled
+         a fifth of the viewport clear of the fold, so the rise is actually seen. */
+    }, { threshold: 1, rootMargin: '0px 0px -20% 0px' });
+    io.observe(section.querySelector('.mcp-st__pill'));
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
