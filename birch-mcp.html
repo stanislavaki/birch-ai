@@ -1297,6 +1297,8 @@
   .hero-mcp__pill--green      { background: var(--color-accent-green); }
   .hero-mcp__pill--indigo     { background: var(--color-accent-indigo); color: var(--color-text); }
   .hero-mcp__pill--salmon     { background: #F47850; }  /* not tokenised — one-off from the mockup */
+  .hero-mcp__pill--purple     { background: var(--color-accent-purple); color: var(--color-text); }
+  .hero-mcp__pill--pink       { background: var(--color-accent-pink);   color: var(--color-text); }
 
   .hero-mcp__pill--dotted {
     background: transparent;
@@ -1318,6 +1320,42 @@
        which pulls the content box up; nudge back down to sit on the pill's centre */
     position: relative;
     top: 0.048em;               /* (0.154em - 0.058em) / 2 */
+  }
+
+  /* ── Reel: the last pill cycles through the AI tools ──
+     Each variant is a whole pill inside a clipped window, so colour and icon
+     swap with the drum movement itself instead of cross-fading. */
+  .hero-mcp__reel {
+    flex: 0 0 auto;
+    overflow: hidden;
+    /* exactly one pill tall: line-height 1.1 + padding 0.058 + 0.154 */
+    height: 1.312em;
+    border-radius: 0.308em;      /* window owns the radius */
+    /* width follows the active variant — overshoot easing gives it the snap */
+    transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .hero-mcp__reel-track {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;        /* each variant fills the window, never a gap */
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  /* variants sit flush inside the window */
+  .hero-mcp__reel .hero-mcp__pill {
+    flex: 0 0 auto;
+    border-radius: 0;
+  }
+  /* while measuring natural widths */
+  .hero-mcp__reel.is-measuring { width: auto !important; }
+  .hero-mcp__reel.is-measuring .hero-mcp__reel-track {
+    width: max-content;
+    align-items: flex-start;
+    transition: none;
+  }
+  .hero-mcp__reel-track.is-instant { transition: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-mcp__reel, .hero-mcp__reel-track { transition: none; }
   }
 
   @media (max-width: 767px) {
@@ -1395,7 +1433,17 @@
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
       <span class="hero-mcp__pill hero-mcp__pill--dotted hero-mcp__pill--pill">from</span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
-      <span class="hero-mcp__pill hero-mcp__pill--salmon hero-mcp__pill--sq"><i class="hero-mcp__icon"></i>Claude</span>
+      <!-- reel: cycles Claude -> Chat GPT -> Perplexity -> your AI tool -> …
+           last item repeats the first so the wrap has nothing to jump over -->
+      <span class="hero-mcp__reel" id="heroReel">
+        <span class="hero-mcp__reel-track" id="heroReelTrack">
+          <span class="hero-mcp__pill hero-mcp__pill--salmon"><i class="hero-mcp__icon"></i>Claude</span>
+          <span class="hero-mcp__pill hero-mcp__pill--purple"><i class="hero-mcp__icon"></i>Chat GPT</span>
+          <span class="hero-mcp__pill hero-mcp__pill--light-blue"><i class="hero-mcp__icon"></i>Perplexity</span>
+          <span class="hero-mcp__pill hero-mcp__pill--pink">your AI tool</span>
+          <span class="hero-mcp__pill hero-mcp__pill--salmon"><i class="hero-mcp__icon"></i>Claude</span>
+        </span>
+      </span>
     </div>
   </div>
 </section>
@@ -2167,6 +2215,82 @@
   /* ── Kick off first exchange after page settles ── */
   addTimer(function () { type(0); }, INIT_DELAY);
 
+})();
+</script>
+
+<!-- ── Hero reel: the last pill cycles through the AI tools ── -->
+<script>
+(function () {
+  var HOLD  = 1800;   /* how long each variant stays */
+  var TRANS = 450;    /* must match the CSS transition duration */
+
+  function init() {
+    var reel  = document.getElementById('heroReel');
+    var track = document.getElementById('heroReelTrack');
+    if (!reel || !track) return;
+
+    var items = [].slice.call(track.children);
+    var real  = items.length - 1;          /* last item is a clone of the first */
+    var widths = [];
+    var stepRem = 0;                       /* one pill height, in rem */
+
+    /* natural width of each variant, in rem so it survives the fluid type scale */
+    function measure() {
+      var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      reel.classList.add('is-measuring');
+      widths = items.map(function (it) { return it.getBoundingClientRect().width / remPx; });
+      reel.classList.remove('is-measuring');
+      stepRem = reel.getBoundingClientRect().height / remPx;
+      apply(index, true);
+    }
+
+    var index = 0;
+
+    function apply(i, instant) {
+      if (instant) track.classList.add('is-instant');
+      reel.style.width = widths[i].toFixed(4) + 'rem';
+      /* step by one pill — a % here would resolve against the whole track */
+      track.style.transform = 'translateY(-' + (i * stepRem).toFixed(4) + 'rem)';
+      if (instant) {
+        void track.offsetHeight;            /* flush, so the next move animates */
+        track.classList.remove('is-instant');
+      }
+    }
+
+    measure();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    window.addEventListener('resize', measure);
+
+    /* reduced motion: park on the first variant, no cycling */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var timer = null;
+    function step() {
+      index += 1;
+      apply(index, false);
+      if (index === real) {
+        /* landed on the clone — snap back to the real first item once it settles */
+        setTimeout(function () { index = 0; apply(0, true); }, TRANS + 20);
+      }
+      timer = setTimeout(step, HOLD);
+    }
+
+    /* start once the hero is actually on screen */
+    var started = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !started) {
+          started = true;
+          io.disconnect();
+          timer = setTimeout(step, HOLD);
+        }
+      });
+    }, { threshold: 0.5 });
+    io.observe(reel);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
