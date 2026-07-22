@@ -1261,7 +1261,17 @@
      Height comes from the content: pills + padding, never a fixed height.
      Pill metrics mirror manage.html (same design-system composition).
   ───────────────────────────────────────── */
-  .hero-mcp { padding: var(--space-xl) 0; }
+  /* the nav is a fixed overlay, so the section reserves its height as padding
+     and the stage fills exactly what is left of the first screen */
+  .hero-mcp { padding: var(--nav-height) 0 0; }
+
+  .hero-mcp__stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - var(--nav-height));
+    padding-block: var(--space-xl);
+  }
 
   .hero-mcp__pills {
     --ps: var(--text-pill-size);   /* shared token — design-system/tokens.css */
@@ -1382,15 +1392,6 @@
     .hero-mcp__brk--mb { display: block; }
   }
 
-  /* ── dev-only runway above the statement ── */
-  .mcp-runway {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .mcp-runway__hint { margin: 0; color: var(--color-text-grey); }
-
   @media (prefers-reduced-motion: reduce) {
     .mcp-st__caret { animation: none; }
     .mcp-st__logo { transition: none; }
@@ -1434,8 +1435,8 @@
 </nav>
 
 <!-- ── Hero — word pills, last one on a rotating cube ── -->
-<section class="hero-mcp" style="padding-top: calc(var(--space-xl) + var(--nav-height));">
-  <div class="container">
+<section class="hero-mcp">
+  <div class="container hero-mcp__stage">
     <div class="hero-mcp__pills">
       <span class="hero-mcp__pill hero-mcp__pill--orange hero-mcp__pill--sq">Evaluate</span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
@@ -1461,11 +1462,6 @@
       </span>
     </div>
   </div>
-</section>
-
-<!-- ── Dev-only runway: gives room to scroll into the statement animation ── -->
-<section class="mcp-runway">
-  <p class="mcp-runway__hint t-para-sm">Scroll down to trigger the animation ↓</p>
 </section>
 
 <!-- ── MCP statement — typing headline + platform logos ── -->
