@@ -1314,6 +1314,10 @@
     margin-right: 0.173em;      /* 9px @ 52px */
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.55);
+    /* the pill's vertical padding is asymmetric (it optically centres the text),
+       which pulls the content box up; nudge back down to sit on the pill's centre */
+    position: relative;
+    top: 0.048em;               /* (0.154em - 0.058em) / 2 */
   }
 
   @media (max-width: 767px) {
