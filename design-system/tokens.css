@@ -38,6 +38,10 @@
   --color-bg:      #0D0D12;   /* Background/Black */
   --color-bg-grey: #2A2A2A;   /* Background/Grey  */
 
+  /* ---- Colors: Border ---- */
+  /* Translucent white so a stroke stays "a touch lighter" on any dark fill */
+  --color-border-subtle: rgba(255, 255, 255, 0.14);
+
   /* ---- Colors: Text ---- */
   --color-text:          #FFFFFF;  /* Text/Base     */
   --color-text-inverted: #000000;  /* Text/Inverted */
