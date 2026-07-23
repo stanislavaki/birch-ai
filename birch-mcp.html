@@ -1215,10 +1215,9 @@
 
   .mcp-st__logo {
     flex: 0 0 auto;
-    width: 2.5rem;             /* 40px placeholder — real assets pending */
+    width: 2.5rem;             /* 40px */
     height: 2.5rem;
-    border-radius: var(--radius-sm);
-    background: #3a3a3a;
+    object-fit: contain;
     opacity: 0;
     transform: scale(0.6);
     will-change: opacity, transform;
@@ -1321,8 +1320,8 @@
   /* AI-tool mark on each cube face */
   .hero-mcp__icon {
     flex: 0 0 auto;
-    width: 0.99em;              /* 51.5px @ 52px */
-    height: 0.99em;
+    width: 0.85em;              /* ~44px @ 52px — 14% smaller than the label cap */
+    height: 0.85em;
     margin-right: 0.173em;      /* 9px @ 52px */
     /* the pill's vertical padding is asymmetric (it optically centres the text),
        which pulls the content box up; nudge back down to sit on the pill's centre */
@@ -1533,12 +1532,11 @@
           <span class="mcp-st__typed" id="mcpTyped"></span><span class="mcp-st__caret" id="mcpCaret"></span>
         </div>
         <div class="mcp-st__logos" id="mcpLogos">
-          <!-- placeholders 40px — swap for real platform marks when assets land -->
-          <span class="mcp-st__logo"></span>
-          <span class="mcp-st__logo"></span>
-          <span class="mcp-st__logo"></span>
-          <span class="mcp-st__logo"></span>
-          <span class="mcp-st__logo"></span>
+          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
+          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />
+          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
+          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d2919b68c977d1b4f74_cursor.svg" alt="" />
+          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
         </div>
       </div>
     </div>
