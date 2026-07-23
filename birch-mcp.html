@@ -1524,23 +1524,26 @@
   .promo-shot {
     position: relative;
     width: 100%;
-    border-radius: var(--radius-lg);
+    border-radius: 0.75rem;      /* match the mockup window, not larger */
     overflow: hidden;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
   }
   .promo-shot__bg { width: 100%; height: auto; display: block; }
 
-  /* the popover, positioned over the empty right-hand canvas of the mockup */
+  /* the popover — a FIXED-height chat window over the mockup's right canvas */
   .promo-pop {
     position: absolute;
     left: 57%;
-    top: 12.5%;
+    top: 11%;
     width: 41%;
+    height: 84%;                 /* static — the window doesn't grow while typing */
     background: #fff;
-    border-radius: 3.2%/5.8%;    /* small radius relative to the popover box */
-    box-shadow: 0 1.2% 4% rgba(0, 0, 0, 0.25);
+    border-radius: 4cqw;
+    box-shadow: 0 1.2cqw 4cqw rgba(0, 0, 0, 0.22);
     container-type: inline-size;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     /* appears once the card is on screen */
     opacity: 0;
     transform: translateY(3%) scale(0.96);
@@ -1550,69 +1553,103 @@
   .promo-shot.is-live .promo-pop { opacity: 1; transform: none; }
   /* everything inside scales off the popover width so it tracks the mockup */
   .promo-pop__head {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4.2cqw 5.5cqw 1.5cqw;
+    padding: 4.2cqw 5.5cqw 2cqw;
   }
-  .promo-pop__head-title { font-size: 4.8cqw; font-weight: 600; color: #111; }
-  .promo-pop__head-icons { display: flex; gap: 2.6cqw; color: #9a9a9a; }
-  .promo-pop__head-icons svg { width: 4cqw; height: 4cqw; display: block; }
+  .promo-pop__head-title { font-size: 4.6cqw; font-weight: 600; color: #111; }
+  .promo-pop__head-icons { display: flex; gap: 2.6cqw; color: #b3b3b3; }
+  .promo-pop__head-icons svg { width: 3.8cqw; height: 3.8cqw; display: block; }
 
-  .promo-pop__feed { padding: 0 5.5cqw 1.5cqw; }
+  /* feed fills the window; messages sit at the top */
+  .promo-pop__feed {
+    flex: 1 1 auto;
+    overflow: hidden;
+    padding: 0 5.5cqw;
+  }
   .promo-pop__bubble {
     margin-left: auto;
     width: fit-content;
-    max-width: 92%;
+    max-width: 90%;
     background: #f1f1f3;
     border-radius: 3.4cqw;
     padding: 3cqw 3.6cqw;
-    font-size: 4.4cqw;
+    font-size: 4.2cqw;
     line-height: 1.26;
     color: #111;
+    /* floats in once the message has been "sent" from the input */
+    opacity: 0;
+    transform: translateY(1.5cqw) scale(0.98);
+    transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .promo-pop__bubble.is-in { opacity: 1; transform: none; }
   .promo-pop__resp {
     margin-top: 3.4cqw;
-    font-size: 4.4cqw;
+    font-size: 4.2cqw;
     line-height: 1.3;
     color: #111;
-    /* fades in once the user's message has finished typing */
     opacity: 0;
     transform: translateY(1cqw);
     transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .promo-pop__resp.is-in { opacity: 1; transform: none; }
   .promo-pop__resp-lead { color: #444; }
-  .promo-pop__rule { margin-top: 2.8cqw; }
+  .promo-pop__rule { margin-top: 2.6cqw; }
   .promo-pop__rule-title { font-weight: 700; }
-  .promo-pop__rule-more { color: #9a9a9a; font-size: 3.9cqw; margin-top: 0.6cqw; }
+  .promo-pop__rule-more { color: #9a9a9a; font-size: 3.7cqw; margin-top: 0.6cqw; }
 
   .promo-pop__btn {
     display: inline-flex;
     align-items: center;
-    gap: 2cqw;
-    margin-top: 3.4cqw;
-    padding: 2.4cqw 3.6cqw;
+    gap: 1.8cqw;
+    margin-top: 3.2cqw;
+    padding: 2.4cqw 4cqw;
     background: var(--color-primary);
-    border-radius: 3cqw;
-    font-size: 4.1cqw;
+    border-radius: var(--radius-pill);   /* a proper pill, like the mockup */
+    font-size: 3.9cqw;
     font-weight: 600;
     color: #111;
   }
-  .promo-pop__btn svg { width: 4cqw; height: 4cqw; display: block; }
+  .promo-pop__btn svg { width: 3.8cqw; height: 3.8cqw; display: block; }
 
+  /* input pinned at the bottom — the message types in HERE, then it's sent */
   .promo-pop__input {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 3cqw 5.5cqw 4.4cqw;
-    padding: 3cqw 2.6cqw 3cqw 3.6cqw;
+    gap: 2cqw;
+    margin: 2.5cqw 5.5cqw 5cqw;
+    padding: 3cqw 2.6cqw 3cqw 3.8cqw;
     border: 0.5cqw solid #e6e6e8;
-    border-radius: 3.4cqw;
+    border-radius: 3.6cqw;
     font-size: 4.1cqw;
-    color: #9a9a9a;
   }
+  .promo-pop__input-text {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .promo-pop__typed { color: #111; }
+  .promo-pop__ph { color: #9a9a9a; }
+  .promo-pop__caret {
+    flex: 0 0 auto;
+    width: 0.4cqw;
+    height: 4.6cqw;
+    margin-left: 0.3cqw;
+    background: #111;
+    opacity: 0;
+  }
+  .promo-pop.is-typing .promo-pop__caret { animation: promoCaret 1.05s steps(1) infinite; }
+  @keyframes promoCaret { 0%, 50% { opacity: 1 } 50.01%, 100% { opacity: 0 } }
   .promo-pop__input-send {
+    flex: 0 0 auto;
     display: grid;
     place-items: center;
     width: 7cqw;
@@ -1621,7 +1658,7 @@
     background: #ececef;
     color: #9a9a9a;
   }
-  .promo-pop__input-send svg { width: 4.4cqw; height: 4.4cqw; display: block; }
+  .promo-pop__input-send svg { width: 4.2cqw; height: 4.2cqw; display: block; }
 
   /* ── Card 2 illustration: source → dots → cycling destination ── */
   .promo-mcp {
@@ -1636,10 +1673,10 @@
   .promo-mcp__src {
     position: relative;
     flex: 0 0 auto;
-    width: 31cqw;              /* the 140px tile; chips overflow it */
+    width: 25cqw;              /* the 140px tile; chips overflow it */
     /* chips overflow ~22% left / ~29% right — pad the flex box so the dots
        centre against the chips, not the bare tile */
-    margin: 0 8cqw;
+    margin: 0 6cqw;
   }
   .promo-mcp__tile { width: 100%; height: auto; display: block; }
   .promo-mcp__chip {
@@ -1665,26 +1702,44 @@
     opacity: 0.28;
   }
 
+  /* destination — a rounded-square app tile; the logo sits on a rotating drum */
   .promo-mcp__dest {
     position: relative;
     flex: 0 0 auto;
-    width: 31cqw;
+    width: 25cqw;
     aspect-ratio: 1;
     background: #fff;
-    border-radius: 24cqw;
+    border-radius: 26%;         /* squircle, not a circle */
     box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.2);
+    perspective: 45cqw;
   }
-  .promo-mcp__logo {
+  .promo-mcp__cube {
     position: absolute;
-    inset: 22%;
-    width: 56%;
-    height: 56%;
-    object-fit: contain;
-    opacity: 0;
-    transform: scale(0.7);
-    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    inset: 20%;
+    transform-style: preserve-3d;
+    --r: 7.5cqw;                /* half the face height — the drum radius */
+    /* pushed back so the front face rests flat (no perspective zoom) */
+    transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
+    transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);   /* "weighted", like the hero */
   }
-  .promo-mcp__logo.is-active { opacity: 1; transform: scale(1); }
+  .promo-mcp__face {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    backface-visibility: hidden;
+  }
+  .promo-mcp__face:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
+  .promo-mcp__face:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
+  .promo-mcp__face:nth-child(3) { transform: rotateX(180deg) translateZ(var(--r)); }
+  .promo-mcp__face:nth-child(4) { transform: rotateX(270deg) translateZ(var(--r)); }
+  /* the ChatGPT mark is white — recolour it dark so it reads on the white tile */
+  .promo-mcp__face--mask {
+    background: #111;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
+  }
 
   /* dots: a brightness wave runs left → right, like data in transit */
   .promo-mcp.is-live .promo-mcp__dot {
@@ -1705,9 +1760,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     .promo-pop,
-    .promo-pop__resp { transition: none; opacity: 1; transform: none; }
+    .promo-pop__resp,
+    .promo-pop__bubble { transition: none; opacity: 1; transform: none; }
     .promo-mcp.is-live .promo-mcp__dot { animation: none; opacity: 0.7; }
-    .promo-mcp__logo { transition: none; }
+    .promo-mcp__cube { transition: none; }
   }
 
   @media (max-width: 767px) {
@@ -1832,7 +1888,7 @@
               </div>
 
               <div class="promo-pop__feed">
-                <div class="promo-pop__bubble">Create a rule to Pause ad sets: 3-day spend over $100 and cost per purchase above $40</div>
+                <div class="promo-pop__bubble" id="promoBubble">Create a rule to Pause ad sets: 3-day spend over $100 and cost per purchase above $40</div>
 
                 <div class="promo-pop__resp">
                   <p class="promo-pop__resp-lead">Got it. Here&rsquo;s a rule based on your conditions:</p>
@@ -1841,14 +1897,14 @@
                     <div class="promo-pop__rule-more">Conditions &rsaquo;</div>
                   </div>
                   <div class="promo-pop__btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.35 4.2 2.3 6.15 6.5 6.5-4.2.35-6.15 2.3-6.5 6.5-.35-4.2-2.3-6.15-6.5-6.5C9.7 8.15 11.65 6.2 12 2Z"/></svg>
                     Review and set live rule
                   </div>
                 </div>
               </div>
 
               <div class="promo-pop__input">
-                Ask anything
+                <span class="promo-pop__input-text"><span class="promo-pop__typed" id="promoTyped"></span><span class="promo-pop__ph" id="promoPh">Ask anything</span><span class="promo-pop__caret" id="promoCaret"></span></span>
                 <span class="promo-pop__input-send">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                 </span>
@@ -1881,10 +1937,13 @@
               <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
             </div>
 
-            <div class="promo-mcp__dest" id="promoDest">
-              <img class="promo-mcp__logo is-active" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
-              <img class="promo-mcp__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
-              <img class="promo-mcp__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
+            <div class="promo-mcp__dest">
+              <div class="promo-mcp__cube" id="promoCube">
+                <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
+                <i class="promo-mcp__face promo-mcp__face--mask" style="--icon:url('https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg')"></i>
+                <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
+                <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
+              </div>
             </div>
           </div>
         </div>
@@ -2841,16 +2900,15 @@
 
   function init() {
     var viz  = document.getElementById('promoMcp');
-    var dest = document.getElementById('promoDest');
-    if (!viz || !dest) return;
-    var logos = [].slice.call(dest.querySelectorAll('.promo-mcp__logo'));
+    var cube = document.getElementById('promoCube');
+    if (!viz || !cube) return;
     viz.style.setProperty('--wave', WAVE + 'ms');
 
-    var idx = 0, timer = null;
+    /* rotate the drum one face each time a wave lands on the tile */
+    var turns = 0;
     function swap() {
-      logos[idx].classList.remove('is-active');
-      idx = (idx + 1) % logos.length;
-      logos[idx].classList.add('is-active');
+      turns += 1;
+      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -2888,28 +2946,45 @@
     var shot = document.getElementById('promoShot');
     var pop  = document.getElementById('promoPop');
     if (!shot || !pop) return;
-    var bubble = pop.querySelector('.promo-pop__bubble');
+    var bubble = document.getElementById('promoBubble');
     var resp   = pop.querySelector('.promo-pop__resp');
+    var typed  = document.getElementById('promoTyped');
+    var ph     = document.getElementById('promoPh');
     var full   = bubble.textContent;
 
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { shot.classList.add('is-live'); resp.classList.add('is-in'); return; }
+    if (reduce) {
+      shot.classList.add('is-live');
+      bubble.classList.add('is-in');
+      resp.classList.add('is-in');
+      return;
+    }
 
-    /* reset to the pre-chat state: message empty, reply hidden */
-    bubble.textContent = '';
-    bubble.style.visibility = 'hidden';
+    /* pre-chat state: input empty (placeholder showing), message + reply hidden */
+    typed.textContent = '';
 
-    function typeBubble(i) {
-      if (i > full.length) { setTimeout(function () { resp.classList.add('is-in'); }, RESP_GAP); return; }
-      bubble.textContent = full.slice(0, i);
-      setTimeout(function () { typeBubble(i + 1); }, TYPE_MS);
+    /* PHASE 1 — type the request into the input field */
+    function typeInput(i) {
+      if (i > full.length) { setTimeout(send, 280); return; }
+      if (i === 1) ph.style.display = 'none';   /* drop the placeholder on 1st char */
+      typed.textContent = full.slice(0, i);
+      setTimeout(function () { typeInput(i + 1); }, TYPE_MS);
+    }
+
+    /* PHASE 2 — send: input clears, the bubble floats up, then the reply */
+    function send() {
+      pop.classList.remove('is-typing');
+      typed.textContent = '';
+      ph.style.display = '';
+      bubble.classList.add('is-in');
+      setTimeout(function () { resp.classList.add('is-in'); }, RESP_GAP);
     }
 
     function play() {
       shot.classList.add('is-live');          /* popover scales in */
       setTimeout(function () {
-        bubble.style.visibility = 'visible';
-        typeBubble(0);
+        pop.classList.add('is-typing');       /* caret starts blinking */
+        typeInput(0);
       }, APPEAR);
     }
 
