@@ -1318,18 +1318,28 @@
     padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em);
   }
 
-  /* Claude mark — placeholder until the real asset lands */
+  /* AI-tool mark on each cube face */
   .hero-mcp__icon {
     flex: 0 0 auto;
     width: 0.99em;              /* 51.5px @ 52px */
     height: 0.99em;
     margin-right: 0.173em;      /* 9px @ 52px */
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.55);
     /* the pill's vertical padding is asymmetric (it optically centres the text),
        which pulls the content box up; nudge back down to sit on the pill's centre */
     position: relative;
     top: 0.048em;               /* (0.154em - 0.058em) / 2 */
+  }
+
+  /* white-on-light-blue is near-invisible, so the Perplexity mark is recoloured
+     to the pill's own (black) text colour — the white SVG is used as a mask and
+     filled with currentColor */
+  .hero-mcp__icon--mask {
+    background-color: currentColor;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
+  }
+  .hero-mcp__icon--perplexity {
+    --icon: url("https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca34b29ac24d70e3648_perplexity-white.svg");
   }
 
   /* ── Speech bubble with typing dots — sits between "Talk" and "with" ──
@@ -1502,9 +1512,9 @@
 
       <span class="hero-mcp__swap">
         <span class="hero-mcp__cube">
-          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--salmon"><i class="hero-mcp__icon"></i>Claude</span>
-          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--purple"><i class="hero-mcp__icon"></i>Chat GPT</span>
-          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--light-blue"><i class="hero-mcp__icon"></i>Perplexity</span>
+          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--salmon"><img class="hero-mcp__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca364cbe342449b930b_claude-white.svg" alt="" />Claude</span>
+          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--purple"><img class="hero-mcp__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />Chat GPT</span>
+          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--light-blue"><i class="hero-mcp__icon hero-mcp__icon--mask hero-mcp__icon--perplexity"></i>Perplexity</span>
           <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--pink">your AI tool</span>
         </span>
       </span>
