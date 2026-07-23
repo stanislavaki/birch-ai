@@ -1397,7 +1397,8 @@
        z=0 — no perspective zoom, so it keeps its natural width and a true 8px
        gap to "from"; the incoming face still swings through depth on the turn */
     transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
-    transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+    /* "Weighted" — slow-in / slow-out quint, a heavier premium turn */
+    transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);
   }
 
   .hero-mcp__swap .hero-mcp__pill {
@@ -2280,11 +2281,14 @@
 <script>
 (function () {
   var HOLD  = 2600;   /* how long each variant stays before the next turn */
-  var TRANS = 450;    /* must match the CSS transition duration */
+  var TRANS = 600;    /* must match the CSS transition duration */
 
-  /* Width settles straight onto its target — no overshoot. If the slot flies
-     past and creeps back, the pills to its right read as wobbling. */
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  /* Width rides the same "Weighted" quint as the rotation, so the row re-centres
+     in lockstep with the turn — no overshoot, so the dotted "from" never wobbles.
+     JS mirror of cubic-bezier(0.83, 0, 0.17, 1). */
+  function easeInOutQuint(t) {
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+  }
 
   function init() {
     [].slice.call(document.querySelectorAll('.hero-mcp__swap')).forEach(setup);
@@ -2323,7 +2327,7 @@
       var t0 = performance.now();
       (function frame(now) {
         var p = Math.min((now - t0) / TRANS, 1);
-        setWidth(from + (to - from) * easeOutCubic(p));
+        setWidth(from + (to - from) * easeInOutQuint(p));
         if (p < 1) raf = requestAnimationFrame(frame);
         else { raf = null; setWidth(to); }
       })(t0);
