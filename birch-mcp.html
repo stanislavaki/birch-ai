@@ -1451,6 +1451,231 @@
     .mcp-st__caret { animation: none; }
     .mcp-st__logo { transition: none; }
   }
+
+  /* ═════════════════════════════════════════════════════════
+     PROMO — two product cards ("work with automation")
+     Native-in-Webflow parts (card, title, Explore, caption) are mirrored
+     here as HTML so the whole block can be previewed; only each card's
+     image container becomes an embed on the real site.
+  ═════════════════════════════════════════════════════════ */
+  .promo { padding: var(--space-xl) 0; }
+  .promo__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-main);
+    align-items: stretch;
+  }
+
+  .promo-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-md);
+    border-radius: 1.75rem;      /* ~28px */
+    min-width: 0;
+  }
+  .promo-card--ai  { background: var(--color-primary); color: var(--color-text-inverted); }
+  .promo-card--mcp { background: var(--color-accent-purple); color: var(--color-text); }
+
+  .promo-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-main);
+    margin-bottom: var(--space-md);
+  }
+  .promo-card__title { margin: 0; }
+
+  /* Explore — text only at rest; its container reveals on hover */
+  .promo-explore {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: inherit;
+    background: transparent;
+    border: 0.0625rem solid transparent;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+  }
+  .promo-explore__arrow { transition: transform 0.2s ease; }
+  .promo-explore:hover {
+    background: var(--color-text);
+    color: var(--color-text-inverted);
+    border-color: var(--color-text);
+  }
+  .promo-explore:hover .promo-explore__arrow { transform: translateX(0.15em); }
+
+  /* image container — holds the (eventually embedded) illustration */
+  .promo-card__shot {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+  }
+  .promo-card__desc { margin: 0; }
+
+  /* ── Card 1 illustration: dimmed app chrome + chat popover ── */
+  .promo-shot {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+  }
+  .promo-shot__bg { width: 100%; height: auto; display: block; }
+
+  /* the popover, positioned over the empty right-hand canvas of the mockup */
+  .promo-pop {
+    position: absolute;
+    left: 57%;
+    top: 12.5%;
+    width: 41%;
+    background: #fff;
+    border-radius: 3.2%/5.8%;    /* small radius relative to the popover box */
+    box-shadow: 0 1.2% 4% rgba(0, 0, 0, 0.25);
+    container-type: inline-size;
+    overflow: hidden;
+  }
+  /* everything inside scales off the popover width so it tracks the mockup */
+  .promo-pop__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4.2cqw 5.5cqw 1.5cqw;
+  }
+  .promo-pop__head-title { font-size: 4.8cqw; font-weight: 600; color: #111; }
+  .promo-pop__head-icons { display: flex; gap: 2.6cqw; color: #9a9a9a; }
+  .promo-pop__head-icons svg { width: 4cqw; height: 4cqw; display: block; }
+
+  .promo-pop__feed { padding: 0 5.5cqw 1.5cqw; }
+  .promo-pop__bubble {
+    margin-left: auto;
+    width: fit-content;
+    max-width: 92%;
+    background: #f1f1f3;
+    border-radius: 3.4cqw;
+    padding: 3cqw 3.6cqw;
+    font-size: 4.4cqw;
+    line-height: 1.26;
+    color: #111;
+  }
+  .promo-pop__resp {
+    margin-top: 3.4cqw;
+    font-size: 4.4cqw;
+    line-height: 1.3;
+    color: #111;
+  }
+  .promo-pop__resp-lead { color: #444; }
+  .promo-pop__rule { margin-top: 2.8cqw; }
+  .promo-pop__rule-title { font-weight: 700; }
+  .promo-pop__rule-more { color: #9a9a9a; font-size: 3.9cqw; margin-top: 0.6cqw; }
+
+  .promo-pop__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2cqw;
+    margin-top: 3.4cqw;
+    padding: 2.4cqw 3.6cqw;
+    background: var(--color-primary);
+    border-radius: 3cqw;
+    font-size: 4.1cqw;
+    font-weight: 600;
+    color: #111;
+  }
+  .promo-pop__btn svg { width: 4cqw; height: 4cqw; display: block; }
+
+  .promo-pop__input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 3cqw 5.5cqw 4.4cqw;
+    padding: 3cqw 2.6cqw 3cqw 3.6cqw;
+    border: 0.5cqw solid #e6e6e8;
+    border-radius: 3.4cqw;
+    font-size: 4.1cqw;
+    color: #9a9a9a;
+  }
+  .promo-pop__input-send {
+    display: grid;
+    place-items: center;
+    width: 7cqw;
+    height: 7cqw;
+    border-radius: 50%;
+    background: #ececef;
+    color: #9a9a9a;
+  }
+  .promo-pop__input-send svg { width: 4.4cqw; height: 4.4cqw; display: block; }
+
+  /* ── Card 2 illustration: source → dots → cycling destination ── */
+  .promo-mcp {
+    container-type: inline-size;
+    width: 100%;
+    aspect-ratio: 447 / 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3cqw;
+  }
+  .promo-mcp__src {
+    position: relative;
+    flex: 0 0 auto;
+    width: 31cqw;              /* the 140px tile; chips overflow it */
+    /* chips overflow ~22% left / ~29% right — pad the flex box so the dots
+       centre against the chips, not the bare tile */
+    margin: 0 8cqw;
+  }
+  .promo-mcp__tile { width: 100%; height: auto; display: block; }
+  .promo-mcp__chip {
+    position: absolute;
+    width: 43%;                /* 60px chip on the 140px tile */
+    height: auto;
+  }
+  .promo-mcp__chip--m { left: -21.7%; top: 35.7%; }
+  .promo-mcp__chip--c { left: 50%;    top: 71.4%; }
+  .promo-mcp__chip--p { left: 86%;    top: 30%; }
+
+  .promo-mcp__dots {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2.4cqw;
+  }
+  .promo-mcp__dot {
+    width: 2.6cqw;
+    height: 2.6cqw;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.28;
+  }
+
+  .promo-mcp__dest {
+    position: relative;
+    flex: 0 0 auto;
+    width: 31cqw;
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 24cqw;
+    box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.2);
+  }
+  .promo-mcp__logo {
+    position: absolute;
+    inset: 22%;
+    width: 56%;
+    height: 56%;
+    object-fit: contain;
+    opacity: 0;
+  }
+  .promo-mcp__logo.is-active { opacity: 1; }
+
+  @media (max-width: 767px) {
+    .promo__grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -1539,6 +1764,97 @@
           <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Promo — two product cards (work with automation) ── -->
+<section class="promo">
+  <div class="container">
+    <div class="promo__grid">
+
+      <!-- Card 1 — Birch AI (chat popover) -->
+      <div class="promo-card promo-card--ai">
+        <div class="promo-card__head">
+          <h3 class="promo-card__title t-h3">Birch AI</h3>
+          <a class="promo-explore" href="#">Explore <span class="promo-explore__arrow">&rarr;</span></a>
+        </div>
+
+        <div class="promo-card__shot">
+          <div class="promo-shot" id="promoShot">
+            <img class="promo-shot__bg" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a627163e058d35a3e3b57ca_Birch%20AI-bg.jpg" alt="" />
+
+            <div class="promo-pop" id="promoPop">
+              <div class="promo-pop__head">
+                <span class="promo-pop__head-title">New chat</span>
+                <span class="promo-pop__head-icons">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </span>
+              </div>
+
+              <div class="promo-pop__feed">
+                <div class="promo-pop__bubble">Create a rule to Pause ad sets: 3-day spend over $100 and cost per purchase above $40</div>
+
+                <div class="promo-pop__resp">
+                  <p class="promo-pop__resp-lead">Got it. Here&rsquo;s a rule based on your conditions:</p>
+                  <div class="promo-pop__rule">
+                    <div class="promo-pop__rule-title">Pause ad sets &mdash; high spend, low efficiency</div>
+                    <div class="promo-pop__rule-more">Conditions &rsaquo;</div>
+                  </div>
+                  <div class="promo-pop__btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>
+                    Review and set live rule
+                  </div>
+                </div>
+              </div>
+
+              <div class="promo-pop__input">
+                Ask anything
+                <span class="promo-pop__input-send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="promo-card__desc t-para-lg">Assistant inside the Birch product. It reads your rules and account data and helps you work faster without leaving Birch.</p>
+      </div>
+
+      <!-- Card 2 — Birch MCP (dots + cycling logo) -->
+      <div class="promo-card promo-card--mcp">
+        <div class="promo-card__head">
+          <h3 class="promo-card__title t-h3">Birch MCP</h3>
+          <a class="promo-explore" href="#">Explore <span class="promo-explore__arrow">&rarr;</span></a>
+        </div>
+
+        <div class="promo-card__shot">
+          <div class="promo-mcp" id="promoMcp">
+            <div class="promo-mcp__src">
+              <img class="promo-mcp__tile" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271641c43b8c805720082_bird-yellow-svg.svg" alt="" />
+              <img class="promo-mcp__chip promo-mcp__chip--m" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271784c67dba92c3cecb8_bubble-m.svg" alt="" />
+              <img class="promo-mcp__chip promo-mcp__chip--c" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271784c67dba92c3cecbc_bibble-c.svg" alt="" />
+              <img class="promo-mcp__chip promo-mcp__chip--p" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271787c7b2a6092d38628_bubble-p.svg" alt="" />
+            </div>
+
+            <div class="promo-mcp__dots">
+              <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
+              <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
+            </div>
+
+            <div class="promo-mcp__dest" id="promoDest">
+              <img class="promo-mcp__logo is-active" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
+              <img class="promo-mcp__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
+              <img class="promo-mcp__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
+            </div>
+          </div>
+        </div>
+
+        <p class="promo-card__desc t-para-lg">Brings your real data to Claude and other AI clients. Use it when you&rsquo;re already working in Claude &mdash; alongside your other connected tools. You don&rsquo;t have to switch to Birch to understand what your automation did.</p>
+      </div>
+
     </div>
   </div>
 </section>
