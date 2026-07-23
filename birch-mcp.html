@@ -1510,13 +1510,16 @@
   }
   .promo-explore:hover .promo-explore__arrow { transform: translateX(0.15em); }
 
-  /* image container — holds the (eventually embedded) illustration */
+  /* image container — holds the (eventually embedded) illustration.
+     A query container so an illustration's OWN cqw props (e.g. .promo-mcp gap)
+     resolve against the container width, not the viewport. */
   .promo-card__shot {
     flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-md);
+    container-type: inline-size;
   }
   .promo-card__desc { margin: 0; }
 
@@ -1527,6 +1530,8 @@
     border-radius: 0.75rem;      /* match the mockup window, not larger */
     overflow: hidden;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+    /* container so the popover's OWN cqw props resolve against the shot width */
+    container-type: inline-size;
   }
   .promo-shot__bg { width: 100%; height: auto; display: block; }
 
@@ -1538,8 +1543,10 @@
     width: 41%;
     height: 84%;                 /* static — the window doesn't grow while typing */
     background: #fff;
-    border-radius: 4cqw;
-    box-shadow: 0 1.2cqw 4cqw rgba(0, 0, 0, 0.22);
+    /* radius/shadow are cqw of the SHOT (the ancestor container) — 10px & shadow
+       at the design size, and they scale with the mockup */
+    border-radius: 1.8cqw;
+    box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.22);
     container-type: inline-size;
     overflow: hidden;
     display: flex;
@@ -1624,7 +1631,7 @@
     margin: 2.5cqw 5.5cqw 5cqw;
     padding: 3cqw 2.6cqw 3cqw 3.8cqw;
     border: 0.5cqw solid #e6e6e8;
-    border-radius: 3.6cqw;
+    border-radius: 7.2cqw;       /* 16px @ design — matches the Figma input */
     font-size: 4.1cqw;
   }
   .promo-pop__input-text {
