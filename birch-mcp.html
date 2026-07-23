@@ -2364,6 +2364,14 @@
       });
     }, { threshold: 0.5 });
     io.observe(swap);
+
+    /* hover flicks the cube to the next face, then re-arms the idle timer so a
+       manual turn never collides with an auto-turn a moment later */
+    swap.addEventListener('mouseenter', function () {
+      if (!started) { started = true; io.disconnect(); }
+      if (timer) clearTimeout(timer);
+      step();   /* advances one face AND re-arms the timer */
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
