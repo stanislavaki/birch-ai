@@ -1332,6 +1332,46 @@
     top: 0.048em;               /* (0.154em - 0.058em) / 2 */
   }
 
+  /* ── Speech bubble with typing dots — sits between "Talk" and "with" ──
+     The dots pulse in sequence to read as "someone is typing". */
+  .hero-mcp__bubble {
+    flex: 0 0 auto;
+    align-self: center;
+    position: relative;
+    width: 1.846em;             /* 96px @ 52px */
+  }
+  .hero-mcp__bubble-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .hero-mcp__dots {
+    position: absolute;
+    left: 50%;
+    top: 42%;                   /* centre of the round body, above the tail */
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 0.077em;               /* 4px @ 52px */
+  }
+  .hero-mcp__dot {
+    width: 0.269em;             /* 14px @ 52px */
+    height: 0.269em;
+    border-radius: 50%;
+    background: var(--color-text-grey);
+    /* drum-roll cadence: three quick springy taps, then a rest — echoes the
+       cube's snap-and-hold rhythm rather than a smooth continuous wave */
+    animation: heroTyping 1.3s infinite cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .hero-mcp__dot:nth-child(2) { animation-delay: 0.13s; }
+  .hero-mcp__dot:nth-child(3) { animation-delay: 0.26s; }
+
+  @keyframes heroTyping {
+    0%   { opacity: 0.3; transform: translateY(0.12em); }
+    16%  { opacity: 1;   transform: translateY(-0.15em); }
+    38%  { opacity: 0.3; transform: translateY(0.12em); }
+    100% { opacity: 0.3; transform: translateY(0.12em); }  /* rest between rolls */
+  }
+
   /* ── Swap: the last pill cycles through the AI tools ──
      Variants are absolutely positioned and nothing clips them, so the overshoot
      is thrown clear of the row instead of being eaten by a window. */
@@ -1344,6 +1384,8 @@
     /* exactly one pill tall: line-height 1.1 + padding 0.058 + 0.154 */
     height: 1.312em;
     perspective: 16em;
+    /* cube half-depth — shared by the cube's push-back and the faces */
+    --r: 0.656em;
     /* width is driven per-frame from JS (rounded), never by a CSS transition */
   }
 
@@ -1351,6 +1393,10 @@
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
+    /* push the whole cube back by its half-depth so the FRONT face rests at
+       z=0 — no perspective zoom, so it keeps its natural width and a true 8px
+       gap to "from"; the incoming face still swings through depth on the turn */
+    transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
     transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
   }
 
@@ -1360,8 +1406,6 @@
     top: 0;
     width: 100%;
     backface-visibility: hidden;
-    /* half the pill height — the cube's radius */
-    --r: 0.656em;
   }
   .hero-mcp__swap .hero-mcp__pill:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
   .hero-mcp__swap .hero-mcp__pill:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
@@ -1384,6 +1428,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .hero-mcp__cube { transition: none; }
+    .hero-mcp__dot  { animation: none; opacity: 0.7; }
   }
 
   @media (max-width: 767px) {
@@ -1438,16 +1483,18 @@
 <section class="hero-mcp">
   <div class="container hero-mcp__stage">
     <div class="hero-mcp__pills">
-      <span class="hero-mcp__pill hero-mcp__pill--orange hero-mcp__pill--sq">Evaluate</span>
+      <span class="hero-mcp__pill hero-mcp__pill--orange hero-mcp__pill--sq">Talk</span>
+      <span class="hero-mcp__bubble">
+        <img class="hero-mcp__bubble-img" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a624f92ba30806cc73a822b_bubble%20icon_4x.webp" alt="" />
+        <span class="hero-mcp__dots"><i class="hero-mcp__dot"></i><i class="hero-mcp__dot"></i><i class="hero-mcp__dot"></i></span>
+      </span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
-      <span class="hero-mcp__pill hero-mcp__pill--light-blue hero-mcp__pill--sq">and</span>
-      <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
-      <span class="hero-mcp__pill hero-mcp__pill--green hero-mcp__pill--sq">improve</span>
+      <span class="hero-mcp__pill hero-mcp__pill--light-blue hero-mcp__pill--sq">with</span>
+      <span class="hero-mcp__pill hero-mcp__pill--green hero-mcp__pill--sq">your</span>
 
       <i class="hero-mcp__brk"></i>
 
-      <span class="hero-mcp__pill hero-mcp__pill--indigo hero-mcp__pill--pill">ad</span>
-      <span class="hero-mcp__pill hero-mcp__pill--indigo hero-mcp__pill--pill">automation</span>
+      <span class="hero-mcp__pill hero-mcp__pill--indigo hero-mcp__pill--pill">Bïrch data</span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
       <span class="hero-mcp__pill hero-mcp__pill--dotted hero-mcp__pill--pill">from</span>
       <i class="hero-mcp__brk hero-mcp__brk--mb"></i>
@@ -2287,7 +2334,8 @@
     function swapTo(next) {
       animateWidth(widths[index], widths[next]);
       turns += 1;
-      cube.style.transform = 'rotateX(-' + (turns * 90) + 'deg)';
+      /* only drive the rotation; the cube's push-back translateZ stays in CSS */
+      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
       index = next;
     }
 
