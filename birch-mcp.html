@@ -1165,8 +1165,8 @@
     transform: translateY(1.25rem);
     will-change: opacity, transform;
     transition:
-      opacity   0.55s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity   0.9s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
     font-family: var(--font);
     font-size: var(--text-h2-size);
     font-weight: 600;
@@ -2396,7 +2396,7 @@
 (function () {
   var TEXT        = 'ask your AI assistant';
   var TYPE_MS     = 68;    /* per character */
-  var START_DELAY = 620;   /* lets the pill finish rising (0.55s) before typing starts */
+  var START_DELAY = 1150;  /* pill rise (0.9s) + a short beat before typing starts */
   var STAGGER     = 0.08;  /* 80ms between logos */
 
   function init() {
