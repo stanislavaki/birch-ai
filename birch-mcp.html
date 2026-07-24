@@ -1414,13 +1414,16 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    /* each face keeps its own width — the plate is never stretched to the slot,
+       so it doesn't redraw while the row re-centres. Faces share a left edge. */
+    width: max-content;
     backface-visibility: hidden;
+    transform: rotateX(var(--fx)) translateZ(var(--r));
   }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(3) { transform: rotateX(180deg) translateZ(var(--r)); }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(4) { transform: rotateX(270deg) translateZ(var(--r)); }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(1) { --fx: 0deg;   }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(2) { --fx: 90deg;  }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(3) { --fx: 180deg; }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(4) { --fx: 270deg; }
 
   /* measuring: flatten the cube so every face can hug its own text */
   .hero-mcp__swap.is-measuring { width: auto !important; }
@@ -1445,6 +1448,11 @@
     .hero-mcp__pills { --ps: var(--text-pill-size-mobile); }
     /* one pill per line, except "ad automation" which stay together */
     .hero-mcp__brk--mb { display: block; }
+    /* faces centre in the slot instead of hugging its left edge */
+    .hero-mcp__swap .hero-mcp__pill {
+      left: 50%;
+      transform: translateX(-50%) rotateX(var(--fx)) translateZ(var(--r));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
