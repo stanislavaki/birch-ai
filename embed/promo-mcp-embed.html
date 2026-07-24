@@ -1,0 +1,186 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Birch MCP card — image container
+     Drop into the HTML Embed inside the card's image container.
+     Background/padding of the card come from Webflow; this block adds none.
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+  /* wrapper is the query container, so the row's OWN gap (cqw) resolves
+     against this width instead of the viewport */
+  .promo-mcp-e {
+    width: 100%;
+    container-type: inline-size;
+  }
+  /* the row is its own container for everything inside it */
+  .promo-mcp-e__row {
+    container-type: inline-size;
+    width: 100%;
+    aspect-ratio: 447 / 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3cqw;
+  }
+
+  /* source: Birch tile with the M / C / P chips around it */
+  .promo-mcp-e__src {
+    position: relative;
+    flex: 0 0 auto;
+    width: 25cqw;
+    margin: 0 6cqw;            /* room for the chips that overflow the tile */
+  }
+  .promo-mcp-e__tile { width: 100%; height: auto; display: block; }
+  .promo-mcp-e__chip {
+    position: absolute;
+    width: 43%;                /* 60px chip on the 140px tile */
+    height: auto;
+  }
+  .promo-mcp-e__chip--m { left: -21.7%; top: 35.7%; }
+  .promo-mcp-e__chip--c { left: 50%;    top: 71.4%; }
+  .promo-mcp-e__chip--p { left: 86%;    top: 30%; }
+
+  /* dots in transit */
+  .promo-mcp-e__dots {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1.5cqw;
+  }
+  .promo-mcp-e__dot {
+    width: 2.1cqw;
+    height: 2.1cqw;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.28;
+  }
+
+  /* destination: rounded-square app tile, logo on a rotating drum */
+  .promo-mcp-e__dest {
+    position: relative;
+    flex: 0 0 auto;
+    width: 25cqw;
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 26%;
+    box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.2);
+    perspective: 45cqw;
+  }
+  .promo-mcp-e__cube {
+    position: absolute;
+    inset: 20%;
+    transform-style: preserve-3d;
+    --r: 7.5cqw;               /* half the face height — the drum radius */
+    transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
+    transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);
+  }
+  .promo-mcp-e__face {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    backface-visibility: hidden;
+  }
+  .promo-mcp-e__face:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
+  .promo-mcp-e__face:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
+  .promo-mcp-e__face:nth-child(3) { transform: rotateX(180deg) translateZ(var(--r)); }
+  .promo-mcp-e__face:nth-child(4) { transform: rotateX(270deg) translateZ(var(--r)); }
+  /* the ChatGPT mark ships white — recolour it dark so it reads on the tile */
+  .promo-mcp-e__face--mask {
+    background: #111;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
+  }
+
+  /* a brightness wave runs left to right, like data in transit */
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot {
+    animation: promoMcpDot var(--wave, 1600ms) linear infinite;
+  }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(1) { animation-delay: calc(var(--wave) * 0.00); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(2) { animation-delay: calc(var(--wave) * 0.05); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(3) { animation-delay: calc(var(--wave) * 0.10); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(4) { animation-delay: calc(var(--wave) * 0.15); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(5) { animation-delay: calc(var(--wave) * 0.20); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(6) { animation-delay: calc(var(--wave) * 0.25); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(7) { animation-delay: calc(var(--wave) * 0.30); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(8) { animation-delay: calc(var(--wave) * 0.35); }
+  .promo-mcp-e__row.is-live .promo-mcp-e__dot:nth-child(9) { animation-delay: calc(var(--wave) * 0.40); }
+  @keyframes promoMcpDot {
+    0%   { opacity: 0.28; }
+    12%  { opacity: 1; }
+    30%  { opacity: 0.28; }
+    100% { opacity: 0.28; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .promo-mcp-e__row.is-live .promo-mcp-e__dot { animation: none; opacity: 0.7; }
+    .promo-mcp-e__cube { transition: none; }
+  }
+</style>
+
+<div class="promo-mcp-e">
+  <div class="promo-mcp-e__row" id="promoMcpViz">
+
+    <div class="promo-mcp-e__src">
+      <img class="promo-mcp-e__tile" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271641c43b8c805720082_bird-yellow-svg.svg" alt="" />
+      <img class="promo-mcp-e__chip promo-mcp-e__chip--m" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271784c67dba92c3cecb8_bubble-m.svg" alt="" />
+      <img class="promo-mcp-e__chip promo-mcp-e__chip--c" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271784c67dba92c3cecbc_bibble-c.svg" alt="" />
+      <img class="promo-mcp-e__chip promo-mcp-e__chip--p" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a6271787c7b2a6092d38628_bubble-p.svg" alt="" />
+    </div>
+
+    <div class="promo-mcp-e__dots">
+      <i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i>
+      <i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i>
+      <i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i><i class="promo-mcp-e__dot"></i>
+    </div>
+
+    <div class="promo-mcp-e__dest">
+      <div class="promo-mcp-e__cube" id="promoMcpCube">
+        <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
+        <i class="promo-mcp-e__face promo-mcp-e__face--mask" style="--icon:url('https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg')"></i>
+        <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
+        <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var WAVE = 1600;   /* one dot-wave; the destination turns as it lands */
+
+  function init() {
+    var viz  = document.getElementById('promoMcpViz');
+    var cube = document.getElementById('promoMcpCube');
+    if (!viz || !cube) return;
+    viz.style.setProperty('--wave', WAVE + 'ms');
+
+    var turns = 0;
+    function swap() {
+      turns += 1;
+      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      viz.classList.add('is-live');
+      return;
+    }
+
+    var started = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !started) {
+          started = true;
+          io.disconnect();
+          viz.classList.add('is-live');
+          setInterval(swap, WAVE);
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(viz);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
