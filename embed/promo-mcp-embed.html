@@ -4,6 +4,11 @@
      Background/padding of the card come from Webflow; this block adds none.
      ═══════════════════════════════════════════════════════════════ -->
 <style>
+  /* Webflow wraps every embed in .w-embed. In a flex slot that wrapper is a
+     flex item sized by its content, so a % width inside would collapse to 0 —
+     pin it to full width. */
+  .w-embed:has(> .promo-mcp-e) { width: 100%; }
+
   /* wrapper is the query container, so the row's OWN gap (cqw) resolves
      against this width instead of the viewport */
   .promo-mcp-e {

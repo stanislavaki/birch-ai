@@ -4,6 +4,11 @@
      Background/padding of the card come from Webflow; this block adds none.
      ═══════════════════════════════════════════════════════════════ -->
 <style>
+  /* Webflow wraps every embed in .w-embed. In a flex slot that wrapper is a
+     flex item sized by its content, so a % width inside would collapse to 0 —
+     pin it to full width. */
+  .w-embed:has(> .promo-ai-e) { width: 100%; }
+
   /* the mockup window. A query container so the popover's OWN cqw props
      (radius, shadow) resolve against this width and not the viewport. */
   .promo-ai-e {
