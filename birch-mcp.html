@@ -1539,9 +1539,10 @@
   .promo-pop {
     position: absolute;
     left: 57%;
-    top: 11%;
+    /* clear of the black/grey seam in the mockup's top bar */
+    top: 15%;
     width: 41%;
-    height: 84%;                 /* static — the window doesn't grow while typing */
+    height: 81%;                 /* static — the window doesn't grow while typing */
     background: #fff;
     /* radius/shadow are cqw of the SHOT (the ancestor container) — 10px & shadow
        at the design size, and they scale with the mockup */
@@ -1699,11 +1700,11 @@
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 2.4cqw;
+    gap: 1.5cqw;               /* tighter — the dots read as a continuous stream */
   }
   .promo-mcp__dot {
-    width: 2.6cqw;
-    height: 2.6cqw;
+    width: 2.1cqw;
+    height: 2.1cqw;
     border-radius: 50%;
     background: #fff;
     opacity: 0.28;
@@ -1753,11 +1754,14 @@
     animation: promoDot var(--wave, 1600ms) linear infinite;
   }
   .promo-mcp.is-live .promo-mcp__dot:nth-child(1) { animation-delay: calc(var(--wave) * 0.00); }
-  .promo-mcp.is-live .promo-mcp__dot:nth-child(2) { animation-delay: calc(var(--wave) * 0.08); }
-  .promo-mcp.is-live .promo-mcp__dot:nth-child(3) { animation-delay: calc(var(--wave) * 0.16); }
-  .promo-mcp.is-live .promo-mcp__dot:nth-child(4) { animation-delay: calc(var(--wave) * 0.24); }
-  .promo-mcp.is-live .promo-mcp__dot:nth-child(5) { animation-delay: calc(var(--wave) * 0.32); }
-  .promo-mcp.is-live .promo-mcp__dot:nth-child(6) { animation-delay: calc(var(--wave) * 0.40); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(2) { animation-delay: calc(var(--wave) * 0.05); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(3) { animation-delay: calc(var(--wave) * 0.10); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(4) { animation-delay: calc(var(--wave) * 0.15); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(5) { animation-delay: calc(var(--wave) * 0.20); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(6) { animation-delay: calc(var(--wave) * 0.25); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(7) { animation-delay: calc(var(--wave) * 0.30); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(8) { animation-delay: calc(var(--wave) * 0.35); }
+  .promo-mcp.is-live .promo-mcp__dot:nth-child(9) { animation-delay: calc(var(--wave) * 0.40); }
   @keyframes promoDot {
     0%   { opacity: 0.28; }
     12%  { opacity: 1; }
@@ -1940,6 +1944,7 @@
             </div>
 
             <div class="promo-mcp__dots">
+              <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
               <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
               <i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i><i class="promo-mcp__dot"></i>
             </div>
@@ -2945,7 +2950,8 @@
 <!-- ── Promo card 1: popover appears, then the chat plays out ── -->
 <script>
 (function () {
-  var APPEAR   = 650;   /* let the popover settle before the message starts */
+  var LEAD_IN  = 700;   /* hold before anything starts, so the card is read first */
+  var APPEAR   = 750;   /* let the popover settle before the message starts */
   var TYPE_MS  = 22;    /* per character in the user bubble */
   var RESP_GAP = 420;   /* beat between the message landing and the reply */
 
@@ -2995,16 +3001,18 @@
       }, APPEAR);
     }
 
+    /* wait until the card is properly in view, then hold a beat — the viewer
+       should catch the popover appearing, not arrive after it already played */
     var started = false;
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting && !started) {
           started = true;
           io.disconnect();
-          play();
+          setTimeout(play, LEAD_IN);
         }
       });
-    }, { threshold: 0.4 });
+    }, { threshold: 0.6 });
     io.observe(shot);
   }
 
