@@ -2592,8 +2592,8 @@
 <script>
 (function () {
   var TEXT        = 'ask your AI assistant';
-  var TYPE_MS     = 68;    /* per character */
-  var START_DELAY = 1350;  /* pill rise (1.1s) + a short beat before typing starts */
+  var TYPE_MS     = 45;    /* per character */
+  var START_DELAY = 800;   /* pill rise (1.1s) overlaps — typing starts before it settles */
   var STAGGER     = 0.08;  /* 80ms between logos */
 
   function init() {
@@ -2647,30 +2647,41 @@
       }
     }
 
-    /* fire once, when the block comes into view */
+    /* Fire once, when the pill has cleared the fold.
+       Measured directly rather than with IntersectionObserver: the observer asked
+       for threshold 1 (pill 100% visible), and on a narrow screen the pill turns
+       into a column — field above, logos below — so it grows tall enough that the
+       condition may never be met and the typing never started. Here a pill taller
+       than the fold line falls back to "its top has come up far enough". */
+    var pill  = section.querySelector('.mcp-st__pill');
     var fired = false;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting && !fired) {
-          fired = true;
-          io.disconnect();
-          /* Let the start state (opacity 0 + offset) paint first. On a reload with
-             the block already in view the observer fires immediately, and adding
-             the class in that same frame would skip the transition entirely. */
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              section.classList.add('is-in');                      /* pill rises in */
-              setTimeout(function () { type(0); }, START_DELAY);   /* then it types */
-            });
-          });
-        }
+
+    function foldLine() {
+      return (window.innerHeight || document.documentElement.clientHeight) * 0.92;
+    }
+    function cleared() {
+      var r = pill.getBoundingClientRect(), line = foldLine();
+      if (r.height > line) return r.top < line * 0.6;   /* taller than the window */
+      return r.top >= 0 && r.bottom <= line;
+    }
+    function maybeStart() {
+      if (fired || !cleared()) return;
+      fired = true;
+      window.removeEventListener('scroll', maybeStart);
+      window.removeEventListener('resize', maybeStart);
+      /* Let the start state (opacity 0 + offset) paint first: when the block is
+         already in view on load, adding the class in the same frame would skip
+         the transition entirely. */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          section.classList.add('is-in');                      /* pill rises in */
+          setTimeout(function () { type(0); }, START_DELAY);   /* then it types */
+        });
       });
-      /* Watch the pill itself, not the section — the section clears its threshold
-         while the pill is still below the fold, so the rise played off-screen.
-         The negative bottom margin holds the start until the pill has travelled
-         a little clear of the fold, so the rise is actually seen. */
-    }, { threshold: 1, rootMargin: '0px 0px -8% 0px' });
-    io.observe(section.querySelector('.mcp-st__pill'));
+    }
+    window.addEventListener('scroll', maybeStart, { passive: true });
+    window.addEventListener('resize', maybeStart);
+    maybeStart();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
