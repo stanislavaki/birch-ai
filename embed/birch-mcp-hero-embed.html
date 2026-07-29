@@ -1,0 +1,303 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     Birch MCP hero — headline message
+     Drop into an HTML Embed inside the hero container.
+     The pills message: "Talk [bubble] with your / Birch data from [cube]".
+     The last pill sits on a rotating 3D cube cycling the AI tools.
+     Background / horizontal padding come from Webflow; this block adds none.
+     Has a <script>, so it renders only in Preview / on the published site.
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+  /* Webflow wraps every embed in .w-embed. In a flex slot that wrapper is a
+     flex item sized by its content, so a % width inside would collapse to 0 —
+     pin it to full width. */
+  .w-embed:has(> .hero-mcp-e) { width: 100%; }
+
+  .hero-mcp-e {
+    /* shared pill token if the site exposes it, else the literal fluid scale */
+    --ps: var(--text-pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* 52px @ 1280 */
+    --font-e: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+    width: 100%;
+    /* Webflow sections often set text-align:center, which inherits into the embed.
+       The dev page inherits left; the pills are centred by flex, not by text-align. */
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.154em;                  /* 8px @ 52px — same for column and row gap */
+    font-size: var(--ps);
+  }
+
+  /* zero-height flex item forces a line break at an exact spot, so desktop and
+     mobile can group the same pills differently */
+  .hero-mcp-e__brk { flex-basis: 100%; height: 0; }
+  .hero-mcp-e__brk--mb { display: none; }
+
+  .hero-mcp-e__pill {
+    display: flex;
+    align-items: center;
+    padding: 0.058em 0.462em 0.154em;  /* 3px 24px 8px @ 52px */
+    font-family: var(--font-e);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: #000;                       /* Text/Inverted */
+  }
+  .hero-mcp-e__pill--sq   { border-radius: 0.308em; }   /* 16px @ 52px — em so it scales */
+  .hero-mcp-e__pill--pill { border-radius: 9999px; }
+
+  .hero-mcp-e__pill--orange     { background: #FF7700; }
+  .hero-mcp-e__pill--light-blue { background: #59DBFF; }
+  .hero-mcp-e__pill--green      { background: #04DE00; }
+  .hero-mcp-e__pill--indigo     { background: #4450F2; color: #fff; }
+  .hero-mcp-e__pill--salmon     { background: #F47850; }  /* one-off from the mockup */
+  .hero-mcp-e__pill--purple     { background: #5B45CD; color: #fff; }
+  .hero-mcp-e__pill--pink       { background: #FF21A6; color: #fff; }
+
+  .hero-mcp-e__pill--dotted {
+    background: transparent;
+    color: #fff;
+    border: 0.108em dotted #fff;       /* 5.6px @ 52px */
+    /* border eats into the padding so the box keeps the same size */
+    padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em);
+  }
+
+  /* AI-tool mark on each cube face */
+  .hero-mcp-e__icon {
+    flex: 0 0 auto;
+    width: 0.85em;              /* ~44px @ 52px — 14% smaller than the label cap */
+    height: 0.85em;
+    margin-right: 0.173em;      /* 9px @ 52px */
+    /* the pill's vertical padding is asymmetric (optically centres the text),
+       which pulls the content box up; nudge back down to the pill's centre */
+    position: relative;
+    top: 0.048em;               /* (0.154em - 0.058em) / 2 */
+  }
+
+  /* ── Speech bubble with typing dots — sits between "Talk" and "with" ── */
+  .hero-mcp-e__bubble {
+    flex: 0 0 auto;
+    align-self: center;
+    position: relative;
+    width: 1.846em;             /* 96px @ 52px */
+  }
+  .hero-mcp-e__bubble-img { width: 100%; height: auto; display: block; }
+  .hero-mcp-e__dots {
+    position: absolute;
+    left: 50%;
+    top: 42%;                   /* centre of the round body, above the tail */
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 0.077em;               /* 4px @ 52px */
+  }
+  .hero-mcp-e__dot {
+    width: 0.269em;             /* 14px @ 52px */
+    height: 0.269em;
+    border-radius: 50%;
+    background: #909090;        /* Text/Grey */
+    /* drum-roll cadence: three quick springy taps, then a rest */
+    animation: heroMcpTyping 1.3s infinite cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .hero-mcp-e__dot:nth-child(2) { animation-delay: 0.13s; }
+  .hero-mcp-e__dot:nth-child(3) { animation-delay: 0.26s; }
+
+  @keyframes heroMcpTyping {
+    0%   { opacity: 0.3; transform: translateY(0.12em); }
+    16%  { opacity: 1;   transform: translateY(-0.15em); }
+    38%  { opacity: 0.3; transform: translateY(0.12em); }
+    100% { opacity: 0.3; transform: translateY(0.12em); }  /* rest between rolls */
+  }
+
+  /* ── The last pill sits on the faces of a rotating prism ──
+     Faces are fixed in place; the prism turns, so a variant is never "moved",
+     it is simply brought to the front. Nothing clips it, so the turn's
+     depth swing is thrown clear of the row.
+     Three variants → a triangular prism: faces every 120deg, and the drum
+     radius is the apothem h / (2 * tan(180/N)), not half the height. */
+  .hero-mcp-e__swap {
+    position: relative;
+    flex: 0 0 auto;
+    height: 1.312em;            /* exactly one pill tall */
+    perspective: 16em;
+    --r: 0.3787em;              /* 1.312em / (2 * tan 60deg) */
+    /* width is driven per-frame from JS (rounded), never by a CSS transition */
+  }
+  .hero-mcp-e__cube {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    /* push the prism back by its radius so the FRONT face rests at z=0 —
+       no perspective zoom, natural width, true 8px gap to "from" */
+    transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
+    transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);  /* weighted quint */
+  }
+  .hero-mcp-e__swap .hero-mcp-e__pill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: max-content;         /* each face keeps its own width */
+    backface-visibility: hidden;
+    transform: rotateX(var(--fx)) translateZ(var(--r));
+  }
+  .hero-mcp-e__swap .hero-mcp-e__pill:nth-child(1) { --fx: 0deg;   }
+  .hero-mcp-e__swap .hero-mcp-e__pill:nth-child(2) { --fx: 120deg; }
+  .hero-mcp-e__swap .hero-mcp-e__pill:nth-child(3) { --fx: 240deg; }
+
+  /* measuring: flatten the prism so every face can hug its own text */
+  .hero-mcp-e__swap.is-measuring { width: auto !important; }
+  .hero-mcp-e__swap.is-measuring .hero-mcp-e__cube {
+    position: static;
+    transform: none;
+    transform-style: flat;
+  }
+  .hero-mcp-e__swap.is-measuring .hero-mcp-e__pill {
+    position: static;
+    display: inline-flex;
+    width: auto;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-mcp-e__cube { transition: none; }
+    .hero-mcp-e__dot  { animation: none; opacity: 0.7; }
+  }
+
+  @media (max-width: 767px) {
+    .hero-mcp-e { --ps: var(--text-pill-size-mobile, clamp(1.875rem, 9.375vw, 4.4941rem)); }
+    .hero-mcp-e__brk--mb { display: block; }
+    /* faces centre in the slot instead of hugging its left edge */
+    .hero-mcp-e__swap .hero-mcp-e__pill {
+      left: 50%;
+      transform: translateX(-50%) rotateX(var(--fx)) translateZ(var(--r));
+    }
+  }
+</style>
+
+<div class="hero-mcp-e">
+  <span class="hero-mcp-e__pill hero-mcp-e__pill--orange hero-mcp-e__pill--sq">Talk</span>
+  <span class="hero-mcp-e__bubble">
+    <img class="hero-mcp-e__bubble-img" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a624f92ba30806cc73a822b_bubble%20icon_4x.webp" alt="" />
+    <span class="hero-mcp-e__dots"><i class="hero-mcp-e__dot"></i><i class="hero-mcp-e__dot"></i><i class="hero-mcp-e__dot"></i></span>
+  </span>
+  <i class="hero-mcp-e__brk hero-mcp-e__brk--mb"></i>
+  <span class="hero-mcp-e__pill hero-mcp-e__pill--light-blue hero-mcp-e__pill--sq">with</span>
+  <span class="hero-mcp-e__pill hero-mcp-e__pill--green hero-mcp-e__pill--sq">your</span>
+
+  <i class="hero-mcp-e__brk"></i>
+
+  <span class="hero-mcp-e__pill hero-mcp-e__pill--indigo hero-mcp-e__pill--pill">B&iuml;rch data</span>
+  <i class="hero-mcp-e__brk hero-mcp-e__brk--mb"></i>
+  <span class="hero-mcp-e__pill hero-mcp-e__pill--dotted hero-mcp-e__pill--pill">from</span>
+  <i class="hero-mcp-e__brk hero-mcp-e__brk--mb"></i>
+
+  <span class="hero-mcp-e__swap">
+    <span class="hero-mcp-e__cube">
+      <span class="hero-mcp-e__pill hero-mcp-e__pill--sq hero-mcp-e__pill--salmon"><img class="hero-mcp-e__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca364cbe342449b930b_claude-white.svg" alt="" />Claude</span>
+      <span class="hero-mcp-e__pill hero-mcp-e__pill--sq hero-mcp-e__pill--purple"><img class="hero-mcp-e__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />Chat GPT</span>
+      <span class="hero-mcp-e__pill hero-mcp-e__pill--sq hero-mcp-e__pill--pink">your AI tool</span>
+    </span>
+  </span>
+</div>
+
+<script>
+(function () {
+  var HOLD  = 2600;   /* how long each variant stays before the next turn */
+  var TRANS = 600;    /* must match the CSS transition duration */
+
+  /* Width rides the same weighted quint as the rotation, so the row re-centres
+     in lockstep with the turn — no overshoot, so the dotted "from" never wobbles.
+     JS mirror of cubic-bezier(0.83, 0, 0.17, 1). */
+  function easeInOutQuint(t) {
+    return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+  }
+
+  function init() {
+    [].slice.call(document.querySelectorAll('.hero-mcp-e__swap')).forEach(setup);
+  }
+
+  function setup(swap) {
+    var cube  = swap.querySelector('.hero-mcp-e__cube');
+    var items = [].slice.call(cube.children);
+    var widths = [];
+    var index  = 0;
+    var raf    = null;
+
+    function remPx() {
+      return parseFloat(getComputedStyle(document.documentElement).fontSize);
+    }
+
+    /* width in rem (fluid type scale) but rounded to an even integer px, so the
+       centred row stays on whole pixels and the dotted "from" never re-rasterises */
+    function setWidth(px) {
+      var even = Math.round(px / 2) * 2;
+      swap.style.width = (even / remPx()).toFixed(4) + 'rem';
+    }
+
+    function measure() {
+      swap.classList.add('is-measuring');
+      widths = items.map(function (it) { return it.getBoundingClientRect().width; });
+      swap.classList.remove('is-measuring');
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      setWidth(widths[index]);
+    }
+
+    function animateWidth(from, to) {
+      if (raf) cancelAnimationFrame(raf);
+      if (Math.round(from) === Math.round(to)) { setWidth(to); return; }
+      var t0 = performance.now();
+      (function frame(now) {
+        var p = Math.min((now - t0) / TRANS, 1);
+        setWidth(from + (to - from) * easeInOutQuint(p));
+        if (p < 1) raf = requestAnimationFrame(frame);
+        else { raf = null; setWidth(to); }
+      })(t0);
+    }
+
+    var turns = 0;   /* the prism only rotates forward, so it never unwinds */
+    var STEP  = 360 / items.length;   /* one face per turn — matches the CSS --fx */
+
+    function swapTo(next) {
+      animateWidth(widths[index], widths[next]);
+      turns += 1;
+      cube.style.setProperty('--turn', (-turns * STEP) + 'deg');
+      index = next;
+    }
+
+    measure();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    window.addEventListener('resize', measure);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var timer = null;
+    function step() {
+      swapTo((index + 1) % items.length);
+      timer = setTimeout(step, HOLD);
+    }
+
+    /* start once the hero is actually on screen */
+    var started = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && !started) {
+          started = true;
+          io.disconnect();
+          timer = setTimeout(step, HOLD);
+        }
+      });
+    }, { threshold: 0.5 });
+    io.observe(swap);
+
+    /* hover flicks the cube to the next face, then re-arms the idle timer */
+    swap.addEventListener('mouseenter', function () {
+      if (!started) { started = true; io.disconnect(); }
+      if (timer) clearTimeout(timer);
+      step();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

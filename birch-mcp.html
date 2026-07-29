@@ -1080,18 +1080,6 @@
     top: 0.048em;               /* (0.154em - 0.058em) / 2 */
   }
 
-  /* white-on-light-blue is near-invisible, so the Perplexity mark is recoloured
-     to the pill's own (black) text colour — the white SVG is used as a mask and
-     filled with currentColor */
-  .hero-mcp__icon--mask {
-    background-color: currentColor;
-    -webkit-mask: var(--icon) center / contain no-repeat;
-            mask: var(--icon) center / contain no-repeat;
-  }
-  .hero-mcp__icon--perplexity {
-    --icon: url("https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca34b29ac24d70e3648_perplexity-white.svg");
-  }
-
   /* ── Speech bubble with typing dots — sits between "Talk" and "with" ──
      The dots pulse in sequence to read as "someone is typing". */
   .hero-mcp__bubble {
@@ -1135,17 +1123,19 @@
   /* ── Swap: the last pill cycles through the AI tools ──
      Variants are absolutely positioned and nothing clips them, so the overshoot
      is thrown clear of the row instead of being eaten by a window. */
-  /* ── The last pill sits on the faces of a rotating cube ──
-     Faces are fixed in place; the cube itself turns, so a variant is never
-     "moved" — it is simply brought to the front. */
+  /* ── The last pill sits on the faces of a rotating prism ──
+     Faces are fixed in place; the prism itself turns, so a variant is never
+     "moved" — it is simply brought to the front. Three variants → a triangular
+     prism: faces every 120deg, and the drum radius is the apothem
+     h / (2 * tan(180/N)) — only at N=4 does that equal half the height. */
   .hero-mcp__swap {
     position: relative;
     flex: 0 0 auto;
     /* exactly one pill tall: line-height 1.1 + padding 0.058 + 0.154 */
     height: 1.312em;
     perspective: 16em;
-    /* cube half-depth — shared by the cube's push-back and the faces */
-    --r: 0.656em;
+    /* drum radius — shared by the prism's push-back and the faces */
+    --r: 0.3787em;              /* 1.312em / (2 * tan 60deg) */
     /* width is driven per-frame from JS (rounded), never by a CSS transition */
   }
 
@@ -1153,7 +1143,7 @@
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
-    /* push the whole cube back by its half-depth so the FRONT face rests at
+    /* push the whole prism back by its radius so the FRONT face rests at
        z=0 — no perspective zoom, so it keeps its natural width and a true 8px
        gap to "from"; the incoming face still swings through depth on the turn */
     transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
@@ -1172,11 +1162,10 @@
     transform: rotateX(var(--fx)) translateZ(var(--r));
   }
   .hero-mcp__swap .hero-mcp__pill:nth-child(1) { --fx: 0deg;   }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(2) { --fx: 90deg;  }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(3) { --fx: 180deg; }
-  .hero-mcp__swap .hero-mcp__pill:nth-child(4) { --fx: 270deg; }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(2) { --fx: 120deg; }
+  .hero-mcp__swap .hero-mcp__pill:nth-child(3) { --fx: 240deg; }
 
-  /* measuring: flatten the cube so every face can hug its own text */
+  /* measuring: flatten the prism so every face can hug its own text */
   .hero-mcp__swap.is-measuring { width: auto !important; }
   .hero-mcp__swap.is-measuring .hero-mcp__cube {
     position: static;
@@ -1482,7 +1471,8 @@
     position: absolute;
     inset: 20%;
     transform-style: preserve-3d;
-    --r: 7.5cqw;                /* half the face height — the drum radius */
+    /* drum radius = apothem, face height / (2 * tan(180/N)); N=3 → /(2*tan60) */
+    --r: 4.3301cqw;
     /* pushed back so the front face rests flat (no perspective zoom) */
     transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
     transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);   /* "weighted", like the hero */
@@ -1496,9 +1486,8 @@
     backface-visibility: hidden;
   }
   .promo-mcp__face:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
-  .promo-mcp__face:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
-  .promo-mcp__face:nth-child(3) { transform: rotateX(180deg) translateZ(var(--r)); }
-  .promo-mcp__face:nth-child(4) { transform: rotateX(270deg) translateZ(var(--r)); }
+  .promo-mcp__face:nth-child(2) { transform: rotateX(120deg) translateZ(var(--r)); }
+  .promo-mcp__face:nth-child(3) { transform: rotateX(240deg) translateZ(var(--r)); }
   /* the ChatGPT mark is white — recolour it dark so it reads on the white tile */
   .promo-mcp__face--mask {
     background: #111;
@@ -1599,7 +1588,6 @@
         <span class="hero-mcp__cube">
           <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--salmon"><img class="hero-mcp__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca364cbe342449b930b_claude-white.svg" alt="" />Claude</span>
           <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--purple"><img class="hero-mcp__icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />Chat GPT</span>
-          <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--light-blue"><i class="hero-mcp__icon hero-mcp__icon--mask hero-mcp__icon--perplexity"></i>Perplexity</span>
           <span class="hero-mcp__pill hero-mcp__pill--sq hero-mcp__pill--pink">your AI tool</span>
         </span>
       </span>
@@ -1620,8 +1608,6 @@
         <div class="mcp-st__logos" id="mcpLogos">
           <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
           <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />
-          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
-          <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d2919b68c977d1b4f74_cursor.svg" alt="" />
           <img class="mcp-st__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
         </div>
       </div>
@@ -1707,7 +1693,6 @@
               <div class="promo-mcp__cube" id="promoCube">
                 <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
                 <i class="promo-mcp__face promo-mcp__face--mask" style="--icon:url('https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg')"></i>
-                <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
                 <img class="promo-mcp__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
               </div>
             </div>
@@ -2519,13 +2504,14 @@
       })(t0);
     }
 
-    var turns = 0;   /* cube only ever rotates forward, so it never unwinds */
+    var turns = 0;   /* the prism only ever rotates forward, so it never unwinds */
+    var STEP  = 360 / items.length;   /* one face per turn — matches the CSS --fx */
 
     function swapTo(next) {
       animateWidth(widths[index], widths[next]);
       turns += 1;
-      /* only drive the rotation; the cube's push-back translateZ stays in CSS */
-      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
+      /* only drive the rotation; the prism's push-back translateZ stays in CSS */
+      cube.style.setProperty('--turn', (-turns * STEP) + 'deg');
       index = next;
     }
 
@@ -2672,9 +2658,10 @@
 
     /* rotate the drum one face each time a wave lands on the tile */
     var turns = 0;
+    var STEP  = 360 / cube.children.length;   /* matches the per-face CSS angles */
     function swap() {
       turns += 1;
-      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
+      cube.style.setProperty('--turn', (-turns * STEP) + 'deg');
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

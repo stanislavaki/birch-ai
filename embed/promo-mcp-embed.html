@@ -73,7 +73,8 @@
     position: absolute;
     inset: 20%;
     transform-style: preserve-3d;
-    --r: 7.5cqw;               /* half the face height — the drum radius */
+    /* drum radius = apothem, face height / (2 * tan(180/N)); N=3 → /(2*tan60) */
+    --r: 4.3301cqw;
     transform: translateZ(calc(-1 * var(--r))) rotateX(var(--turn, 0deg));
     transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1);
   }
@@ -86,9 +87,8 @@
     backface-visibility: hidden;
   }
   .promo-mcp-e__face:nth-child(1) { transform: rotateX(0deg)   translateZ(var(--r)); }
-  .promo-mcp-e__face:nth-child(2) { transform: rotateX(90deg)  translateZ(var(--r)); }
-  .promo-mcp-e__face:nth-child(3) { transform: rotateX(180deg) translateZ(var(--r)); }
-  .promo-mcp-e__face:nth-child(4) { transform: rotateX(270deg) translateZ(var(--r)); }
+  .promo-mcp-e__face:nth-child(2) { transform: rotateX(120deg) translateZ(var(--r)); }
+  .promo-mcp-e__face:nth-child(3) { transform: rotateX(240deg) translateZ(var(--r)); }
   /* the ChatGPT mark ships white — recolour it dark so it reads on the tile */
   .promo-mcp-e__face--mask {
     background: #111;
@@ -142,7 +142,6 @@
       <div class="promo-mcp-e__cube" id="promoMcpCube">
         <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
         <i class="promo-mcp-e__face promo-mcp-e__face--mask" style="--icon:url('https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg')"></i>
-        <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29d43e976365befb20_perplexity.svg" alt="" />
         <img class="promo-mcp-e__face" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
       </div>
     </div>
@@ -161,9 +160,10 @@
     viz.style.setProperty('--wave', WAVE + 'ms');
 
     var turns = 0;
+    var STEP  = 360 / cube.children.length;   /* matches the per-face CSS angles */
     function swap() {
       turns += 1;
-      cube.style.setProperty('--turn', (-turns * 90) + 'deg');
+      cube.style.setProperty('--turn', (-turns * STEP) + 'deg');
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
