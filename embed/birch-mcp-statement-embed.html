@@ -1,0 +1,279 @@
+<!--
+  Birch MCP - "Analyze your automation" statement.
+  The headline, then a pill that types "ask your AI assistant" and staggers the
+  three tool logos in once the phrase lands. Fires when scrolled into view.
+
+  Drop into a full-width container. No background and no horizontal padding here -
+  both come from Webflow. Source of truth: birch-mcp.html.
+-->
+<style>
+  /* the Webflow .w-embed wrapper collapses to 0 inside a flex slot */
+  .w-embed:has(> .mcp-st-e) { width: 100%; }
+
+  /* border-box and the inherited text colour come from webflow-env.css / <body>
+     on the dev page; an embed inherits neither, so state both, scoped to us. */
+  .mcp-st-e,
+  .mcp-st-e *,
+  .mcp-st-e *::before,
+  .mcp-st-e *::after { box-sizing: border-box; }
+  /* Webflow pages often set text-align:center on the section, and it inherits
+     straight into the embed. The dev page inherits left, so state left here;
+     the title declares its own centre and wins over this. */
+  .mcp-st-e { width: 100%; color: var(--color-text, #FFFFFF); text-align: left; }
+
+  /* stands in for the page's .container - Webflow supplies width and padding */
+  .mcp-st-e__outer { width: 100%; }
+
+  /* bir.ch styles bare tags - `h4 { max-width: 400px }` (applies to every heading
+     there) and `p { font-size: 14.4px }`. Needs (0,1,1) to beat them; the class
+     rules below are (0,2,0) and still win over this. */
+  .mcp-st-e h1, .mcp-st-e h2, .mcp-st-e h3,
+  .mcp-st-e h4, .mcp-st-e h5, .mcp-st-e h6,
+  .mcp-st-e p, .mcp-st-e span {
+    max-width: none;
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+  }
+
+  /* h2 type scale, inlined so the embed needs no tokens.css */
+  .mcp-st-e .t-h2-e {
+    font-family: var(--font, "TT Commons Pro Variable", "Inter", Arial, sans-serif);
+    font-size: var(--text-h2-size, 3.25rem);
+    line-height: var(--text-h2-lh, 1.1);
+    letter-spacing: var(--text-h2-ls, -0.02em);
+    font-weight: 600;
+  }
+  /* tokens.css drops h2 to 2rem below 768px. The fallbacks above only carry the
+     desktop value, so restate the mobile one - otherwise a site without these
+     variables keeps the 52px headline on a phone. The pill is included because
+     it inherits the h2 scale and sizes everything inside it in em. */
+  @media (max-width: 767px) {
+    .mcp-st-e .t-h2-e,
+    .mcp-st-e .mcp-st-e__pill { font-size: var(--text-h2-size, 2rem); }
+  }
+
+  .mcp-st-e { /* no padding - vertical spacing comes from the Webflow section */ }
+
+  .mcp-st-e__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm, 1rem);
+  }
+
+  /* scoped under the root so its max-width outranks the (0,1,1) tag guard above */
+  .mcp-st-e .mcp-st-e__title {
+    max-width: 55.5rem;        /* 887px in the mockup */
+    margin: 0;
+    color: var(--color-text, #FFFFFF);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* Pill inherits the h2 type scale, so every inner em-value scales with it */
+  .mcp-st-e__pill {
+    display: flex;
+    align-items: center;
+    gap: 0.3077em;             /* 16px @ 52px */
+    padding: 0.3846em 0.6538em; /* 20px 34px @ 52px */
+    background: var(--color-bg-grey, #2A2A2A);
+    /* stroke a touch lighter than the fill — reads as an input field */
+    border: 0.125rem solid var(--color-border-subtle, rgba(255, 255, 255, 0.14));   /* 2px */
+    border-radius: var(--radius-lg, 1rem);
+    /* rises into place before typing starts */
+    opacity: 0;
+    transform: translateY(2rem);
+    will-change: opacity, transform;
+    transition:
+      opacity   1.1s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: var(--font, "TT Commons Pro Variable", "Inter", Arial, sans-serif);
+    font-size: var(--text-h2-size, 3.25rem);
+    font-weight: 600;
+    line-height: var(--text-h2-lh, 1.1);
+    letter-spacing: var(--text-h2-ls, -0.02em);
+  }
+
+  .mcp-st-e__field {
+    display: flex;
+    align-items: center;
+    gap: 0.1346em;             /* 7px @ 52px */
+  }
+
+  .mcp-st-e__typed {
+    color: var(--color-text, #FFFFFF);
+    white-space: nowrap;
+  }
+  /* zero-width space keeps a full line box before the first character,
+     so the pill height doesn't jump the moment typing starts */
+  .mcp-st-e__typed::before { content: '\200B'; }
+
+  /* plain text caret, like a real input */
+  .mcp-st-e__caret {
+    flex: 0 0 auto;
+    width: 0.06em;
+    height: 0.78em;
+    border-radius: 0.0625rem;  /* 1px */
+    background: var(--color-text, #FFFFFF);
+    animation: mcpCaretBlinkE 1.06s steps(1) infinite;
+  }
+  @keyframes mcpCaretBlinkE { 0%, 50% { opacity: 1 } 50.01%, 100% { opacity: 0 } }
+
+  /* caret retires once the sentence is typed */
+  .mcp-st-e.is-typed .mcp-st-e__caret {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  /* widths are reserved up front, so logos fade in place instead of pushing the pill */
+  .mcp-st-e__logos {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs, 0.5rem);      /* 8px */
+  }
+
+  .mcp-st-e__logo {
+    flex: 0 0 auto;
+    width: 2.5rem;             /* 40px */
+    height: 2.5rem;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.6);
+    will-change: opacity, transform;
+    transition:
+      opacity   0.45s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mcp-st-e__logo.is-visible { opacity: 1; transform: scale(1); }
+
+  /* pill has landed */
+  .mcp-st-e.is-in .mcp-st-e__pill { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mcp-st-e__pill { transition: none; }
+  }
+
+  /* ── mobile: logos step out of the input and sit below it ── */
+  @media (max-width: 767px) {
+    .mcp-st-e__pill {
+      flex-direction: column;
+      gap: var(--space-sm, 1rem);
+      /* the wrapper stops being the input… */
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: 0;
+    }
+    /* …the field becomes it, hugging the phrase */
+    .mcp-st-e__field {
+      max-width: 100%;
+      padding: 0.3846em 0.6538em;
+      background: var(--color-bg-grey, #2A2A2A);
+      border: 0.125rem solid var(--color-border-subtle, rgba(255, 255, 255, 0.14));
+      border-radius: var(--radius-lg, 1rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mcp-st-e__caret { animation: none; }
+    .mcp-st-e__logo { transition: none; }
+  }
+</style>
+
+<div class="mcp-st-e" id="mcpStatement">
+  <div class="mcp-st-e__outer">
+    <div class="mcp-st-e__inner">
+      <h2 class="mcp-st-e__title t-h2-e">Analyze your automation the way you analyze everything else</h2>
+
+      <div class="mcp-st-e__pill">
+        <div class="mcp-st-e__field" id="mcpField">
+          <span class="mcp-st-e__typed" id="mcpTyped"></span><span class="mcp-st-e__caret" id="mcpCaret"></span>
+        </div>
+        <div class="mcp-st-e__logos" id="mcpLogos">
+          <img class="mcp-st-e__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d29c7446ada92191091_claude.svg" alt="" />
+          <img class="mcp-st-e__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625ca32ab14fc409c60353_chat-gpt-white.svg" alt="" />
+          <img class="mcp-st-e__logo" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a625d298be57d9e64b13bb3_codex.svg" alt="" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var TEXT        = 'ask your AI assistant';
+  var TYPE_MS     = 45;
+  var START_DELAY = 800;
+  var STAGGER     = 0.08;
+  function init() {
+    var section = document.getElementById('mcpStatement');
+    var typedEl = document.getElementById('mcpTyped');
+    var field   = document.getElementById('mcpField');
+    if (!section || !typedEl || !field) return;
+    var logos = [].slice.call(section.querySelectorAll('.mcp-st-e__logo'));
+    function reserveWidth() {
+      var prev = typedEl.textContent;
+      field.style.minWidth = '';
+      typedEl.textContent = TEXT;
+      var w = field.getBoundingClientRect().width;
+      typedEl.textContent = prev;
+      var remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      field.style.minWidth = (w / remPx).toFixed(4) + 'rem';
+    }
+    reserveWidth();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserveWidth);
+    window.addEventListener('resize', reserveWidth);
+    logos.forEach(function (el, i) {
+      el.style.transitionDelay = (i * STAGGER).toFixed(3) + 's';
+    });
+    function revealLogos() {
+      logos.forEach(function (el) { el.classList.add('is-visible'); });
+    }
+    function finish() {
+      section.classList.add('is-in');
+      typedEl.textContent = TEXT;
+      section.classList.add('is-typed');
+      revealLogos();
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+    function type(i) {
+      typedEl.textContent = TEXT.slice(0, i);
+      if (i < TEXT.length) {
+        setTimeout(function () { type(i + 1); }, TYPE_MS);
+      } else {
+        section.classList.add('is-typed');
+        revealLogos();
+      }
+    }
+    var pill  = section.querySelector('.mcp-st-e__pill');
+    var fired = false;
+    function foldLine() {
+      return (window.innerHeight || document.documentElement.clientHeight) * 0.92;
+    }
+    function cleared() {
+      var r = pill.getBoundingClientRect(), line = foldLine();
+      if (r.height > line) return r.top < line * 0.6;
+      return r.top >= 0 && r.bottom <= line;
+    }
+    function maybeStart() {
+      if (fired || !cleared()) return;
+      fired = true;
+      window.removeEventListener('scroll', maybeStart);
+      window.removeEventListener('resize', maybeStart);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          section.classList.add('is-in');
+          setTimeout(function () { type(0); }, START_DELAY);
+        });
+      });
+    }
+    window.addEventListener('scroll', maybeStart, { passive: true });
+    window.addEventListener('resize', maybeStart);
+    maybeStart();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>

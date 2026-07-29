@@ -1,0 +1,1179 @@
+<!--
+  Birch MCP - "Use cases" accordion. Desktop: three accordion cards + a live chat
+  mock, auto-advancing. At 991px and below the same three steps become a carousel.
+  Drop into a full-width container; background and horizontal padding come from
+  Webflow. Comments stripped to fit the embed size limit - the readable source of
+  truth is birch-mcp.html + design-system/components/{card-accordion,chat-card}.css
+-->
+<style>
+  .w-embed:has(> .acc-e-root) { width: 100%; }
+
+  /* Every token the block needs is declared here, on our own root, exactly as the
+     approved ai-promo accordion embed does. Two reasons this beats per-property
+     fallbacks: nothing from the host site can leak in under a matching name, and
+     inline `color: var(--color-text-grey)` in the markup resolves instead of going
+     invalid (that is why the grey descriptions came out white).
+     All rem values are the design-system numbers x0.9 - the scale that block was
+     signed off at. */
+  .acc-e-root {
+    width: 100%;
+    --font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+
+    --color-accent-green:      #04DE00;
+    --color-accent-pink:       #FF21A6;
+    --color-accent-light-blue: #59DBFF;
+    --color-accent-purple:     #5B45CD;
+    --color-bg:            #0D0D12;
+    --color-bg-grey:       #2A2A2A;
+    --color-text:          #FFFFFF;
+    --color-text-inverted: #000000;
+    --color-text-grey:     #909090;
+
+    --text-h4-size: 1.35rem;       --text-h4-lh: 1;        --text-h4-ls: 0em;
+    --text-para-lg-size: 1.125rem; --text-para-lg-lh: 1.1; --text-para-lg-ls: 0em;
+    --text-para-sm-size: 0.7875rem;--text-para-sm-lh: 1.3;
+    --text-eyebrow-size: 0.72rem;  --text-eyebrow-lh: 1.2; --text-eyebrow-ls: 0.10em;
+
+    --space-xs: 0.45rem; --space-sm: 0.9rem; --space-md: 1.8rem; --space-xl: 4.5rem;
+    --gap-main: 0.9rem;  --pad-card: 1.35rem;
+    --radius-sm: 0.45rem; --radius-lg: 0.9rem; --radius-xl: 1.35rem; --radius-pill: 9999px;
+
+    color: var(--color-text);
+    /* Webflow sections often set text-align:center and it inherits into the embed.
+       The dev page inherits left; anything centred on purpose says so on itself. */
+    text-align: left;
+  }
+
+  .acc-e-root,
+  .acc-e-root *,
+  .acc-e-root *::before,
+  .acc-e-root *::after { box-sizing: border-box; }
+  /* Webflow's tag styles add their own margins and list padding.
+     :where() keeps this at zero specificity - written as a plain descendant
+     selector it outranks the block's own class rules (`.acc-e-root p` beats
+     `.acc-mob-e__eyebrow`) and flattens every gap the layout depends on. */
+  :where(.acc-e-root) :where(h1, h2, h3, h4, h5, h6, p, ul, li) { margin: 0; padding: 0; }
+  :where(.acc-e-root) :where(img, svg) { display: block; max-width: 100%; }
+  /* bir.ch styles bare tags: `h4 { max-width: 400px }` clamped the card titles onto
+     a second line, and `p, li, td, th { font-size: 14.4px }` plus `ul { padding-left:
+     40px }` broke the chat, where every size is em-based off the card. These need real
+     specificity (0,1,1) to beat the site, so they cannot go in the :where() block.
+     Only properties no component rule sets at (0,1,0) are listed - the margins stay
+     above at zero specificity, otherwise they flatten the layout again. Class rules
+     like .t-h4-e or .chat-card-e__stats th are (0,2,0) and still win over this. */
+  .acc-e-root h1, .acc-e-root h2, .acc-e-root h3,
+  .acc-e-root h4, .acc-e-root h5, .acc-e-root h6,
+  .acc-e-root p, .acc-e-root ul, .acc-e-root ol, .acc-e-root li,
+  .acc-e-root table, .acc-e-root thead, .acc-e-root tbody,
+  .acc-e-root tr, .acc-e-root th, .acc-e-root td {
+    max-width: none;
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+  }
+
+  .acc-e__inner { width: 100%; }
+  .acc-e-root .t-eyebrow-e { font-family: var(--font); font-size: var(--text-eyebrow-size); line-height: var(--text-eyebrow-lh); letter-spacing: var(--text-eyebrow-ls); font-weight: 600; text-transform: uppercase; }
+  .acc-e-root .t-h4-e      { font-family: var(--font); font-size: var(--text-h4-size); line-height: var(--text-h4-lh); letter-spacing: var(--text-h4-ls); font-weight: 600; }
+  .acc-e-root .t-para-lg-e { font-family: var(--font); font-size: var(--text-para-lg-size); line-height: var(--text-para-lg-lh); letter-spacing: var(--text-para-lg-ls); font-weight: 600; }
+  .acc-e-root .t-para-sm-e { font-family: var(--font); font-size: var(--text-para-sm-size); line-height: var(--text-para-sm-lh); font-weight: 600; }
+  .acc-e {  }
+  .acc-e__title {
+    color: var(--color-text, #FFFFFF);
+    text-align: center;
+    margin: 0 0 3rem;
+  }
+  .acc-e__hint {
+    text-align: center;
+    color: var(--color-text-grey, #909090);
+    margin: var(--space-sm, 1rem) 0 0;
+  }
+  @media (max-width: 991px) {
+    .acc-e__hint { display: none; }
+  }
+  .acc-e__box {
+    width: 100%;
+    background-color: var(--color-accent-green, #04DE00);
+    border-radius: var(--radius-lg, 1rem);
+    padding: var(--space-md) !important;
+    overflow: hidden;
+    contain: layout;
+    overflow-anchor: none;
+    transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .acc-e__layout {
+    display: flex;
+    align-items: stretch;
+    gap: var(--gap-main, 1rem);
+  }
+  .acc-e__left {
+    width: 45.59%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main);
+  }
+  .acc-e__right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .acc-e__eyebrow {
+    color: var(--color-text-inverted, #000000);
+    margin: 0 0 1rem;
+  }
+  .acc-e__cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .acc-e__placeholder {
+    display: none;
+    width: 70.15%;
+    aspect-ratio: 463 / 592;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-xl, 1.5rem);
+  }
+  .acc-mob-e { display: none; }
+  @media (max-width: 991px) {
+    .acc-e { display: none; }
+    .acc-e__box  { display: none !important; }
+    .acc-e__title { display: none; }
+    .acc-mob-e {
+      display: block;
+      /* No vertical padding. On the dev page this stood in for the section spacing
+         of the hidden desktop block; in the embed Webflow's own section supplies it,
+         and the two stacked into an 80px gap above and 64px below the carousel. */
+      padding: 0;
+    }
+    .acc-mob-e__heading {
+      text-align: center;
+      margin: 0 0 var(--space-md, 2rem);
+    }
+    .acc-mob-e__carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg, 1rem);
+      touch-action: pan-y;
+      user-select: none;
+    }
+    .acc-mob-e__slide {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 1.5rem !important;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      box-sizing: border-box;
+      transition: transform 0.5s cubic-bezier(0.0, 0.0, 0.2, 1.0);
+    }
+    .acc-mob-e__eyebrow {
+      color: var(--color-text-inverted, #000000);
+      margin: 0 0 var(--space-sm, 1rem);
+    }
+    .acc-mob-e__slide-title {
+      color: var(--color-text-inverted, #000000);
+      margin: 0 0 var(--space-md, 2rem);
+    }
+    .acc-mob-e__coming-soon {
+      display: inline-block;
+      color: #fff;
+      margin: 0 0 var(--space-md, 2rem);
+    }
+    .acc-mob-e__hint {
+      display: none;
+    }
+    @media (max-width: 991px) {
+      .acc-mob-e__hint {
+        display: block;
+        text-align: center;
+        color: var(--color-text-grey, #909090);
+        margin: var(--space-sm, 1rem) 0 0;
+      }
+    }
+    .acc-mob-e__slide:last-child .acc-mob-e__slide-title { margin-bottom: var(--space-sm, 1rem); }
+    .acc-mob-e .chat-card-e__bubble,
+    .acc-mob-e .chat-card-e__response {
+      transition: none !important;
+    }
+    .acc-mob-e .chat-card-wrap-e {
+      width: min(100%, 22rem);
+      height: auto;
+      aspect-ratio: 400 / 530;
+      margin: auto auto 0;
+      flex-shrink: 0;
+    }
+    .acc-mob-e .chat-card-e {
+      height: 100%;
+    }
+    .acc-mob-e .chat-card-e__body {
+      overflow-y: auto;
+    }
+    @keyframes acc-mob-dot-fill-e {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(0); }
+    }
+    .acc-mob-e__dots {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding-top: var(--space-sm, 1rem);
+      padding-inline: var(--radius-lg, 1rem);
+    }
+    .acc-mob-e__dot {
+      flex: 1;
+      min-width: 0;
+      height: 0.25rem;
+      border-radius: var(--radius-pill, 9999px);
+      background: rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .acc-mob-e__dots--paused .acc-mob-e__dot.is-active::after {
+      animation-play-state: paused;
+    }
+    .acc-mob-e__dot.is-active::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      transform: translateX(-100%);
+      animation: acc-mob-dot-fill-e 7s linear forwards;
+      border-radius: var(--radius-pill, 9999px);
+    }
+  }
+  .card-accordion-e {
+    background: var(--color-bg, #0D0D12);
+    border-radius: var(--radius-lg, 1rem);
+    padding: var(--pad-card) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    flex: 1 1 0;
+    transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-accordion-e.is-closed {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+  .card-accordion-e h1,
+  .card-accordion-e h2,
+  .card-accordion-e h3,
+  .card-accordion-e h4,
+  .card-accordion-e h5,
+  .card-accordion-e h6 {
+    margin: 0;
+  }
+  .card-accordion-e__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm, 1rem);
+    padding-top: var(--space-sm, 1rem);
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                padding-top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-accordion-e.is-closed .card-accordion-e__body {
+    height: 0;
+    padding-top: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .card-accordion-e__bar {
+    position: relative;
+    height: 4px;
+    border-radius: var(--radius-sm, 0.5rem);
+    background: rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+  }
+  .card-accordion-e__bar-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-sm, 0.5rem);
+    background: var(--acc-color, var(--color-accent-green, #04DE00));
+  }
+  .chat-card-wrap-e {
+    height: min(70vh, 45rem);
+    width: auto;
+    aspect-ratio: 400 / 600;
+    container-type: inline-size;
+  }
+  .chat-card-e {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border-radius: 1.5em;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--font, "TT Commons Pro Variable", "Inter", Arial, sans-serif);
+    font-size: clamp(0.5625rem, 1.125vw, 1.125rem);
+    font-size: 4.095cqi;
+    font-weight: 500;
+    color: #161616;
+    -webkit-font-smoothing: antialiased;
+  }
+  .chat-card-e__body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-card-e__body::-webkit-scrollbar { display: none; }
+  .chat-card-e__feed {
+    padding: 1em 1em 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+  }
+  .chat-card-e__messages {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+  }
+  .chat-card-e__bubble {
+    background: #f2f2f2;
+    border-radius: 1em 1em 0.25em 1em;
+    padding: 0.6em 0.875em;
+    max-width: 85%;
+    font-weight: 500;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    color: #161616;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card-e__bubble.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chat-card-e__response {
+    padding: 0;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translateY(0.5em);
+    transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+                transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .chat-card-e__response.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chat-card-e__response-content {
+    color: #161616;
+    line-height: 1.467;
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+  .chat-card-e__response-content,
+  .chat-card-e__response-content p,
+  .chat-card-e__response-content li,
+  .chat-card-e__response-content td,
+  .chat-card-e__response-content th { font-weight: 500; }
+  .chat-card-e__response-content p {
+    margin: 0 0 0.4em;
+  }
+  .chat-card-e__response-content p:last-child { margin-bottom: 0; }
+  .chat-card-e__response-content strong { font-weight: 600; }
+  .chat-card-e__used {
+    margin: 0 0 0.533em;
+    font-weight: 600;
+  }
+  .chat-card-e__used-row {
+    display: flex;
+    align-items: center;
+    gap: 0.133em;
+    margin: 0 0 1.067em;
+    font-weight: 600;
+  }
+  .chat-card-e__used-icon {
+    flex: 0 0 auto;
+    width: 1.267em;
+    height: 1.267em;
+    border-radius: 0.362em;
+  }
+  .chat-card-e__used-names { padding-left: 0.267em; }
+  .chat-card-e__response-content ul {
+    margin: 0.25em 0;
+    padding-left: 1.25em;
+  }
+  .chat-card-e__response-content li { margin-bottom: 0.2em; }
+  .chat-card-e__response-content .chat-card-e__lines {
+    list-style: none;
+    margin: 0 0 1.067em;
+    padding: 0;
+    font-weight: 600;
+  }
+  .chat-card-e__response-content .chat-card-e__lines li { margin: 0; font-weight: 600; }
+  .chat-card-e__response-content .chat-card-e__dots {
+    list-style: none;
+    margin: 0.25em 0 1.067em;
+    padding: 0;
+  }
+  .chat-card-e__response-content .chat-card-e__dots li { margin: 0; }
+  .chat-card-e__response-content .chat-card-e__dots li::before { content: "\00B7\00A0"; }
+  .chat-card-e__stats {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.25em 0 0.6em;
+  }
+  .chat-card-e__stats th,
+  .chat-card-e__stats td {
+    text-align: left;
+    padding: 0.3em 0.5em;
+  }
+  .chat-card-e__stats th {
+    font-size: 0.8em;
+    color: var(--color-text-grey, #909090);
+  }
+  .chat-card-e__stats th:last-child,
+  .chat-card-e__stats td:last-child { width: 22%; }
+  .chat-card-e__stats td:last-child { font-weight: 600; }
+  .chat-card-e__stats tbody tr:nth-child(odd) td { background: #f4f4f5; }
+  .chat-card-e__stats tbody tr td:first-child { border-radius: 0.4em 0 0 0.4em; }
+  .chat-card-e__stats tbody tr td:last-child  { border-radius: 0 0.4em 0.4em 0; }
+  .chat-card-e__review-link {
+    display: block;
+    color: #0067ed;
+    line-height: 1.467;
+    margin-top: 0.375em;
+    cursor: pointer;
+  }
+  .chat-card-e__input-area {
+    flex-shrink: 0;
+    padding: 1em !important;
+    position: relative;
+  }
+  .chat-card-e__input-area::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 100%;
+    height: 2.5em;
+    background: linear-gradient(to bottom, transparent, #fff);
+    pointer-events: none;
+  }
+  .chat-card-e__input-wrap {
+    position: relative;
+    background: #fff;
+    border: 0.0625rem solid #ccc;
+    border-radius: 1em;
+    padding: 0.9em 3.5em 0.9em 1.25em;
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+    line-height: 1.4;
+    min-height: 3em;
+  }
+  .chat-card-e__text-flow {
+    flex: 1;
+    min-width: 0;
+    line-height: inherit;
+  }
+  .chat-card-e__placeholder {
+    color: #9e9e9e;
+    font-weight: 500 !important;
+    pointer-events: none;
+    user-select: none;
+  }
+  .chat-card-e__typed {
+    color: #161616;
+    font-weight: 500;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-card-e__cursor {
+    display: inline-block;
+    width: 0.1em;
+    height: 1.1em;
+    background: #161616;
+    vertical-align: text-bottom;
+    margin-left: 0.0625rem;
+    opacity: 0;
+  }
+  .chat-card-e__cursor.is-blinking {
+    animation: cursorBlink 0.9s step-end infinite;
+  }
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  .chat-card-e__send {
+    position: absolute;
+    right: 0.4375em;
+    bottom: 0.6em;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: background 0.2s;
+  }
+  .chat-card-e__send.is-active {
+    background: #161616;
+    cursor: pointer;
+  }
+  .chat-card-e__send svg {
+    width: 1em;
+    height: 1em;
+  }
+</style>
+
+<div class="acc-e-root">
+<div class="acc-e">
+  <div class="acc-e__inner">
+    <div class="acc-e__box" id="accBox">
+      <div class="acc-e__layout">
+        <div class="acc-e__left">
+          <p class="acc-e__eyebrow t-eyebrow-e">Use Cases</p>
+          <div class="acc-e__cards">
+            <div class="card-accordion-e" data-index="0">
+              <h4 class="t-h4-e">Connect it to the rest of your workflow</h4>
+              <div class="card-accordion-e__body">
+                <p class="t-para-lg-e" style="color:var(--color-text-grey);margin:0">B&iuml;rch MCP is one of the tools Claude can reach. Ask a question that pulls your automation data alongside your analytics, your project tracker, your planning docs &mdash; whatever else you've connected. The context lives in one conversation instead of four tabs.</p>
+                <div class="card-accordion-e__bar"><div class="card-accordion-e__bar-fill" id="accBar0"></div></div>
+              </div>
+            </div>
+            <div class="card-accordion-e is-closed" data-index="1">
+              <h4 class="t-h4-e">Pressure-test 100 rules in 7 words</h4>
+              <div class="card-accordion-e__body">
+                <p class="t-para-lg-e" style="color:var(--color-text-grey);margin:0">Ask "Audit my automations &mdash; what's actually working?" Claude reads every rule on the account, checks execution history, and classifies them: firing usefully, running but never matching, erroring silently, or sitting disabled. Every mature account accumulates zombie rules &mdash; find them before they cost you.</p>
+                <div class="card-accordion-e__bar"><div class="card-accordion-e__bar-fill" id="accBar1"></div></div>
+              </div>
+            </div>
+            <div class="card-accordion-e is-closed" data-index="2">
+              <h4 class="t-h4-e">Know what happened before your first call</h4>
+              <div class="card-accordion-e__body">
+                <p class="t-para-lg-e" style="color:var(--color-text-grey);margin:0">Let Claude read your execution logs and trace which rule fired, what triggered it, and how rules interacted &mdash; the investigation that used to mean opening B&iuml;rch and piecing it together yourself. Now it's a question in the same conversation where you're already planning your day. Schedule it for a regular check-in.</p>
+                <div class="card-accordion-e__bar"><div class="card-accordion-e__bar-fill" id="accBar2"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="acc-e__right">
+          <div class="chat-card-wrap-e">
+          <div class="chat-card-e">
+            <div class="chat-card-e__body" id="chatBody">
+              <div class="chat-card-e__feed" id="chatFeed"></div>
+            </div>
+            <div class="chat-card-e__input-area">
+              <div class="chat-card-e__input-wrap">
+                <div class="chat-card-e__text-flow">
+                  <span class="chat-card-e__placeholder" id="chatPlaceholder">Ask anything</span><span class="chat-card-e__typed" id="chatTyped"></span><span class="chat-card-e__cursor" id="chatCursor"></span>
+                </div>
+                <button class="chat-card-e__send" id="chatSendBtn" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="acc-e__hint t-para-sm-e">Hold to pause auto-switching</p>
+  </div>
+</div>
+<div class="acc-mob-e" id="accMob">
+  <div class="acc-e__inner">
+    <div class="acc-mob-e__carousel" id="accMobCarousel">
+      <div class="acc-mob-e__slide" data-index="0">
+        <p class="acc-mob-e__eyebrow t-eyebrow-e">Use Cases</p>
+        <h4 class="acc-mob-e__slide-title t-h4-e">Connect it to the rest of your workflow</h4>
+        <div class="chat-card-wrap-e">
+          <div class="chat-card-e">
+            <div class="chat-card-e__body">
+              <div class="chat-card-e__feed">
+                <div class="chat-card-e__messages">
+                  <div class="chat-card-e__bubble is-visible">Why did Meta spend jump yesterday? Check analytics and what we shipped.</div>
+                </div>
+                <div class="chat-card-e__response is-visible">
+                  <div class="chat-card-e__response-content">
+                    <div class="chat-card-e__used">Used:</div>
+                    <div class="chat-card-e__used-row">
+                      <img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24001899bbe5839c0d6_chat-icon-analytics.svg" alt="" />
+                      <img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24063292731f3455e6e_chat-icon-linear.svg" alt="" />
+                      <span class="chat-card-e__used-names">B&iuml;rch MCP &middot; Analytics &middot; Linear</span>
+                    </div>
+                    <ul class="chat-card-e__lines">
+                      <li>B&iuml;rch &mdash; "Scale winners" fired 6&times; on Q4 Prospecting</li>
+                      <li>Analytics &mdash; paid sessions +38%, checkout flat</li>
+                      <li>Linear &mdash; "New PDP layout" shipped Tuesday</li>
+                    </ul>
+                    <p>Your scaling rule reacted to Tuesday's launch, but conversions didn't follow. Want me to pull possible metrics to use in a safeguard rule?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card-e__input-area">
+              <div class="chat-card-e__input-wrap">
+                <div class="chat-card-e__text-flow"><span class="chat-card-e__placeholder">Ask anything</span></div>
+                <button class="chat-card-e__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="acc-mob-e__slide" data-index="1">
+        <p class="acc-mob-e__eyebrow t-eyebrow-e">Use Cases</p>
+        <h4 class="acc-mob-e__slide-title t-h4-e">Pressure-test 100 rules in 7 words</h4>
+        <div class="chat-card-wrap-e">
+          <div class="chat-card-e">
+            <div class="chat-card-e__body">
+              <div class="chat-card-e__feed">
+                <div class="chat-card-e__messages">
+                  <div class="chat-card-e__bubble is-visible">Audit my automations &mdash; what's actually working?</div>
+                </div>
+                <div class="chat-card-e__response is-visible">
+                  <div class="chat-card-e__response-content">
+                    <div class="chat-card-e__used">Used:</div>
+                    <div class="chat-card-e__used-row">
+                      <img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <span class="chat-card-e__used-names">B&iuml;rch MCP</span>
+                    </div>
+                    <table class="chat-card-e__stats">
+                      <thead><tr><th>Status</th><th>Rules</th></tr></thead>
+                      <tbody>
+                        <tr><td>&#x1F7E2; Firing usefully</td><td>41</td></tr>
+                        <tr><td>&#x26AA; Never matching</td><td>23</td></tr>
+                        <tr><td>&#x1F534; Erroring silently</td><td>5</td></tr>
+                        <tr><td>&#x26AB; Disabled</td><td>18</td></tr>
+                      </tbody>
+                    </table>
+                    <p>28 are dead weight or broken &mdash; plus 2 pairs quietly fighting over the same budgets. Want me to pull them up?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card-e__input-area">
+              <div class="chat-card-e__input-wrap">
+                <div class="chat-card-e__text-flow"><span class="chat-card-e__placeholder">Ask anything</span></div>
+                <button class="chat-card-e__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="acc-mob-e__slide" data-index="2">
+        <p class="acc-mob-e__eyebrow t-eyebrow-e">Use Cases</p>
+        <h4 class="acc-mob-e__slide-title t-h4-e">Know what happened before your first call</h4>
+        <div class="chat-card-wrap-e">
+          <div class="chat-card-e">
+            <div class="chat-card-e__body">
+              <div class="chat-card-e__feed">
+                <div class="chat-card-e__messages">
+                  <div class="chat-card-e__bubble is-visible">What happened on the account overnight?</div>
+                </div>
+                <div class="chat-card-e__response is-visible">
+                  <div class="chat-card-e__response-content">
+                    <div class="chat-card-e__used">Used:</div>
+                    <div class="chat-card-e__used-row">
+                      <img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <span class="chat-card-e__used-names">B&iuml;rch MCP</span>
+                    </div>
+                    <p><strong>Overnight digest:</strong></p>
+                    <ul class="chat-card-e__dots">
+                      <li>12 rules ran, 3 acted &mdash; 6 ad sets paused, 4 budgets adjusted</li>
+                      <li>"Pause underperformers" fired 4&times; vs its usual 1</li>
+                      <li>2 errors &mdash; sheet-sync rule lost permission</li>
+                      <li>Budget guardrails held at 90% of target</li>
+                    </ul>
+                    <p>Nothing on fire &mdash; but the extra pauses and that sync error are worth a look before your day starts.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card-e__input-area">
+              <div class="chat-card-e__input-wrap">
+                <div class="chat-card-e__text-flow"><span class="chat-card-e__placeholder">Ask anything</span></div>
+                <button class="chat-card-e__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="acc-mob-e__dots acc-mob-e__dots--paused" id="accMobDots">
+      <span class="acc-mob-e__dot is-active"></span>
+      <span class="acc-mob-e__dot"></span>
+      <span class="acc-mob-e__dot"></span>
+    </div>
+    <p class="acc-mob-e__hint t-para-sm-e">Hold to pause auto-switching</p>
+  </div>
+</div>
+</div>
+
+<script>
+(function () {
+  var _root = getComputedStyle(document.documentElement);
+  var FALLBACK = {
+    '--color-accent-green': '#04DE00',
+    '--color-accent-pink': '#FF21A6',
+    '--color-accent-light-blue': '#59DBFF',
+    '--color-accent-purple': '#5B45CD'
+  };
+  function token(name) {
+    return _root.getPropertyValue(name).trim() || FALLBACK[name] || '';
+  }
+  var COLORS = [
+    token('--color-accent-green'),
+    token('--color-accent-pink'),
+    token('--color-accent-light-blue'),
+    token('--color-accent-purple'),
+  ];
+  var DURATION = 7000;
+  var box   = document.getElementById('accBox');
+  var cards = Array.prototype.slice.call(box.querySelectorAll('.card-accordion-e'));
+  var bars  = Array.prototype.slice.call(box.querySelectorAll('.card-accordion-e__bar-fill'));
+  var active  = 0;
+  var startMs = null;
+  box.style.setProperty('--acc-color', COLORS[0]);
+  function setActive(idx) {
+    cards.forEach(function (c) { c.classList.add('is-closed'); });
+    cards[idx].classList.remove('is-closed');
+    box.style.backgroundColor = COLORS[idx];
+    box.style.setProperty('--acc-color', COLORS[idx]);
+    bars.forEach(function (b) { b.style.width = '0%'; });
+    active  = idx;
+    startMs = null;
+    if (window.switchChat) window.switchChat(idx);
+  }
+  var _paused   = false;
+  var _pausedAt = null;
+  box.addEventListener('pointerdown', function () {
+    _paused   = true;
+    _pausedAt = performance.now();
+  });
+  document.addEventListener('pointerup', function () {
+    if (!_paused) return;
+    _paused = false;
+    if (startMs !== null && _pausedAt !== null) {
+      startMs += performance.now() - _pausedAt;
+    }
+    _pausedAt = null;
+  });
+  document.addEventListener('pointercancel', function () {
+    if (!_paused) return;
+    _paused = false;
+    if (startMs !== null && _pausedAt !== null) {
+      startMs += performance.now() - _pausedAt;
+    }
+    _pausedAt = null;
+  });
+  (function tick(now) {
+    if (!_paused) {
+      if (startMs === null) startMs = now;
+      var elapsed  = now - startMs;
+      var progress = Math.min(elapsed / DURATION, 1);
+      bars[active].style.width = (progress * 100).toFixed(1) + '%';
+      if (elapsed >= DURATION) {
+        setActive((active + 1) % cards.length);
+      }
+    }
+    requestAnimationFrame(tick);
+  })(performance.now());
+  cards.forEach(function (card, idx) {
+    card.addEventListener('click', function () { setActive(idx); });
+  });
+  var accCards = box.querySelector('.acc-e__cards');
+  var accLeft  = box.querySelector('.acc-e__left');
+  var eyebrow  = box.querySelector('.acc-e__eyebrow');
+  function sizeAccBox() {
+    var animated = [box].concat(cards).concat(
+      cards.map(function (c) { return c.querySelector('.card-accordion-e__body'); })
+    );
+    animated.forEach(function (el) { if (el) el.style.transition = 'none'; });
+    var wasClosed = cards.map(function (c) { return c.classList.contains('is-closed'); });
+    accCards.style.flex = 'none';
+    var maxCardsH = 0;
+    cards.forEach(function (_, openIdx) {
+      cards.forEach(function (c, i) {
+        c.classList.toggle('is-closed', i !== openIdx);
+        c.style.flex = (i === openIdx) ? '0 0 auto' : '';
+      });
+      void box.offsetHeight;
+      if (accCards.offsetHeight > maxCardsH) maxCardsH = accCards.offsetHeight;
+    });
+    cards.forEach(function (c, i) {
+      c.style.flex = '';
+      c.classList.toggle('is-closed', wasClosed[i]);
+    });
+    accCards.style.flex = '';
+    animated.forEach(function (el) { if (el) el.style.transition = ''; });
+    var cs       = getComputedStyle(box);
+    var boxPadV  = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var eyebrowH = eyebrow.offsetHeight;
+    var eyebrowGap = parseFloat(getComputedStyle(accLeft).gap)
+                   + parseFloat(getComputedStyle(eyebrow).marginBottom);
+    var leftColMinH = boxPadV + eyebrowH + eyebrowGap + maxCardsH;
+    var chatWrap   = box.querySelector('.chat-card-wrap-e');
+    var chatMinH   = boxPadV + chatWrap.offsetHeight;
+    var minH = Math.max(leftColMinH, chatMinH);
+    box.style.minHeight = minH + 'px';
+    box.style.height    = minH + 'px';
+  }
+  sizeAccBox();
+  document.fonts.ready.then(function () { sizeAccBox(); });
+  window.addEventListener('resize', sizeAccBox);
+})();
+</script>
+
+<script>
+(function () {
+  var _root = getComputedStyle(document.documentElement);
+  var FALLBACK = {
+    '--color-accent-green': '#04DE00',
+    '--color-accent-pink': '#FF21A6',
+    '--color-accent-light-blue': '#59DBFF',
+    '--color-accent-purple': '#5B45CD'
+  };
+  function token(name) {
+    return _root.getPropertyValue(name).trim() || FALLBACK[name] || '';
+  }
+  var BG_COLORS = [
+    token('--color-accent-green'),
+    token('--color-accent-pink'),
+    token('--color-accent-light-blue'),
+    token('--color-accent-purple')
+  ];
+  var MOB_INTERVAL = 7000;
+  var MOB = window.matchMedia('(max-width: 991px)');
+  var section  = document.getElementById('accMob');
+  var carousel = document.getElementById('accMobCarousel');
+  var dotsEl   = document.getElementById('accMobDots');
+  var slides   = Array.prototype.slice.call(carousel.querySelectorAll('.acc-mob-e__slide'));
+  var dots     = Array.prototype.slice.call(dotsEl.querySelectorAll('.acc-mob-e__dot'));
+  var SLIDE_COUNT = slides.length;
+  var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap-e'); });
+  var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+  function sizeCarousel() {
+    slides.forEach(function (s) { s.style.position = 'relative'; s.style.height = 'auto'; });
+    chatWraps.forEach(function (w) { w.style.width = ''; w.style.height = ''; });
+    var maxH = 0;
+    slides.forEach(function (s) { if (s.offsetHeight > maxH) maxH = s.offsetHeight; });
+    slides.forEach(function (s) { s.style.position = ''; s.style.height = ''; });
+    carousel.style.height = maxH + 'px';
+    var pad    = parseFloat(getComputedStyle(slides[0]).paddingLeft);
+    var maxRem = parseFloat(getComputedStyle(document.documentElement).fontSize) * 22;
+    var chatW  = Math.min(carousel.offsetWidth - pad * 2, maxRem);
+    var chatH  = Math.round(chatW * 530 / 400);
+    chatWraps.forEach(function (w) {
+      w.style.width  = chatW + 'px';
+      w.style.height = chatH + 'px';
+    });
+  }
+  function updateDots(idx) {
+    dots.forEach(function (d, i) {
+      if (i === idx) {
+        d.classList.remove('is-active');
+        d.offsetWidth;
+        d.classList.add('is-active');
+      } else {
+        d.classList.remove('is-active');
+      }
+    });
+  }
+  function goTo(idx, animate) {
+    idx = idx >= SLIDE_COUNT ? 0 : Math.max(0, idx);
+    _idx = idx;
+    if (!animate) {
+      slides.forEach(function (s) { s.style.transition = 'none'; });
+    }
+    slides.forEach(function (s, i) {
+      s.style.transform = i === idx ? 'translateX(0%)' : (i < idx ? 'translateX(-100%)' : 'translateX(100%)');
+      s.style.zIndex    = i === idx ? 1 : 0;
+    });
+    carousel.style.backgroundColor = BG_COLORS[idx];
+    updateDots(idx);
+    if (!animate) {
+      requestAnimationFrame(function () {
+        slides.forEach(function (s) { s.style.transition = ''; });
+      });
+    }
+  }
+  function stopTimer() { if (_timer) { clearInterval(_timer); _timer = null; } }
+  function startTimer() {
+    stopTimer();
+    _timer = setInterval(function () { goTo((_idx + 1) % SLIDE_COUNT, true); }, MOB_INTERVAL);
+  }
+  function initSwipe() {
+    if (_swipeInited) return;
+    _swipeInited = true;
+    var startX = 0, startY = 0, _down = false;
+    carousel.addEventListener('pointerdown', function (e) {
+      startX = e.clientX; startY = e.clientY; _down = true;
+      carousel.setPointerCapture(e.pointerId);
+      stopTimer();
+      dotsEl.classList.add('acc-mob-e__dots--paused');
+    });
+    carousel.addEventListener('pointerup', function (e) {
+      if (!_down) return; _down = false;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      dotsEl.classList.remove('acc-mob-e__dots--paused');
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        goTo(dx < 0 ? _idx + 1 : _idx - 1, true);
+      } else if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+        var midX = carousel.getBoundingClientRect().left + carousel.offsetWidth / 2;
+        goTo(e.clientX < midX ? _idx - 1 : _idx + 1, true);
+      } else {
+        updateDots(_idx);
+      }
+      startTimer();
+    });
+    carousel.addEventListener('pointercancel', function () {
+      if (!_down) return; _down = false;
+      dotsEl.classList.remove('acc-mob-e__dots--paused');
+      startTimer();
+    });
+  }
+  function initMobile() {
+    sizeCarousel();
+    document.fonts.ready.then(sizeCarousel);
+    window.addEventListener('resize', sizeCarousel);
+    goTo(0, false);
+    initSwipe();
+    dotsEl.classList.add('acc-mob-e__dots--paused');
+    if (_observer) _observer.disconnect();
+    _observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        dotsEl.classList.remove('acc-mob-e__dots--paused');
+        updateDots(_idx);
+        startTimer();
+      } else {
+        dotsEl.classList.add('acc-mob-e__dots--paused');
+        stopTimer();
+      }
+    }, { threshold: 0.1 });
+    _observer.observe(section);
+  }
+  function destroyMobile() {
+    stopTimer();
+    if (_observer) { _observer.disconnect(); _observer = null; }
+    slides.forEach(function (s) {
+      s.style.transform  = '';
+      s.style.zIndex     = '';
+      s.style.transition = '';
+    });
+    carousel.style.backgroundColor = '';
+  }
+  if (MOB.matches) { initMobile(); }
+  MOB.addEventListener('change', function (e) { if (e.matches) initMobile(); else destroyMobile(); });
+})();
+</script>
+
+<script>
+(function () {
+  var CHATS = [
+    {
+      userMsg: 'Why did Meta spend jump yesterday? Check analytics and what we shipped.',
+      aiHtml: [
+        '<div class="chat-card-e__response-content">',
+          '<div class="chat-card-e__used">Used:</div>',
+          '<div class="chat-card-e__used-row">',
+            '<img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24001899bbe5839c0d6_chat-icon-analytics.svg" alt="" />',
+            '<img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24063292731f3455e6e_chat-icon-linear.svg" alt="" />',
+            '<span class="chat-card-e__used-names">B\u00EFrch MCP \u00B7 Analytics \u00B7 Linear</span>',
+          '</div>',
+          '<ul class="chat-card-e__lines">',
+            '<li>B\u00EFrch \u2014 "Scale winners" fired 6\u00D7 on Q4 Prospecting</li>',
+            '<li>Analytics \u2014 paid sessions +38%, checkout flat</li>',
+            '<li>Linear \u2014 "New PDP layout" shipped Tuesday</li>',
+          '</ul>',
+          '<p>Your scaling rule reacted to Tuesday\'s launch, but conversions didn\'t follow. Want me to pull possible metrics to use in a safeguard rule?</p>',
+        '</div>'
+      ].join('')
+    },
+    {
+      userMsg: 'Audit my automations \u2014 what\'s actually working?',
+      aiHtml: [
+        '<div class="chat-card-e__response-content">',
+          '<div class="chat-card-e__used">Used:</div>',
+          '<div class="chat-card-e__used-row">',
+            '<img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<span class="chat-card-e__used-names">B\u00EFrch MCP</span>',
+          '</div>',
+          '<table class="chat-card-e__stats">',
+            '<thead><tr><th>Status</th><th>Rules</th></tr></thead>',
+            '<tbody>',
+              '<tr><td>\uD83D\uDFE2 Firing usefully</td><td>41</td></tr>',
+              '<tr><td>\u26AA Never matching</td><td>23</td></tr>',
+              '<tr><td>\uD83D\uDD34 Erroring silently</td><td>5</td></tr>',
+              '<tr><td>\u26AB Disabled</td><td>18</td></tr>',
+            '</tbody>',
+          '</table>',
+          '<p>28 are dead weight or broken \u2014 plus 2 pairs quietly fighting over the same budgets. Want me to pull them up?</p>',
+        '</div>'
+      ].join('')
+    },
+    {
+      userMsg: 'What happened on the account overnight?',
+      aiHtml: [
+        '<div class="chat-card-e__response-content">',
+          '<div class="chat-card-e__used">Used:</div>',
+          '<div class="chat-card-e__used-row">',
+            '<img class="chat-card-e__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<span class="chat-card-e__used-names">B\u00EFrch MCP</span>',
+          '</div>',
+          '<p><strong>Overnight digest:</strong></p>',
+          '<ul class="chat-card-e__dots">',
+            '<li>12 rules ran, 3 acted \u2014 6 ad sets paused, 4 budgets adjusted</li>',
+            '<li>"Pause underperformers" fired 4\u00D7 vs its usual 1</li>',
+            '<li>2 errors \u2014 sheet-sync rule lost permission</li>',
+            '<li>Budget guardrails held at 90% of target</li>',
+          '</ul>',
+          '<p>Nothing on fire \u2014 but the extra pauses and that sync error are worth a look before your day starts.</p>',
+        '</div>'
+      ].join('')
+    }
+  ];
+  if (window.CHAT_TYPING_MS === undefined) window.CHAT_TYPING_MS = 15;
+  var PAUSE_SEND   = 500;
+  var RESP_DELAY   = 700;
+  var FULL_PAUSE   = 1800;
+  var FADE_MS      = 350;
+  var IDLE_PAUSE   = 400;
+  var INIT_DELAY   = 1400;
+  var chatBody    = document.getElementById('chatBody');
+  var chatFeed    = document.getElementById('chatFeed');
+  var placeholder = document.getElementById('chatPlaceholder');
+  var typedEl     = document.getElementById('chatTyped');
+  var inputCursor = document.getElementById('chatCursor');
+  var sendBtn     = document.getElementById('chatSendBtn');
+  typedEl.style.display = 'none';
+  var currentIdx      = 0;
+  var pendingTimers   = [];
+  var currentBubbleEl = null;
+  var currentRespEl   = null;
+  var phase = 'idle';
+  function addTimer(fn, ms) {
+    var t = setTimeout(fn, ms);
+    pendingTimers.push(t);
+    return t;
+  }
+  function cancelTimers() {
+    pendingTimers.forEach(function (t) { clearTimeout(t); });
+    pendingTimers = [];
+  }
+  function setSendActive(on) {
+    sendBtn.classList.toggle('is-active', on);
+    sendBtn.disabled = !on;
+  }
+  function showInputCursor(on) {
+    inputCursor.classList.toggle('is-blinking', on);
+    inputCursor.style.opacity = on ? '' : '0';
+  }
+  function clearInput() {
+    typedEl.textContent    = '';
+    typedEl.style.display  = 'none';
+    placeholder.style.display = '';
+    setSendActive(false);
+    showInputCursor(false);
+  }
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  function createBubble(text) {
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-card-e__messages';
+    var el = document.createElement('div');
+    el.className = 'chat-card-e__bubble';
+    el.textContent = text;
+    wrap.appendChild(el);
+    chatFeed.appendChild(wrap);
+    scrollToBottom();
+    return el;
+  }
+  function createResponse(html) {
+    var el = document.createElement('div');
+    el.className = 'chat-card-e__response';
+    el.innerHTML = html;
+    chatFeed.appendChild(el);
+    scrollToBottom();
+    return el;
+  }
+  function resetChat(nextIdx) {
+    phase           = 'clearing';
+    currentIdx      = nextIdx;
+    currentBubbleEl = null;
+    currentRespEl   = null;
+    clearInput();
+    var els = chatFeed.querySelectorAll('.chat-card-e__bubble, .chat-card-e__response');
+    els.forEach(function (el) { el.classList.remove('is-visible'); });
+    addTimer(function () {
+      chatFeed.innerHTML = '';
+      phase = 'idle';
+      type(0);
+    }, FADE_MS + 50);
+  }
+  function type(charIdx) {
+    phase = 'typing';
+    var msg = CHATS[currentIdx].userMsg;
+    if (charIdx === 0) {
+      placeholder.style.display = 'none';
+      typedEl.style.display     = 'inline';
+      showInputCursor(true);
+    }
+    typedEl.textContent = msg.slice(0, charIdx);
+    if (charIdx > 0) setSendActive(true);
+    if (charIdx < msg.length) {
+      addTimer(function () { type(charIdx + 1); }, window.CHAT_TYPING_MS);
+    } else {
+      showInputCursor(false);
+      phase = 'sending';
+      addTimer(doSend, PAUSE_SEND);
+    }
+  }
+  function doSend() {
+    clearInput();
+    currentBubbleEl = createBubble(CHATS[currentIdx].userMsg);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentBubbleEl.classList.add('is-visible');
+        scrollToBottom();
+      });
+    });
+    phase = 'responding';
+    addTimer(startResponse, RESP_DELAY);
+  }
+  function startResponse() {
+    currentRespEl = createResponse(CHATS[currentIdx].aiHtml);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        currentRespEl.classList.add('is-visible');
+        scrollToBottom();
+        phase = 'viewing';
+        addTimer(onExchangeComplete, FULL_PAUSE);
+      });
+    });
+  }
+  function onExchangeComplete() {
+    phase = 'idle';
+  }
+  window.switchChat = function (nextIdx) {
+    cancelTimers();
+    resetChat(nextIdx);
+  };
+  addTimer(function () { type(0); }, INIT_DELAY);
+})();
+</script>
