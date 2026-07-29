@@ -767,9 +767,8 @@
       }
     }
 
-    /* Last slide (purple bg) — white text */
-    .acc-mob__slide:last-child .acc-mob__eyebrow,
-    .acc-mob__slide:last-child .acc-mob__slide-title { color: #fff; }
+    /* The white override here dated from a purple last slide; the gallery is one
+       light background now, so every slide keeps the inverted (dark) text above. */
     .acc-mob__slide:last-child .acc-mob__slide-title { margin-bottom: var(--space-sm); }
 
     /* Static chat: override transitions so content shows instantly */
@@ -1794,14 +1793,19 @@
                 </div>
                 <div class="chat-card__response is-visible">
                   <div class="chat-card__response-content">
-                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong> · Analytics · Linear</p>
-                    <p>Three things line up:</p>
-                    <ul>
-                      <li><strong>Bïrch</strong> — "Scale winners" fired 6× on Q4 Prospecting</li>
-                      <li><strong>Analytics</strong> — paid sessions +38%, checkout flat</li>
-                      <li><strong>Linear</strong> — "New PDP layout" shipped Tuesday</li>
+                    <div class="chat-card__used">Used:</div>
+                    <div class="chat-card__used-row">
+                      <img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24001899bbe5839c0d6_chat-icon-analytics.svg" alt="" />
+                      <img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24063292731f3455e6e_chat-icon-linear.svg" alt="" />
+                      <span class="chat-card__used-names">Bïrch MCP · Analytics · Linear</span>
+                    </div>
+                    <ul class="chat-card__lines">
+                      <li>Bïrch — "Scale winners" fired 6× on Q4 Prospecting</li>
+                      <li>Analytics — paid sessions +38%, checkout flat</li>
+                      <li>Linear — "New PDP layout" shipped Tuesday</li>
                     </ul>
-                    <p>Your scaling rule reacted to Tuesday's launch — watch conversion, not just ROAS.</p>
+                    <p>Your scaling rule reacted to Tuesday's launch, but conversions didn't follow. Want me to pull possible metrics to use in a safeguard rule?</p>
                   </div>
                 </div>
               </div>
@@ -1829,15 +1833,21 @@
                 </div>
                 <div class="chat-card__response is-visible">
                   <div class="chat-card__response-content">
-                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>
-                    <p><strong>🔍 87 rules scanned</strong></p>
-                    <ul>
-                      <li>🟢 Firing usefully — 41</li>
-                      <li>⚪ Running, never matching — 23</li>
-                      <li>🔴 Erroring silently — 5</li>
-                      <li>⚫ Disabled — 18</li>
-                    </ul>
-                    <p>28 rules are dead weight or broken — your cleanup list.</p>
+                    <div class="chat-card__used">Used:</div>
+                    <div class="chat-card__used-row">
+                      <img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <span class="chat-card__used-names">Bïrch MCP</span>
+                    </div>
+                    <table class="chat-card__stats">
+                      <thead><tr><th>Status</th><th>Rules</th></tr></thead>
+                      <tbody>
+                        <tr><td>🟢 Firing usefully</td><td>41</td></tr>
+                        <tr><td>⚪ Never matching</td><td>23</td></tr>
+                        <tr><td>🔴 Erroring silently</td><td>5</td></tr>
+                        <tr><td>⚫ Disabled</td><td>18</td></tr>
+                      </tbody>
+                    </table>
+                    <p>28 are dead weight or broken — plus 2 pairs quietly fighting over the same budgets. Want me to pull them up?</p>
                   </div>
                 </div>
               </div>
@@ -1865,14 +1875,19 @@
                 </div>
                 <div class="chat-card__response is-visible">
                   <div class="chat-card__response-content">
-                    <p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>
-                    <p><strong>🔍 3 rules fired · 11pm–7am</strong></p>
-                    <ul>
-                      <li><strong>2:14am</strong> — Paused 4 ad sets (spend &gt; $50, 0 leads)</li>
-                      <li><strong>4:40am</strong> — Budget capped at 90% of target</li>
-                      <li><strong>6:02am</strong> — Scaling blocked by the guardrail above</li>
+                    <div class="chat-card__used">Used:</div>
+                    <div class="chat-card__used-row">
+                      <img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />
+                      <span class="chat-card__used-names">Bïrch MCP</span>
+                    </div>
+                    <p><strong>Overnight digest:</strong></p>
+                    <ul class="chat-card__dots">
+                      <li>12 rules ran, 3 acted — 6 ad sets paused, 4 budgets adjusted</li>
+                      <li>"Pause underperformers" fired 4× vs its usual 1</li>
+                      <li>2 errors — sheet-sync rule lost permission</li>
+                      <li>Budget guardrails held at 90% of target</li>
                     </ul>
-                    <p>Your guardrail is overriding your scaler at night.</p>
+                    <p>Nothing on fire — but the extra pauses and that sync error are worth a look before your day starts.</p>
                   </div>
                 </div>
               </div>
@@ -2107,7 +2122,9 @@
 
   /* ── Go to slide ── */
   function goTo(idx, animate) {
-    idx = Math.max(0, Math.min(SLIDE_COUNT - 1, idx));
+    /* Forward only: past the last slide loops back to the first (matching the
+       auto-advance timer). Going back from the first stays put — no reverse wrap. */
+    idx = idx >= SLIDE_COUNT ? 0 : Math.max(0, idx);
     _idx = idx;
 
     if (!animate) {
@@ -2218,14 +2235,19 @@
       userMsg: 'Why did Meta spend jump yesterday? Check analytics and what we shipped.',
       aiHtml: [
         '<div class="chat-card__response-content">',
-          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong> · Analytics · Linear</p>',
-          '<p>Three things line up:</p>',
-          '<ul>',
-            '<li><strong>Bïrch</strong> — "Scale winners" fired 6× on Q4 Prospecting</li>',
-            '<li><strong>Analytics</strong> — paid sessions +38%, checkout flat</li>',
-            '<li><strong>Linear</strong> — "New PDP layout" shipped Tuesday</li>',
+          '<div class="chat-card__used">Used:</div>',
+          '<div class="chat-card__used-row">',
+            '<img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24001899bbe5839c0d6_chat-icon-analytics.svg" alt="" />',
+            '<img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c24063292731f3455e6e_chat-icon-linear.svg" alt="" />',
+            '<span class="chat-card__used-names">Bïrch MCP · Analytics · Linear</span>',
+          '</div>',
+          '<ul class="chat-card__lines">',
+            '<li>Bïrch — "Scale winners" fired 6× on Q4 Prospecting</li>',
+            '<li>Analytics — paid sessions +38%, checkout flat</li>',
+            '<li>Linear — "New PDP layout" shipped Tuesday</li>',
           '</ul>',
-          '<p>Your scaling rule reacted to Tuesday\'s launch — watch conversion, not just ROAS.</p>',
+          '<p>Your scaling rule reacted to Tuesday\'s launch, but conversions didn\'t follow. Want me to pull possible metrics to use in a safeguard rule?</p>',
         '</div>'
       ].join('')
     },
@@ -2234,15 +2256,21 @@
       userMsg: 'Audit my automations — what\'s actually working?',
       aiHtml: [
         '<div class="chat-card__response-content">',
-          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>',
-          '<p><strong>🔍 87 rules scanned</strong></p>',
-          '<ul>',
-            '<li>🟢 Firing usefully — 41</li>',
-            '<li>⚪ Running, never matching — 23</li>',
-            '<li>🔴 Erroring silently — 5</li>',
-            '<li>⚫ Disabled — 18</li>',
-          '</ul>',
-          '<p>28 rules are dead weight or broken — your cleanup list.</p>',
+          '<div class="chat-card__used">Used:</div>',
+          '<div class="chat-card__used-row">',
+            '<img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<span class="chat-card__used-names">Bïrch MCP</span>',
+          '</div>',
+          '<table class="chat-card__stats">',
+            '<thead><tr><th>Status</th><th>Rules</th></tr></thead>',
+            '<tbody>',
+              '<tr><td>🟢 Firing usefully</td><td>41</td></tr>',
+              '<tr><td>⚪ Never matching</td><td>23</td></tr>',
+              '<tr><td>🔴 Erroring silently</td><td>5</td></tr>',
+              '<tr><td>⚫ Disabled</td><td>18</td></tr>',
+            '</tbody>',
+          '</table>',
+          '<p>28 are dead weight or broken — plus 2 pairs quietly fighting over the same budgets. Want me to pull them up?</p>',
         '</div>'
       ].join('')
     },
@@ -2251,14 +2279,19 @@
       userMsg: 'What happened on the account overnight?',
       aiHtml: [
         '<div class="chat-card__response-content">',
-          '<p class="chat-card__tools">Used: <strong>Bïrch MCP</strong></p>',
-          '<p><strong>🔍 3 rules fired · 11pm–7am</strong></p>',
-          '<ul>',
-            '<li><strong>2:14am</strong> — Paused 4 ad sets (spend &gt; $50, 0 leads)</li>',
-            '<li><strong>4:40am</strong> — Budget capped at 90% of target</li>',
-            '<li><strong>6:02am</strong> — Scaling blocked by the guardrail above</li>',
+          '<div class="chat-card__used">Used:</div>',
+          '<div class="chat-card__used-row">',
+            '<img class="chat-card__used-icon" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a68c2419d49cb3f6747c578_chat-icon-bird.svg" alt="" />',
+            '<span class="chat-card__used-names">Bïrch MCP</span>',
+          '</div>',
+          '<p><strong>Overnight digest:</strong></p>',
+          '<ul class="chat-card__dots">',
+            '<li>12 rules ran, 3 acted — 6 ad sets paused, 4 budgets adjusted</li>',
+            '<li>"Pause underperformers" fired 4× vs its usual 1</li>',
+            '<li>2 errors — sheet-sync rule lost permission</li>',
+            '<li>Budget guardrails held at 90% of target</li>',
           '</ul>',
-          '<p>Your guardrail is overriding your scaler at night.</p>',
+          '<p>Nothing on fire — but the extra pauses and that sync error are worth a look before your day starts.</p>',
         '</div>'
       ].join('')
     }
