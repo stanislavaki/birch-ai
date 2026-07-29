@@ -2086,7 +2086,7 @@
 
   var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap'); });
 
-  var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+  var _idx = 0, _timer = null, _swipeInited = false, _wasInView = false;
 
   /* ── Size carousel: measure all slides, set height to max ── */
   function sizeCarousel() {
@@ -2192,23 +2192,46 @@
     goTo(0, false);
     initSwipe();
     dotsEl.classList.add('acc-mob__dots--paused');
-    if (_observer) _observer.disconnect();
-    _observer = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) {
-        dotsEl.classList.remove('acc-mob__dots--paused');
-        updateDots(_idx);
-        startTimer();
-      } else {
-        dotsEl.classList.add('acc-mob__dots--paused');
-        stopTimer();
-      }
-    }, { threshold: 0.1 });
-    _observer.observe(section);
+    _wasInView = false;
+    window.addEventListener('scroll', syncTimer, { passive: true });
+    window.addEventListener('resize', syncTimer);
+    syncTimer();
+    /* The first check runs before JS has given the carousel its height, so the
+       block can measure as off-screen. Re-check once layout has settled — and do
+       not rely on a scroll event arriving: when the block is already in view and
+       the page does not scroll, none ever fires and the timer never starts. */
+    requestAnimationFrame(function () { requestAnimationFrame(syncTimer); });
+    document.fonts.ready.then(syncTimer);
+  }
+
+  /* Auto-advance runs only while the carousel is on screen. Measured directly
+     instead of with IntersectionObserver: IO does not fire inside the preview
+     panel, so the behaviour could never be verified there — and a trigger that
+     cannot be tested is how the typing animation shipped broken once already. */
+  function inView() {
+    var r  = section.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.bottom > vh * 0.1 && r.top < vh * 0.9;
+  }
+  function syncTimer() {
+    var now = inView();
+    if (now === _wasInView) return;      /* only act on a change of state */
+    _wasInView = now;
+    if (now) {
+      dotsEl.classList.remove('acc-mob__dots--paused');
+      updateDots(_idx);
+      startTimer();
+    } else {
+      dotsEl.classList.add('acc-mob__dots--paused');
+      stopTimer();
+    }
   }
 
   function destroyMobile() {
     stopTimer();
-    if (_observer) { _observer.disconnect(); _observer = null; }
+    window.removeEventListener('scroll', syncTimer);
+    window.removeEventListener('resize', syncTimer);
+    _wasInView = false;
     slides.forEach(function (s) {
       s.style.transform  = '';
       s.style.zIndex     = '';

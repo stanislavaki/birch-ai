@@ -865,7 +865,7 @@
   var dots     = Array.prototype.slice.call(dotsEl.querySelectorAll('.acc-mob-e__dot'));
   var SLIDE_COUNT = slides.length;
   var chatWraps = slides.map(function (s) { return s.querySelector('.chat-card-wrap-e'); });
-  var _idx = 0, _timer = null, _swipeInited = false, _observer = null;
+  var _idx = 0, _timer = null, _swipeInited = false, _wasInView = false;
   function sizeCarousel() {
     slides.forEach(function (s) { s.style.position = 'relative'; s.style.height = 'auto'; });
     chatWraps.forEach(function (w) { w.style.width = ''; w.style.height = ''; });
@@ -953,22 +953,37 @@
     goTo(0, false);
     initSwipe();
     dotsEl.classList.add('acc-mob-e__dots--paused');
-    if (_observer) _observer.disconnect();
-    _observer = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) {
-        dotsEl.classList.remove('acc-mob-e__dots--paused');
-        updateDots(_idx);
-        startTimer();
-      } else {
-        dotsEl.classList.add('acc-mob-e__dots--paused');
-        stopTimer();
-      }
-    }, { threshold: 0.1 });
-    _observer.observe(section);
+    _wasInView = false;
+    window.addEventListener('scroll', syncTimer, { passive: true });
+    window.addEventListener('resize', syncTimer);
+    syncTimer();
+    requestAnimationFrame(function () { requestAnimationFrame(syncTimer); });
+    document.fonts.ready.then(syncTimer);
+  }
+  function inView() {
+    var r  = section.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.bottom > vh * 0.1 && r.top < vh * 0.9;
+  }
+
+  function syncTimer() {
+    var now = inView();
+    if (now === _wasInView) return;
+    _wasInView = now;
+    if (now) {
+      dotsEl.classList.remove('acc-mob-e__dots--paused');
+      updateDots(_idx);
+      startTimer();
+    } else {
+      dotsEl.classList.add('acc-mob-e__dots--paused');
+      stopTimer();
+    }
   }
   function destroyMobile() {
     stopTimer();
-    if (_observer) { _observer.disconnect(); _observer = null; }
+    window.removeEventListener('scroll', syncTimer);
+    window.removeEventListener('resize', syncTimer);
+    _wasInView = false;
     slides.forEach(function (s) {
       s.style.transform  = '';
       s.style.zIndex     = '';

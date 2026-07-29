@@ -35,7 +35,10 @@
 (function () {
   var name = new URLSearchParams(location.search).get('e') || 'birch-mcp-usecases-embed';
 
-  fetch('../embed/' + name + '.html').then(function (r) { return r.text(); }).then(function (html) {
+  /* cache-bust: without it the browser happily serves a stale embed and you end up
+     debugging a file you already fixed */
+  fetch('../embed/' + name + '.html?v=' + Date.now(), { cache: 'no-store' })
+    .then(function (r) { return r.text(); }).then(function (html) {
     var slot = document.getElementById('slot');
     slot.innerHTML = html;
     /* innerHTML never executes <script>, so re-create each one to run it */
