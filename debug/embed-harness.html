@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Embed harness</title>
+<link rel="stylesheet" href="../design-system/webflow-env.css" />
+<style>
+  body { margin: 0; background: #0D0D12; }
+  /* Stands in for the Webflow section + container the embed is dropped into.
+     text-align: center on purpose - real Webflow sections usually carry it, and
+     it inherits into the embed. Anything that must stay left has to say so. */
+  .slot { padding: 3rem 1.5rem; text-align: center; }
+  .bar {
+    position: fixed; right: 0.75rem; top: 0.75rem; z-index: 99;
+    font: 500 12px/1.4 ui-monospace, monospace; color: #909090;
+    background: rgba(0, 0, 0, 0.6); padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+  }
+</style>
+</head>
+<body>
+<!--
+  Why this file exists: opening an embed fragment straight from embed/*.html gives
+  the browser no <!DOCTYPE>, so it renders in QUIRKS MODE. There, tables stop
+  inheriting font-size (UA rule `table { font-size: medium }`), so the stats table
+  in the chat card measures against 16px instead of the card's em scale — the embed
+  looks broken for a reason that never happens on the real site. Check embeds here.
+
+  Usage: debug/embed-harness.html?e=birch-mcp-usecases-embed
+-->
+<div class="bar" id="bar">loading...</div>
+<div class="slot" id="slot"></div>
+
+<script>
+(function () {
+  var name = new URLSearchParams(location.search).get('e') || 'birch-mcp-usecases-embed';
+
+  fetch('../embed/' + name + '.html').then(function (r) { return r.text(); }).then(function (html) {
+    var slot = document.getElementById('slot');
+    slot.innerHTML = html;
+    /* innerHTML never executes <script>, so re-create each one to run it */
+    Array.prototype.forEach.call(slot.querySelectorAll('script'), function (old) {
+      var s = document.createElement('script');
+      if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
+      old.parentNode.replaceChild(s, old);
+    });
+    document.getElementById('bar').textContent =
+      name + ' | ' + html.length.toLocaleString('en-US') + ' chars | ' + document.compatMode;
+  });
+})();
+</script>
+</body>
+</html>
