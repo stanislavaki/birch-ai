@@ -1,0 +1,293 @@
+/* ==========================================================================
+   Chat card — the AI-chat mockup used inside accordions and promo blocks.
+
+   Sizing is driven by .chat-card-wrap (container-type: inline-size); every
+   inner dimension is em/cqi so the whole card scales from one font-size.
+
+   Extracted from birch-mcp.html so there is a single source of truth. The
+   other pages (ai-promo, manage, acc-mob-dev) and every embed still carry
+   their own forked copies — see the migration note in the repo tasks before
+   pointing them here, because their values differ.
+   ========================================================================== */
+
+/* ─────────────────────────────────────────
+   CHAT CARD
+───────────────────────────────────────── */
+
+/* Wrapper owns the sizing — enables container queries for the card */
+.chat-card-wrap {
+  height: min(70vh, 45rem); /* 45rem = 720px */
+  width: auto;
+  aspect-ratio: 400 / 600;
+  container-type: inline-size;
+}
+
+.chat-card {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 1.5em;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font);
+  font-size: clamp(0.5625rem, 1.125vw, 1.125rem); /* fallback */
+  font-size: 4.095cqi;                            /* 16.2px @ 395px card width — 10% down from 4.55 */
+  font-weight: 500;
+  color: #161616;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Body */
+.chat-card__body {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+  display: flex;
+  flex-direction: column;
+}
+.chat-card__body::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+/* Feed — wraps all exchanges */
+.chat-card__feed {
+  padding: 1em 1em 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+
+/* Messages group */
+.chat-card__messages {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5em;
+}
+
+/* User bubble */
+.chat-card__bubble {
+  background: #f2f2f2;
+  border-radius: 1em 1em 0.25em 1em;
+  padding: 0.6em 0.875em;
+  max-width: 85%;
+  font-weight: 500;
+  line-height: 1.467;
+  letter-spacing: 0.01em;
+  color: #161616;
+  opacity: 0;
+  transform: translateY(0.5em);
+  transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+              transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.chat-card__bubble.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* AI response area — fades + floats in after send */
+.chat-card__response {
+  padding: 0;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateY(0.5em);
+  transition: opacity 0.35s cubic-bezier(0.2, 0, 0, 1),
+              transform 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.chat-card__response.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Inner content — base text styles for AI responses */
+.chat-card__response-content {
+  color: #161616;
+  line-height: 1.467;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+}
+/* The global variable-font reset declares * { font-weight: 600 }, which hits every
+   node directly and flattens the answer to a single weight — the bold parts stop
+   reading as bold. Restore the body weight here; the emphasised blocks below
+   re-assert 600 with a higher-specificity selector. */
+.chat-card__response-content,
+.chat-card__response-content p,
+.chat-card__response-content li,
+.chat-card__response-content td,
+.chat-card__response-content th { font-weight: 500; }
+.chat-card__response-content p {
+  margin: 0 0 0.4em;
+}
+.chat-card__response-content p:last-child { margin-bottom: 0; }
+/* DemiBold, matching the mock — not the browser's heavier default bold */
+.chat-card__response-content strong { font-weight: 600; }
+/* "Used:" — which connectors Claude reached. A label line, then a row of
+   marks followed by the names; both in body size and semibold, per the mock. */
+.chat-card__used {
+  margin: 0 0 0.533em;        /* 8px @ 15px */
+  font-weight: 600;
+}
+.chat-card__used-row {
+  display: flex;
+  align-items: center;
+  gap: 0.133em;               /* 2px @ 15px */
+  margin: 0 0 1.067em;        /* 16px @ 15px — down to the answer body */
+  font-weight: 600;
+}
+.chat-card__used-icon {
+  flex: 0 0 auto;
+  width: 1.267em;             /* 19px @ 15px */
+  height: 1.267em;
+  border-radius: 0.362em;
+}
+.chat-card__used-names { padding-left: 0.267em; }   /* 4px @ 15px */
+.chat-card__response-content ul {
+  margin: 0.25em 0;
+  padding-left: 1.25em;
+}
+.chat-card__response-content li { margin-bottom: 0.2em; }
+
+/* card 0 — the three source lines carry the answer, so they are set bold and
+   without list markers; the plain sentence below them stays regular weight.
+   Selectors are scoped to the response so they outrank the generic ul/li above. */
+.chat-card__response-content .chat-card__lines {
+  list-style: none;
+  margin: 0 0 1.067em;
+  padding: 0;
+  font-weight: 600;
+}
+.chat-card__response-content .chat-card__lines li { margin: 0; font-weight: 600; }
+
+/* card 2 — digest lines are prefixed with a middle dot, not a disc bullet */
+.chat-card__response-content .chat-card__dots {
+  list-style: none;
+  margin: 0.25em 0 1.067em;
+  padding: 0;
+}
+.chat-card__response-content .chat-card__dots li { margin: 0; }
+.chat-card__response-content .chat-card__dots li::before { content: "·\00a0"; }
+
+/* Rule-audit table — card 1 answers with a status breakdown, not a list */
+.chat-card__stats {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.25em 0 0.6em;
+}
+.chat-card__stats th,
+.chat-card__stats td {
+  text-align: left;
+  padding: 0.3em 0.5em;
+}
+.chat-card__stats th {
+  font-size: 0.8em;           /* the header stays a step down, as in the mock */
+  color: var(--color-text-grey);
+}
+/* the count column only ever holds two digits — keep it off the right edge */
+.chat-card__stats th:last-child,
+.chat-card__stats td:last-child { width: 22%; }
+.chat-card__stats td:last-child { font-weight: 600; }
+.chat-card__stats tbody tr:nth-child(odd) td { background: #f4f4f5; }
+.chat-card__stats tbody tr td:first-child { border-radius: 0.4em 0 0 0.4em; }
+.chat-card__stats tbody tr td:last-child  { border-radius: 0 0.4em 0.4em 0; }
+
+/* "Review rule" link — card 0 only */
+.chat-card__review-link {
+  display: block;
+  color: #0067ed;
+  line-height: 1.467;
+  margin-top: 0.375em;
+  cursor: pointer;
+}
+
+/* Input area */
+.chat-card__input-area {
+  flex-shrink: 0;
+  padding: 1em;
+  position: relative;
+}
+/* Fade gradient above input */
+.chat-card__input-area::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 100%;
+  height: 2.5em;
+  background: linear-gradient(to bottom, transparent, #fff);
+  pointer-events: none;
+}
+.chat-card__input-wrap {
+  position: relative;
+  background: #fff;
+  border: 0.0625rem solid #ccc;
+  border-radius: 1em;
+  padding: 0.9em 3.5em 0.9em 1.25em;
+  display: flex;
+  align-items: center;
+  /* same size as the chat text — the input is not a step down */
+  font-size: 1em;
+  line-height: 1.4;
+  min-height: 3em;
+}
+.chat-card__text-flow {
+  flex: 1;
+  min-width: 0;
+  line-height: inherit;
+}
+.chat-card__placeholder {
+  color: #9e9e9e;
+  font-weight: 500 !important;
+  pointer-events: none;
+  user-select: none;
+}
+.chat-card__typed {
+  color: #161616;
+  font-weight: 500;
+  /* visibility toggled via inline style in JS — no display:none here */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-card__cursor {
+  display: inline-block;
+  width: 0.1em;
+  height: 1.1em;
+  background: #161616;
+  vertical-align: text-bottom;
+  margin-left: 0.0625rem;
+  opacity: 0;
+}
+.chat-card__cursor.is-blinking {
+  animation: cursorBlink 0.9s step-end infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+/* Send button — inside the textarea, absolute.
+   bottom = (padding-top + line-height + padding-bottom - button-height) / 2
+          = (0.9 + 1.4 + 0.9 - 2) / 2 = 0.6em  → centers in single-line input,
+   stays pinned to bottom when input grows to multiple lines. */
+.chat-card__send {
+  position: absolute;
+  right: 0.4375em;
+  bottom: 0.6em;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  border: none;
+  background: #e8e8e8;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: background 0.2s;
+}
+.chat-card__send.is-active {
+  background: #161616;
+  cursor: pointer;
+}
+.chat-card__send svg {
+  width: 1em;
+  height: 1em;
+}

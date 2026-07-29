@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="./tokens.css" />
 <link rel="stylesheet" href="./components/button.css" />
 <link rel="stylesheet" href="./components/card-accordion.css" />
+<link rel="stylesheet" href="./components/chat-card.css" />
 <style>
   html { background: var(--color-bg); }
   body {
@@ -248,6 +249,7 @@
   <nav class="sg-anchors" id="anchors-components" style="display:none">
     <a href="#s-buttons">Buttons</a>
     <a href="#s-accordion">Card Accordion</a>
+    <a href="#s-chat-card">Chat Card</a>
     <a href="#s-live">Live Usage Demo</a>
   </nav>
 </div>
@@ -1032,6 +1034,111 @@
         <tr><td>Description</td><td class="muted">.t-para-lg · 20px · 600 · LH 1.1 · --color-text-grey</td></tr>
         <tr><td>Progress track</td><td class="muted">4px · --radius-sm · rgba(255,255,255,0.15)</td></tr>
         <tr><td>Progress fill</td><td class="muted">4px · --radius-sm · --color-accent-green</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ CHAT CARD ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-chat-card">Chat Card</div>
+    <hr class="sg-divider" />
+    <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin: 0 0 2rem; max-width: 52rem;">
+      The AI-chat mockup used inside use-case accordions and promo blocks.
+      <code>.chat-card-wrap</code> owns the sizing and declares <code>container-type: inline-size</code>;
+      every dimension inside the card is <code>em</code>/<code>cqi</code>, so the whole thing scales
+      from one font-size. Set the wrapper's height (or width) and nothing inside needs touching.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; max-width: 860px;">
+      <!-- Answer as source lines -->
+      <div>
+        <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.75rem;">Answer — source lines</div>
+        <div class="chat-card-wrap" style="height: 26rem;">
+          <div class="chat-card">
+            <div class="chat-card__body">
+              <div class="chat-card__feed">
+                <div class="chat-card__messages">
+                  <div class="chat-card__bubble is-visible">Why did Meta spend jump yesterday? Check analytics and what we shipped.</div>
+                </div>
+                <div class="chat-card__response is-visible">
+                  <div class="chat-card__response-content">
+                    <div class="chat-card__used">Used:</div>
+                    <div class="chat-card__used-row"><span class="chat-card__used-names">Bïrch MCP · Analytics · Linear</span></div>
+                    <ul class="chat-card__lines">
+                      <li>Bïrch — "Scale winners" fired 6× on Q4 Prospecting</li>
+                      <li>Analytics — paid sessions +38%, checkout flat</li>
+                      <li>Linear — "New PDP layout" shipped Tuesday</li>
+                    </ul>
+                    <p>Your scaling rule reacted to Tuesday's launch, but conversions didn't follow.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+                <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Answer as a stats table -->
+      <div>
+        <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.75rem;">Answer — stats table</div>
+        <div class="chat-card-wrap" style="height: 26rem;">
+          <div class="chat-card">
+            <div class="chat-card__body">
+              <div class="chat-card__feed">
+                <div class="chat-card__messages">
+                  <div class="chat-card__bubble is-visible">Audit my automations — what's actually working?</div>
+                </div>
+                <div class="chat-card__response is-visible">
+                  <div class="chat-card__response-content">
+                    <div class="chat-card__used">Used:</div>
+                    <div class="chat-card__used-row"><span class="chat-card__used-names">Bïrch MCP</span></div>
+                    <table class="chat-card__stats">
+                      <thead><tr><th>Status</th><th>Rules</th></tr></thead>
+                      <tbody>
+                        <tr><td>&#x1F7E2; Firing usefully</td><td>41</td></tr>
+                        <tr><td>&#x26AA; Never matching</td><td>23</td></tr>
+                        <tr><td>&#x1F534; Erroring silently</td><td>5</td></tr>
+                        <tr><td>&#x26AB; Disabled</td><td>18</td></tr>
+                      </tbody>
+                    </table>
+                    <p>28 are dead weight or broken. Want me to pull them up?</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-card__input-area">
+              <div class="chat-card__input-wrap">
+                <div class="chat-card__text-flow"><span class="chat-card__placeholder">Ask anything</span></div>
+                <button class="chat-card__send" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spec -->
+    <table class="sg-pad-table" style="max-width: 860px; margin-top: 2rem;">
+      <thead>
+        <tr><th>ELEMENT</th><th>CLASS / VALUE</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Sizing wrapper</td><td class="muted">.chat-card-wrap · container-type: inline-size</td></tr>
+        <tr><td>Card</td><td class="muted">.chat-card · #fff · radius 1.5em · font-size 4.095cqi</td></tr>
+        <tr><td>Question bubble</td><td class="muted">.chat-card__bubble.is-visible · #f2f2f2</td></tr>
+        <tr><td>Answer</td><td class="muted">.chat-card__response.is-visible &gt; .chat-card__response-content</td></tr>
+        <tr><td>Connectors used</td><td class="muted">.chat-card__used + .chat-card__used-row (icons 1.267em) · 600</td></tr>
+        <tr><td>Source lines</td><td class="muted">ul.chat-card__lines · no markers · 600</td></tr>
+        <tr><td>Digest lines</td><td class="muted">ul.chat-card__dots · "·" prefix · 500</td></tr>
+        <tr><td>Stats table</td><td class="muted">table.chat-card__stats · head 0.8em grey · counts 600 · zebra on odd rows</td></tr>
+        <tr><td>Body text</td><td class="muted">500 — re-declared to survive the global * { font-weight: 600 } reset</td></tr>
+        <tr><td>Input row</td><td class="muted">.chat-card__input-wrap · 1em, same size as the chat text</td></tr>
       </tbody>
     </table>
   </section>
