@@ -284,7 +284,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; padding
   font-size: var(--text-eyebrow-size);
   line-height: var(--text-eyebrow-lh);
   letter-spacing: var(--text-eyebrow-ls);
-  font-weight: 600;
+  font-weight: 700; /* Birch/Eyebrow is Bold in Figma */
   text-transform: uppercase;
 }
 .t-btn {
