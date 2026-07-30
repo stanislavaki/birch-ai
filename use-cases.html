@@ -417,7 +417,11 @@
   ───────────────────────────────────────── */
   .uc-prompt {
     position: relative;
-    border: 3px dotted var(--color-text-inverted); /* mock dashed → dotted per DS rule */
+    /* Muted section-color fill, mixed into the card grey so it stays in tone;
+       hairline border = same mix, one step darker */
+    /* Pale accents (yellow, light-blue) need a stronger mix — see --wf-mix on sections */
+    background: color-mix(in srgb, var(--wf-c, #909090) var(--wf-mix, 12%), #F6F5FA);
+    border: 1px solid color-mix(in srgb, var(--wf-c, #909090) var(--wf-mix-b, 28%), #F6F5FA);
     border-radius: 0.375rem; /* 6px per mock — no DS token */
     padding: var(--space);
     display: grid;
@@ -444,9 +448,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FFFFFF;
-    /* Claude-style nuanced button: hairline border, quiet hover */
-    border: 1px solid rgba(13, 13, 18, 0.12);
+    /* Slightly darker than the prompt fill; icon takes the text color */
+    background: color-mix(in srgb, var(--wf-c, #FFFFFF) calc(var(--wf-mix, 12%) + 14%), #F6F5FA);
+    border: none; /* borderless variant under review */
     border-radius: 0.25rem;
     cursor: pointer;
     font-size: 0.8rem;
@@ -455,15 +459,25 @@
     transition: background 0.12s ease, border-color 0.12s ease;
   }
   .uc-copy:hover {
-    background: #F7F7F7;
-    border-color: rgba(13, 13, 18, 0.24);
+    background: color-mix(in srgb, var(--wf-c, #FFFFFF) calc(var(--wf-mix, 12%) + 24%), #F6F5FA);
   }
-  .uc-copy img { display: block; width: 0.9rem; height: 0.9rem; border-radius: 0; }
+  /* Icon is painted via mask so it can follow --wf-cd */
+  .uc-copy img { display: none; }
+  .uc-copy::after {
+    content: "";
+    width: 0.9rem;
+    height: 0.9rem;
+    background: var(--wf-cd, var(--color-text-inverted));
+    -webkit-mask: url("images/use-cases/copy-icon-black.svg") center / contain no-repeat;
+    mask: url("images/use-cases/copy-icon-black.svg") center / contain no-repeat;
+  }
   .uc-copy.is-done { background: var(--color-bg); color: var(--color-text); }
-  .uc-copy.is-done img { display: none; }
+  .uc-copy.is-done::after { display: none; }
+  /* Placeholder reads as an empty input field: white chip, section-toned text */
   .uc-ph {
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: #FFFFFF;
+    color: var(--wf-cd, var(--color-text-inverted));
+    border: 1px solid color-mix(in srgb, var(--wf-c, #909090) 40%, #F6F5FA);
     border-radius: 0.25em;
     padding: 0 0.25em 0.1em;
   }
@@ -574,7 +588,7 @@
     <div class="uc-content">
 
       <!-- ════════ 01 · AUDIT & REVIEW ════════ -->
-      <section class="uc-wf" id="wf-audit" data-title="Audit &amp; Review" style="--wf-c: var(--color-accent-green); --wf-cd: #04A000">
+      <section class="uc-wf" id="wf-audit" data-title="Audit &amp; Review" style="--wf-c: var(--color-accent-green); --wf-cd: #037A00">
         <div class="uc-banner">
           <h2 class="t-para-xl">Audit &amp; Review</h2>
           <p class="uc-banner__quote">“I need to understand what my automation is doing and how it helps with my campaigns performance.”</p>
@@ -665,7 +679,7 @@
       </section>
 
       <!-- ════════ 02 · BUILD & SET UP ════════ -->
-      <section class="uc-wf" id="wf-build" data-title="Build &amp; Set Up" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #1B9EC3">
+      <section class="uc-wf" id="wf-build" data-title="Build &amp; Set Up" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #136F88; --wf-mix: 26%; --wf-mix-b: 52%">
         <div class="uc-banner">
           <h2 class="t-para-xl">Build &amp; Set Up</h2>
           <p class="uc-banner__quote">“I need to create rules — or figure out which ones to create.”</p>
@@ -730,7 +744,7 @@
       </section>
 
       <!-- ════════ 03 · MONITOR & CONTROL ════════ -->
-      <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #BF9708">
+      <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #826705; --wf-mix: 30%; --wf-mix-b: 60%">
         <div class="uc-banner">
           <h2 class="t-para-xl">Monitor &amp; Control</h2>
           <p class="uc-banner__quote">“I need to know what's happening — and whether my guardrails are holding.”</p>
@@ -861,7 +875,7 @@
       </section>
 
       <!-- ════════ 05 · CREATE & TEST AT SCALE ════════ -->
-      <section class="uc-wf" id="wf-create" data-title="Create &amp; Test at Scale" style="--wf-c: var(--color-accent-orange); --wf-cd: #BD5A05">
+      <section class="uc-wf" id="wf-create" data-title="Create &amp; Test at Scale" style="--wf-c: var(--color-accent-orange); --wf-cd: #A64F04">
         <div class="uc-banner">
           <h2 class="t-para-xl">Create &amp; Test at Scale</h2>
           <p class="uc-banner__quote">“I need to get creatives into ad accounts and test them.”</p>
