@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Use cases — wireframe concepts</title>
+<style>
+  /* ── Wireframe base (Inter, no design-system dependency) ── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Inter", -apple-system, sans-serif;
+    background: #0D0D12;
+    color: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ── Concept switcher (fixed top) ── */
+  .tabsbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 3.2rem; /* must match main padding-top and .barB sticky top */
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0 1.25rem;
+    background: #0D0D12;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .tabsbar__title { font-size: 0.8rem; color: #909090; margin-right: 1rem; }
+  .tab {
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+    background: none; color: #fff;
+    padding: 0.35rem 0.9rem; font-size: 0.85rem;
+  }
+  .tab.is-on { background: #FFE243; color: #0D0D12; border-color: #FFE243; font-weight: 600; }
+  main { padding-top: 3.2rem; }
+
+  /* ── Concept description strip ── */
+  .concept-note {
+    max-width: 80rem; margin: 0 auto; padding: 1rem 1.5rem 0;
+    font-size: 0.8rem; color: #909090; line-height: 1.5;
+  }
+  .concept-note b { color: #c9c9ce; }
+
+  /* ── Hero + product cards (shared) ── */
+  .hero { text-align: center; padding: 3rem 1.5rem 1rem; }
+  .hero h1 { font-size: 2.6rem; letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+  .hero p { color: #909090; font-size: 1.05rem; max-width: 40rem; margin: 0 auto; }
+  .pcards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+    max-width: 64rem; margin: 2rem auto 0; padding: 0 1.5rem;
+    text-align: center;
+  }
+  .pcard { border-radius: 1rem; padding: 1.5rem 1.25rem; }
+  .pcard--ai   { background: #1877F2; }
+  .pcard--mcp  { background: #FF21A6; }
+  .pcard--meta { background: #E4E4E6; color: #0D0D12; }
+  .pcard__logo { font-weight: 800; font-size: 1.3rem; margin-bottom: 0.75rem; }
+  .pcard__tag  { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .pcard__desc { font-size: 0.8rem; line-height: 1.45; opacity: 0.85; }
+
+  /* ── Filter chips ── */
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+    background: none; color: #c9c9ce;
+    padding: 0.3rem 0.8rem; font-size: 0.8rem;
+  }
+  .chip.is-on { background: #FFE243; border-color: #FFE243; color: #0D0D12; font-weight: 600; }
+  .chip__dot { display: inline-block; width: 0.5em; height: 0.5em; border-radius: 50%; margin-right: 0.35em; background: var(--c, #909090); }
+
+  /* ── Sections ── */
+  .wf-section { scroll-margin-top: 7rem; }
+  .wf-section.is-hidden { display: none; }
+  .wf-section__head { margin: 3rem 0 1.25rem; }
+  .wf-section__num { font-size: 0.75rem; letter-spacing: 0.12em; color: #909090; text-transform: uppercase; }
+  .wf-section__head h2 { font-size: 1.8rem; letter-spacing: -0.02em; margin: 0.25rem 0; }
+  .wf-section__quote { color: #909090; font-size: 0.95rem; font-style: italic; }
+
+  /* ── Use case card ── */
+  .card {
+    background: #16161C;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    padding: 1.4rem;
+    display: grid; gap: 0.85rem;
+    align-content: start;
+    scroll-margin-top: 7rem;
+  }
+  .card.is-hidden { display: none; }
+  .card + .card { margin-top: 1rem; }
+  .card--road { opacity: 0.65; border-style: dashed; }
+  .card__head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+  .card__head h3 { font-size: 1.15rem; letter-spacing: -0.01em; line-height: 1.25; }
+  .badges { display: flex; gap: 0.35rem; flex-wrap: wrap; flex-shrink: 0; }
+  .bdg {
+    display: inline-flex; align-items: center;
+    border: 1px solid var(--c); color: var(--c);
+    border-radius: 999px; padding: 0.15rem 0.6rem;
+    font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+  }
+  .bdg em { font-style: normal; font-weight: 400; opacity: 0.8; margin-left: 0.3em; }
+  .card__desc { color: #c9c9ce; font-size: 0.9rem; line-height: 1.5; }
+  .card__note { color: #FFB84D; font-size: 0.8rem; line-height: 1.45; }
+  .chain { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; font-size: 0.75rem; color: #909090; }
+  .chain code {
+    background: #0F0F14; border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 0.4rem; padding: 0.15rem 0.5rem;
+    font-family: inherit; color: #c9c9ce;
+  }
+  .saydont { display: grid; gap: 0.3rem; font-size: 0.8rem; line-height: 1.45; }
+  .say  { color: #7ED957; }
+  .dont { color: #FF7A7A; }
+  .say b, .dont b { font-weight: 700; }
+
+  /* ── Prompt block ── */
+  .prompt {
+    background: #0F0F14;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 0.75rem;
+    padding: 0.8rem 1rem;
+  }
+  .prompt__bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; }
+  .prompt__label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #909090; }
+  .copy {
+    border: 1px solid rgba(255,255,255,0.18); border-radius: 0.4rem;
+    background: none; color: #c9c9ce;
+    padding: 0.15rem 0.55rem; font-size: 0.72rem;
+  }
+  .copy.is-done { border-color: #7ED957; color: #7ED957; }
+  .prompt p { font-size: 0.88rem; line-height: 1.5; color: #e8e8ec; }
+  .ph { background: rgba(255,226,67,0.16); color: #FFE243; border-radius: 0.25rem; padding: 0 0.2em; }
+
+  /* ── Concept A: sidebar layout ── */
+  .layA {
+    display: grid; grid-template-columns: 15rem 1fr; gap: 2.5rem;
+    max-width: 80rem; margin: 1rem auto 0; padding: 0 1.5rem 6rem;
+    align-items: start;
+  }
+  .tocA {
+    position: sticky; top: 4.2rem; display: grid; gap: 1.25rem;
+    /* Safety: accordion may exceed short viewports — sticky blocks don't scroll on their own */
+    max-height: calc(100vh - 5.5rem); overflow-y: auto; align-content: start;
+  }
+  .tocA__label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #909090; }
+  /* Sidebar filter: pills stacked vertically */
+  .tocA .chips { flex-direction: column; align-items: flex-start; }
+  .tocA nav { display: grid; gap: 0.15rem; }
+  .tocA nav a {
+    display: flex; justify-content: space-between; gap: 0.5rem;
+    padding: 0.45rem 0.7rem; border-radius: 0.5rem;
+    font-size: 0.85rem; color: #c9c9ce;
+  }
+  .tocA nav a:hover { background: #16161C; }
+  .tocA nav a.is-active { background: #16161C; color: #fff; box-shadow: inset 2px 0 0 #FFE243; }
+  .tocA nav a.is-empty { opacity: 0.3; pointer-events: none; }
+  .tocA .cnt { color: #909090; font-size: 0.75rem; }
+  /* Concept E: accordion sub-list of cases under each workflow */
+  .tocA__sub {
+    display: none;
+    margin-left: 0.7rem; padding: 0.1rem 0 0.3rem 0.6rem;
+    border-left: 1px solid rgba(255,255,255,0.12);
+  }
+  .tocA__group.is-open .tocA__sub { display: block; }
+  .tocA nav .tocA__sub a {
+    display: block; padding: 0.28rem 0.5rem;
+    font-size: 0.78rem; line-height: 1.35; color: #909090;
+    box-shadow: none; background: none;
+  }
+  .tocA nav .tocA__sub a:hover { color: #fff; background: none; }
+  .tocA nav .tocA__sub a.is-active { color: #FFE243; background: none; box-shadow: none; }
+  .tocA nav .tocA__sub a.is-hidden { display: none; }
+  .colA { max-width: 46rem; }
+
+  /* ── Concept B: sticky top bar ── */
+  .barB {
+    position: sticky; top: 3.2rem; z-index: 50;
+    background: #0D0D12;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding: 0.6rem 1.5rem;
+  }
+  .barB__inner {
+    max-width: 80rem; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .barB__anchors { display: flex; gap: 0.25rem; overflow-x: auto; }
+  .barB__anchors a {
+    padding: 0.35rem 0.75rem; border-radius: 999px;
+    font-size: 0.82rem; color: #c9c9ce; white-space: nowrap;
+  }
+  .barB__anchors a:hover { background: #16161C; }
+  .barB__anchors a.is-active { background: #16161C; color: #FFE243; }
+  .barB__anchors a.is-empty { opacity: 0.3; pointer-events: none; }
+  .colB { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem 6rem; }
+  .gridB { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  .gridB .card + .card { margin-top: 0; }
+
+  /* ── Concept C: map overview ── */
+  .colC { max-width: 64rem; margin: 0 auto; padding: 0 1.5rem 6rem; }
+  .mapC {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .mapC__tile {
+    background: #16161C; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem; padding: 1.1rem;
+  }
+  .mapC__tile h4 { font-size: 0.95rem; margin-bottom: 0.6rem; }
+  .mapC__tile a {
+    display: flex; align-items: baseline; gap: 0.4rem;
+    padding: 0.28rem 0; font-size: 0.8rem; color: #c9c9ce; line-height: 1.35;
+  }
+  .mapC__tile a:hover { color: #fff; }
+  .mapC__tile a.is-hidden { display: none; }
+  .dots { display: inline-flex; gap: 0.2rem; flex-shrink: 0; transform: translateY(-0.05em); }
+  .dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--c); }
+  .filterC { display: flex; justify-content: center; margin-top: 2rem; }
+  /* Concept D: map block width when used above the sidebar layout */
+  .mapD { max-width: 64rem; margin: 0 auto; padding: 0 1.5rem; }
+  .upC {
+    position: fixed; right: 1.5rem; bottom: 1.5rem; z-index: 60;
+    width: 2.8rem; height: 2.8rem; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2); background: #16161C; color: #fff;
+    font-size: 1.1rem;
+  }
+
+  /* ── Minimal mobile fallback (wireframe is desktop-first) ── */
+  @media (max-width: 767px) {
+    .pcards, .mapC, .gridB { grid-template-columns: 1fr; }
+    .layA { grid-template-columns: 1fr; }
+    .tocA { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<header class="tabsbar">
+  <span class="tabsbar__title">Use cases — wireframes</span>
+  <button class="tab is-on" data-tab="a">A &middot; Сайдбар</button>
+  <button class="tab" data-tab="b">B &middot; Топ-бар</button>
+  <button class="tab" data-tab="c">C &middot; Карта</button>
+  <button class="tab" data-tab="d">D &middot; Гибрид A+C</button>
+  <button class="tab" data-tab="e">E &middot; Аккордеон</button>
+</header>
+
+<main id="mount"></main>
+
+<script>
+/* ═══════════ DATA — all 20 use cases, condensed from the source doc ═══════════ */
+
+var PRODUCTS = {
+  ai:   { label: 'Birch AI',  color: '#59A8FF' },
+  mcp:  { label: 'Birch MCP', color: '#FF5FBE' },
+  meta: { label: 'Meta MCP',  color: '#B4B4B4' },
+  road: { label: '🔜 Roadmap', color: '#909090' }
+};
+
+var WF = [
+  { id: 'audit', num: '01', title: 'Audit & Review',
+    quote: '"I need to understand what my automation is doing and how it helps performance."',
+    cases: [
+      { t: 'Review existing rules for errors and gaps', products: ['ai','mcp'],
+        desc: "Reads every rule's conditions, actions, schedule and filters, then flags issues: overlapping conditions, contradictory actions, thresholds with no volume guard, long-disabled rules.",
+        say: "Birch AI reads your full rule set and flags what looks wrong — it's a second pair of eyes.",
+        dont: '"It optimizes your rules" or "it fixes problems automatically."',
+        prompts: ["Audit all my Meta rules and identify outdated, duplicated, risky, or conflicting automations."] },
+      { t: 'Analyze rule execution logs', products: ['mcp'],
+        chain: ['list_rule_logs','get_rule_log'],
+        desc: "Run-by-run summaries and per-entity outcomes: which ad was paused, which budget changed, what condition values were evaluated, what errors occurred.",
+        say: "You can see exactly what each rule did — per ad, per run.",
+        dont: '"It shows the impact on your ROAS." (Rule actions, not performance metrics.)',
+        prompts: ['I want to see the logs for my rule called "Pause on high CPA" for the last week — what fired, what didn\'t, and why.'] },
+      { t: 'Audit rules structure + identify zombie rules and over-firing', products: ['ai','mcp'],
+        chain: ['list_rule_folders','list_automation_rules','list_rule_logs','get_rule_log'],
+        desc: "Inventory all rules, check recent execution history, and classify: firing usefully, enabled but never triggering, firing too broadly, or fighting each other. Scope by folder for large accounts.",
+        say: "Check which of your rules are actually doing useful work — and which are dead weight.",
+        dont: '"It cleans up your rules" — it reads and reports; you decide.',
+        prompts: ["I have 80 rules and I've lost track — what's actually running, and is anything working against me?"] },
+      { t: 'Get the full picture of Meta account without opening Ads Manager', products: ['meta'],
+        desc: "Three jobs: the overnight briefing, validating what automation did, and calibrating against the market — all without opening Ads Manager.",
+        prompts: [
+          { l: 'Overnight briefing', t: "Access Meta Ads Manager history and show what recent changes were made to my campaigns — give me the briefing I'd build myself from Ads Manager if I had 45 minutes." },
+          { l: 'Rule validation', t: 'The ad set "[ad set name]" that my rule paused this week — was it actually underperforming, or did something else change? Pull ad-level performance and auction context from around the time it paused.' },
+          { l: 'Calibration', t: 'My campaign "[campaign name]" feels expensive lately. Compare its costs and delivery against auction benchmarks so I can tell if it\'s a me problem or a market problem.' }
+        ] }
+    ] },
+
+  { id: 'build', num: '02', title: 'Build & Set Up',
+    quote: '"I need to create rules — or figure out which ones to create."',
+    cases: [
+      { t: 'Get starter rule suggestions based on actual account data', products: ['ai'],
+        desc: "Reads connected ad accounts, current performance and existing rules, then suggests rules from the Strategy Library tailored to what it sees. On Meta — clickable draft links.",
+        say: "It reads your account and suggests rules grounded in your actual setup.",
+        dont: '"It sets up your account for you."',
+        prompts: ["Suggest new rules to expand my current rules setup based on what you see in my account."] },
+      { t: 'Create a rule from natural language', products: [['ai','Meta only']],
+        desc: "Describe the rule in plain language — Birch AI creates a draft in the \"Birch AI Playbook\" folder. The user reviews, edits, and activates.",
+        note: "Draft generation is Meta only; other platforms get text descriptions. Always review drafts before activating.",
+        prompts: ["Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40."] },
+      { t: 'Find which metrics are available for rules', products: ['ai','mcp'],
+        chain: ['search_metrics'],
+        desc: "Natural-language search of Birch's metric catalog — Meta, Google, TikTok, Snapchat plus attribution platforms. Returns metric ID, label, and whether it's usable in rules.",
+        prompts: ["Can you suggest metrics for TikTok to use in rules?"] },
+      { t: 'Create rules from Claude', products: [], road: true,
+        desc: "Birch MCP is read-only today. Write tools are in the backlog — when shipped, rules will always be created as drafts, never live without approval.",
+        say: "You can create rules from natural language inside the Birch app today; from Claude — on our roadmap." }
+    ] },
+
+  { id: 'monitor', num: '03', title: 'Monitor & Control',
+    quote: '"I need to know what\'s happening — and whether my guardrails are holding."',
+    cases: [
+      { t: 'Quick performance overview', products: ['ai'],
+        desc: "ROAS, spend, CPA across all connected platforms in natural language, with custom timeframes. Entity-level breakdown is Meta only.",
+        note: "Birch MCP cannot do this — it has no performance metrics.",
+        prompts: ["How is my ROAS across all ad accounts this week compared to last week?"] },
+      { t: 'Setup health check', products: ['ai',['mcp','logic only']],
+        desc: "Reviews the rule set for offense/defense imbalance: scaling on single-day data, missing budget caps, aggressive increases without guardrails, no recovery rules for paused winners.",
+        prompts: ["My budgets keep swinging up and down week to week — can you check if my scaling rules are missing budget caps, relying on single-day data, or if I'm missing recovery rules for winners that got paused?"] },
+      { t: 'Find growth opportunities', products: ['ai'],
+        desc: "Identifies high-performing ad sets that are underfunded and poor performers consuming budget, with scaling or pausing recommendations.",
+        prompts: ["Identify high-performing ad sets that are underfunded and poor performers consuming budget, and recommend scaling or pausing decisions."] },
+      { t: 'Trace what a rule did to specific entities', products: ['mcp'],
+        chain: ['get_rule_log'],
+        desc: "Per-entity outcome for debugging: which condition was evaluated, what metric value was checked, what action was applied — plus the historical rule snapshot at time of execution.",
+        prompts: ['My ad "[ad name]" got paused this morning by the rule "[rule name]" — pull the log for that run and show me exactly which condition triggered it, the metric value at the time, and whether the rule\'s been edited recently.'] }
+    ] },
+
+  { id: 'compete', num: '04', title: 'Compete & Benchmark',
+    quote: '"I need to know what\'s happening outside my account."',
+    cases: [
+      { t: 'Competitive creative research via Ads Library', products: ['meta'],
+        desc: "Search the Facebook Ads Library in plain language — active ads, formats, hooks — without navigating the Ads Library UI. Publicly visible ads only.",
+        prompts: [
+          { l: 'Category angles', t: "Which creative angles are performing best in ecommerce supplements in the US right now? Pull active ads running 30+ days and show me what hooks, formats, and offers show up most." },
+          { l: 'Competitor', t: "Show me all active ads from [Competitor Name] running in the US right now. Focus on ads active for more than 30 days. Prioritize video and carousel formats." }
+        ] },
+      { t: 'Industry and auction benchmarks', products: ['meta'],
+        desc: "Compare ad account performance against auction and industry benchmarks — data not available in the regular Meta API or Birch's own analytics.",
+        prompts: ["How is my account performing compared to other advertisers in my auction? I want to know where I'm above benchmark and where I'm losing ground — CPM, CTR, whatever is available."] },
+      { t: 'Anomaly detection and Opportunity Score', products: ['meta'],
+        desc: "Unusual spend patterns, sudden metric shifts, Meta's Opportunity Score. Also lists custom audiences, images and videos for quick creative audits.",
+        prompts: ["Has anything unusual happened in my campaigns in the last 7 days? Flag anything that looks off — sudden drops in delivery, CPM spikes, CTR anomalies — before it gets expensive."] }
+    ] },
+
+  { id: 'create', num: '05', title: 'Create & Test at Scale',
+    quote: '"I need to get creatives into ad accounts and test them."',
+    cases: [
+      { t: 'Suggest creative testing rules', products: ['ai'],
+        desc: "Rules for creative fatigue detection (frequency + CTR decay), testing pipelines (auto-pause underperformers, scale winners), and phoenix rules for late attribution.",
+        prompts: ["Suggest rules for my creative testing pipeline — one to catch fatigue before CTR drops, one to auto-pause underperforming test ads, and one to recover ads that got paused right before a delayed conversion came in."] },
+      { t: 'Monitor Stage task execution', products: ['mcp'],
+        chain: ['list_stage_tasks','list_stage_uploads','list_stage_created_ads'],
+        desc: "Which uploads completed, which failed, which ads were created — monitor Stage from Claude without logging into Birch. Meta, TikTok, Snapchat.",
+        prompts: ["Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?"] }
+    ] },
+
+  { id: 'integrate', num: '06', title: 'Integrate & Extend',
+    quote: '"I need Birch data inside my own AI workflow — not just inside the Birch app."',
+    cases: [
+      { t: 'Work with Birch data in Claude', products: ['mcp'],
+        desc: "Connect at mcp.bir.ch/mcp — workspaces, rules, execution logs, folder structures, Stage tasks and help docs in natural language. Handles very large rule sets (200+), exportable analysis.",
+        prompts: ["Pull every rule across all my ad accounts in this workspace and visualize it for my weekly presentation, alongside the numbers in my Google Sheets pacing tracker."] },
+      { t: 'Plug Birch data into an internal AI bot', products: [['mcp','read-only']],
+        desc: "Enterprise teams connect Birch MCP to their own AI bots (e.g. in Slack). Read-only by design — the bot reports, humans decide what to change.",
+        prompts: ["Every morning, pull rule activity from the last 24 hours across all our ad accounts, flag anything that errored or hasn't fired in 7+ days, and post the summary in #paid-media."] },
+      { t: 'Answer product questions from any AI client', products: ['mcp'],
+        chain: ['search_help'],
+        desc: "Keyword search across Birch Help Center articles — Claude pulls answers from Birch's own documentation.",
+        prompts: ["How does the ranking condition in Automated rules work?"] }
+    ] }
+];
+
+/* ═══════════ Shared render helpers ═══════════ */
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+/* Highlight [placeholders] in prompt text */
+function hl(s) {
+  return esc(s).replace(/\[([^\]]+)\]/g, '<span class="ph">[$1]</span>');
+}
+function prodId(p) { return Array.isArray(p) ? p[0] : p; }
+
+function badgesHTML(c) {
+  var out = (c.products || []).map(function (p) {
+    var id = prodId(p), note = Array.isArray(p) ? p[1] : null;
+    var d = PRODUCTS[id];
+    return '<span class="bdg" style="--c:' + d.color + '">' + d.label + (note ? '<em>&middot; ' + note + '</em>' : '') + '</span>';
+  });
+  if (c.road) out.push('<span class="bdg" style="--c:' + PRODUCTS.road.color + '">' + PRODUCTS.road.label + '</span>');
+  return '<div class="badges">' + out.join('') + '</div>';
+}
+
+function promptHTML(pr) {
+  var label = (typeof pr === 'object' && pr.l) ? 'Prompt &middot; ' + esc(pr.l) : 'Prompt';
+  var text = (typeof pr === 'object') ? pr.t : pr;
+  return '<div class="prompt">' +
+    '<div class="prompt__bar"><span class="prompt__label">' + label + '</span>' +
+    '<button class="copy" type="button">&#10697; copy</button></div>' +
+    '<p>' + hl(text) + '</p></div>';
+}
+
+function cardHTML(c, id) {
+  var prods = (c.products || []).map(prodId).join(' ');
+  var h = '<article class="card' + (c.road ? ' card--road' : '') + '" id="' + id + '" data-products="' + prods + '">';
+  h += '<div class="card__head"><h3>' + esc(c.t) + '</h3>' + badgesHTML(c) + '</div>';
+  h += '<p class="card__desc">' + esc(c.desc) + '</p>';
+  if (c.chain) {
+    h += '<div class="chain">' + c.chain.map(function (t) { return '<code>' + t + '</code>'; }).join('<span>&rarr;</span>') + '</div>';
+  }
+  if (c.note) h += '<p class="card__note">&#9888; ' + esc(c.note) + '</p>';
+  /* say/dont fields intentionally not rendered — sales-internal, not for the landing */
+  (c.prompts || []).forEach(function (pr) { h += promptHTML(pr); });
+  h += '</article>';
+  return h;
+}
+
+function heroHTML() {
+  return '<div class="hero"><h1>Learn the difference</h1>' +
+    '<p>A breakdown across six workflows — auditing rules, reading logs, building automation, benchmarking, and more.</p></div>' +
+    '<div class="pcards">' +
+    '<div class="pcard pcard--ai"><div class="pcard__logo">b&iuml;rch AI</div><div class="pcard__tag">In-app assistant or co-pilot</div><div class="pcard__desc">Reads your rules and your performance together — spots what’s off, suggests what to change, drafts the fix.</div></div>' +
+    '<div class="pcard pcard--mcp"><div class="pcard__logo">b&iuml;rch MCP</div><div class="pcard__tag">External connector for AI clients to Birch</div><div class="pcard__desc">Your rules, execution logs and Stage tasks join the conversation you’re already having in Claude.</div></div>' +
+    '<div class="pcard pcard--meta"><div class="pcard__logo">Meta MCP</div><div class="pcard__tag">Official Meta connector inside Birch AI chat</div><div class="pcard__desc">Ad-level performance, change history, benchmarks and the Ads Library — read directly from Meta.</div></div>' +
+    '</div>';
+}
+
+function chipsHTML() {
+  var h = '<div class="chips"><button class="chip is-on" data-p="all">All products</button>';
+  ['ai','mcp','meta'].forEach(function (id) {
+    h += '<button class="chip" data-p="' + id + '"><span class="chip__dot" style="--c:' + PRODUCTS[id].color + '"></span>' + PRODUCTS[id].label + '</button>';
+  });
+  return h + '</div>';
+}
+
+function sectionHTML(wf, tab, gridClass) {
+  var h = '<section class="wf-section" id="' + tab + '-' + wf.id + '">';
+  h += '<div class="wf-section__head"><div class="wf-section__num">Workflow ' + wf.num + '</div>' +
+       '<h2>' + wf.title + '</h2><div class="wf-section__quote">' + esc(wf.quote) + '</div></div>';
+  h += '<div class="' + (gridClass || '') + '">';
+  wf.cases.forEach(function (c, i) { h += cardHTML(c, tab + '-' + wf.id + '-' + i); });
+  h += '</div></section>';
+  return h;
+}
+
+/* ═══════════ Concept renderers ═══════════ */
+
+function renderA() {
+  var h = '<div class="concept-note"><b>Концепт A — левый sticky-сайдбар.</b> Фильтр и оглавление всегда на экране, подсветка текущей секции при скролле. Контент в одну узкую колонку — читается как документация.</div>';
+  h += heroHTML();
+  h += '<div class="layA">' + tocHTML('a') + '<div class="colA">';
+  WF.forEach(function (wf) { h += sectionHTML(wf, 'a'); });
+  h += '</div></div>';
+  return h;
+}
+
+function tocAccordionHTML(tab) {
+  var h = '<aside class="tocA">';
+  h += '<div><div class="tocA__label">Filter</div>' + chipsHTML() + '</div>';
+  h += '<div><div class="tocA__label">Workflows</div><nav>';
+  WF.forEach(function (wf) {
+    h += '<div class="tocA__group">';
+    h += '<a class="tocA__wf" href="#' + tab + '-' + wf.id + '" data-toc-for="' + tab + '-' + wf.id + '">' + wf.title + ' <span class="cnt">' + wf.cases.length + '</span></a>';
+    h += '<div class="tocA__sub">';
+    wf.cases.forEach(function (c, i) {
+      h += '<a href="#' + tab + '-' + wf.id + '-' + i + '" data-sub-for="' + tab + '-' + wf.id + '-' + i + '">' + esc(c.t) + '</a>';
+    });
+    h += '</div></div>';
+  });
+  return h + '</nav></div></aside>';
+}
+
+function renderE() {
+  var h = '<div class="concept-note"><b>Концепт E — A с аккордеон-оглавлением.</b> Клик по разделу скроллит к нему и раскрывает список тем прямо в сайдбаре — можно прыгнуть и в раздел, и в конкретную тему. Открыт всегда один раздел; при скролле текущий раскрывается сам, активная тема подсвечивается.</div>';
+  h += heroHTML();
+  h += '<div class="layA">' + tocAccordionHTML('e') + '<div class="colA">';
+  WF.forEach(function (wf) { h += sectionHTML(wf, 'e'); });
+  h += '</div></div>';
+  return h;
+}
+
+function renderD() {
+  var h = '<div class="concept-note"><b>Концепт D — гибрид A+C.</b> Карта-оглавление из C как вводный блок (все кейсы и покрытие продуктов видны до скролла, клик ведёт к карточке) + sticky-сайдбар из A для навигации по ходу чтения. Фильтры над картой и в сайдбаре синхронизированы.</div>';
+  h += heroHTML();
+  h += '<div class="mapD"><div class="filterC">' + chipsHTML() + '</div>' + mapHTML('d') + '</div>';
+  h += '<div class="layA">' + tocHTML('d') + '<div class="colA">';
+  WF.forEach(function (wf) { h += sectionHTML(wf, 'd'); });
+  h += '</div></div>';
+  return h;
+}
+
+function renderB() {
+  var h = '<div class="concept-note"><b>Концепт B — sticky-лента якорей сверху + фильтр справа.</b> Вся ширина отдана контенту, карточки в две колонки — плотнее, страница короче. Лента прилипает под навбаром.</div>';
+  h += heroHTML();
+  h += '<div class="barB"><div class="barB__inner"><div class="barB__anchors">';
+  WF.forEach(function (wf) {
+    h += '<a href="#b-' + wf.id + '" data-toc-for="b-' + wf.id + '">' + wf.title + '</a>';
+  });
+  h += '</div>' + chipsHTML() + '</div></div><div class="colB">';
+  WF.forEach(function (wf) { h += sectionHTML(wf, 'b', 'gridB'); });
+  h += '</div>';
+  return h;
+}
+
+function mapHTML(tab) {
+  var h = '<div class="mapC">';
+  WF.forEach(function (wf) {
+    h += '<div class="mapC__tile"><h4>' + wf.num + ' &middot; ' + wf.title + '</h4>';
+    wf.cases.forEach(function (c, i) {
+      var prods = (c.products || []).map(prodId);
+      var dots = prods.map(function (id) { return '<span class="dot" style="--c:' + PRODUCTS[id].color + '"></span>'; }).join('');
+      h += '<a href="#' + tab + '-' + wf.id + '-' + i + '" data-products="' + prods.join(' ') + '"><span class="dots">' + dots + '</span>' + esc(c.t) + '</a>';
+    });
+    h += '</div>';
+  });
+  return h + '</div>';
+}
+
+function tocHTML(tab) {
+  var h = '<aside class="tocA">';
+  h += '<div><div class="tocA__label">Filter</div>' + chipsHTML() + '</div>';
+  h += '<div><div class="tocA__label">Workflows</div><nav>';
+  WF.forEach(function (wf) {
+    h += '<a href="#' + tab + '-' + wf.id + '" data-toc-for="' + tab + '-' + wf.id + '">' + wf.title + ' <span class="cnt">' + wf.cases.length + '</span></a>';
+  });
+  return h + '</nav></div></aside>';
+}
+
+function renderC() {
+  var h = '<div class="concept-note"><b>Концепт C — карта-оглавление сверху, без sticky-навигации.</b> Все 20 кейсов видны сразу в шести плитках, клик ведёт к карточке. Возврат — плавающая кнопка &laquo;наверх&raquo;. Фильтр действует и на карту, и на карточки.</div>';
+  h += heroHTML();
+  h += '<div class="colC"><div class="filterC">' + chipsHTML() + '</div>' + mapHTML('c');
+  WF.forEach(function (wf) { h += sectionHTML(wf, 'c'); });
+  h += '</div><button class="upC" type="button" title="Back to top">&uarr;</button>';
+  return h;
+}
+
+/* ═══════════ Wiring: tabs, filter, copy, scroll-spy ═══════════ */
+
+var mount = document.getElementById('mount');
+var observers = [];
+
+/* Suppress scroll-spy while a smooth anchor scroll is in flight — otherwise the
+   spy fires on every section the scroll passes through and the accordion
+   flips them all one by one. Click sets the final state itself. */
+var navLock = false, navLockTimer = null;
+function lockSpy() {
+  navLock = true;
+  clearTimeout(navLockTimer);
+  navLockTimer = setTimeout(unlockSpy, 1500); /* fallback if scrollend never fires */
+}
+function unlockSpy() {
+  navLock = false;
+  clearTimeout(navLockTimer);
+}
+window.addEventListener('scrollend', unlockSpy);
+var RENDER = { a: renderA, b: renderB, c: renderC, d: renderD, e: renderE };
+
+function openGroup(g) {
+  if (!g) return;
+  g.parentElement.querySelectorAll('.tocA__group').forEach(function (x) {
+    x.classList.toggle('is-open', x === g);
+  });
+}
+function setActiveToc(link) {
+  mount.querySelectorAll('[data-toc-for]').forEach(function (l) { l.classList.remove('is-active'); });
+  if (link) link.classList.add('is-active');
+}
+function setActiveSub(link) {
+  mount.querySelectorAll('[data-sub-for]').forEach(function (l) { l.classList.remove('is-active'); });
+  if (link) link.classList.add('is-active');
+}
+
+function applyFilter(pid) {
+  mount.querySelectorAll('.card').forEach(function (card) {
+    var ps = card.dataset.products.split(' ').filter(Boolean);
+    card.classList.toggle('is-hidden', pid !== 'all' && ps.indexOf(pid) === -1);
+  });
+  mount.querySelectorAll('.mapC__tile a').forEach(function (a) {
+    var ps = (a.dataset.products || '').split(' ').filter(Boolean);
+    a.classList.toggle('is-hidden', pid !== 'all' && ps.indexOf(pid) === -1);
+  });
+  /* Accordion sub-links follow their card's visibility */
+  mount.querySelectorAll('[data-sub-for]').forEach(function (a) {
+    var card = document.getElementById(a.dataset.subFor);
+    if (card) a.classList.toggle('is-hidden', card.classList.contains('is-hidden'));
+  });
+  mount.querySelectorAll('.wf-section').forEach(function (sec) {
+    var any = sec.querySelector('.card:not(.is-hidden)');
+    sec.classList.toggle('is-hidden', !any);
+    /* dim toc links pointing to empty sections + update counts */
+    var link = mount.querySelector('[data-toc-for="' + sec.id + '"]');
+    if (link) {
+      link.classList.toggle('is-empty', !any);
+      var cnt = link.querySelector('.cnt');
+      if (cnt) cnt.textContent = sec.querySelectorAll('.card:not(.is-hidden)').length;
+    }
+  });
+  mount.querySelectorAll('.chip').forEach(function (ch) {
+    ch.classList.toggle('is-on', ch.dataset.p === pid);
+  });
+}
+
+function setupSpy() {
+  var links = mount.querySelectorAll('[data-toc-for]');
+  if (!links.length) return;
+  var map = {};
+  links.forEach(function (l) { map[l.dataset.tocFor] = l; });
+  var io = new IntersectionObserver(function (entries) {
+    if (navLock) return;
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        links.forEach(function (l) { l.classList.remove('is-active'); });
+        var l = map[e.target.id];
+        if (l) {
+          l.classList.add('is-active');
+          openGroup(l.closest('.tocA__group')); /* auto-expand current section (concept E) */
+        }
+      }
+    });
+  }, { rootMargin: '-15% 0px -75% 0px' });
+  mount.querySelectorAll('.wf-section').forEach(function (s) { io.observe(s); });
+  observers.push(io);
+
+  /* Case-level spy for accordion sub-links (concept E) */
+  var subs = mount.querySelectorAll('[data-sub-for]');
+  if (subs.length) {
+    var subMap = {};
+    subs.forEach(function (l) { subMap[l.dataset.subFor] = l; });
+    var io2 = new IntersectionObserver(function (entries) {
+      if (navLock) return;
+      entries.forEach(function (e) {
+        if (e.isIntersecting && subMap[e.target.id]) setActiveSub(subMap[e.target.id]);
+      });
+    }, { rootMargin: '-15% 0px -75% 0px' });
+    mount.querySelectorAll('.card').forEach(function (c) { io2.observe(c); });
+    observers.push(io2);
+  }
+}
+
+function show(tab) {
+  observers.forEach(function (o) { o.disconnect(); });
+  observers = [];
+  mount.innerHTML = RENDER[tab]();
+  setupSpy();
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.classList.toggle('is-on', b.dataset.tab === tab);
+  });
+  window.scrollTo(0, 0);
+}
+
+document.querySelector('.tabsbar').addEventListener('click', function (e) {
+  var b = e.target.closest('.tab');
+  if (b) show(b.dataset.tab);
+});
+
+mount.addEventListener('click', function (e) {
+  var chip = e.target.closest('.chip');
+  if (chip) { applyFilter(chip.dataset.p); return; }
+  var copy = e.target.closest('.copy');
+  if (copy) {
+    var text = copy.closest('.prompt').querySelector('p').textContent;
+    navigator.clipboard.writeText(text).catch(function () {});
+    copy.textContent = 'copied ✓';
+    copy.classList.add('is-done');
+    setTimeout(function () {
+      copy.innerHTML = '&#10697; copy';
+      copy.classList.remove('is-done');
+    }, 1400);
+    return;
+  }
+  if (e.target.closest('.upC')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  /* TOC clicks: set active state immediately (don't wait for scroll-spy) */
+  var tocLink = e.target.closest('[data-toc-for]');
+  if (tocLink) {
+    lockSpy();
+    setActiveToc(tocLink);
+    var group = tocLink.closest('.tocA__group');
+    openGroup(group);
+    /* Section click lands on its first case — highlight it right away */
+    setActiveSub(group ? group.querySelector('[data-sub-for]:not(.is-hidden)') : null);
+    return;
+  }
+  var subLink = e.target.closest('[data-sub-for]');
+  if (subLink) { lockSpy(); setActiveSub(subLink); }
+});
+
+show('e');
+</script>
+</body>
+</html>
