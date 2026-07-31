@@ -28,9 +28,9 @@
   .sim-nav { background: var(--color-bg); }
 
   /* Values from the approved Figma mock that have no DS token yet
-     (candidates for /figma-sync): quote size 2.375rem, prompt radius 0.375rem,
-     surface greys #F6F5FA (bir.ch course surface) / #EDECF3 (one step darker,
-     same cool tone), pastel badge fills, #54B5FF meta badge blue */
+     (candidates for /figma-sync): quote size 2.375rem, surface greys #F6F5FA
+     (bir.ch course surface) / #EDECF3 (one step darker, same cool tone),
+     the six section colors and their dark companions */
 
   /* ─────────────────────────────────────────
      PRODUCT LOCKUPS — shared em-scaled component
@@ -441,7 +441,7 @@
     /* Pale accents (yellow, light-blue) need a stronger mix — see --wf-mix on sections */
     background: color-mix(in srgb, var(--wf-c, #909090) var(--wf-mix, 12%), #F6F5FA);
     border: 1px solid color-mix(in srgb, var(--wf-c, #909090) var(--wf-mix-b, 28%), #F6F5FA);
-    border-radius: 0.375rem; /* 6px per mock — no DS token */
+    border-radius: var(--radius-sm);
     padding: var(--space);
     display: grid;
     gap: var(--space-xs);
@@ -472,8 +472,8 @@
        --wf-btn overrides the mixed-in color where the dark tone reads muddy. */
     background: color-mix(in srgb, var(--wf-btn, var(--wf-cd, #909090)) var(--wf-btn-mix, 18%),
       color-mix(in srgb, var(--wf-c, #FFFFFF) var(--wf-mix, 12%), #F6F5FA));
-    border: none; /* borderless variant under review */
-    border-radius: 0.25rem;
+    border: none;
+    border-radius: var(--radius-xs);
     cursor: pointer;
     font-size: 0.8rem;
     line-height: 1;

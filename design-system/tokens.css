@@ -137,6 +137,7 @@
   --pad-gutter:     1.5rem; /* 24px desktop */
 
   /* ---- Border radius ---- */
+  --radius-xs:   0.25rem;  /*  4px — Radius/Radius 4 */
   --radius-sm:   0.5rem;   /*  8px */
   --radius-md:   0.75rem;  /* 12px */
   --radius-lg:   1rem;     /* 16px */
