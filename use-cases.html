@@ -542,6 +542,14 @@
   }
   .uc-totop:hover { background: var(--color-bg-grey); }
   .uc-totop__arrow { font-size: 1.15em; line-height: 1; }
+  /* Mirrors the active tab: same lockup, inverted for the dark pill */
+  .uc-totop .uc-lk { font-size: var(--text-para-sm-size); color: var(--color-text); }
+  .uc-totop .uc-lk__ai,
+  .uc-totop .uc-lk__sq {
+    background: var(--color-text);
+    color: var(--color-text-inverted);
+  }
+  .uc-totop .uc-bub { filter: invert(1); }
   @media (prefers-reduced-motion: reduce) { .uc-totop { transition: none; } }
 
   /* Mobile is intentionally not designed yet — minimal safety fallback only */
@@ -1034,7 +1042,8 @@
 </div>
 
 <button class="uc-totop" type="button" id="ucToTop">
-  <span class="uc-totop__arrow" aria-hidden="true">&uarr;</span> Filters
+  <span class="uc-totop__arrow" aria-hidden="true">&uarr;</span>
+  <span id="ucToTopLabel">All products</span>
 </button>
 
 <script>
@@ -1138,10 +1147,13 @@
         link.querySelector('.uc-toc__cnt').textContent = sec.querySelectorAll('.uc-card:not(.is-hidden)').length;
       }
     });
-    /* keep every tab bar in sync (dev variants are stacked) */
     document.querySelectorAll('.uc-tab').forEach(function (t) {
       t.classList.toggle('is-on', t.dataset.p === pid);
     });
+    /* The floating button mirrors the active tab — same wording, same lockup */
+    var active = document.querySelector('.uc-tab[data-p="' + pid + '"]');
+    var label = document.getElementById('ucToTopLabel');
+    if (active && label) label.innerHTML = active.innerHTML;
   }
 
   /* ── Delegated clicks: tabs, toc links, copy buttons ── */
