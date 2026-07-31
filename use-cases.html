@@ -541,6 +541,10 @@
     padding: 0.9em 1.3em 1em;
     cursor: pointer;
     box-shadow: 0 0.375rem 1.5rem rgba(13, 13, 18, 0.25);
+    /* Fits the longest state ("Selected: Bïrch M C P") so neither the hover
+       swap nor a filter change resizes the pill */
+    min-width: 16rem;
+    justify-content: center;
     opacity: 0;
     transform: translate(-50%, 0.75rem);
     pointer-events: none;
