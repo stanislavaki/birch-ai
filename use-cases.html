@@ -168,8 +168,9 @@
     display: flex;
     gap: var(--space-xxs);
     background: #EDECF3;
-    /* track radius = item radius + track padding, so the corners stay concentric */
-    border-radius: calc(var(--radius-md) + var(--space-xs));
+    /* Matches the .tab-bar / .tab-pill scale on bir.ch/mcp, expressed in tokens:
+       track radius = pill radius + track padding, so the corners stay concentric */
+    border-radius: var(--radius-lg);
     padding: var(--space-xs);
   }
   .uc-tab {
@@ -184,8 +185,8 @@
     color: var(--color-text-inverted);
     background: none;
     border: none;
-    border-radius: var(--radius-md);
-    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
     cursor: pointer;
   }
   .uc-tab.is-on { background: #FFFFFF; }
