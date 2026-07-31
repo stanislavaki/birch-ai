@@ -541,7 +541,8 @@
     pointer-events: auto;
   }
   .uc-totop:hover { background: var(--color-bg-grey); }
-  .uc-totop__arrow { font-size: 1.15em; line-height: 1; }
+  .uc-totop__arrow { font-size: 1.15em; line-height: 1; color: var(--color-text-grey); }
+  .uc-totop__caption { color: var(--color-text-grey); }
   /* Mirrors the active tab: same lockup, inverted for the dark pill */
   .uc-totop .uc-lk { font-size: var(--text-para-sm-size); color: var(--color-text); }
   .uc-totop .uc-lk__ai,
@@ -1042,8 +1043,9 @@
 </div>
 
 <button class="uc-totop" type="button" id="ucToTop">
-  <span class="uc-totop__arrow" aria-hidden="true">&uarr;</span>
+  <span class="uc-totop__caption">Selected:</span>
   <span id="ucToTopLabel">All products</span>
+  <span class="uc-totop__arrow" aria-hidden="true">&uarr;</span>
 </button>
 
 <script>
