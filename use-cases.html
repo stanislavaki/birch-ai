@@ -512,7 +512,8 @@
   ───────────────────────────────────────── */
   .uc-totop {
     position: fixed;
-    right: var(--space-md);
+    /* Centred, not in the corner — the site's Intercom launcher lives bottom-right */
+    left: 50%;
     bottom: var(--space-md);
     z-index: 80;
     display: inline-flex;
@@ -530,13 +531,13 @@
     cursor: pointer;
     box-shadow: 0 0.375rem 1.5rem rgba(13, 13, 18, 0.25);
     opacity: 0;
-    transform: translateY(0.75rem);
+    transform: translate(-50%, 0.75rem);
     pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
   .uc-totop.is-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
     pointer-events: auto;
   }
   .uc-totop:hover { background: var(--color-bg-grey); }
