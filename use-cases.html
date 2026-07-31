@@ -23,9 +23,20 @@
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 { text-wrap: balance; }
-  /* Dev-only: the shared nav is transparent with white text — give it a dark
-     backing so it reads on the light page. Real site nav has its own bg. */
-  .sim-nav { background: var(--color-bg); }
+  /* Dev-only: the shared nav partial is built for the dark site (white text on
+     a transparent bar). This page is light, so the nav is inverted here — the
+     real Webflow nav carries its own styling. */
+  .sim-nav {
+    background: #FFFFFF;
+    color: var(--color-text-inverted);
+    border-bottom: 1px solid rgba(13, 13, 18, 0.12);
+  }
+  .sim-nav__logo { color: var(--color-text-inverted); }
+  .sim-nav__link,
+  .sim-nav__link-lg { color: var(--color-text-inverted); }
+  .sim-nav__link-dot { background: var(--color-text-inverted); }
+  .sim-nav__link-lg:hover { background: #EDECF3; }
+  .sim-nav__badge { color: #B8860B; } /* yellow is invisible on white */
 
   /* Values from the approved Figma mock that have no DS token yet
      (candidates for /figma-sync): quote size 2.375rem, surface greys #F6F5FA
@@ -541,8 +552,20 @@
     pointer-events: auto;
   }
   .uc-totop:hover { background: var(--color-bg-grey); }
-  .uc-totop__arrow { font-size: 1.15em; line-height: 1; color: var(--color-text-grey); }
+  .uc-totop__arrow {
+    font-size: 1.15em;
+    line-height: 1;
+    color: var(--color-text-grey);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+  .uc-totop:hover .uc-totop__arrow { transform: translateY(-0.15em); color: var(--color-text); }
   .uc-totop__caption { color: var(--color-text-grey); }
+  /* Static state reads as a status chip, so hover has to spell out the action:
+     the state line swaps for "Back to filters". */
+  .uc-totop__state { display: inline-flex; align-items: center; gap: var(--space-xs); }
+  .uc-totop__action { display: none; }
+  .uc-totop:hover .uc-totop__state { display: none; }
+  .uc-totop:hover .uc-totop__action { display: inline; }
   /* Mirrors the active tab: same lockup, inverted for the dark pill */
   .uc-totop .uc-lk { font-size: var(--text-para-sm-size); color: var(--color-text); }
   .uc-totop .uc-lk__ai,
@@ -1043,8 +1066,11 @@
 </div>
 
 <button class="uc-totop" type="button" id="ucToTop">
-  <span class="uc-totop__caption">Selected:</span>
-  <span id="ucToTopLabel">All products</span>
+  <span class="uc-totop__state">
+    <span class="uc-totop__caption">Selected:</span>
+    <span id="ucToTopLabel">All products</span>
+  </span>
+  <span class="uc-totop__action">Back to filters</span>
   <span class="uc-totop__arrow" aria-hidden="true">&uarr;</span>
 </button>
 
