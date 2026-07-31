@@ -375,38 +375,38 @@
   .uc-card.is-hidden { display: none; }
   .uc-card--road { border: 1px dashed var(--color-text-grey); background: #FFFFFF; }
   .uc-card--road > *:not(.uc-card__head) { opacity: 0.6; }
+  /* Badges sit above the title (Figma 04-01): they stop competing with it for
+     width, and read as a kicker — which products, then the case itself. */
   .uc-card__head {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: flex-start;
-    gap: var(--gap-main);
-    /* no flex-wrap: with wrap enabled the title's unwrapped width fills the line
-       and pushes badges below; nowrap lets the title shrink and wrap instead */
+    gap: var(--space-xs);
   }
   /* No text-wrap: balance here — evened-out lines read as body copy;
      natural wrapping keeps the display-title feel */
-  .uc-card__head h3 { margin: 0; flex: 1 1 auto; min-width: 0; text-wrap: initial; }
-  .uc-card__head .uc-badges { flex-shrink: 0; }
+  .uc-card__head h3 { margin: 0; text-wrap: initial; }
   .uc-card p { margin: 0; }
   .uc-card__sub { margin: var(--space-sm) 0 0; }
 
-  .uc-badges { display: flex; gap: 0.1875rem; flex-wrap: wrap; }
+  .uc-badges { display: flex; gap: var(--space-xxs); flex-wrap: wrap; }
+  /* Typographic badge: the brand half stays light, the product half goes bold —
+     the lockup structure without the weight of its graphic marks, which would
+     out-shout the 32px title twenty times over. */
   .uc-badge {
     display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    border-radius: var(--radius-pill);
-    padding: 0.1875rem 0.1875rem 0.1875rem 0.4375rem;
+    align-items: baseline;
+    gap: 0.15em;
+    font-size: var(--text-eyebrow-size);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-text-grey);
+    background: #EDECF3;
+    border-radius: var(--radius-xs);
+    padding: 0.45em 0.6em 0.55em;
   }
-  /* Neutral badges: product is identified by the lockup shape, color belongs
-     to sections. Same hairline-button treatment as the copy button. */
-  .uc-badge--ai,
-  .uc-badge--mcp,
-  .uc-badge--meta {
-    background: #FFFFFF;
-    border: 1px solid rgba(13, 13, 18, 0.12);
-  }
-  .uc-badge--meta { border-radius: 0; padding: 0.1875rem 0.375rem; }
+  .uc-badge b { font-weight: 700; color: var(--color-text-inverted); }
+  .uc-badge em { font-style: normal; font-weight: 600; opacity: 0.85; }
   .uc-badge--road {
     background: transparent;
     border: 1px dashed var(--color-text-grey);
@@ -694,11 +694,11 @@
 
         <article class="uc-card" id="case-audit-1" data-products="ai mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Review existing rules for errors and gaps</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Review existing rules for errors and gaps</h3>
           </div>
           <p class="t-body">You ask for a review of all rules in your workspace. The AI reads each rule's conditions, actions, schedule, and filters, then flags issues: overlapping conditions, contradictory actions (one pauses what another starts), thresholds with no volume guard, long-disabled rules taking up space.</p>
           <p class="t-body">Birch AI does this in-app with zero setup and can tie findings to live performance data. Birch MCP does this in Claude using <code>list_automation_rules</code> &rarr; <code>get_rule_details</code> per rule, and handles larger accounts (200+ rules tested) without timeouts.</p>
@@ -712,10 +712,10 @@
 
         <article class="uc-card" id="case-audit-2" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Analyze rule execution logs</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Analyze rule execution logs</h3>
           </div>
           <p class="t-body">You want to know what your rules actually did: which ones fired, how often, which entities were affected, and whether there were errors. This is the "was my automation working while I wasn't looking?" question.</p>
           <p class="t-body">Birch MCP with <code>list_rule_logs</code> returns run-by-run summaries (timestamp, entities evaluated/acted on/errored), and <code>get_rule_log</code> returns per-entity outcomes (which ad was paused, which budget changed, what condition values were evaluated, what errors occurred). Can filter by matched entities, errors only, or specific entity IDs.</p>
@@ -728,11 +728,11 @@
 
         <article class="uc-card" id="case-audit-3" data-products="ai mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Audit rules structure + identify zombie rules and over-firing</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Audit rules structure + identify zombie rules and over-firing</h3>
           </div>
           <p class="t-body">An operator or manager on a mature account where rules accumulated over months. Often triggered by unexplained performance instability, a budget spike, or an account handover: "I have 80 rules and I've lost track — what's actually running, and is anything working against me?"</p>
           <p class="t-body">Ask Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering (stale thresholds or conditions that no longer match), firing too broadly (acting on most entities every run), or fighting each other (one rule pauses what another restarts). If your account is organized into folders, scope the audit to one section at a time. Useful for: "show me all rules in the [Product X] folder and check if any conflict."</p>
@@ -747,10 +747,10 @@
 
         <article class="uc-card" id="case-audit-4" data-products="meta">
           <div class="uc-card__head">
-            <h3 class="t-h3">Get the full picture of Meta account without opening Ads Manager</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--meta"><span class="uc-lk">Meta <span class="uc-lk__sq">MCP</span></span></span>
+              <span class="uc-badge">Meta<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Get the full picture of Meta account without opening Ads Manager</h3>
           </div>
           <h4 class="uc-card__sub t-para-lg">1. "What happened while I wasn't looking?" (overnight/weekend briefing)</h4>
           <p class="t-body">You need: ad set and ad level performance and trends, change history (what was modified and when), anomaly alerts (spikes, drops, unusual patterns), budget and delivery status across active and paused campaigns. The job: get caught up before the first call.</p>
@@ -785,10 +785,10 @@
 
         <article class="uc-card" id="case-build-1" data-products="ai">
           <div class="uc-card__head">
-            <h3 class="t-h3">Get starter rule suggestions based on actual account data</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
             </div>
+            <h3 class="t-h3">Get starter rule suggestions based on actual account data</h3>
           </div>
           <p class="t-body">You ask "what rules should I set up?" Birch AI looks at connected ad accounts, current performance, and existing rules (or lack of them), then suggests rules from the Strategy Library tailored to what it sees. On Meta, it creates clickable draft links. On other platforms, it gives text recommendations.</p>
           <p class="t-body">Also works proactively: when you visit the rules page, Birch AI can prompt you with "check new rule ideas for your account" — no need to know to ask.</p>
@@ -801,10 +801,10 @@
 
         <article class="uc-card" id="case-build-2" data-products="ai">
           <div class="uc-card__head">
-            <h3 class="t-h3">Create a rule from natural language</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span><em>&middot; Meta only</em></span>
+              <span class="uc-badge">Bïrch<b>AI</b><em>&middot; Meta only</em></span>
             </div>
+            <h3 class="t-h3">Create a rule from natural language</h3>
           </div>
           <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
           <p class="uc-note t-para-sm">Draft generation is Meta only — TikTok, Snapchat, and Google get text descriptions of the rule logic. Always review drafts before activating.</p>
@@ -817,11 +817,11 @@
 
         <article class="uc-card" id="case-build-3" data-products="ai mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Find which metrics are available for rules</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Find which metrics are available for rules</h3>
           </div>
           <p class="t-body">When you want to ideate rules in Claude: <code>search_metrics</code> searches Birch's metric catalog by natural language ("purchase cost on TikTok," "frequency for Snapchat"). Returns canonical metric ID, label, platform, and whether it's usable in automation rules or reports. Supports Meta, Google, TikTok, Snapchat, and attribution platforms (Hyros, AppsFlyer, Wicked Reports, Adjust, Google Analytics).</p>
           <p class="t-body">You can also get a list of available metrics from Birch AI.</p>
@@ -834,8 +834,8 @@
 
         <article class="uc-card uc-card--road" id="case-build-4" data-products="">
           <div class="uc-card__head">
-            <h3 class="t-h3">Create rules from Claude</h3>
             <div class="uc-badges"><span class="uc-badge uc-badge--road">&#128284; Roadmap</span></div>
+            <h3 class="t-h3">Create rules from Claude</h3>
           </div>
           <p class="t-body">Today Birch MCP is read-only. Write tools (<code>create_automation_rule</code>, <code>update_automation_rule</code>) are in the engineering backlog. When shipped, rules will always be created as drafts — never live without user approval.</p>
         </article>
@@ -850,10 +850,10 @@
 
         <article class="uc-card" id="case-monitor-1" data-products="ai">
           <div class="uc-card__head">
-            <h3 class="t-h3">Quick performance overview</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
             </div>
+            <h3 class="t-h3">Quick performance overview</h3>
           </div>
           <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes (Q1, last 7 days, etc.), and works across all connected platforms at the ad account level. Entity-level breakdown (campaigns, ad sets, ads) is Meta only and limited to accounts with a manageable entity count.</p>
           <p class="uc-note t-para-sm">Birch MCP cannot do this — it has no performance metrics.</p>
@@ -866,11 +866,11 @@
 
         <article class="uc-card" id="case-monitor-2" data-products="ai mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Setup health check</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span><em>&middot; logic only</em></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b><em>&middot; logic only</em></span>
             </div>
+            <h3 class="t-h3">Setup health check</h3>
           </div>
           <p class="t-body">You notice yo-yoing budgets or unstable performance. You ask Birch AI to review the rule set for offense/defense imbalance. The AI reads the full setup and identifies patterns: scaling based on single-day data, no budget caps, aggressive percentage increases without guardrails, missing recovery rules for paused winners.</p>
           <p class="t-body">Birch AI can correlate with actual account performance. Birch MCP can read rule logic via <code>get_rule_details</code> and spot the structural imbalance, but won't see the performance impact.</p>
@@ -883,10 +883,10 @@
 
         <article class="uc-card" id="case-monitor-3" data-products="ai">
           <div class="uc-card__head">
-            <h3 class="t-h3">Find growth opportunities</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
             </div>
+            <h3 class="t-h3">Find growth opportunities</h3>
           </div>
           <p class="t-body">You're not just looking at what happened — you want to know where you're leaving money on the table. Birch AI can identify high-performing ad sets that are underfunded, poor performers that are consuming budget, and recommend scaling or pausing decisions.</p>
           <div class="uc-prompt">
@@ -898,10 +898,10 @@
 
         <article class="uc-card" id="case-monitor-4" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Trace what a rule did to specific entities</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Trace what a rule did to specific entities</h3>
           </div>
           <p class="t-body">For debugging: "why did this rule pause this ad?" Use <code>get_rule_log</code> with specific entity IDs to see the per-entity outcome — which condition was evaluated, what metric value was checked, what action was applied, and any error messages. Also shows the historical rule snapshot at time of execution, so Claude can compare what the rule looked like when it ran vs. what it looks like now.</p>
           <div class="uc-prompt">
@@ -921,10 +921,10 @@
 
         <article class="uc-card" id="case-compete-1" data-products="meta">
           <div class="uc-card__head">
-            <h3 class="t-h3">Competitive creative research via Ads Library</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--meta"><span class="uc-lk">Meta <span class="uc-lk__sq">MCP</span></span></span>
+              <span class="uc-badge">Meta<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Competitive creative research via Ads Library</h3>
           </div>
           <p class="t-body">Search the Facebook Ads Library using plain language: "show me active video ads from [competitor] in the US." No need to navigate the Ads Library UI. Only covers publicly visible ads — not competitor performance data.</p>
           <div class="uc-prompt">
@@ -941,10 +941,10 @@
 
         <article class="uc-card" id="case-compete-2" data-products="meta">
           <div class="uc-card__head">
-            <h3 class="t-h3">Industry and auction benchmarks</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--meta"><span class="uc-lk">Meta <span class="uc-lk__sq">MCP</span></span></span>
+              <span class="uc-badge">Meta<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Industry and auction benchmarks</h3>
           </div>
           <p class="t-body">Compare ad account performance against auction and industry benchmarks. This data is only available through Meta MCP — it's not in the regular Meta API or Birch's own analytics.</p>
           <div class="uc-prompt">
@@ -956,10 +956,10 @@
 
         <article class="uc-card" id="case-compete-3" data-products="meta">
           <div class="uc-card__head">
-            <h3 class="t-h3">Anomaly detection and Opportunity Score</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--meta"><span class="uc-lk">Meta <span class="uc-lk__sq">MCP</span></span></span>
+              <span class="uc-badge">Meta<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Anomaly detection and Opportunity Score</h3>
           </div>
           <p class="t-body">Check for unusual spend patterns, sudden metric shifts, and Meta's Opportunity Score. Also supports listing custom audiences, images, and videos in the account — useful for quick creative audits without navigating Ads Manager.</p>
           <div class="uc-prompt">
@@ -981,10 +981,10 @@
 
         <article class="uc-card" id="case-create-1" data-products="ai">
           <div class="uc-card__head">
-            <h3 class="t-h3">Suggest creative testing rules</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--ai"><span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
             </div>
+            <h3 class="t-h3">Suggest creative testing rules</h3>
           </div>
           <p class="t-body">Birch AI can suggest rules for creative fatigue detection (frequency + CTR decay), creative testing pipelines (auto-pause underperformers, scale winners), and late-attribution recovery ("phoenix" rules that restart paused ads when delayed conversions come in). These are text recommendations (all platforms) or draft rules (Meta only).</p>
           <div class="uc-prompt">
@@ -996,10 +996,10 @@
 
         <article class="uc-card" id="case-create-2" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Monitor Stage task execution</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Monitor Stage task execution</h3>
           </div>
           <p class="t-body">Check which uploads completed, which failed, and which ads were created. Useful for teams doing high-volume creative testing who want to monitor Stage from Claude without logging into Birch. Supports Meta, TikTok, Snapchat.</p>
           <div class="uc-chain t-para-sm"><code>list_stage_tasks</code><span>&rarr;</span><code>list_stage_uploads</code><span>&rarr;</span><code>list_stage_created_ads</code></div>
@@ -1020,10 +1020,10 @@
 
         <article class="uc-card" id="case-integrate-1" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Work with Birch data in Claude</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Work with Birch data in Claude</h3>
           </div>
           <p class="t-body">Connect at mcp.bir.ch/mcp. Claude can then pull workspaces, ad accounts, rules, rule details, execution logs, folder structures, Stage tasks, and help docs — all in natural language. No Birch UI needed.</p>
           <p class="t-body">The differentiation from Birch AI: no UI constraints, exportable analysis, code execution against the data, and the ability to process very large rule sets (200+ rules). Better for deep audits, cross-account comparisons, and structured exports.</p>
@@ -1036,10 +1036,10 @@
 
         <article class="uc-card" id="case-integrate-2" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Plug Birch data into an internal AI bot</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span><em>&middot; read-only</em></span>
+              <span class="uc-badge">Bïrch<b>MCP</b><em>&middot; read-only</em></span>
             </div>
+            <h3 class="t-h3">Plug Birch data into an internal AI bot</h3>
           </div>
           <p class="t-body">Enterprise teams that run their own AI bots (e.g., in Slack) can connect Birch MCP. Read-only by design — the bot reports, humans decide what to change.</p>
           <div class="uc-prompt">
@@ -1051,10 +1051,10 @@
 
         <article class="uc-card" id="case-integrate-3" data-products="mcp">
           <div class="uc-card__head">
-            <h3 class="t-h3">Answer product questions from any AI client</h3>
             <div class="uc-badges">
-              <span class="uc-badge uc-badge--mcp"><span class="uc-lk">Bïrch <span class="uc-lk__bub"><img src="images/use-cases/mcp-bubble-m.svg" alt="" /><img src="images/use-cases/mcp-bubble-c.svg" alt="" /><img src="images/use-cases/mcp-bubble-p.svg" alt="" /></span></span></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
             </div>
+            <h3 class="t-h3">Answer product questions from any AI client</h3>
           </div>
           <p class="t-body"><code>search_help</code> searches Birch Help Center articles by keyword. Useful when a user asks Claude "how does the ranking condition work in Birch?" — Claude can pull the answer from Birch's own documentation.</p>
           <div class="uc-prompt">
