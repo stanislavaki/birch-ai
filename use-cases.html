@@ -168,9 +168,9 @@
     display: flex;
     gap: var(--space-xxs);
     background: #EDECF3;
-    border-radius: var(--radius-lg);
+    /* track radius = item radius + track padding, so the corners stay concentric */
+    border-radius: calc(var(--radius-md) + var(--space-xs));
     padding: var(--space-xs);
-    min-height: 4.75rem; /* 76px per mock */
   }
   .uc-tab {
     flex: 1;
@@ -184,12 +184,13 @@
     color: var(--color-text-inverted);
     background: none;
     border: none;
-    border-radius: var(--radius-sm);
-    padding: var(--space-xs) 1.875rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
     cursor: pointer;
   }
   .uc-tab.is-on { background: #FFFFFF; }
   .uc-tab .uc-lk { font-size: var(--text-para-lg-size); font-weight: 600; }
+
   /* Active tab: lockup marks switch to product colors (per Figma 927:2842) */
   .uc-tab.is-on .uc-lk__ai { background: var(--color-accent-orange); }
   .uc-tab.is-on .uc-lk__sq { background: var(--color-accent-blue); }
@@ -314,14 +315,30 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.625rem;
+    /* Spacing per Figma 934:3128 — label sits close to the top edge, the quote
+       area takes the rest and carries its own bottom padding, which lifts the
+       quote above true centre to balance the label above it. */
+    gap: var(--space);
     text-align: center;
     background: var(--wf-c, var(--color-accent-green));
     border-radius: var(--radius-md);
-    padding: var(--space-lg) var(--space-sm);
-    min-height: 21.875rem; /* 350px — air around the quote */
+    padding: var(--space) var(--space-sm) 0;
+    min-height: 20rem; /* 320px per mock */
+    justify-content: flex-start;
   }
   .uc-banner h2 { margin: 0; }
+  /* Quote area: fills the leftover height and centres the quote inside it */
+  .uc-banner__quote {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: var(--space-lg);
+  }
+  /* Toggle .banner-grouped on <body> for the Figma bottom option
+     (label + quote as one centred group) */
+  body.banner-grouped .uc-banner { justify-content: center; padding-bottom: var(--space); }
+  body.banner-grouped .uc-banner__quote { flex: 0 1 auto; padding-bottom: 0; }
   .uc-banner__quote {
     font-family: "PP Pangaia", "Fraunces", Georgia, serif; /* Fraunces = dev stand-in */
     font-weight: 400;
@@ -339,7 +356,7 @@
   .uc-card {
     background: #F6F5FA; /* matches bir.ch course surface grey (course-block-wrapper) */
     border-radius: var(--radius-lg);
-    padding: var(--space) var(--space-md) var(--space-md);
+    padding: var(--space-md);
     display: grid;
     gap: var(--space-sm);
     scroll-margin-top: calc(var(--nav-height) + 6.5rem);
@@ -355,7 +372,9 @@
     /* no flex-wrap: with wrap enabled the title's unwrapped width fills the line
        and pushes badges below; nowrap lets the title shrink and wrap instead */
   }
-  .uc-card__head h3 { margin: 0; flex: 1 1 auto; min-width: 0; }
+  /* No text-wrap: balance here — evened-out lines read as body copy;
+     natural wrapping keeps the display-title feel */
+  .uc-card__head h3 { margin: 0; flex: 1 1 auto; min-width: 0; text-wrap: initial; }
   .uc-card__head .uc-badges { flex-shrink: 0; }
   .uc-card p { margin: 0; }
   .uc-card__sub { margin: var(--space-sm) 0 0; }
@@ -448,8 +467,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Slightly darker than the prompt fill; icon takes the text color */
-    background: color-mix(in srgb, var(--wf-c, #FFFFFF) calc(var(--wf-mix, 12%) + 14%), #F6F5FA);
+    /* Darker than the fill by mixing in the section's dark color — uniform
+       ~1.3:1 step across all hues (plain hue-mixing barely darkens yellow).
+       --wf-btn overrides the mixed-in color where the dark tone reads muddy. */
+    background: color-mix(in srgb, var(--wf-btn, var(--wf-cd, #909090)) var(--wf-btn-mix, 18%),
+      color-mix(in srgb, var(--wf-c, #FFFFFF) var(--wf-mix, 12%), #F6F5FA));
     border: none; /* borderless variant under review */
     border-radius: 0.25rem;
     cursor: pointer;
@@ -459,7 +481,8 @@
     transition: background 0.12s ease, border-color 0.12s ease;
   }
   .uc-copy:hover {
-    background: color-mix(in srgb, var(--wf-c, #FFFFFF) calc(var(--wf-mix, 12%) + 24%), #F6F5FA);
+    background: color-mix(in srgb, var(--wf-btn, var(--wf-cd, #909090)) calc(var(--wf-btn-mix, 18%) + 10%),
+      color-mix(in srgb, var(--wf-c, #FFFFFF) var(--wf-mix, 12%), #F6F5FA));
   }
   /* Icon is painted via mask so it can follow --wf-cd */
   .uc-copy img { display: none; }
@@ -744,7 +767,7 @@
       </section>
 
       <!-- ════════ 03 · MONITOR & CONTROL ════════ -->
-      <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #826705; --wf-mix: 30%; --wf-mix-b: 60%">
+      <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #826705; --wf-mix: 30%; --wf-mix-b: 60%; --wf-btn: #C99B00; --wf-btn-mix: 30%">
         <div class="uc-banner">
           <h2 class="t-para-xl">Monitor &amp; Control</h2>
           <p class="uc-banner__quote">“I need to know what's happening — and whether my guardrails are holding.”</p>
@@ -1072,7 +1095,8 @@
         link.querySelector('.uc-toc__cnt').textContent = sec.querySelectorAll('.uc-card:not(.is-hidden)').length;
       }
     });
-    tabs.querySelectorAll('.uc-tab').forEach(function (t) {
+    /* keep every tab bar in sync (dev variants are stacked) */
+    document.querySelectorAll('.uc-tab').forEach(function (t) {
       t.classList.toggle('is-on', t.dataset.p === pid);
     });
   }
