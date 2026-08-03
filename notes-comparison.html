@@ -172,11 +172,13 @@
 
 <!-- ═══════════ 2 — смягчить ═══════════ -->
 <div class="case" style="--wf-c: var(--color-primary); --wf-cd: #826705; --wf-mix: 30%; --wf-mix-b: 60%; --wf-btn: #C99B00; --wf-btn-mix: 30%">
-  <div class="case__meta">Monitor &amp; Control <span class="tag tag--soft">смягчить</span></div>
+  <div class="case__meta">Monitor &amp; Control <span class="tag tag--cut">убрать</span></div>
   <p class="case__why">
-    Тут нет дефекта: у Birch MCP просто другая специализация. Но «cannot do this» подаёт
-    разделение труда как провал — а страница ровно для того и сделана, чтобы объяснить,
-    какой продукт за что отвечает. Значок&nbsp;⚠ добавляет тревоги там, где её нет.
+    Дефекта тут нет, у Birch MCP просто другая специализация — но и говорить об этом
+    в карточке незачем: мы уже сказали это дважды. Карточка продукта в начале страницы
+    прямо перечисляет, с чем работает Birch MCP («rules, execution logs, and Stage tasks»),
+    а на самой карточке кейса стоит бейдж <b>Bïrch&nbsp;AI</b> — он и отвечает, чей это
+    сценарий. Отсутствие бейджа MCP говорит то же самое, только без отрицания.
   </p>
   <div class="cols">
     <div class="col col--now">
@@ -203,14 +205,13 @@
           <h3 class="t-h3">Quick performance overview</h3>
         </div>
         <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes, and works across all connected platforms at the ad account level. Entity-level breakdown is Meta only and limited to accounts with a manageable entity count.</p>
-        <p class="uc-note t-para-sm"><span class="diff">Performance questions go to Birch AI</span> — Birch MCP works with rules, execution logs and Stage tasks.</p>
         <div class="uc-prompt">
           <span class="uc-prompt__label t-eyebrow">Prompt</span>
           <p class="uc-prompt__text">How is my ROAS across all ad accounts this week compared to last week?</p>
           <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
         </div>
       </article>
-      <span class="removed">Значок&nbsp;⚠ снят — это нейтральный факт, а не предупреждение.</span>
+      <span class="removed">Заметка убрана целиком — бейдж и карточки продуктов в начале страницы уже это сказали.</span>
     </div>
   </div>
 </div>
@@ -219,17 +220,19 @@
 <div class="case" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #136F88; --wf-mix: 26%; --wf-mix-b: 52%">
   <div class="case__meta">Build &amp; Set Up <span class="tag tag--soft">смягчить</span></div>
   <p class="case__why">
-    Первая половина — честная граница платформ, она нужна. Вторая появилась во внутреннем доке
-    после конкретного случая, когда AI собрал черновик с неверным фильтром. Предупреждение
-    правильное, но его место — в продукте, в момент создания черновика; на странице оно заранее
-    сеет недоверие к главной фиче карточки.
+    Здесь заметка нужна, но короче. «Draft generation is Meta only» повторяет бейдж, который
+    и так говорит «&middot;&nbsp;Meta only». А «Always review drafts» появилось во внутреннем доке
+    после конкретного случая, когда AI собрал черновик с неверным фильтром: предупреждение
+    правильное, но его место — в продукте, в момент создания черновика, а не на странице, где
+    оно заранее сеет недоверие к главной фиче карточки. Остаётся единственное, чего нигде
+    больше нет: что происходит на остальных платформах.
   </p>
   <div class="cols">
     <div class="col col--now">
       <div class="col__label">Сейчас</div>
       <article class="uc-card">
         <div class="uc-card__head">
-          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b></span></div>
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b><em>&middot; Meta only</em></span></div>
           <h3 class="t-h3">Create a rule from natural language</h3>
         </div>
         <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
@@ -245,18 +248,18 @@
       <div class="col__label">Предложение</div>
       <article class="uc-card">
         <div class="uc-card__head">
-          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b></span></div>
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b><em>&middot; Meta only</em></span></div>
           <h3 class="t-h3">Create a rule from natural language</h3>
         </div>
         <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
-        <p class="uc-note t-para-sm">Draft generation is Meta only — on TikTok, Snapchat and Google <span class="diff">you get the rule logic as text to build from</span>.</p>
+        <p class="uc-note t-para-sm"><span class="diff">On TikTok, Snapchat and Google you get the rule logic as text to build from.</span></p>
         <div class="uc-prompt">
           <span class="uc-prompt__label t-eyebrow">Prompt</span>
           <p class="uc-prompt__text">Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40.</p>
           <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
         </div>
       </article>
-      <span class="removed">«Always review drafts before activating» убрано, значок&nbsp;⚠ снят.</span>
+      <span class="removed">Убрано «Meta only» (это уже на бейдже) и «Always review drafts», значок&nbsp;⚠ снят.</span>
     </div>
   </div>
 </div>
