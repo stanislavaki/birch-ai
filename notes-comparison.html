@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Use cases — заметки-ограничения: было / стало</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", -apple-system, sans-serif;
+    background: #FFFFFF;
+    color: #1A1A1A;
+    line-height: 1.55;
+    padding: 3rem 1.5rem 5rem;
+  }
+  .wrap { max-width: 68rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; letter-spacing: -0.01em; margin-bottom: 0.75rem; }
+  .intro { color: #555; font-size: 0.95rem; max-width: 48rem; margin-bottom: 1.25rem; }
+  .intro b { color: #1A1A1A; }
+  .legend { display: flex; gap: 1.25rem; font-size: 0.85rem; color: #555; margin-bottom: 2.5rem; flex-wrap: wrap; }
+  .legend span { padding: 0.1rem 0.45rem; border-radius: 0.25rem; }
+  .tag-cut { background: #FDE3E3; color: #A81F1F; }
+  .tag-keep { background: #DFF2E4; color: #11702E; }
+  .tag-soft { background: #FFF1D6; color: #8A5A00; }
+
+  .case { margin-bottom: 3rem; }
+  .case__meta {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #999; margin-bottom: 0.3rem;
+  }
+  .case__meta span { padding: 0.1rem 0.45rem; border-radius: 0.25rem; letter-spacing: 0.04em; }
+  .case h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .case__why { color: #555; font-size: 0.9rem; margin-bottom: 1rem; max-width: 48rem; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+  .col { border: 1px solid #E5E5E5; border-radius: 0.75rem; padding: 1.1rem 1.25rem; font-size: 0.92rem; }
+  .col--now { background: #FAFAFA; }
+  .col__label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #999; margin-bottom: 0.6rem;
+  }
+  .note { color: #555; }
+  .note--warn::before { content: "\26A0\FE0E  "; }
+  .old { background: #FDE3E3; color: #A81F1F; padding: 0.05rem 0.25rem; border-radius: 0.25rem; }
+  .new { background: #DFF2E4; color: #11702E; padding: 0.05rem 0.25rem; border-radius: 0.25rem; }
+  .gone { color: #A81F1F; font-style: italic; }
+
+  .foot {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #E5E5E5;
+    font-size: 0.9rem; color: #555; max-width: 48rem;
+  }
+  .foot h2 { font-size: 1rem; color: #1A1A1A; margin-bottom: 0.6rem; }
+  .foot li { margin: 0.4rem 0 0.4rem 1.2rem; }
+  .foot p + h2 { margin-top: 1.5rem; }
+
+  @media (max-width: 767px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Заметки-ограничения на странице Use cases</h1>
+<p class="intro">
+  На странице четыре заметки под значком&nbsp;⚠. Три из них нуждаются в правке — они ниже.
+  Логика разбора одна: <b>границы применения — это не дефект</b>, их стоит формулировать как
+  маршрутизацию («это умеет вот тот продукт»), а не как отказ. А вот <b>открытые баги
+  и предостережения об ошибках</b> на публичной странице работают против продукта и к тому же
+  протухают, как только инженеры их чинят.
+</p>
+<div class="legend">
+  <span class="tag-cut">убрать</span>
+  <span class="tag-soft">смягчить</span>
+  <span class="tag-keep">оставить как есть</span>
+</div>
+
+<!-- ═══════════ 1 ═══════════ -->
+<div class="case">
+  <div class="case__meta">Audit &amp; Review <span class="tag-cut">убрать</span></div>
+  <h3>Audit rules structure + identify zombie rules and over-firing</h3>
+  <p class="case__why">
+    Это открытый баг (BIRCH-152 во внутреннем доке), а не граница продукта. На странице,
+    которая продаёт аудит правил, фраза читается как «наш аудит может молча соврать».
+    Плюс заметка станет неправдой в день, когда баг починят.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <p class="note note--warn">
+        <span class="old">list_automation_rules currently only returns rules in the "General" category — rules in other categories are invisible to the MCP, so the audit may be incomplete.</span>
+      </p>
+    </div>
+    <div class="col">
+      <div class="col__label">Предложение</div>
+      <p class="gone">Заметку убрать со страницы целиком.</p>
+      <p style="margin-top:0.6rem; color:#555; font-size:0.88rem;">
+        Место такой информации — релиз-ноуты и внутренний док для sales и support,
+        где она и была изначально.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<div class="case">
+  <div class="case__meta">Monitor &amp; Control <span class="tag-soft">смягчить</span></div>
+  <h3>Quick performance overview</h3>
+  <p class="case__why">
+    Тут нет никакого дефекта: у Birch MCP просто другая специализация. Но «cannot do this»
+    подаёт разделение труда как провал — а страница ровно для того и сделана, чтобы объяснить,
+    какой продукт за что отвечает. Значок&nbsp;⚠ добавляет тревоги там, где её нет.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <p class="note note--warn">
+        Birch MCP <span class="old">cannot do this — it has no performance metrics</span>.
+      </p>
+    </div>
+    <div class="col">
+      <div class="col__label">Предложение</div>
+      <p class="note">
+        <span class="new">Performance questions go to Birch AI</span> — Birch MCP works with rules,
+        execution logs and Stage tasks.
+      </p>
+      <p style="margin-top:0.6rem; color:#555; font-size:0.88rem;">Без значка&nbsp;⚠ — это нейтральный факт, а не предупреждение.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<div class="case">
+  <div class="case__meta">Build &amp; Set Up <span class="tag-soft">смягчить</span></div>
+  <h3>Create a rule from natural language</h3>
+  <p class="case__why">
+    Первая половина — честная граница платформ, она нужна. Вторая появилась во внутреннем доке
+    после конкретного случая, когда AI собрал черновик с неверным фильтром. Предупреждение
+    правильное, но его место — в продукте, в момент создания черновика; на странице оно
+    заранее сеет недоверие к главной фиче карточки.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <p class="note note--warn">
+        Draft generation is Meta only — TikTok, Snapchat, and Google get text descriptions of the rule logic.
+        <span class="old">Always review drafts before activating.</span>
+      </p>
+    </div>
+    <div class="col">
+      <div class="col__label">Предложение</div>
+      <p class="note">
+        Draft generation is Meta only — on TikTok, Snapchat and Google
+        <span class="new">you get the rule logic as text to build from</span>.
+      </p>
+      <p style="margin-top:0.6rem; color:#555; font-size:0.88rem;">Тоже без значка&nbsp;⚠.</p>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <h2>Что не трогаем</h2>
+  <p>
+    <b>Compete &amp; Benchmark, заметка раздела</b> — «Meta MCP в бете, доступно не всем,
+    объём будет меняться». Это честное управление ожиданиями, и читается как «ранний доступ»,
+    а не как дефект. Единственное — можно убрать слово «Limitation» из начала, чтобы фраза
+    не открывалась с отрицания.
+  </p>
+
+  <h2>Что меняется в оформлении</h2>
+  <ul>
+    <li>Значок&nbsp;⚠ остаётся только там, где он правда предупреждает. У заметок про границы применения его не будет — они станут обычным тихим серым текстом.</li>
+    <li>Формулировки уходят от «не умеет» к «за это отвечает вот тот продукт».</li>
+  </ul>
+
+  <h2>Принцип, по которому разбирали</h2>
+  <p>
+    Та же граница, что мы уже провели, когда убирали со страницы блоки «What to say / What not to say»:
+    <b>публичная страница — возможности и границы применения; внутренний док — дефекты,
+    предостережения и незакрытые баги.</b> Просто в прошлый раз мы провели её не до конца.
+  </p>
+</div>
+
+</div>
+</body>
+</html>

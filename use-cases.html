@@ -388,6 +388,10 @@
   .uc-card__head h3 { margin: 0; text-wrap: initial; }
   .uc-card p { margin: 0; }
   .uc-card__sub { margin: var(--space-sm) 0 0; }
+  /* A sub-heading belongs to the paragraph under it, so that pair sits at half
+     the card gap (8 vs 16). Grid gap is uniform, so the pair is pulled together
+     with a negative margin rather than by regrouping the markup. */
+  .uc-card__sub + p { margin-top: calc(var(--space-xs) - var(--space-sm)); }
 
   .uc-badges { display: flex; gap: var(--space-xxs); flex-wrap: wrap; }
   /* Typographic badge: the brand half stays light, the product half goes bold —
