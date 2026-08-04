@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Birch — Map</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", monospace, sans-serif;
+      background: #0D0D12;
+      color: #fff;
+      padding: 3rem 2rem 6rem;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .subtitle { font-size: 0.875rem; color: #555; margin-bottom: 2rem; max-width: 46rem; line-height: 1.5; }
+
+    .nav-links { display: flex; gap: 1.5rem; margin-bottom: 3rem; flex-wrap: wrap; }
+    .nav-links a {
+      font-size: 0.75rem; color: #444; text-decoration: none;
+      font-family: monospace; transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #888; }
+    .nav-links a.is-active { color: #59DBFF; }
+
+    /* ── growth strip ── */
+    .growth { margin-bottom: 3.5rem; }
+    .growth__head {
+      display: flex; align-items: baseline; gap: 1rem;
+      font-size: 0.75rem; font-family: monospace; color: #555;
+      margin-bottom: 0.75rem;
+    }
+    .growth__head b { color: #fff; font-size: 1.75rem; font-weight: 600; }
+    .growth__bars { display: flex; align-items: flex-end; gap: 4px; height: 72px; }
+    .growth__col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
+    .growth__bar { background: #1e1e2a; border-radius: 2px; min-height: 2px; transition: background 0.15s; }
+    .growth__col:hover .growth__bar { background: #59DBFF; }
+    .growth__label {
+      font-family: monospace; font-size: 0.625rem; color: #444;
+      text-align: center; white-space: nowrap;
+    }
+
+    /* ── family tree ── */
+    .families { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+    .family {
+      background: #13131a; border: 1px solid #1e1e2a; border-radius: 10px;
+      padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .family__head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+    .family__title { font-size: 0.9375rem; font-weight: 600; }
+    .family__count { font-family: monospace; font-size: 0.6875rem; color: #444; flex-shrink: 0; }
+    .family__note { font-size: 0.75rem; color: #555; line-height: 1.45; }
+
+    .node { display: flex; align-items: baseline; gap: 0.5rem; text-decoration: none; padding: 0.3rem 0; }
+    .node:hover .node__name { color: #59DBFF; }
+    .node__dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transform: translateY(-2px); }
+    .node__name { font-size: 0.8125rem; color: #ccc; transition: color 0.15s; }
+    .node__date { font-family: monospace; font-size: 0.6875rem; color: #3a3a4a; margin-left: auto; flex-shrink: 0; }
+    .node--root .node__name { font-weight: 600; color: #fff; }
+
+    /* children hang off the root on a rail */
+    .node--child { margin-left: 0.75rem; padding-left: 0.875rem; border-left: 1px solid #21212c; }
+    .node--child:last-child { border-left-color: transparent; box-shadow: -1px 0 0 #21212c; }
+
+    /* type colours — same key as the legend */
+    .t-page   { background: #59DBFF; }
+    .t-embed  { background: #04DE00; }
+    .t-review { background: #FF21A6; }
+    .t-tool   { background: #FF7700; }
+    .t-system { background: #FFE243; }
+
+    .legend { display: flex; gap: 1.25rem; flex-wrap: wrap; margin: 2.5rem 0 1.5rem; }
+    .legend span { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: #555; }
+    .legend i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+  </style>
+</head>
+<body>
+
+  <h1>Карта проекта</h1>
+  <p class="subtitle">
+    Всё, что когда-либо сверстали, — сгруппировано по тому, ради чего делалось.
+    У каждой страницы под ней висят её embed-блоки, черновики и материалы,
+    которые уходили на вычитку. Дата — когда файл появился в репозитории.
+  </p>
+
+  <nav class="nav-links">
+    <a href="pages.html" target="_blank">Pages</a>
+    <a href="embeds.html" target="_blank">Embeds</a>
+    <a href="map.html" class="is-active">Map</a>
+    <a href="debug/webflow-sim.html" target="_blank">Simulator</a>
+    <a href="design-system/tokens-comparison.html" target="_blank">Tokens Comparison</a>
+  </nav>
+
+  <div class="growth">
+    <div class="growth__head"><b id="total">—</b> файлов за <span id="span">—</span></div>
+    <div class="growth__bars" id="bars"></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="t-page"></i> страница</span>
+    <span><i class="t-embed"></i> embed для Webflow</span>
+    <span><i class="t-review"></i> на вычитку</span>
+    <span><i class="t-tool"></i> инструмент</span>
+    <span><i class="t-system"></i> дизайн-система</span>
+  </div>
+
+  <div class="families" id="families"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* Dates are first-commit dates, pulled from git history when this page was written.
+     Regenerate with:
+     for f in $(git ls-files '*.html'); do
+       echo "$f $(git log --diff-filter=A --follow --format=%ad --date=short -1 -- $f)"; done  */
+  var FAMILIES = [
+    {
+      title: 'Bïrch AI promo',
+      note: 'Первая большая страница проекта. Разошлась на шесть embed-блоков.',
+      nodes: [
+        ['ai-promo.html', 'page', '2026-05-20', 1],
+        ['embed/ai-promo-embed.html', 'embed', '2026-05-15'],
+        ['embed/ai-promo-hero-embed.html', 'embed', '2026-06-05'],
+        ['embed/ai-promo-pills-embed.html', 'embed', '2026-06-05'],
+        ['embed/ai-promo-prompts-embed.html', 'embed', '2026-06-05'],
+        ['embed/ai-promo-vision-embed.html', 'embed', '2026-06-05'],
+        ['embed/ai-promo-acc-embed.html', 'embed', '2026-06-05']
+      ]
+    },
+    {
+      title: 'Bïrch MCP',
+      note: 'Страница продукта. Её embed-блоки — тот случай, где вскрылись грабли из EMBED-ISSUES.',
+      nodes: [
+        ['birch-mcp.html', 'page', '2026-05-20', 1],
+        ['embed/birch-mcp-hero-embed.html', 'embed', '2026-07-29'],
+        ['embed/birch-mcp-statement-embed.html', 'embed', '2026-07-29'],
+        ['embed/birch-mcp-usecases-embed.html', 'embed', '2026-07-29']
+      ]
+    },
+    {
+      title: 'Use cases',
+      note: 'Свежая. Собиралась через вайрфреймы, дважды уходила на вычитку копирайта.',
+      nodes: [
+        ['use-cases.html', 'page', '2026-07-30', 1],
+        ['use-cases-wireframes.html', 'review', '2026-07-30'],
+        ['voice-comparison.html', 'review', '2026-07-30'],
+        ['notes-comparison.html', 'review', '2026-08-03']
+      ]
+    },
+    {
+      title: 'Manage UPD',
+      note: 'Три блока, собранных прямо в Webflow нативными элементами.',
+      nodes: [
+        ['manage.html', 'page', '2026-07-09', 1],
+        ['embed/manage-pills-embed.html', 'embed', '2026-07-09'],
+        ['embed/manage-ais-embed.html', 'embed', '2026-07-10'],
+        ['embed/manage-aichat-embed.html', 'embed', '2026-07-13']
+      ]
+    },
+    {
+      title: 'Stage',
+      note: 'Самый долгоживущий embed — 18 правок с мая.',
+      nodes: [
+        ['stage.html', 'page', '2026-05-27', 1],
+        ['embed/stage-embed.html', 'embed', '2026-05-27']
+      ]
+    },
+    {
+      title: 'Промо-карточки',
+      note: 'Пара блоков-тизеров для чужих страниц сайта — без своей dev-страницы.',
+      nodes: [
+        ['embed/promo-ai-embed.html', 'embed', '2026-07-24'],
+        ['embed/promo-mcp-embed.html', 'embed', '2026-07-24']
+      ]
+    },
+    {
+      title: 'Отдельные блоки',
+      note: 'Врезки, которые живут сами по себе.',
+      nodes: [
+        ['embed/aq-text-embed.html', 'embed', '2026-06-25'],
+        ['embed/footer-physics-embed.html', 'embed', '2026-06-25']
+      ]
+    },
+    {
+      title: 'Ранние страницы',
+      note: 'С чего всё начиналось, до того как появилась дизайн-система.',
+      nodes: [
+        ['index.html', 'page', '2026-04-29', 1],
+        ['experiments.html', 'page', '2026-06-03'],
+        ['acc-mob-dev.html', 'page', '2026-06-08']
+      ]
+    },
+    {
+      title: 'Дизайн-система',
+      note: 'Токены, компоненты и Webflow-окружение для dev-страниц.',
+      nodes: [
+        ['design-system/styleguide.html', 'system', '2026-05-14', 1],
+        ['design-system/tokens-comparison.html', 'system', '2026-07-09'],
+        ['design-system/webflow-env-nav.html', 'system', '2026-07-09']
+      ]
+    },
+    {
+      title: 'Утилиты',
+      note: 'Навигация по проекту. Эта страница — здесь же.',
+      nodes: [
+        ['pages.html', 'tool', '2026-07-08', 1],
+        ['embeds.html', 'tool', '2026-06-25'],
+        ['map.html', 'tool', '2026-08-04']
+      ]
+    },
+    {
+      title: 'Отладка',
+      note: 'Стенды, на которых проверяли embed-ы и анимации.',
+      nodes: [
+        ['debug/webflow-sim.html', 'tool', '2026-06-05', 1],
+        ['debug/webflow-sim-test.html', 'tool', '2026-07-09'],
+        ['debug/embed-harness.html', 'tool', '2026-07-29'],
+        ['debug/hero-icons.html', 'tool', '2026-06-02'],
+        ['debug/cube-width-demo.html', 'tool', '2026-07-22'],
+        ['debug/cube-easing-demo.html', 'tool', '2026-07-23']
+      ]
+    }
+  ];
+
+  var TYPE_CLASS = { page:'t-page', embed:'t-embed', review:'t-review', tool:'t-tool', system:'t-system' };
+
+  /* ── families ── */
+  var host = document.getElementById('families');
+  var all = [];
+  FAMILIES.forEach(function (f) {
+    var card = document.createElement('div');
+    card.className = 'family';
+
+    var head = document.createElement('div');
+    head.className = 'family__head';
+    head.innerHTML = '<span class="family__title">' + f.title + '</span>' +
+                     '<span class="family__count">' + f.nodes.length + '</span>';
+    card.appendChild(head);
+
+    var note = document.createElement('p');
+    note.className = 'family__note';
+    note.textContent = f.note;
+    card.appendChild(note);
+
+    f.nodes.forEach(function (n) {
+      var path = n[0], type = n[1], date = n[2], isRoot = n[3];
+      all.push({ path: path, date: date });
+      var a = document.createElement('a');
+      a.className = 'node' + (isRoot ? ' node--root' : ' node--child');
+      a.href = path;
+      a.target = '_blank';
+      a.innerHTML =
+        '<span class="node__dot ' + TYPE_CLASS[type] + '"></span>' +
+        '<span class="node__name">' + path.replace(/^(embed|debug|design-system)\//, '') + '</span>' +
+        '<span class="node__date">' + date.slice(2).replace(/-/g, '.') + '</span>';
+      card.appendChild(a);
+    });
+    host.appendChild(card);
+  });
+
+  /* ── growth: files added per month, stacked cumulatively ── */
+  var byMonth = {};
+  all.forEach(function (f) {
+    var m = f.date.slice(0, 7);
+    byMonth[m] = (byMonth[m] || 0) + 1;
+  });
+  var months = Object.keys(byMonth).sort();
+  var peak = Math.max.apply(null, months.map(function (m) { return byMonth[m]; }));
+  var bars = document.getElementById('bars');
+  months.forEach(function (m) {
+    var col = document.createElement('div');
+    col.className = 'growth__col';
+    col.title = m + ' — ' + byMonth[m] + ' файлов';
+    var bar = document.createElement('div');
+    bar.className = 'growth__bar';
+    bar.style.height = Math.round(byMonth[m] / peak * 52) + 'px';
+    var label = document.createElement('div');
+    label.className = 'growth__label';
+    label.textContent = m.slice(5) + '.' + m.slice(2, 4) + ' · ' + byMonth[m];
+    col.appendChild(bar);
+    col.appendChild(label);
+    bars.appendChild(col);
+  });
+
+  document.getElementById('total').textContent = all.length;
+  document.getElementById('span').textContent =
+    months[0].slice(5) + '.' + months[0].slice(2,4) + ' — ' +
+    months[months.length-1].slice(5) + '.' + months[months.length-1].slice(2,4);
+})();
+</script>
+</body>
+</html>
