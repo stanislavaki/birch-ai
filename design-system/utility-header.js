@@ -20,12 +20,14 @@
     { file: 'design-system/tokens-comparison.html',  label: 'Tokens' }
   ];
 
-  /* depth is derived from this script's own src, so pages in sub-folders
-     do not have to declare where the root is */
-  var src = (document.currentScript && document.currentScript.src) || '';
-  var root = src.indexOf('../') > -1 ? '../' : '';
+  /* Depth is derived from the current page's own path — how many folders deep
+     it sits below the project root — so links resolve from any sub-folder.
+     (document.currentScript.src is absolute, so it cannot tell us the depth.) */
+  var segs = location.pathname.split('/').filter(Boolean);
+  var depth = Math.max(0, segs.length - 1);       /* folders above the file */
+  var root = depth ? new Array(depth + 1).join('../') : '';
 
-  var here = location.pathname.split('/').filter(Boolean).slice(-2).join('/');
+  var here = segs.slice(-2).join('/');
   function isActive(file) {
     var tail = file.split('/').pop();
     return here === file || here.split('/').pop() === tail;
