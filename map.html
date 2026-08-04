@@ -41,6 +41,23 @@
     }
     .node--child .node__name { font-weight: 600; color: #a9a9b6; }
 
+    /* ── growth strip: files added per month ── */
+    .growth { margin-bottom: var(--space-lg); }
+    .growth__head {
+      display: flex; align-items: baseline; gap: var(--space-sm);
+      font-size: var(--text-para-sm-size); color: var(--color-text-grey);
+      margin-bottom: var(--space-xs);
+    }
+    .growth__head b { color: var(--color-text); font-size: var(--text-h4-size); font-weight: 600; }
+    .growth__bars { display: flex; align-items: flex-end; gap: 0.25rem; height: 4.5rem; }
+    .growth__col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.25rem; }
+    .growth__bar { background: #1e1e2a; border-radius: 0.125rem; min-height: 0.125rem; transition: background 0.15s; }
+    .growth__col:hover .growth__bar { background: var(--color-accent-light-blue); }
+    .growth__label {
+      font-size: var(--text-eyebrow-size); color: #3a3a4a;
+      text-align: center; white-space: nowrap;
+    }
+
     .legend { display: flex; gap: var(--space); flex-wrap: wrap; margin-bottom: var(--space-lg); }
     .legend span { display: flex; align-items: center; gap: 0.4rem; font-size: var(--text-eyebrow-size); color: var(--color-text-grey); }
     .legend i { width: 0.375rem; height: 0.375rem; border-radius: 50%; display: block; }
@@ -62,6 +79,11 @@
   </p>
 
   <nav class="u-anchors" id="anchors"></nav>
+
+  <div class="growth">
+    <div class="growth__head"><b id="total">&mdash;</b> файлов &middot; <span id="span">&mdash;</span></div>
+    <div class="growth__bars" id="bars"></div>
+  </div>
 
   <div class="legend">
     <span><i class="t-page"></i> страница</span>
@@ -244,7 +266,9 @@
       name.textContent = path.replace(/^(embed|debug|design-system)\//, '');
       var when = document.createElement('span');
       when.className = 'node__date';
-      when.textContent = date.slice(2).replace(/-/g, '.');
+      /* day.month.year, e.g. 2026-05-20 → 20.05.2026 */
+      var dp = date.split('-');
+      when.textContent = dp[2] + '.' + dp[1] + '.' + dp[0];
       top.appendChild(dot); top.appendChild(name); top.appendChild(when);
       a.appendChild(top);
 
@@ -257,6 +281,38 @@
     });
     host.appendChild(card);
   });
+
+  /* ── growth strip: files added per month across all families ── */
+  var all = [];
+  FAMILIES.forEach(function (f) { f.nodes.forEach(function (n) { all.push(n[2]); }); });
+  var byMonth = {};
+  all.forEach(function (d) {
+    var m = d.slice(0, 7);
+    byMonth[m] = (byMonth[m] || 0) + 1;
+  });
+  var months = Object.keys(byMonth).sort();
+  var peak = Math.max.apply(null, months.map(function (m) { return byMonth[m]; }));
+  var bars = document.getElementById('bars');
+  months.forEach(function (m) {
+    var col = document.createElement('div');
+    col.className = 'growth__col';
+    col.title = m + ' — ' + byMonth[m] + ' файлов';
+    var bar = document.createElement('div');
+    bar.className = 'growth__bar';
+    bar.style.height = Math.round(byMonth[m] / peak * 52) + 'px';
+    var label = document.createElement('div');
+    label.className = 'growth__label';
+    label.textContent = m.slice(5) + '.' + m.slice(0, 4) + ' · ' + byMonth[m];
+    col.appendChild(bar);
+    col.appendChild(label);
+    bars.appendChild(col);
+  });
+  document.getElementById('total').textContent = all.length;
+  var first = all.slice().sort()[0];
+  var span = document.getElementById('span');
+  var mNames = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  var fp = first.split('-');
+  span.textContent = mNames[+fp[1] - 1] + ' ' + fp[0] + ' — сейчас';
 })();
 </script>
 </body>

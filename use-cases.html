@@ -15,6 +15,9 @@
      PAGE SETUP — light page on the dark-site shell
   ───────────────────────────────────────── */
   html, body { margin: 0; padding: 0; }
+  /* TOC links target section/card anchors — glide, don't jump */
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     font-family: var(--font);
     background: #FFFFFF; /* light page — approved in briefing */
@@ -95,23 +98,25 @@
     margin: var(--space-sm) auto 0;
     text-wrap: pretty;
   }
+  /* Product cards (Figma 1008:10783): all three on the surface grey, title at
+     the top, brand lockup centred in the middle, description at the bottom. */
   .uc-pcards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap-main);
     margin-top: var(--space-lg);
-    text-align: center;
+    text-align: left;
   }
   .uc-pcard {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    background: #F1F0F7; /* surface grey */
+    color: var(--color-text-inverted);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
-    min-height: 25.875rem; /* 414px per Figma */
+    min-height: 26rem; /* 417px per Figma */
   }
-  .uc-pcard--ai   { background: var(--color-accent-blue); color: var(--color-text); }
-  .uc-pcard--mcp  { background: var(--color-accent-pink); color: var(--color-text); }
-  .uc-pcard--meta { background: #E8E8E8; color: var(--color-text-inverted); } /* literal per Figma, not tokenised */
   .uc-pcard__logo {
     flex: 1;
     display: flex;
@@ -119,48 +124,40 @@
     justify-content: center;
   }
   .uc-pcard__title { margin: 0 0 0.625rem; }
-  .uc-pcard--meta .uc-pcard__desc { color: var(--color-text-grey); }
 
-  /* Placeholder logo lockups — replace with exported SVG lockups from Figma */
+  /* Brand lockups (Figma): dark pill + white wordmark + coloured product tag */
   .uc-lockup {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     background: var(--color-bg);
-    color: var(--color-text);
     border-radius: var(--radius-pill);
-    padding: 0.625rem 0.75rem 0.625rem 1.4375rem;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1;
+    padding: 0.625rem 0.625rem 0.625rem 1.4375rem; /* 10 / 10 / 10 / 23 */
   }
+  .uc-lockup img { display: block; width: 8.3125rem; height: 2.77rem; } /* 133×44.3 */
   .uc-lockup__tag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    height: 3.75rem; /* 60px */
+    min-width: 3.75rem;
+    padding: 0 0.8125rem 0.15em;
+    background: var(--color-primary); /* yellow */
+    color: var(--color-text-inverted);
+    border-radius: var(--radius-pill);
+    font-size: 2.86rem; /* 45.7px */
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  /* Meta variant: square black bar, smaller Meta wordmark, blue square tag */
+  .uc-lockup--meta { border-radius: 0; padding-left: 1.25rem; }
+  .uc-lockup--meta img { width: 7.35rem; height: 2.9rem; } /* 117.6×46.3 */
+  .uc-lockup--meta .uc-lockup__tag {
     background: var(--color-accent-blue);
     color: var(--color-text);
-    border-radius: var(--radius-pill);
-    padding: 0.35em 0.5em 0.45em;
-    font-size: 0.9em;
-    font-weight: 900;
+    border-radius: 0;
   }
-  .uc-lockup__tag--sq { border-radius: 0.15em; }
-  .uc-lockup__mcp { display: inline-flex; }
-  .uc-lockup__mcp span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.5em;
-    height: 1.5em;
-    border-radius: 50%;
-    background: var(--color-accent-pink);
-    color: var(--color-text);
-    font-size: 0.75em;
-    font-weight: 900;
-  }
-  .uc-lockup__mcp span + span { margin-left: -0.3em; }
 
   /* ─────────────────────────────────────────
      FILTER TABS — segmented bar, sticky under nav
@@ -176,7 +173,8 @@
     display: flex;
     gap: var(--space-xxs);
     background: #F1F0F7; /* surface grey (Figma 989:1278) */
-    border-radius: var(--radius-lg); /* 16px track (Figma) */
+    /* var3 sizing: track radius = pill radius + track padding (concentric) */
+    border-radius: calc(var(--radius-md) + var(--space-xs));
     padding: var(--space-xs);
   }
   .uc-tab {
@@ -191,8 +189,8 @@
     color: var(--color-text-inverted);
     background: none;
     border: none;
-    border-radius: var(--radius-sm); /* 8px pill (Figma) */
-    padding: var(--space-xs) var(--space);
+    border-radius: var(--radius-md); /* var3 pill */
+    padding: var(--space-sm);
     cursor: pointer;
   }
   .uc-tab.is-on { background: #FFFFFF; }
@@ -249,7 +247,7 @@
     align-items: center;
     gap: var(--gap-main);
     padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-lg); /* match the open-section radius on hover */
     color: var(--color-text-inverted);
     text-decoration: none;
     transition: background 0.15s ease;
@@ -311,43 +309,75 @@
   }
   .uc-wf.is-hidden { display: none; }
 
+  /* Divider card (Figma 976:4597): big centred title + a white chip pinned at
+     the bottom carrying a colour-matched seal badge and the persona quote. */
   .uc-banner {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    /* Spacing per Figma 934:3128 — label sits close to the top edge, the quote
-       area takes the rest and carries its own bottom padding, which lifts the
-       quote above true centre to balance the label above it. */
     gap: var(--space);
-    text-align: center;
     background: var(--wf-c, var(--color-accent-green));
     border-radius: var(--radius-md);
-    padding: var(--space-md) var(--space-sm) 0;
-    min-height: 20rem; /* 320px per mock */
-    justify-content: flex-start;
+    padding: var(--space-sm);
+    min-height: 21.25rem; /* 340px per mock */
   }
-  .uc-banner h2 { margin: 0; }
-  /* Quote area: fills the leftover height and centres the quote inside it */
-  .uc-banner__quote {
+  .uc-banner__title {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: var(--space-lg);
+    text-align: center;
+    margin: 0;
+    font-size: clamp(2.25rem, 1.2rem + 2.6vw, 3.25rem); /* 52px cap (Figma) */
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: var(--color-text-inverted);
   }
-  /* Toggle .banner-grouped on <body> for the Figma bottom option
-     (label + quote as one centred group) */
-  body.banner-grouped .uc-banner { justify-content: center; padding-bottom: var(--space); }
-  body.banner-grouped .uc-banner__quote { flex: 0 1 auto; padding-bottom: 0; }
+  .uc-banner__chip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: #FFFFFF;
+    border-radius: var(--radius-sm);
+    padding: var(--space) var(--space-sm);
+    min-height: 4.5rem; /* 72px */
+  }
+  /* Seal badge: section-colour scalloped mark with a serif quote glyph */
+  .uc-banner__mark {
+    position: relative;
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .uc-banner__mark::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--wf-c, var(--color-accent-green));
+    -webkit-mask: url("images/use-cases/seal.svg") center / contain no-repeat;
+    mask: url("images/use-cases/seal.svg") center / contain no-repeat;
+  }
+  .uc-banner__mark i {
+    position: relative;
+    font-family: "PP Pangaia", "Fraunces", Georgia, serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.75rem;
+    line-height: 0;
+    color: var(--color-bg-grey);
+    transform: translateY(0.3em);
+  }
   .uc-banner__quote {
+    margin: 0;
     font-family: "PP Pangaia", "Fraunces", Georgia, serif; /* Fraunces = dev stand-in */
     font-weight: 400;
-    font-size: 2.375rem; /* 38px per mock — no DS token yet */
+    font-size: var(--text-para-lg-size); /* 20px */
     line-height: 1.1;
-    max-width: 37.25rem;
-    margin: 0;
-    text-wrap: balance;
+    color: var(--color-text-inverted);
+    text-wrap: pretty;
   }
   .uc-wf__note { color: var(--color-text-grey); padding: 0 var(--space-md); }
 
@@ -363,8 +393,13 @@
     scroll-margin-top: calc(var(--nav-height) + var(--space-sm));
   }
   .uc-card.is-hidden { display: none; }
-  .uc-card--road { border: 1px dashed var(--color-text-grey); background: #FFFFFF; }
-  .uc-card--road > *:not(.uc-card__head) { opacity: 0.6; }
+  /* Roadmap card (Figma 951:844): bold dashed outline, no fill, content at
+     full strength — reads as a planned card, not a disabled one */
+  .uc-card--road {
+    border: 3px dashed var(--color-text-inverted);
+    border-radius: 0.375rem; /* 6px per Figma */
+    background: transparent;
+  }
   /* Badges sit above the title (Figma 04-01): they stop competing with it for
      width, and read as a kicker — which products, then the case itself. */
   .uc-card__head {
@@ -401,13 +436,19 @@
   }
   .uc-badge b { font-weight: 600; color: var(--color-text-inverted); }
   .uc-badge em { font-style: normal; font-weight: 600; opacity: 0.85; }
+  /* "In roadmap" pill (Figma 961:4531): yellow eyebrow chip at the end of the
+     badges row — the row spans the card so the pill lands on the right edge */
+  .uc-card--road .uc-badges { width: 100%; }
   .uc-badge--road {
-    background: transparent;
-    border: 1px dashed var(--color-text-grey);
-    color: var(--color-text-grey);
+    margin-left: auto;
+    background: var(--color-primary);
+    border: none;
+    color: var(--color-text-inverted);
     font-size: var(--text-eyebrow-size);
     font-weight: 700;
-    padding: 0.45em 0.8em 0.55em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.35em 0.6em 0.45em;
   }
   .uc-badge em { font-style: normal; font-weight: 600; font-size: 0.75rem; opacity: 0.75; }
 
@@ -508,16 +549,41 @@
      SELECTED BOX — top of the sidebar (Figma 1017:11133)
      Shows the active product; the round button scrolls back to the tab bar.
   ───────────────────────────────────────── */
+  /* Shown only once the tab bar has scrolled out of view. Collapses smoothly
+     (max-height + opacity) so the Workflows list below slides instead of
+     jumping when the box appears/disappears. Sticky inside the scrollable
+     sidebar: the workflows list scrolls, the box stays put — that's its job. */
   .uc-selected {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    /* white ring masks list items sliding under the rounded corners */
+    box-shadow: 0 0 0 0.375rem #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-sm);
     background: #F1F0F7; /* surface grey */
     border-radius: var(--radius-lg);
+    padding: 0 var(--space-sm) 0 var(--space);
+    margin-bottom: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition: max-height 0.25s ease, opacity 0.2s ease,
+      padding 0.25s ease, margin 0.25s ease;
+  }
+  .uc-selected.is-visible {
+    max-height: 8rem;
+    opacity: 1;
     padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space);
     margin-bottom: var(--space-sm);
+    pointer-events: auto;
+    cursor: pointer; /* the whole box scrolls back to the filters */
   }
+  .uc-selected.is-visible:hover .uc-selected__btn { background: var(--color-text-inverted); transform: translateY(-0.1em); }
+  @media (prefers-reduced-motion: reduce) { .uc-selected { transition: none; } }
   .uc-selected__text { display: flex; flex-direction: column; gap: var(--space-xxs); min-width: 0; }
   .uc-selected__label {
     font-size: var(--text-eyebrow-size);
@@ -604,26 +670,25 @@
     <h1 class="t-h2">Learn the difference</h1>
     <p class="uc-hero__sub t-para-lg">A breakdown across six workflows — auditing rules, reading logs, building automation, benchmarking, and more.</p>
     <div class="uc-pcards">
-      <div class="uc-pcard uc-pcard--ai">
-        <div class="uc-pcard__logo">
-          <!-- Placeholder lockup — swap for exported SVG -->
-          <span class="uc-lockup">bïrch <span class="uc-lockup__tag">AI</span></span>
-        </div>
+      <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">In-app assistant<br />or co-pilot</h3>
+        <div class="uc-pcard__logo">
+          <span class="uc-lockup"><img src="images/use-cases/birch-wordmark.svg" alt="Bïrch" /><span class="uc-lockup__tag">AI</span></span>
+        </div>
         <p class="uc-pcard__desc t-body">An assistant inside Birch that reads your rules and your performance side by side — it spots what's off, suggests what to change, and drafts the fix for you to review.</p>
       </div>
-      <div class="uc-pcard uc-pcard--mcp">
-        <div class="uc-pcard__logo">
-          <span class="uc-lockup">bïrch <span class="uc-lockup__mcp"><span>M</span><span>C</span><span>P</span></span></span>
-        </div>
+      <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">External connector<br />for AI clients to Birch</h3>
+        <div class="uc-pcard__logo">
+          <span class="uc-lockup"><img src="images/use-cases/birch-wordmark.svg" alt="Bïrch" /><span class="uc-lockup__tag">MCP</span></span>
+        </div>
         <p class="uc-pcard__desc t-body">Birch data inside your own AI workflow. Connect Birch MCP to Claude, or any MCP-compatible tool, and your rules, execution logs and Stage tasks join the conversation.</p>
       </div>
-      <div class="uc-pcard uc-pcard--meta">
-        <div class="uc-pcard__logo">
-          <span class="uc-lockup">Meta <span class="uc-lockup__tag uc-lockup__tag--sq">MCP</span></span>
-        </div>
+      <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">Official Meta connector<br />inside Birch AI chat</h3>
+        <div class="uc-pcard__logo">
+          <span class="uc-lockup uc-lockup--meta"><img src="images/use-cases/meta-wordmark.svg" alt="Meta" /><span class="uc-lockup__tag">MCP</span></span>
+        </div>
         <p class="uc-pcard__desc t-body">Meta's own data inside your Birch AI conversation — ad-level performance, change history, industry benchmarks and the Ads Library, read straight from Meta.</p>
       </div>
     </div>
@@ -669,8 +734,11 @@
       <!-- ════════ 01 · AUDIT & REVIEW ════════ -->
       <section class="uc-wf" id="wf-audit" data-title="Audit &amp; Review" style="--wf-c: var(--color-accent-green); --wf-cd: #037A00">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Audit &amp; Review</h2>
-          <p class="uc-banner__quote">“I need to understand what my automation is doing and how it helps with my campaigns performance.”</p>
+          <h2 class="uc-banner__title">Audit &amp; Review</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to understand what my automation is doing and how it helps with my campaigns performance</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-audit-1" data-products="ai mcp">
@@ -760,8 +828,11 @@
       <!-- ════════ 02 · BUILD & SET UP ════════ -->
       <section class="uc-wf" id="wf-build" data-title="Build &amp; Set Up" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #136F88">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Build &amp; Set Up</h2>
-          <p class="uc-banner__quote">“I need to create rules — or figure out which ones to create.”</p>
+          <h2 class="uc-banner__title">Build &amp; Set Up</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to create rules &mdash; or figure out which ones to create</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-build-1" data-products="ai">
@@ -813,9 +884,13 @@
           </div>
         </article>
 
-        <article class="uc-card uc-card--road" id="case-build-4" data-products="">
+        <article class="uc-card uc-card--road" id="case-build-4" data-products="ai mcp">
           <div class="uc-card__head">
-            <div class="uc-badges"><span class="uc-badge uc-badge--road">&#128284; Roadmap</span></div>
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+              <span class="uc-badge uc-badge--road">In roadmap</span>
+            </div>
             <h3 class="t-h3">Create rules from Claude</h3>
           </div>
           <p class="t-body">Today Birch MCP is read-only. Write tools (<code>create_automation_rule</code>, <code>update_automation_rule</code>) are in the engineering backlog. When shipped, rules will always be created as drafts — never live without user approval.</p>
@@ -825,8 +900,11 @@
       <!-- ════════ 03 · MONITOR & CONTROL ════════ -->
       <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #826705">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Monitor &amp; Control</h2>
-          <p class="uc-banner__quote">“I need to know what's happening — and whether my guardrails are holding.”</p>
+          <h2 class="uc-banner__title">Monitor &amp; Control</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to know what's happening &mdash; and whether my guardrails are holding</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-monitor-1" data-products="ai">
@@ -896,8 +974,11 @@
       <!-- ════════ 04 · COMPETE & BENCHMARK ════════ -->
       <section class="uc-wf" id="wf-compete" data-title="Compete &amp; Benchmark" style="--wf-c: var(--color-accent-pink); --wf-cd: #B2136F">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Compete &amp; Benchmark</h2>
-          <p class="uc-banner__quote">“I need to know what's happening outside my account.”</p>
+          <h2 class="uc-banner__title">Compete &amp; Benchmark</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to know what's happening outside my account</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-compete-1" data-products="meta">
@@ -950,14 +1031,16 @@
           </div>
         </article>
 
-        <p class="uc-wf__note t-para-sm">Limitation for all Meta MCP use cases: beta — not available to all users; scope will change as Meta ships updates.</p>
       </section>
 
       <!-- ════════ 05 · CREATE & TEST AT SCALE ════════ -->
       <section class="uc-wf" id="wf-create" data-title="Create &amp; Test at Scale" style="--wf-c: var(--color-accent-orange); --wf-cd: #A64F04">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Create &amp; Test at Scale</h2>
-          <p class="uc-banner__quote">“I need to get creatives into ad accounts and test them.”</p>
+          <h2 class="uc-banner__title">Create &amp; Test at Scale</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to get creatives into ad accounts and test them</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-create-1" data-products="ai">
@@ -995,8 +1078,11 @@
       <!-- ════════ 06 · INTEGRATE & EXTEND ════════ -->
       <section class="uc-wf" id="wf-integrate" data-title="Integrate &amp; Extend" style="--wf-c: var(--color-accent-red); --wf-cd: #BB1B1B">
         <div class="uc-banner">
-          <h2 class="t-para-xl">Integrate &amp; Extend</h2>
-          <p class="uc-banner__quote">“I need Birch data inside my own AI workflow — not just inside the Birch app.”</p>
+          <h2 class="uc-banner__title">Integrate &amp; Extend</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need Birch data inside my own AI workflow &mdash; not just inside the Birch app</p>
+          </div>
         </div>
 
         <article class="uc-card" id="case-integrate-1" data-products="mcp">
@@ -1190,19 +1276,31 @@
     }
   });
 
-  /* ── Back-to-filters button (in the sidebar SELECTED box) ──
-     The sidebar is sticky, so the button is always in reach; it scrolls the
-     tab bar back under the nav. */
-  var toTop = document.getElementById('ucToTop');
+  /* ── SELECTED box (sidebar) ──
+     Mirrors the old floating button: it appears only once the tab bar has
+     scrolled out of view, and hides while the tabs are on screen. The round
+     button scrolls back up to the tabs. */
+  var selBox = document.querySelector('.uc-selected');
   var tabsWrap = document.getElementById('ucTabsWrap');
   function navPx() {
     var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
     var rootFs = parseFloat(getComputedStyle(document.documentElement).fontSize);
     return raw ? parseFloat(raw) * rootFs : 0;
   }
-  toTop.addEventListener('click', function () {
-    var y = tabsWrap.getBoundingClientRect().top + window.pageYOffset - navPx() - 16;
-    window.scrollTo({ top: Math.max(y, 0), behavior: 'smooth' });
+  function syncSelected() {
+    var gone = tabsWrap.getBoundingClientRect().bottom < navPx();
+    selBox.classList.toggle('is-visible', gone);
+  }
+  window.addEventListener('scroll', syncSelected, { passive: true });
+  window.addEventListener('resize', syncSelected, { passive: true });
+  syncSelected();
+
+  /* The whole SELECTED box is the click target, not just the arrow button.
+     scrollIntoView + the wrap's scroll-margin-top ride the page's CSS
+     scroll-behavior: smooth (programmatic scrollTo(smooth) proved flaky
+     alongside it). */
+  selBox.addEventListener('click', function () {
+    tabsWrap.scrollIntoView({ block: 'start' });
   });
 })();
 </script>
