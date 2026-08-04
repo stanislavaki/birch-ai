@@ -12,10 +12,11 @@
    The header markup is injected by the JS, so it is edited in one place.
    ============================================================ */
 
+/* Theme-neutral: sets the project font and clears space for the sticky header,
+   but does NOT impose bg/text colour — each page keeps its own theme, so the
+   light Tokens page and the dark directory pages both stay intact. */
 .u-page {
   font-family: var(--font);
-  background: var(--color-bg);
-  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   margin: 0;
   padding: 0 var(--space-md) var(--space-xl);

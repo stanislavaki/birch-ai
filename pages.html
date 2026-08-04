@@ -36,10 +36,15 @@
     }
     .nav-links a:hover { color: #888; }
     .nav-links a.is-active { color: #59DBFF; }
-    .grid {
+    /* Larger tiles that fill the full width — three up on wide screens,
+       down to one on mobile, all fluid via auto-fill + minmax */
+    .page-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
+      gap: 1.5rem;
+    }
+    @media (max-width: 767px) {
+      .page-grid { grid-template-columns: 1fr; }
     }
     .page-card {
       background: #13131a;
@@ -64,16 +69,16 @@
       display: block;
     }
     .page-card__body {
-      padding: 0.875rem 1rem;
+      padding: 1.125rem 1.375rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
     }
     .page-card__name {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #ccc;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ddd;
     }
     .page-card__links {
       display: flex;
@@ -97,7 +102,7 @@
   <h1>Pages</h1>
   <p class="subtitle">Все сверстанные страницы проекта.</p>
 
-  <div class="grid">
+  <div class="page-grid">
 
     <div class="page-card">
       <a class="page-card__preview" href="index.html" target="_blank"><img src="images/pages/index.jpg" alt=""></a>
