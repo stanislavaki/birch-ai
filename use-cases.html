@@ -445,23 +445,6 @@
     font-weight: 500;
     white-space: nowrap;
   }
-  /* Tool-chain row keeps the chip look (single line, no overlap) */
-  .uc-chain code {
-    font-size: 0.85em;
-    background: #FFFFFF;
-    border: 1px solid #DDDDDD;
-    border-radius: 0.4em;
-    padding: 0.1em 0.45em 0.2em;
-  }
-  .uc-chain {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    color: var(--color-text-grey);
-  }
-  .uc-note { color: var(--color-text-grey); }
-  .uc-note::before { content: "\26A0\FE0E  "; }
 
   /* ─────────────────────────────────────────
      PROMPT BLOCK — white frame, neutral mono text.
@@ -768,8 +751,6 @@
           </div>
           <p class="t-body">An operator or manager on a mature account where rules accumulated over months. Often triggered by unexplained performance instability, a budget spike, or an account handover: "I have 80 rules and I've lost track — what's actually running, and is anything working against me?"</p>
           <p class="t-body">Ask Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering (stale thresholds or conditions that no longer match), firing too broadly (acting on most entities every run), or fighting each other (one rule pauses what another restarts). If your account is organized into folders, scope the audit to one section at a time. Useful for: "show me all rules in the [Product X] folder and check if any conflict."</p>
-          <div class="uc-chain t-para-sm"><code>list_rule_folders</code><span>&rarr;</span><code>list_automation_rules</code><span>&rarr;</span><code>list_rule_logs</code><span>&rarr;</span><code>get_rule_log</code></div>
-          <p class="uc-note t-para-sm">list_automation_rules currently only returns rules in the "General" category — rules in other categories are invisible to the MCP, so the audit may be incomplete.</p>
           <div class="uc-prompt">
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">I have 80 rules and I've lost track — what's actually running, and is anything working against me?</p>
@@ -837,12 +818,12 @@
         <article class="uc-card" id="case-build-2" data-products="ai">
           <div class="uc-card__head">
             <div class="uc-badges">
-              <span class="uc-badge">Bïrch<b>AI</b><em>&middot; Meta only</em></span>
+              <span class="uc-badge">Bïrch<b>AI</b></span>
             </div>
             <h3 class="t-h3">Create a rule from natural language</h3>
           </div>
           <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
-          <p class="uc-note t-para-sm">Draft generation is Meta only — TikTok, Snapchat, and Google get text descriptions of the rule logic. Always review drafts before activating.</p>
+          <p class="t-para-sm" style="color: var(--color-text-grey);">Draft generation is Meta only — on TikTok, Snapchat and Google you get the rule logic as text to build from.</p>
           <div class="uc-prompt">
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40.</p>
@@ -898,7 +879,6 @@
             <h3 class="t-h3">Quick performance overview</h3>
           </div>
           <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes (Q1, last 7 days, etc.), and works across all connected platforms at the ad account level. Entity-level breakdown (campaigns, ad sets, ads) is Meta only and limited to accounts with a manageable entity count.</p>
-          <p class="uc-note t-para-sm">Birch MCP cannot do this — it has no performance metrics.</p>
           <div class="uc-prompt">
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">How is my ROAS across all ad accounts this week compared to last week?</p>
@@ -1049,7 +1029,6 @@
             <h3 class="t-h3">Monitor Stage task execution</h3>
           </div>
           <p class="t-body">Check which uploads completed, which failed, and which ads were created. Useful for teams doing high-volume creative testing who want to monitor Stage from Claude without logging into Birch. Supports Meta, TikTok, Snapchat.</p>
-          <div class="uc-chain t-para-sm"><code>list_stage_tasks</code><span>&rarr;</span><code>list_stage_uploads</code><span>&rarr;</span><code>list_stage_created_ads</code></div>
           <div class="uc-prompt">
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?</p>
