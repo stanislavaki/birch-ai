@@ -124,40 +124,8 @@
     justify-content: center;
   }
   .uc-pcard__title { margin: 0 0 0.625rem; }
-
-  /* Brand lockups (Figma): dark pill + white wordmark + coloured product tag */
-  .uc-lockup {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: var(--color-bg);
-    border-radius: var(--radius-pill);
-    padding: 0.625rem 0.625rem 0.625rem 1.4375rem; /* 10 / 10 / 10 / 23 */
-  }
-  .uc-lockup img { display: block; width: 8.3125rem; height: 2.77rem; } /* 133×44.3 */
-  .uc-lockup__tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 3.75rem; /* 60px */
-    min-width: 3.75rem;
-    padding: 0 0.8125rem 0.15em;
-    background: var(--color-primary); /* yellow */
-    color: var(--color-text-inverted);
-    border-radius: var(--radius-pill);
-    font-size: 2.86rem; /* 45.7px */
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-  /* Meta variant: square black bar, smaller Meta wordmark, blue square tag */
-  .uc-lockup--meta { border-radius: 0; padding-left: 1.25rem; }
-  .uc-lockup--meta img { width: 7.35rem; height: 2.9rem; } /* 117.6×46.3 */
-  .uc-lockup--meta .uc-lockup__tag {
-    background: var(--color-accent-blue);
-    color: var(--color-text);
-    border-radius: 0;
-  }
+  /* Brand lockups — full SVG (dark pill + wordmark + tag), uniform height */
+  .uc-pcard__lockup { display: block; height: 5rem; width: auto; max-width: 100%; }
 
   /* ─────────────────────────────────────────
      FILTER TABS — segmented bar, sticky under nav
@@ -319,7 +287,9 @@
   .uc-banner {
     display: flex;
     flex-direction: column;
-    gap: var(--space);
+    /* gap == the top/side padding, so the title (flex:1) centres symmetrically
+       in the space above the chip */
+    gap: var(--space-sm);
     background: var(--wf-c, var(--color-accent-green));
     border-radius: var(--radius-md);
     padding: var(--space-sm);
@@ -344,15 +314,15 @@
     gap: var(--space-sm);
     background: #FFFFFF;
     border-radius: var(--radius-sm);
-    padding: var(--space) var(--space-sm);
-    min-height: 4.5rem; /* 72px */
+    padding: var(--space-xs) var(--space-sm); /* tight vertical → chip ~72px per Figma */
+    min-height: 3.75rem; /* 72px */
   }
   /* Seal badge: section-colour scalloped mark with a serif quote glyph */
   .uc-banner__mark {
     position: relative;
     flex-shrink: 0;
-    width: 3rem;
-    height: 3.25rem;
+    width: 2.5rem; /* 48px */
+    height: 2.75rem; /* 52px */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -370,7 +340,7 @@
     font-family: "PP Pangaia", "Fraunces", Georgia, serif;
     font-style: normal;
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     line-height: 0;
     color: var(--color-bg-grey);
     transform: translateY(0.3em);
@@ -398,10 +368,13 @@
     scroll-margin-top: calc(var(--nav-height) + var(--space-sm));
   }
   .uc-card.is-hidden { display: none; }
-  /* Roadmap card (Figma 951:844): bold dashed outline, no fill, content at
-     full strength — reads as a planned card, not a disabled one */
+  /* Roadmap card (Figma 951:844): bold dotted frame, no fill, content at full
+     strength. Drawn with outline (offset inward) rather than border so it adds
+     no box width — the badges/title/body stay aligned with the sibling cards.
+     (Project convention: Figma "dashed" = CSS dotted.) */
   .uc-card--road {
-    border: 3px dashed var(--color-text-inverted);
+    outline: 3px dotted var(--color-text-inverted);
+    outline-offset: -3px;
     border-radius: 0.375rem; /* 6px per Figma */
     background: transparent;
   }
@@ -672,21 +645,21 @@
       <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">In-app assistant<br />or co-pilot</h3>
         <div class="uc-pcard__logo">
-          <span class="uc-lockup"><img src="images/use-cases/birch-wordmark.svg" alt="Bïrch" /><span class="uc-lockup__tag">AI</span></span>
+          <img class="uc-pcard__lockup" src="images/use-cases/birch-ai.svg" alt="Bïrch AI" />
         </div>
         <p class="uc-pcard__desc t-body">An assistant inside Birch that reads your rules and your performance side by side — it spots what's off, suggests what to change, and drafts the fix for you to review.</p>
       </div>
       <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">External connector<br />for AI clients to Birch</h3>
         <div class="uc-pcard__logo">
-          <span class="uc-lockup"><img src="images/use-cases/birch-wordmark.svg" alt="Bïrch" /><span class="uc-lockup__tag">MCP</span></span>
+          <img class="uc-pcard__lockup" src="images/use-cases/birch-mcp.svg" alt="Bïrch MCP" />
         </div>
         <p class="uc-pcard__desc t-body">Birch data inside your own AI workflow. Connect Birch MCP to Claude, or any MCP-compatible tool, and your rules, execution logs and Stage tasks join the conversation.</p>
       </div>
       <div class="uc-pcard">
         <h3 class="uc-pcard__title t-para-xl">Official Meta connector<br />inside Birch AI chat</h3>
         <div class="uc-pcard__logo">
-          <span class="uc-lockup uc-lockup--meta"><img src="images/use-cases/meta-wordmark.svg" alt="Meta" /><span class="uc-lockup__tag">MCP</span></span>
+          <img class="uc-pcard__lockup" src="images/use-cases/meta-mcp.svg" alt="Meta MCP" />
         </div>
         <p class="uc-pcard__desc t-body">Meta's own data inside your Birch AI conversation — ad-level performance, change history, industry benchmarks and the Ads Library, read straight from Meta.</p>
       </div>
