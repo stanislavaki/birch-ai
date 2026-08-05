@@ -75,6 +75,8 @@
   2. **`scroll-behavior: smooth`** — Webflow включает его глобально. Перед программным `window.scrollTo()` отключать: `document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important')` и восстанавливать в `requestAnimationFrame`.
   3. **`scrollProgress()`** — для анимации по скроллу всегда использовать `getBoundingClientRect().top` (viewport-relative), а не `offsetTop`. Это работает корректно внутри любого контейнера.
 
+- **CSS `scroll-behavior: smooth` глушит `scrollTo({behavior: 'smooth'})`** — обратная сторона предыдущего правила: если на странице задан `html { scroll-behavior: smooth }` (наши dev-страницы, Webflow — глобально), программный `window.scrollTo({top, behavior: 'smooth'})` может **молча не выполниться** — без ошибки в консоли, страница просто не двигается (подтверждено на use-cases.html: обработчик срабатывал, координата считалась верно, скролла не было). Для плавного программного скролла при включённом CSS-smooth использовать **`el.scrollIntoView({block: 'start'})`** — он едет через CSS-механизм и анимируется сам; офсет под фикс-шапку задавать не вычитанием пикселей, а `scroll-margin-top` на целевом элементе. `scrollTo` с ручной координатой оставлять только там, где CSS-smooth отключён (см. правило выше). Отдельная ловушка диагностики: smooth-анимации скролла **замирают, пока окно браузера не в фокусе** — при проверке через автоматизацию (js-tool в фоновой вкладке/окне) кажется, что скролл «не работает», хотя у живого пользователя всё едет.
+
 - **Webflow embed — высота нав бара в sticky** — для sticky-блока в embed всегда учитывать высоту Webflow-навигации:
   ```css
   .xxx-e__sticky {
