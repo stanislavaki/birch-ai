@@ -46,6 +46,20 @@
     color: #A81F1F; font-size: 0.85rem; font-style: italic;
   }
 
+  /* Section-level note (not a card) shown before/after */
+  .note-box {
+    background: #F6F5FA; border-radius: var(--radius-lg);
+    padding: var(--space-md); min-height: 8rem;
+    display: grid; gap: 0.5rem; align-content: center;
+  }
+  .note-box__label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-grey);
+  }
+  .note-box p { margin: 0; color: var(--color-text-grey); font-size: 0.9rem; line-height: 1.5; }
+  .note-box--empty { justify-items: center; text-align: center; }
+  .note-box__gone { color: #B8B6C2; font-style: italic; font-size: 0.9rem; }
+
   /* ─── card styles, copied from use-cases.html so the cards render for real ─── */
   .uc-card {
     background: #F6F5FA;
@@ -293,6 +307,32 @@
         </div>
       </article>
       <span class="removed">Цепочка убрана. То же самое во второй такой карточке — «Audit rules structure» (случай&nbsp;1).</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5 — beta-подпись под секцией Meta MCP ═══════════ -->
+<div class="case">
+  <div class="case__meta">Compete &amp; Benchmark <span class="tag tag--cut">убрать</span></div>
+  <p class="case__why">
+    Это подпись под всей Meta&nbsp;MCP секцией. «Beta, доступна не всем, объём будет меняться» —
+    честное управление ожиданиями, но на маркетинговой странице читается как дисклеймер: сомнение
+    раньше ценности. Место такого — онбординг и бейдж, не публичный каталог кейсов.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <div class="note-box">
+        <span class="note-box__label">Подпись под секцией Compete &amp; Benchmark</span>
+        <p>Limitation for all Meta MCP use cases: beta — not available to all users; scope will change as Meta ships updates.</p>
+      </div>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <div class="note-box note-box--empty">
+        <span class="note-box__gone">Подписи нет</span>
+      </div>
+      <span class="removed">Подпись убрана целиком — бета-статус уходит в онбординг и на бейдж.</span>
     </div>
   </div>
 </div>
