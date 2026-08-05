@@ -413,7 +413,9 @@
     color: var(--color-text-inverted);
     background: #DBDAE2; /* surface-muted grey (Figma) */
     border-radius: var(--radius-xs);
-    padding: 0.45em 0.6em 0.55em;
+    /* more top than bottom padding: caps-heavy text sits optically high, so the
+       extra top space pushes it down to the visual centre */
+    padding: 0.62em 0.6em 0.38em;
   }
   .uc-badge b { font-weight: 600; color: var(--color-text-inverted); }
   .uc-badge em { font-style: normal; font-weight: 600; opacity: 0.85; }
