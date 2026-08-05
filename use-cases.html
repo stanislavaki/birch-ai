@@ -314,8 +314,10 @@
     gap: var(--space-sm);
     background: #FFFFFF;
     border-radius: var(--radius-sm);
-    padding: var(--space-xs) var(--space-sm); /* tight vertical → chip ~72px per Figma */
-    min-height: 3.75rem; /* 72px */
+    /* Even vertical padding so the chip grows for a 2-line quote and the text
+       keeps its breathing room instead of crowding the edges. */
+    padding: var(--space-sm);
+    min-height: 3.75rem; /* 72px floor for a single-line quote */
   }
   /* Seal badge: section-colour scalloped mark with a serif quote glyph */
   .uc-banner__mark {
@@ -347,6 +349,7 @@
   }
   .uc-banner__quote {
     margin: 0;
+    padding-top: 0.25rem; /* optical compensation — serif sits low against the seal */
     font-family: "PP Pangaia", "Fraunces", Georgia, serif; /* Fraunces = dev stand-in */
     font-weight: 400;
     font-size: var(--text-para-lg-size); /* 20px */
@@ -416,9 +419,12 @@
   .uc-badge em { font-style: normal; font-weight: 600; opacity: 0.85; }
   /* "In roadmap" pill (Figma 961:4531): yellow eyebrow chip at the end of the
      badges row — the row spans the card so the pill lands on the right edge */
-  .uc-card--road .uc-badges { width: 100%; }
+  /* Row centres its chips so the (shorter) roadmap pill doesn't stretch and
+     drop its text off-centre — it lines up with the product badges. */
+  .uc-card--road .uc-badges { width: 100%; align-items: center; }
   .uc-badge--road {
     margin-left: auto;
+    align-items: center;
     background: var(--color-primary);
     border: none;
     color: var(--color-text-inverted);
@@ -426,7 +432,7 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    padding: 0.35em 0.6em 0.45em;
+    padding: 0.4em 0.6em;
   }
   .uc-badge em { font-style: normal; font-weight: 600; font-size: 0.75rem; opacity: 0.75; }
 
