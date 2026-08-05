@@ -20,7 +20,7 @@
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     font-family: var(--font);
-    background: #FFFFFF; /* light page — approved in briefing */
+    background: var(--color-bg-white); /* light page — approved in briefing */
     color: var(--color-text-inverted);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -30,21 +30,18 @@
      a transparent bar). This page is light, so the nav is inverted here — the
      real Webflow nav carries its own styling. */
   .sim-nav {
-    background: #FFFFFF;
+    background: var(--color-bg-white);
     color: var(--color-text-inverted);
-    border-bottom: 1px solid rgba(13, 13, 18, 0.12);
   }
   .sim-nav__logo { color: var(--color-text-inverted); }
   .sim-nav__link,
   .sim-nav__link-lg { color: var(--color-text-inverted); }
   .sim-nav__link-dot { background: var(--color-text-inverted); }
-  .sim-nav__link-lg:hover { background: #EDECF3; }
+  .sim-nav__link-lg:hover { background: var(--color-surface); }
   .sim-nav__badge { color: #B8860B; } /* yellow is invisible on white */
 
-  /* Values from the approved Figma mock that have no DS token yet
-     (candidates for /figma-sync): quote size 2.375rem, surface greys #F6F5FA
-     (bir.ch course surface) / #EDECF3 (one step darker, same cool tone),
-     the six section colors and their dark companions */
+  /* Still inline (no DS token, by design): the six section colours and their
+     dark companions — set per section via --wf-c / --wf-cd. */
 
   /* ─────────────────────────────────────────
      PRODUCT LOCKUPS — shared em-scaled component
@@ -161,7 +158,7 @@
     padding: var(--space-sm);
     cursor: pointer;
   }
-  .uc-tab.is-on { background: #FFFFFF; }
+  .uc-tab.is-on { background: var(--color-bg-white); }
   .uc-tab .uc-lk { font-size: var(--text-para-lg-size); font-weight: 600; }
 
   /* Active tab: the product badge switches to its brand colour, text to black
@@ -172,7 +169,7 @@
     color: var(--color-text-inverted);
   }
   .uc-tab.is-on .uc-lk__sq {
-    background: #509CFF; /* Meta MCP blue — no DS token yet */
+    background: var(--color-accent-blue); /* Meta MCP blue */
     color: var(--color-text-inverted);
   }
 
@@ -213,7 +210,7 @@
     border-radius: var(--radius-lg);
     transition: background 0.2s ease;
   }
-  .uc-toc__group.is-open { background: #EDECF3; }
+  .uc-toc__group.is-open { background: var(--color-surface); }
   .uc-toc__wf {
     display: flex;
     justify-content: space-between;
@@ -226,7 +223,7 @@
     transition: background 0.15s ease;
   }
   /* Closed workflow: neutral grey hover; the section color lives on the open state */
-  .uc-toc__group:not(.is-open) .uc-toc__wf:hover { background: #EDECF3; }
+  .uc-toc__group:not(.is-open) .uc-toc__wf:hover { background: var(--color-surface); }
   .uc-toc__wf.is-empty { opacity: 0.3; pointer-events: none; }
   .uc-toc__cnt { color: var(--color-text-grey); transition: color 0.2s ease; }
   .uc-toc__group.is-open .uc-toc__cnt { color: var(--color-text-inverted); }
@@ -313,7 +310,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    background: #FFFFFF;
+    background: var(--color-bg-white);
     border-radius: var(--radius-sm);
     /* Even vertical padding so the chip grows for a 2-line quote and the text
        keeps its breathing room instead of crowding the edges. */
@@ -379,7 +376,7 @@
   .uc-card--road {
     outline: 3px dotted var(--color-text-inverted);
     outline-offset: -3px;
-    border-radius: 0.375rem; /* 6px per Figma */
+    border-radius: var(--radius-xs); /* 4px */
     background: transparent;
   }
   /* Badges sit above the title (Figma 04-01): they stop competing with it for
@@ -453,8 +450,8 @@
   ───────────────────────────────────────── */
   .uc-prompt {
     position: relative;
-    background: #FFFFFF;
-    border: 1px solid rgba(13, 13, 13, 0.12); /* border-hairline */
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-hairline); /* border-hairline */
     border-radius: var(--radius-sm);
     padding: var(--space);
     display: grid;
@@ -483,16 +480,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: color-mix(in srgb, var(--wf-cd, #909090) 30%, #FFFFFF);
+    background: color-mix(in srgb, var(--wf-cd, var(--color-text-grey)) 30%, var(--color-bg-white));
     border: none;
     border-radius: var(--radius-xs);
     cursor: pointer;
     font-size: 0.8rem;
     line-height: 1;
-    color: #FFFFFF;
+    color: var(--color-text);
     transition: background 0.12s ease;
   }
-  .uc-copy:hover { background: color-mix(in srgb, var(--wf-cd, #909090) 42%, #FFFFFF); }
+  .uc-copy:hover { background: color-mix(in srgb, var(--wf-cd, var(--color-text-grey)) 42%, var(--color-bg-white)); }
   /* Icon painted via mask so it follows --wf-cd (the section-dark tone) */
   .uc-copy img { display: none; }
   .uc-copy::after {
@@ -510,7 +507,7 @@
   .uc-ph {
     background: var(--color-surface);
     color: var(--color-text-inverted);
-    border: 1px solid rgba(13, 13, 13, 0.12);
+    border: 1px solid var(--color-border-hairline);
     border-radius: 0.25em;
     padding: 0 0.25em 0.1em;
   }
