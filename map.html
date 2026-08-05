@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Birch — Map</title>
+  <link rel="stylesheet" href="design-system/tokens.css">
+  <link rel="stylesheet" href="design-system/utility-header.css?v=2">
+  <style>
+    /* .u-page is theme-neutral, so this dark page states its own theme */
+    body { background: var(--color-bg); color: var(--color-text); }
+    .families { display: grid; gap: var(--gap-main); grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); }
+    .family {
+      background: #13131a;
+      border: 1px solid #1e1e2a;
+      border-radius: var(--radius-md);
+      padding: var(--space);
+      scroll-margin-top: 5rem;
+    }
+    .family__head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: var(--space-xs); margin-bottom: var(--space-xxs);
+    }
+    .family__title { font-size: var(--text-para-lg-size); font-weight: 700; line-height: 1.1; }
+    .family__count { font-size: var(--text-eyebrow-size); color: #3a3a4a; flex-shrink: 0; }
+    .family__note {
+      font-size: var(--text-para-sm-size); line-height: 1.45;
+      color: var(--color-text-grey); margin: 0 0 var(--space-sm);
+    }
+
+    .node { display: block; padding: var(--space-xs) 0; }
+    .node + .node { border-top: 1px solid #191922; }
+    .node__top { display: flex; align-items: baseline; gap: var(--space-xs); }
+    .node__dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; flex-shrink: 0; transform: translateY(-0.15em); }
+    .node__name { font-size: var(--text-para-sm-size); font-weight: 600; color: #d5d5dd; transition: color 0.15s; }
+    .node:hover .node__name { color: var(--color-accent-light-blue); }
+    .node__date { font-size: var(--text-eyebrow-size); color: #33333f; margin-left: auto; flex-shrink: 0; }
+    .node__desc {
+      font-size: var(--text-eyebrow-size); line-height: 1.45;
+      color: #6a6a7a; margin: 0.2rem 0 0 0.875rem;
+    }
+    .node--child .node__name { font-weight: 600; color: #a9a9b6; }
+
+    /* ── growth strip: files added per month ── */
+    .growth { margin-bottom: var(--space-lg); }
+    .growth__head {
+      display: flex; align-items: baseline; gap: var(--space-sm);
+      font-size: var(--text-para-sm-size); color: var(--color-text-grey);
+      margin-bottom: var(--space-xs);
+    }
+    .growth__head b { color: var(--color-text); font-size: var(--text-h4-size); font-weight: 600; }
+    .growth__bars { display: flex; align-items: flex-end; gap: 0.25rem; height: 4.5rem; }
+    .growth__col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 0.25rem; }
+    .growth__bar { background: #1e1e2a; border-radius: 0.125rem; min-height: 0.125rem; transition: background 0.15s; }
+    .growth__col:hover .growth__bar { background: var(--color-accent-light-blue); }
+    .growth__label {
+      font-size: var(--text-eyebrow-size); color: #3a3a4a;
+      text-align: center; white-space: nowrap;
+    }
+
+    .legend { display: flex; gap: var(--space); flex-wrap: wrap; margin-bottom: var(--space-lg); }
+    .legend span { display: flex; align-items: center; gap: 0.4rem; font-size: var(--text-eyebrow-size); color: var(--color-text-grey); }
+    .legend i { width: 0.375rem; height: 0.375rem; border-radius: 50%; display: block; }
+
+    .t-page   { background: #59DBFF; }
+    .t-embed  { background: #04DE00; }
+    .t-review { background: #FF21A6; }
+    .t-tool   { background: #FF7700; }
+    .t-system { background: #FFE243; }
+  </style>
+</head>
+<body>
+
+  <h1 class="u-title">Карта проекта</h1>
+  <p class="u-subtitle">
+    Всё, что когда-либо сверстали, — сгруппировано по тому, ради чего делалось.
+    У каждой страницы под ней висят её embed-блоки, черновики и материалы,
+    уходившие на вычитку. Дата — когда файл появился в репозитории.
+  </p>
+
+  <nav class="u-anchors" id="anchors"></nav>
+
+  <div class="growth">
+    <div class="growth__head"><b id="total">&mdash;</b> файлов &middot; <span id="span">&mdash;</span></div>
+    <div class="growth__bars" id="bars"></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="t-page"></i> страница</span>
+    <span><i class="t-embed"></i> embed для Webflow</span>
+    <span><i class="t-review"></i> на вычитку</span>
+    <span><i class="t-tool"></i> инструмент</span>
+    <span><i class="t-system"></i> дизайн-система</span>
+  </div>
+
+  <div class="families" id="families"></div>
+
+<script src="design-system/utility-header.js?v=2"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* Dates are first-commit dates. Refresh them with:
+     for f in $(git ls-files '*.html'); do
+       echo "$f $(git log --diff-filter=A --follow --format=%ad --date=short -1 -- $f)"; done  */
+  var FAMILIES = [
+    {
+      id: 'ai-promo',
+      title: 'Bïrch AI promo',
+      note: 'Первая большая страница проекта. Разошлась на шесть embed-блоков.',
+      nodes: [
+        ['ai-promo.html', 'page', '2026-05-20', 1, 'Промо AI-правил: герой со ступенчатыми пилюлями, аккордеон и блок с промптами.'],
+        ['embed/ai-promo-embed.html', 'embed', '2026-05-15', 0, 'Первая цельная версия страницы одним блоком — до того, как её разрезали.'],
+        ['embed/ai-promo-hero-embed.html', 'embed', '2026-06-05', 0, 'Герой: композиция из пилюль-слов со ступенчатой анимацией.'],
+        ['embed/ai-promo-pills-embed.html', 'embed', '2026-06-05', 0, 'Ряд пилюль-возможностей.'],
+        ['embed/ai-promo-prompts-embed.html', 'embed', '2026-06-05', 0, '«Start fast with ready-to-use prompts» — карточки готовых промптов.'],
+        ['embed/ai-promo-vision-embed.html', 'embed', '2026-06-05', 0, '«Today’s co-pilot / Tomorrow’s agent» — две колонки видения продукта.'],
+        ['embed/ai-promo-acc-embed.html', 'embed', '2026-06-05', 0, 'Аккордеон «Every answer sits on top of your data». Эталон для новых embed’ов.']
+      ]
+    },
+    {
+      id: 'birch-mcp',
+      title: 'Bïrch MCP',
+      note: 'Страница продукта. На её embed-блоках вскрылись грабли из EMBED-ISSUES.',
+      nodes: [
+        ['birch-mcp.html', 'page', '2026-05-20', 1, '«Analyze your automation the way you analyze everything else» — герой, statement и аккордеон use cases с чат-карточками.'],
+        ['embed/birch-mcp-hero-embed.html', 'embed', '2026-07-29', 0, 'Герой страницы.'],
+        ['embed/birch-mcp-statement-embed.html', 'embed', '2026-07-29', 0, 'Statement с эффектом печати. Он не запускался на узких экранах — чинили отдельно.'],
+        ['embed/birch-mcp-usecases-embed.html', 'embed', '2026-07-29', 0, 'Аккордеон use cases с чат-карточками и мобильной каруселью. Самый тяжёлый embed — 46k.']
+      ]
+    },
+    {
+      id: 'use-cases',
+      title: 'Use cases',
+      note: 'Собиралась через вайрфреймы и дважды уходила к маркетологу на вычитку.',
+      nodes: [
+        ['use-cases.html', 'page', '2026-07-30', 1, 'Светлая страница: 20 кейсов по шести воркфлоу, фильтр по продуктам, сайдбар-аккордеон, промпты с копированием.'],
+        ['use-cases-wireframes.html', 'review', '2026-07-30', 0, 'Пять концептов навигации на одном стенде — сайдбар, топ-бар, карта, гибрид, аккордеон. Переключаются табами.'],
+        ['voice-comparison.html', 'review', '2026-07-30', 0, 'Голос текста: слева «the user», справа «you». Для маркетолога — какие формулировки поменяются.'],
+        ['notes-comparison.html', 'review', '2026-08-03', 0, 'Что убрать со страницы: заметки-ограничения и цепочки MCP-тулов. Целыми карточками, было / стало.']
+      ]
+    },
+    {
+      id: 'manage',
+      title: 'Manage UPD',
+      note: 'Три блока, собранных прямо в Webflow нативными элементами.',
+      nodes: [
+        ['manage.html', 'page', '2026-07-09', 1, '«A lot of ad tools are racing to make AI fully autonomous» — statement, ряд пилюль и AI-чат.'],
+        ['embed/manage-pills-embed.html', 'embed', '2026-07-09', 0, 'Ряд пилюль под заголовком.'],
+        ['embed/manage-ais-embed.html', 'embed', '2026-07-10', 0, 'AI Statement — блок с крупным утверждением.'],
+        ['embed/manage-aichat-embed.html', 'embed', '2026-07-13', 0, 'Карточка AI-чата с диалогом.']
+      ]
+    },
+    {
+      id: 'stage',
+      title: 'Stage',
+      note: 'Самый долгоживущий embed — 18 правок с мая.',
+      nodes: [
+        ['stage.html', 'page', '2026-05-27', 1, '«How it works» — пошаговое объяснение загрузки креативов через Stage.'],
+        ['embed/stage-embed.html', 'embed', '2026-05-27', 0, 'Тот же блок для Webflow, со скролл-анимацией шагов.']
+      ]
+    },
+    {
+      id: 'promo',
+      title: 'Промо-карточки',
+      note: 'Пара блоков-тизеров для чужих страниц сайта — без своей dev-страницы.',
+      nodes: [
+        ['embed/promo-ai-embed.html', 'embed', '2026-07-24', 0, 'Тизер Bïrch AI: карточка с картинкой-контейнером.'],
+        ['embed/promo-mcp-embed.html', 'embed', '2026-07-24', 0, 'Тизер Bïrch MCP. Правился из-за схлопывания .w-embed во флекс-слоте.']
+      ]
+    },
+    {
+      id: 'blocks',
+      title: 'Отдельные блоки',
+      note: 'Врезки, которые живут сами по себе.',
+      nodes: [
+        ['embed/aq-text-embed.html', 'embed', '2026-06-25', 0, 'Текстовая врезка про правила: «less manual work, less wasted spend, more structure».'],
+        ['embed/footer-physics-embed.html', 'embed', '2026-06-25', 0, 'Футер с физикой — падающие элементы.']
+      ]
+    },
+    {
+      id: 'early',
+      title: 'Ранние страницы',
+      note: 'С чего всё начиналось, до появления дизайн-системы.',
+      nodes: [
+        ['index.html', 'page', '2026-04-29', 1, 'Самая первая: «External AI guesses — Bïrch knows», «Connect. Ask. Own the decision.»'],
+        ['experiments.html', 'page', '2026-06-03', 0, 'Песочница для скролл-анимации промо.'],
+        ['acc-mob-dev.html', 'page', '2026-06-08', 0, 'Мобильная версия аккордеона — отдельный режим со свайпом вместо скролла.']
+      ]
+    },
+    {
+      id: 'system',
+      title: 'Дизайн-система',
+      note: 'Токены, компоненты и Webflow-окружение для dev-страниц.',
+      nodes: [
+        ['design-system/styleguide.html', 'system', '2026-05-14', 1, 'Живой справочник: все токены, тайп-классы и компоненты в одном месте.'],
+        ['design-system/tokens-comparison.html', 'system', '2026-07-09', 0, 'Сверка токенов Figma и CSS — что разошлось.'],
+        ['design-system/webflow-env-nav.html', 'system', '2026-07-09', 0, 'Partial с разметкой навбара, вставляется в dev-страницы.']
+      ]
+    },
+    {
+      id: 'utils',
+      title: 'Утилиты',
+      note: 'Навигация по проекту. Эта страница — здесь же.',
+      nodes: [
+        ['pages.html', 'tool', '2026-07-08', 1, 'Обзор сверстанных страниц со скриншотами-превью.'],
+        ['embeds.html', 'tool', '2026-06-25', 0, 'Каталог embed-кодов для копирования в Webflow, с датами последней правки.'],
+        ['map.html', 'tool', '2026-08-04', 0, 'Эта карта: все файлы, сгруппированные по замыслу, со связями между ними.']
+      ]
+    },
+    {
+      id: 'debug',
+      title: 'Отладка',
+      note: 'Стенды, на которых проверяли embed’ы и анимации.',
+      nodes: [
+        ['debug/webflow-sim.html', 'tool', '2026-06-05', 1, 'Симулятор Webflow-окружения. С появлением webflow-env.css перестал быть обязательным шагом.'],
+        ['debug/webflow-sim-test.html', 'tool', '2026-07-09', 0, 'Прогон реальных блоков в симуляторе.'],
+        ['debug/embed-harness.html', 'tool', '2026-07-29', 0, 'Стенд для embed’ов: оборачивает фрагмент в документ с doctype. Без него браузер уходит в quirks mode и врёт.'],
+        ['debug/hero-icons.html', 'tool', '2026-06-02', 0, 'Подбор иконок для героя.'],
+        ['debug/cube-width-demo.html', 'tool', '2026-07-22', 0, 'Разбор деформации ширины пилюли при повороте куба.'],
+        ['debug/cube-easing-demo.html', 'tool', '2026-07-23', 0, 'Сравнение кривых easing для той же анимации.']
+      ]
+    }
+  ];
+
+  var TYPE_CLASS = { page:'t-page', embed:'t-embed', review:'t-review', tool:'t-tool', system:'t-system' };
+
+  var host = document.getElementById('families');
+  var rail = document.getElementById('anchors');
+
+  FAMILIES.forEach(function (f) {
+    var jump = document.createElement('a');
+    jump.href = '#' + f.id;
+    jump.textContent = f.title;
+    rail.appendChild(jump);
+
+    var card = document.createElement('section');
+    card.className = 'family';
+    card.id = f.id;
+
+    var head = document.createElement('div');
+    head.className = 'family__head';
+    head.innerHTML = '<span class="family__title"></span><span class="family__count"></span>';
+    head.children[0].textContent = f.title;
+    head.children[1].textContent = f.nodes.length;
+    card.appendChild(head);
+
+    var note = document.createElement('p');
+    note.className = 'family__note';
+    note.textContent = f.note;
+    card.appendChild(note);
+
+    f.nodes.forEach(function (n) {
+      var path = n[0], type = n[1], date = n[2], isRoot = n[3], desc = n[4];
+      var a = document.createElement('a');
+      a.className = 'node' + (isRoot ? ' node--root' : ' node--child');
+      a.href = path;
+      a.target = '_blank';
+
+      var top = document.createElement('div');
+      top.className = 'node__top';
+      var dot = document.createElement('span');
+      dot.className = 'node__dot ' + TYPE_CLASS[type];
+      var name = document.createElement('span');
+      name.className = 'node__name';
+      name.textContent = path.replace(/^(embed|debug|design-system)\//, '');
+      var when = document.createElement('span');
+      when.className = 'node__date';
+      /* day.month.year, e.g. 2026-05-20 → 20.05.2026 */
+      var dp = date.split('-');
+      when.textContent = dp[2] + '.' + dp[1] + '.' + dp[0];
+      top.appendChild(dot); top.appendChild(name); top.appendChild(when);
+      a.appendChild(top);
+
+      var d = document.createElement('p');
+      d.className = 'node__desc';
+      d.textContent = desc;
+      a.appendChild(d);
+
+      card.appendChild(a);
+    });
+    host.appendChild(card);
+  });
+
+  /* ── growth strip: files added per month across all families ── */
+  var all = [];
+  FAMILIES.forEach(function (f) { f.nodes.forEach(function (n) { all.push(n[2]); }); });
+  var byMonth = {};
+  all.forEach(function (d) {
+    var m = d.slice(0, 7);
+    byMonth[m] = (byMonth[m] || 0) + 1;
+  });
+  var months = Object.keys(byMonth).sort();
+  var peak = Math.max.apply(null, months.map(function (m) { return byMonth[m]; }));
+  var bars = document.getElementById('bars');
+  months.forEach(function (m) {
+    var col = document.createElement('div');
+    col.className = 'growth__col';
+    col.title = m + ' — ' + byMonth[m] + ' файлов';
+    var bar = document.createElement('div');
+    bar.className = 'growth__bar';
+    bar.style.height = Math.round(byMonth[m] / peak * 52) + 'px';
+    var label = document.createElement('div');
+    label.className = 'growth__label';
+    label.textContent = m.slice(5) + '.' + m.slice(0, 4) + ' · ' + byMonth[m];
+    col.appendChild(bar);
+    col.appendChild(label);
+    bars.appendChild(col);
+  });
+  document.getElementById('total').textContent = all.length;
+  var first = all.slice().sort()[0];
+  var span = document.getElementById('span');
+  var mNames = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+  var fp = first.split('-');
+  span.textContent = mNames[+fp[1] - 1] + ' ' + fp[0] + ' — сейчас';
+})();
+</script>
+</body>
+</html>

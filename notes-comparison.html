@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Use cases — что убрать: было / стало</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: #FFFFFF;
+    color: var(--color-text-inverted);
+    -webkit-font-smoothing: antialiased;
+    padding: 3rem 1.5rem 5rem;
+  }
+  .wrap { max-width: 92rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; letter-spacing: -0.01em; margin: 0 0 0.75rem; }
+  .intro { color: var(--color-text-grey); font-size: 0.95rem; max-width: 52rem; margin-bottom: 1.25rem; line-height: 1.5; }
+  .intro b { color: var(--color-text-inverted); }
+
+  .case { margin-bottom: 3.5rem; }
+  .case__meta {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--color-text-grey); margin-bottom: 0.5rem;
+  }
+  .tag { padding: 0.15rem 0.5rem; border-radius: 0.25rem; letter-spacing: 0.04em; }
+  .tag--cut { background: #FDE3E3; color: #A81F1F; }
+  .tag--soft { background: #FFF1D6; color: #8A5A00; }
+  .case__why { color: var(--color-text-grey); font-size: 0.9rem; line-height: 1.5; max-width: 52rem; margin: 0 0 1.25rem; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+  .col__label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-grey); margin-bottom: 0.5rem;
+  }
+  .col--now .col__label::after { content: " — карточка без изменений"; opacity: 0.6; }
+  /* what changed inside the right-hand card */
+  .diff { background: #DFF2E4; border-radius: 0.25rem; padding: 0 0.2em 0.05em; }
+  .removed {
+    display: block; margin-top: 0.75rem;
+    color: #A81F1F; font-size: 0.85rem; font-style: italic;
+  }
+
+  /* Section-level note (not a card) shown before/after */
+  .note-box {
+    background: #F6F5FA; border-radius: var(--radius-lg);
+    padding: var(--space-md); min-height: 8rem;
+    display: grid; gap: 0.5rem; align-content: center;
+  }
+  .note-box__label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--color-text-grey);
+  }
+  .note-box p { margin: 0; color: var(--color-text-grey); font-size: 0.9rem; line-height: 1.5; }
+  .note-box--empty { justify-items: center; text-align: center; }
+  .note-box__gone { color: #B8B6C2; font-style: italic; font-size: 0.9rem; }
+
+  /* ─── card styles, copied from use-cases.html so the cards render for real ─── */
+  .uc-card {
+    background: #F6F5FA;
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .uc-card__head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+  .uc-card__head h3 { margin: 0; text-wrap: initial; }
+  .uc-card p { margin: 0; }
+  .uc-badges { display: flex; gap: var(--space-xxs); flex-wrap: wrap; }
+  .uc-badge {
+    display: inline-flex; align-items: baseline; gap: 0.15em;
+    font-size: var(--text-eyebrow-size); font-weight: 600; line-height: 1;
+    color: var(--color-text-grey); background: #EDECF3;
+    border-radius: var(--radius-xs); padding: 0.45em 0.6em 0.55em;
+  }
+  .uc-badge b { font-weight: 700; color: var(--color-text-inverted); }
+  .uc-card code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.95em; font-weight: 500; white-space: nowrap;
+  }
+  .uc-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; color: var(--color-text-grey); }
+  .uc-chain code {
+    font-size: 0.85em; background: #FFFFFF; border: 1px solid #DDDDDD;
+    border-radius: 0.4em; padding: 0.1em 0.45em 0.2em;
+  }
+  .uc-note { color: var(--color-text-grey); }
+  .uc-note--warn::before { content: "\26A0\FE0E  "; }
+  .uc-prompt {
+    position: relative;
+    background: color-mix(in srgb, var(--wf-c) var(--wf-mix, 12%), #F6F5FA);
+    border: 1px solid color-mix(in srgb, var(--wf-c) var(--wf-mix-b, 28%), #F6F5FA);
+    border-radius: var(--radius-sm);
+    padding: var(--space);
+    display: grid; gap: var(--space-xs);
+  }
+  .uc-prompt__label { color: var(--color-text-inverted); text-transform: uppercase; }
+  .uc-prompt__text {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 500; font-size: var(--text-eyebrow-size); line-height: 1.2;
+    color: var(--wf-cd);
+  }
+  .uc-copy {
+    position: absolute; bottom: 0.4rem; right: 0.4rem;
+    width: 1.5rem; height: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    background: color-mix(in srgb, var(--wf-btn, var(--wf-cd)) var(--wf-btn-mix, 18%),
+      color-mix(in srgb, var(--wf-c) var(--wf-mix, 12%), #F6F5FA));
+    border: none; border-radius: var(--radius-xs);
+  }
+  .uc-copy img { display: block; width: 0.9rem; height: 0.9rem; }
+
+  @media (max-width: 991px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Что убрать со страницы Use cases</h1>
+<p class="intro">
+  Четыре правки, каждая целой карточкой: слева&nbsp;— как сейчас, справа&nbsp;— предложение.
+</p>
+
+<!-- ═══════════ 1 — убрать ═══════════ -->
+<div class="case" style="--wf-c: var(--color-accent-green); --wf-cd: #037A00">
+  <div class="case__meta">Audit &amp; Review <span class="tag tag--cut">убрать</span></div>
+  <p class="case__why">
+    Открытый баг, а не граница продукта. На странице про аудит правил читается как
+    «наш аудит может молча соврать» — и станет неправдой, когда баг починят.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges">
+            <span class="uc-badge">Bïrch<b>AI</b></span>
+            <span class="uc-badge">Bïrch<b>MCP</b></span>
+          </div>
+          <h3 class="t-h3">Audit rules structure + identify zombie rules and over-firing</h3>
+        </div>
+        <p class="t-body">An operator or manager on a mature account where rules accumulated over months. Often triggered by unexplained performance instability, a budget spike, or an account handover: "I have 80 rules and I've lost track — what's actually running, and is anything working against me?"</p>
+        <p class="t-body">Ask Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering, firing too broadly, or fighting each other. If your account is organized into folders, scope the audit to one section at a time.</p>
+        <div class="uc-chain t-para-sm"><code>list_rule_folders</code><span>&rarr;</span><code>list_automation_rules</code><span>&rarr;</span><code>list_rule_logs</code><span>&rarr;</span><code>get_rule_log</code></div>
+        <p class="uc-note uc-note--warn t-para-sm">list_automation_rules currently only returns rules in the "General" category — rules in other categories are invisible to the MCP, so the audit may be incomplete.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">I have 80 rules and I've lost track — what's actually running, and is anything working against me?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges">
+            <span class="uc-badge">Bïrch<b>AI</b></span>
+            <span class="uc-badge">Bïrch<b>MCP</b></span>
+          </div>
+          <h3 class="t-h3">Audit rules structure + identify zombie rules and over-firing</h3>
+        </div>
+        <p class="t-body">An operator or manager on a mature account where rules accumulated over months. Often triggered by unexplained performance instability, a budget spike, or an account handover: "I have 80 rules and I've lost track — what's actually running, and is anything working against me?"</p>
+        <p class="t-body">Ask Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering, firing too broadly, or fighting each other. If your account is organized into folders, scope the audit to one section at a time.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">I have 80 rules and I've lost track — what's actually running, and is anything working against me?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+      <span class="removed">Заметка убрана целиком — её место в релиз-ноутах и внутреннем доке. Цепочка тулов тоже убрана, см. случай&nbsp;4.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2 — смягчить ═══════════ -->
+<div class="case" style="--wf-c: var(--color-primary); --wf-cd: #826705; --wf-mix: 30%; --wf-mix-b: 60%; --wf-btn: #C99B00; --wf-btn-mix: 30%">
+  <div class="case__meta">Monitor &amp; Control <span class="tag tag--cut">убрать</span></div>
+  <p class="case__why">
+    Дефекта нет — у Birch MCP другая специализация. Но это уже сказано дважды: бейджем
+    <b>Bïrch&nbsp;AI</b> на карточке и списком в карточке продукта вверху. Отсутствие
+    бейджа MCP говорит то же самое, без отрицания.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b></span></div>
+          <h3 class="t-h3">Quick performance overview</h3>
+        </div>
+        <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes, and works across all connected platforms at the ad account level. Entity-level breakdown is Meta only and limited to accounts with a manageable entity count.</p>
+        <p class="uc-note uc-note--warn t-para-sm">Birch MCP cannot do this — it has no performance metrics.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">How is my ROAS across all ad accounts this week compared to last week?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b></span></div>
+          <h3 class="t-h3">Quick performance overview</h3>
+        </div>
+        <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes, and works across all connected platforms at the ad account level. Entity-level breakdown is Meta only and limited to accounts with a manageable entity count.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">How is my ROAS across all ad accounts this week compared to last week?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+      <span class="removed">Заметка убрана целиком — бейдж и карточки продуктов в начале страницы уже это сказали.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3 — смягчить ═══════════ -->
+<div class="case" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #136F88; --wf-mix: 26%; --wf-mix-b: 52%">
+  <div class="case__meta">Build &amp; Set Up <span class="tag tag--soft">смягчить</span></div>
+  <p class="case__why">
+    «Meta only» звучит дважды — на бейдже и в заметке. Убираем с бейджа (в тексте границу
+    заодно смягчаем), бейджи выравниваются. «Always review drafts» — место в продукте, при
+    создании черновика, а не на странице, где оно заранее сеет недоверие.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b><em>&middot; Meta only</em></span></div>
+          <h3 class="t-h3">Create a rule from natural language</h3>
+        </div>
+        <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
+        <p class="uc-note uc-note--warn t-para-sm">Draft generation is Meta only — TikTok, Snapchat, and Google get text descriptions of the rule logic. Always review drafts before activating.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40.</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>AI</b></span></div>
+          <h3 class="t-h3">Create a rule from natural language</h3>
+        </div>
+        <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
+        <p class="uc-note t-para-sm"><span class="diff">Draft generation is Meta only — on TikTok, Snapchat and Google you get the rule logic as text to build from.</span></p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40.</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+      <span class="removed">Квалификатор «&middot;&nbsp;Meta only» ушёл с бейджа в текст, «Always review drafts» убрано, значок&nbsp;⚠ снят.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 4 — цепочки тулов ═══════════ -->
+<div class="case" style="--wf-c: var(--color-accent-orange); --wf-cd: #A64F04">
+  <div class="case__meta">Create &amp; Test at Scale <span class="tag tag--cut">убрать</span></div>
+  <p class="case__why">
+    Цепочки тулов есть лишь в <b>двух карточках из двадцати</b> — след внутреннего дока. И спорят
+    с обещанием MCP: спрашиваешь текстом, тулы выбирает Claude, а ряд имён со стрелками читается
+    как инструкция. <b>Имена тулов внутри предложений остаются</b> — там они доказательство,
+    а не команда.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>MCP</b></span></div>
+          <h3 class="t-h3">Monitor Stage task execution</h3>
+        </div>
+        <p class="t-body">Check which uploads completed, which failed, and which ads were created. Useful for teams doing high-volume creative testing who want to monitor Stage from Claude without logging into Birch. Supports Meta, TikTok, Snapchat.</p>
+        <div class="uc-chain t-para-sm"><code>list_stage_tasks</code><span>&rarr;</span><code>list_stage_uploads</code><span>&rarr;</span><code>list_stage_created_ads</code></div>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <article class="uc-card">
+        <div class="uc-card__head">
+          <div class="uc-badges"><span class="uc-badge">Bïrch<b>MCP</b></span></div>
+          <h3 class="t-h3">Monitor Stage task execution</h3>
+        </div>
+        <p class="t-body">Check which uploads completed, which failed, and which ads were created. Useful for teams doing high-volume creative testing who want to monitor Stage from Claude without logging into Birch. Supports Meta, TikTok, Snapchat.</p>
+        <div class="uc-prompt">
+          <span class="uc-prompt__label t-eyebrow">Prompt</span>
+          <p class="uc-prompt__text">Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?</p>
+          <span class="uc-copy"><img src="images/use-cases/copy-icon-black.svg" alt="" /></span>
+        </div>
+      </article>
+      <span class="removed">Цепочка убрана. То же самое во второй такой карточке — «Audit rules structure» (случай&nbsp;1).</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5 — beta-подпись под секцией Meta MCP ═══════════ -->
+<div class="case">
+  <div class="case__meta">Compete &amp; Benchmark <span class="tag tag--cut">убрать</span></div>
+  <p class="case__why">
+    Это подпись под всей Meta&nbsp;MCP секцией. «Beta, доступна не всем, объём будет меняться» —
+    честное управление ожиданиями, но на маркетинговой странице читается как дисклеймер: сомнение
+    раньше ценности. В публичном каталоге кейсов ей не место.
+  </p>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас</div>
+      <div class="note-box">
+        <span class="note-box__label">Подпись под секцией Compete &amp; Benchmark</span>
+        <p>Limitation for all Meta MCP use cases: beta — not available to all users; scope will change as Meta ships updates.</p>
+      </div>
+    </div>
+    <div class="col col--new">
+      <div class="col__label">Предложение</div>
+      <div class="note-box note-box--empty">
+        <span class="note-box__gone">Подписи нет</span>
+      </div>
+      <span class="removed">Подпись убрана целиком.</span>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

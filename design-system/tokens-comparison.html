@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Birch — Tokens Comparison</title>
+<link rel="stylesheet" href="tokens.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -102,17 +103,12 @@
   .na { color: #ccc; font-style: italic; }
   .col-sep { border-right: 1px solid #e5e5e5; }
 </style>
+  <link rel="stylesheet" href="../design-system/utility-header.css?v=2">
 </head>
 <body>
 
   <h1>Tokens Comparison</h1>
   <p class="subtitle">Webflow (реальные измерения) vs Figma / tokens.css vs Embed. Переключай брейкпоинт — Webflow-значения фактически меняются вместе с fluid root font-size, Figma/Embed пересчитываются от фиксированной базы 16px.</p>
-
-  <nav class="nav-links">
-    <a href="../pages.html">Pages</a>
-    <a href="../embeds.html">Embeds</a>
-    <a href="../debug/webflow-sim.html">Simulator</a>
-  </nav>
 
   <div class="sticky-header" id="stickyHeader">
     <div class="tabs" id="tabs"></div>
@@ -331,5 +327,6 @@
   window.addEventListener('resize', updateStickyOffset);
 </script>
 
+<script src="../design-system/utility-header.js?v=2"></script>
 </body>
 </html>

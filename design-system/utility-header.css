@@ -1,0 +1,93 @@
+/* ============================================================
+   UTILITY HEADER — shared shell for the internal navigation pages
+   (pages, embeds, map, simulator, tokens comparison, styleguide).
+
+   Usage on any utility page:
+     <link rel="stylesheet" href="design-system/tokens.css" />
+     <link rel="stylesheet" href="design-system/utility-header.css" />
+     ...
+     <script src="design-system/utility-header.js"></script>
+
+   Sub-directory pages prefix all three with ../
+   The header markup is injected by the JS, so it is edited in one place.
+   ============================================================ */
+
+/* Theme-neutral: sets the project font and clears space for the sticky header,
+   but does NOT impose bg/text colour — each page keeps its own theme, so the
+   light Tokens page and the dark directory pages both stay intact. */
+.u-page {
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0 var(--space-md) var(--space-xl);
+}
+
+/* ── header ── */
+.u-head {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin: 0 calc(var(--space-md) * -1) var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(13, 13, 18, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid #1e1e2a;
+}
+.u-head__brand {
+  font-size: var(--text-para-sm-size);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+.u-head__nav { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
+.u-head__link {
+  font-size: var(--text-para-sm-size);
+  font-weight: 600;
+  line-height: 1;
+  color: #6a6a7a;
+  padding: 0.45em 0.7em 0.55em;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+.u-head__link:hover { color: var(--color-text); background: #1a1a24; }
+.u-head__link.is-active { color: var(--color-bg); background: var(--color-accent-light-blue); }
+
+/* ── page intro ── */
+.u-title {
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+  font-weight: 700;
+  margin: 0 0 var(--space-xs);
+}
+.u-subtitle {
+  font-size: var(--text-para-sm-size);
+  line-height: 1.5;
+  color: var(--color-text-grey);
+  max-width: 46rem;
+  margin: 0 0 var(--space-lg);
+}
+
+/* ── anchor rail: jump between groups on long directory pages ── */
+.u-anchors {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+.u-anchors a {
+  font-size: var(--text-eyebrow-size);
+  font-weight: 600;
+  line-height: 1;
+  color: #6a6a7a;
+  padding: 0.5em 0.75em 0.6em;
+  border: 1px solid #1e1e2a;
+  border-radius: var(--radius-pill);
+  transition: color 0.15s, border-color 0.15s;
+}
+.u-anchors a:hover { color: var(--color-text); border-color: #3a3a4a; }

@@ -35,12 +35,19 @@
   --color-accent-indigo:     #4450F2;
 
   /* ---- Colors: Background ---- */
-  --color-bg:      #0D0D12;   /* Background/Black */
-  --color-bg-grey: #2A2A2A;   /* Background/Grey  */
+  --color-bg:       #0D0D12;   /* Background/Black */
+  --color-bg-grey:  #2A2A2A;   /* Background/Grey  */
+  --color-bg-white: #FFFFFF;   /* Background/White */
+
+  /* ---- Colors: Surface (light greys for cards/chips on light pages) ---- */
+  --color-surface:       #F1F0F7;  /* Background/Grey (surface) — card / tab / product-card fill */
+  --color-surface-muted: #DBDAE2;  /* Background/Grey-muted (surface-muted) — chips on a surface */
 
   /* ---- Colors: Border ---- */
   /* Translucent white so a stroke stays "a touch lighter" on any dark fill */
   --color-border-subtle: rgba(255, 255, 255, 0.14);
+  /* Various/Border hairline — translucent black stroke for light surfaces */
+  --color-border-hairline: #0D0D0D1F;
 
   /* ---- Colors: Text ---- */
   --color-text:          #FFFFFF;  /* Text/Base     */
@@ -137,6 +144,7 @@
   --pad-gutter:     1.5rem; /* 24px desktop */
 
   /* ---- Border radius ---- */
+  --radius-xs:   0.25rem;  /*  4px — Radius/Radius 4 */
   --radius-sm:   0.5rem;   /*  8px */
   --radius-md:   0.75rem;  /* 12px */
   --radius-lg:   1rem;     /* 16px */
@@ -284,7 +292,7 @@ button { font: inherit; cursor: pointer; border: none; background: none; padding
   font-size: var(--text-eyebrow-size);
   line-height: var(--text-eyebrow-lh);
   letter-spacing: var(--text-eyebrow-ls);
-  font-weight: 600;
+  font-weight: 700; /* Birch/Eyebrow is Bold in Figma */
   text-transform: uppercase;
 }
 .t-btn {

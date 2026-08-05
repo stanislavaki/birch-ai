@@ -1,0 +1,1268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bïrch — AI, MCP &amp; Meta MCP use cases</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<!-- JetBrains Mono for prompts (per design); Fraunces is a dev-only stand-in for PP Pangaia -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
+<style>
+  /* ─────────────────────────────────────────
+     PAGE SETUP — light page on the dark-site shell
+  ───────────────────────────────────────── */
+  html, body { margin: 0; padding: 0; }
+  /* TOC links target section/card anchors — glide, don't jump */
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg-white); /* light page — approved in briefing */
+    color: var(--color-text-inverted);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 { text-wrap: balance; }
+  /* Dev-only: the shared nav partial is built for the dark site (white text on
+     a transparent bar). This page is light, so the nav is inverted here — the
+     real Webflow nav carries its own styling. */
+  .sim-nav {
+    background: var(--color-bg-white);
+    color: var(--color-text-inverted);
+  }
+  .sim-nav__logo { color: var(--color-text-inverted); }
+  .sim-nav__link,
+  .sim-nav__link-lg { color: var(--color-text-inverted); }
+  .sim-nav__link-dot { background: var(--color-text-inverted); }
+  .sim-nav__link-lg:hover { background: var(--color-surface); }
+  .sim-nav__badge { color: #B8860B; } /* yellow is invisible on white */
+
+  /* Still inline (no DS token, by design): the six section colours and their
+     dark companions — set per section via --wf-c / --wf-cd. */
+
+  /* ─────────────────────────────────────────
+     PRODUCT LOCKUPS — shared em-scaled component
+     (badge size by default; tabs override via font-size)
+  ───────────────────────────────────────── */
+  .uc-lk {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.07em;
+    font-size: 0.879rem; /* 14.06px badge base */
+    line-height: 1.1;
+    font-weight: 600;
+    color: var(--color-text-inverted);
+    white-space: nowrap;
+  }
+  .uc-lk__ai, .uc-lk__sq, .uc-lk__mcp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.3em;
+    min-width: 1.51em;
+    padding: 0 0.35em 0.05em;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: 0.86em;
+    font-weight: 600; /* DemiBold — updated per Figma 989:1278 */
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .uc-lk__ai, .uc-lk__mcp { border-radius: var(--radius-pill); }
+  .uc-lk__sq { border-radius: 0.12em; }
+  .uc-lk__bub { display: inline-flex; align-items: center; }
+  .uc-lk__bub img {
+    display: block;
+    width: 1.125em;
+    height: 1.125em;
+    border-radius: 0;
+  }
+  .uc-lk__bub img + img { margin-left: -0.126em; }
+
+  /* ─────────────────────────────────────────
+     HERO + PRODUCT CARDS (unchanged from previous approve)
+  ───────────────────────────────────────── */
+  .uc-hero {
+    padding: calc(var(--space-xl) + var(--nav-height)) 0 var(--space-lg);
+    text-align: center;
+  }
+  .uc-hero__sub {
+    color: var(--color-text-grey);
+    max-width: 42rem;
+    margin: var(--space-sm) auto 0;
+    text-wrap: pretty;
+  }
+  /* Product cards (Figma 1008:10783): all three on the surface grey, title at
+     the top, brand lockup centred in the middle, description at the bottom. */
+  .uc-pcards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-main);
+    margin-top: var(--space-lg);
+    text-align: left;
+  }
+  .uc-pcard {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--color-surface); /* surface grey */
+    color: var(--color-text-inverted);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    min-height: 26rem; /* 417px per Figma */
+  }
+  .uc-pcard__logo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .uc-pcard__title { margin: 0 0 0.625rem; }
+  /* Brand lockups — full SVG (dark pill + wordmark + tag), uniform height */
+  .uc-pcard__lockup { display: block; height: 5rem; width: auto; max-width: 100%; }
+
+  /* ─────────────────────────────────────────
+     FILTER TABS — segmented bar, sticky under nav
+  ───────────────────────────────────────── */
+  /* Not sticky on purpose: the bar is an entry-point control, and the floating
+     "Filters" button brings it back from anywhere. Keeps the permanent chrome
+     down to the site nav alone. */
+  .uc-tabs-wrap {
+    padding-bottom: var(--space-xs);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-sm));
+  }
+  .uc-tabs {
+    display: flex;
+    gap: var(--space-xxs);
+    background: var(--color-surface); /* surface grey (Figma 989:1278) */
+    /* var3 sizing: track radius = pill radius + track padding (concentric) */
+    border-radius: calc(var(--radius-md) + var(--space-xs));
+    padding: var(--space-xs);
+  }
+  .uc-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-family: var(--font);
+    font-size: var(--text-para-lg-size);
+    font-weight: 600;
+    color: var(--color-text-inverted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-md); /* var3 pill */
+    padding: var(--space-sm);
+    cursor: pointer;
+  }
+  .uc-tab.is-on { background: var(--color-bg-white); }
+  .uc-tab .uc-lk { font-size: var(--text-para-lg-size); font-weight: 600; }
+
+  /* Active tab: the product badge switches to its brand colour, text to black
+     (Figma 989:1278). AI + Birch MCP → yellow, Meta MCP → blue. */
+  .uc-tab.is-on .uc-lk__ai,
+  .uc-tab.is-on .uc-lk__mcp {
+    background: var(--color-primary); /* yellow */
+    color: var(--color-text-inverted);
+  }
+  .uc-tab.is-on .uc-lk__sq {
+    background: var(--color-accent-blue); /* Meta MCP blue */
+    color: var(--color-text-inverted);
+  }
+
+  /* ─────────────────────────────────────────
+     LAYOUT — sidebar 400 + content
+  ───────────────────────────────────────── */
+  .uc-layout {
+    display: grid;
+    grid-template-columns: 25rem minmax(0, 1fr);
+    gap: var(--gap-main);
+    align-items: start;
+    padding-bottom: var(--space-xl);
+  }
+
+  /* ─────────────────────────────────────────
+     SIDEBAR: accordion TOC (built by JS)
+  ───────────────────────────────────────── */
+  /* The sidebar splits in two: the SELECTED box sits outside the scroll area,
+     only the Workflows part below it scrolls — so the scrollbar (and the
+     scrolling) starts under the box, not alongside it. */
+  .uc-toc {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--space-sm));
+    max-height: calc(100vh - var(--nav-height) - var(--space-md));
+    display: flex;
+    flex-direction: column;
+  }
+  .uc-toc__scroll { overflow-y: auto; min-height: 0; }
+  .uc-toc__title {
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    padding-left: var(--space-sm);
+    margin: 0 0 var(--space-xs);
+  }
+  .uc-toc nav { display: grid; gap: 0.125rem; }
+  .uc-toc__group {
+    border-radius: var(--radius-lg);
+    transition: background 0.2s ease;
+  }
+  .uc-toc__group.is-open { background: var(--color-surface); }
+  .uc-toc__wf {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--gap-main);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space);
+    border-radius: var(--radius-lg); /* match the open-section radius on hover */
+    color: var(--color-text-inverted);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  /* Closed workflow: neutral grey hover; the section color lives on the open state */
+  .uc-toc__group:not(.is-open) .uc-toc__wf:hover { background: var(--color-surface); }
+  .uc-toc__wf.is-empty { opacity: 0.3; pointer-events: none; }
+  .uc-toc__cnt { color: var(--color-text-grey); transition: color 0.2s ease; }
+  .uc-toc__group.is-open .uc-toc__cnt { color: var(--color-text-inverted); }
+  /* Accordion body animates via grid-template-rows (0fr → 1fr).
+     Padding lives on the innermost wrapper so the collapsed row is truly 0. */
+  .uc-toc__sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+  .uc-toc__group.is-open .uc-toc__sub { grid-template-rows: 1fr; }
+  .uc-toc__sub-inner { min-height: 0; overflow: hidden; }
+  .uc-toc__sub-pad { padding: 0 var(--space-sm) var(--space-sm) var(--space-md); }
+  .uc-toc__case {
+    position: relative;
+    display: block;
+    padding: 0.3125rem 0.5rem;
+    color: var(--color-text-grey);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .uc-toc__case:hover { color: var(--color-text-inverted); }
+  .uc-toc__case.is-active { color: var(--color-text-inverted); }
+  .uc-toc__case::before {
+    content: "";
+    position: absolute;
+    /* Per mock: dot at 22px from the group edge — 10px left of the text, first line */
+    left: -0.625rem;
+    top: 0.55rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-text-inverted);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .uc-toc__case.is-active::before { opacity: 1; }
+  .uc-toc__case.is-hidden { display: none; }
+
+  /* ─────────────────────────────────────────
+     CONTENT: colored section banners + cards
+  ───────────────────────────────────────── */
+  .uc-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md); /* 32px between sections — 2x the in-section gap */
+  }
+  .uc-wf {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-main); /* 16px between cards */
+    scroll-margin-top: calc(var(--nav-height) + var(--space-sm));
+  }
+  .uc-wf.is-hidden { display: none; }
+
+  /* Divider card (Figma 976:4597): big centred title + a white chip pinned at
+     the bottom carrying a colour-matched seal badge and the persona quote. */
+  .uc-banner {
+    display: flex;
+    flex-direction: column;
+    /* gap == the top/side padding, so the title (flex:1) centres symmetrically
+       in the space above the chip */
+    gap: var(--space-sm);
+    background: var(--wf-c, var(--color-accent-green));
+    border-radius: var(--radius-md);
+    padding: var(--space-sm);
+    min-height: 21.25rem; /* 340px per mock */
+  }
+  .uc-banner__title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 0;
+    padding-top: 1.5rem; /* optical compensation — nudges the title down */
+    font-size: clamp(2.25rem, 1.2rem + 2.6vw, 3.25rem); /* 52px cap (Figma) */
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: var(--color-text-inverted);
+  }
+  .uc-banner__chip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--color-bg-white);
+    border-radius: var(--radius-sm);
+    /* Even vertical padding so the chip grows for a 2-line quote and the text
+       keeps its breathing room instead of crowding the edges. */
+    padding: var(--space-sm);
+    min-height: 3.75rem; /* 72px floor for a single-line quote */
+  }
+  /* Seal badge: section-colour scalloped mark with a serif quote glyph */
+  .uc-banner__mark {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.5rem; /* 48px */
+    height: 2.75rem; /* 52px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .uc-banner__mark::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--wf-c, var(--color-accent-green));
+    -webkit-mask: url("images/use-cases/seal.svg") center / contain no-repeat;
+    mask: url("images/use-cases/seal.svg") center / contain no-repeat;
+  }
+  .uc-banner__mark i {
+    position: relative;
+    font-family: "PP Pangaia", "Fraunces", Georgia, serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 0;
+    color: var(--color-bg-grey);
+    transform: translateY(0.3em);
+  }
+  .uc-banner__quote {
+    margin: 0;
+    padding-top: 0.25rem; /* optical compensation — serif sits low against the seal */
+    font-family: "PP Pangaia", "Fraunces", Georgia, serif; /* Fraunces = dev stand-in */
+    font-weight: 400;
+    font-size: var(--text-para-lg-size); /* 20px */
+    line-height: 1.1;
+    color: var(--color-text-inverted);
+    text-wrap: pretty;
+  }
+  .uc-wf__note { color: var(--color-text-grey); padding: 0 var(--space-md); }
+
+  /* ─────────────────────────────────────────
+     USE CASE CARD
+  ───────────────────────────────────────── */
+  .uc-card {
+    background: var(--color-surface); /* surface grey (Figma --background/grey-(surface)) */
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: grid;
+    gap: var(--space-sm);
+    scroll-margin-top: calc(var(--nav-height) + var(--space-sm));
+  }
+  .uc-card.is-hidden { display: none; }
+  /* Roadmap card (Figma 951:844): bold dotted frame, no fill, content at full
+     strength. Drawn with outline (offset inward) rather than border so it adds
+     no box width — the badges/title/body stay aligned with the sibling cards.
+     (Project convention: Figma "dashed" = CSS dotted.) */
+  .uc-card--road {
+    outline: 3px dotted var(--color-text-inverted);
+    outline-offset: -3px;
+    border-radius: var(--radius-xs); /* 4px */
+    background: transparent;
+  }
+  /* Badges sit above the title (Figma 04-01): they stop competing with it for
+     width, and read as a kicker — which products, then the case itself. */
+  .uc-card__head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+  /* No text-wrap: balance here — evened-out lines read as body copy;
+     natural wrapping keeps the display-title feel */
+  .uc-card__head h3 { margin: 0; text-wrap: initial; }
+  .uc-card p { margin: 0; }
+  .uc-card__sub { margin: var(--space-sm) 0 0; }
+  /* A sub-heading belongs to the paragraph under it, so that pair sits at half
+     the card gap (8 vs 16). Grid gap is uniform, so the pair is pulled together
+     with a negative margin rather than by regrouping the markup. */
+  .uc-card__sub + p { margin-top: calc(var(--space-xs) - var(--space-sm)); }
+
+  .uc-badges { display: flex; gap: var(--space-xxs); flex-wrap: wrap; }
+  /* Typographic badge: brand + product at one uniform DemiBold weight on a
+     muted-grey chip (Figma 976:4597) — the lockup structure without the weight
+     of its graphic marks, which would out-shout the 32px title. */
+  .uc-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.15em;
+    font-size: var(--text-eyebrow-size);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-text-inverted);
+    background: var(--color-surface-muted); /* surface-muted grey (Figma) */
+    border-radius: var(--radius-xs);
+    /* more top than bottom padding: caps-heavy text sits optically high, so the
+       extra top space pushes it down to the visual centre */
+    padding: 0.62em 0.6em 0.38em;
+  }
+  .uc-badge b { font-weight: 600; color: var(--color-text-inverted); }
+  .uc-badge em { font-style: normal; font-weight: 600; opacity: 0.85; }
+  /* "In roadmap" pill (Figma 961:4531): yellow eyebrow chip at the end of the
+     badges row — the row spans the card so the pill lands on the right edge */
+  /* Row centres its chips so the (shorter) roadmap pill doesn't stretch and
+     drop its text off-centre — it lines up with the product badges. */
+  .uc-card--road .uc-badges { width: 100%; align-items: center; }
+  .uc-badge--road {
+    margin-left: auto;
+    align-items: center;
+    background: var(--color-primary);
+    border: none;
+    color: var(--color-text-inverted);
+    font-size: var(--text-eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.4em 0.6em;
+  }
+  .uc-badge em { font-style: normal; font-weight: 600; font-size: 0.75rem; opacity: 0.75; }
+
+  /* Inline code in body text: bare mono, no chip — chips overlapped across wrapped lines */
+  .uc-card code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.95em;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ─────────────────────────────────────────
+     PROMPT BLOCK — white frame, neutral mono text.
+     Section colour now lives only in the copy button (Figma 976:4597).
+  ───────────────────────────────────────── */
+  .uc-prompt {
+    position: relative;
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-hairline); /* border-hairline */
+    border-radius: var(--radius-sm);
+    padding: var(--space);
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .uc-prompt__label {
+    color: var(--color-text-inverted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .uc-prompt__text {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 500;
+    font-size: var(--text-eyebrow-size); /* 12.8px */
+    line-height: 1.2;
+    color: var(--color-text-grey); /* neutral — colour coding moved to the button */
+  }
+  /* Copy button carries the section colour: a light tint of the section's dark
+     companion (--wf-cd), icon in that same dark tone (Figma 976:4597). */
+  .uc-copy {
+    position: absolute;
+    bottom: 0.34rem;
+    right: 0.34rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--wf-cd, var(--color-text-grey)) 30%, var(--color-bg-white));
+    border: none;
+    border-radius: var(--radius-xs);
+    cursor: pointer;
+    font-size: 0.8rem;
+    line-height: 1;
+    color: var(--color-text);
+    transition: background 0.12s ease;
+  }
+  .uc-copy:hover { background: color-mix(in srgb, var(--wf-cd, var(--color-text-grey)) 42%, var(--color-bg-white)); }
+  /* Icon painted via mask so it follows --wf-cd (the section-dark tone) */
+  .uc-copy img { display: none; }
+  .uc-copy::after {
+    content: "";
+    width: 0.9rem;
+    height: 0.9rem;
+    background: var(--wf-cd, var(--color-text-inverted));
+    -webkit-mask: url("images/use-cases/copy-icon-outline.svg") center / contain no-repeat;
+    mask: url("images/use-cases/copy-icon-outline.svg") center / contain no-repeat;
+  }
+  /* On success: fill with the section-dark tone, white check */
+  .uc-copy.is-done { background: var(--wf-cd, var(--color-text-inverted)); }
+  .uc-copy.is-done::after { display: none; }
+  /* Placeholder reads as an empty input slot: faint grey chip on the white prompt */
+  .uc-ph {
+    background: var(--color-surface);
+    color: var(--color-text-inverted);
+    border: 1px solid var(--color-border-hairline);
+    border-radius: 0.25em;
+    padding: 0 0.25em 0.1em;
+  }
+
+  /* ─────────────────────────────────────────
+     SELECTED BOX — top of the sidebar (Figma 1017:11133)
+     Shows the active product; the round button scrolls back to the tab bar.
+  ───────────────────────────────────────── */
+  /* Sits in the fixed part of the sidebar, above the scroll area. Shown only
+     once the tab bar has scrolled out of view; collapses smoothly (max-height
+     + opacity) so the title/list below slide instead of jumping. */
+  .uc-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    background: var(--color-surface); /* surface grey */
+    border-radius: var(--radius-lg);
+    padding: 0 var(--space-sm) 0 var(--space);
+    margin-bottom: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition: max-height 0.25s ease, opacity 0.2s ease,
+      padding 0.25s ease, margin 0.25s ease;
+  }
+  .uc-selected.is-visible {
+    max-height: 8rem;
+    opacity: 1;
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space);
+    margin-bottom: var(--space-sm);
+    pointer-events: auto;
+    cursor: pointer; /* the whole box scrolls back to the filters */
+  }
+  .uc-selected.is-visible:hover .uc-selected__btn { background: var(--color-text-inverted); transform: translateY(-0.1em); }
+  @media (prefers-reduced-motion: reduce) { .uc-selected { transition: none; } }
+  .uc-selected__text { display: flex; flex-direction: column; gap: var(--space-xxs); min-width: 0; }
+  .uc-selected__label {
+    font-size: var(--text-eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: var(--color-text-grey);
+  }
+  .uc-selected__value {
+    font-size: var(--text-para-lg-size);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--color-text-inverted);
+  }
+  .uc-selected__btn {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-bg-grey); /* #2A2A2A */
+    color: var(--color-text);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .uc-selected__btn:hover { background: var(--color-text-inverted); transform: translateY(-0.1em); }
+  @media (prefers-reduced-motion: reduce) { .uc-selected__btn { transition: none; } }
+
+  /* Mobile is intentionally not designed yet — minimal safety fallback only */
+  @media (max-width: 767px) {
+    .uc-pcards { grid-template-columns: 1fr; }
+    .uc-pcard { min-height: 0; gap: var(--space); }
+    .uc-layout { grid-template-columns: 1fr; }
+    .uc-toc { display: none; }
+    .uc-tabs { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav partial: design-system/webflow-env-nav.html -->
+<nav class="sim-nav">
+  <div class="sim-nav__inner">
+    <a class="sim-nav__logo" href="#">
+      <svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/>
+        <path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/>
+        <path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/>
+        <path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/>
+        <path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/>
+        <path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/>
+      </svg>
+    </a>
+    <div class="sim-nav__center">
+      <div class="sim-nav__center-links">
+        <a class="sim-nav__link" href="#">Performance<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Hub<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Stage<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#" style="position:relative;padding-top:1.4em;">
+          <span class="sim-nav__badge">New</span>AI<div class="sim-nav__link-dot"></div>
+        </a>
+        <a class="sim-nav__link" href="#">Cases<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Blog<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Pricing<div class="sim-nav__link-dot"></div></a>
+      </div>
+    </div>
+    <div class="sim-nav__right">
+      <a class="sim-nav__link-lg" href="#">Book demo</a>
+      <a class="sim-nav__link-lg" href="#">Log in</a>
+      <a class="sim-nav__btn" href="#">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO + PRODUCT CARDS ═══════════════ -->
+<section class="uc-hero">
+  <div class="container">
+    <h1 class="t-h2">Learn the difference</h1>
+    <p class="uc-hero__sub t-para-lg">A breakdown across six workflows — auditing rules, reading logs, building automation, benchmarking, and more.</p>
+    <div class="uc-pcards">
+      <div class="uc-pcard">
+        <h3 class="uc-pcard__title t-para-xl">In-app assistant<br />or co-pilot</h3>
+        <div class="uc-pcard__logo">
+          <img class="uc-pcard__lockup" src="images/use-cases/birch-ai.svg" alt="Bïrch AI" />
+        </div>
+        <p class="uc-pcard__desc t-body">An assistant inside Birch that reads your rules and your performance side by side — it spots what's off, suggests what to change, and drafts the fix for you to review.</p>
+      </div>
+      <div class="uc-pcard">
+        <h3 class="uc-pcard__title t-para-xl">External connector<br />for AI clients to Birch</h3>
+        <div class="uc-pcard__logo">
+          <img class="uc-pcard__lockup" src="images/use-cases/birch-mcp.svg" alt="Bïrch MCP" />
+        </div>
+        <p class="uc-pcard__desc t-body">Birch data inside your own AI workflow. Connect Birch MCP to Claude, or any MCP-compatible tool, and your rules, execution logs and Stage tasks join the conversation.</p>
+      </div>
+      <div class="uc-pcard">
+        <h3 class="uc-pcard__title t-para-xl">Official Meta connector<br />inside Birch AI chat</h3>
+        <div class="uc-pcard__logo">
+          <img class="uc-pcard__lockup" src="images/use-cases/meta-mcp.svg" alt="Meta MCP" />
+        </div>
+        <p class="uc-pcard__desc t-body">Meta's own data inside your Birch AI conversation — ad-level performance, change history, industry benchmarks and the Ads Library, read straight from Meta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FILTER TABS + LAYOUT ═══════════════ -->
+<div class="container">
+
+  <div class="uc-tabs-wrap" id="ucTabsWrap">
+    <div class="uc-tabs" id="ucTabs">
+      <button class="uc-tab is-on" type="button" data-p="all">All products</button>
+      <button class="uc-tab" type="button" data-p="ai">
+        <span class="uc-lk">Bïrch <span class="uc-lk__ai">AI</span></span>
+      </button>
+      <button class="uc-tab" type="button" data-p="mcp">
+        <span class="uc-lk">Bïrch <span class="uc-lk__mcp">MCP</span></span>
+      </button>
+      <button class="uc-tab" type="button" data-p="meta">
+        <span class="uc-lk">Meta <span class="uc-lk__sq">MCP</span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="uc-layout">
+
+    <aside class="uc-toc" id="ucToc">
+      <!-- Fixed part: SELECTED box + section title. Only the list below scrolls. -->
+      <div class="uc-selected">
+        <div class="uc-selected__text">
+          <span class="uc-selected__label">Selected</span>
+          <span class="uc-selected__value" id="ucSelValue">All products</span>
+        </div>
+        <button class="uc-selected__btn" type="button" id="ucToTop" aria-label="Back to filters">
+          <span aria-hidden="true">&uarr;</span>
+        </button>
+      </div>
+      <h2 class="uc-toc__title t-para-xl">Workflows</h2>
+      <div class="uc-toc__scroll">
+        <nav id="ucNav"><!-- built by JS from sections below --></nav>
+      </div>
+    </aside>
+
+    <div class="uc-content">
+
+      <!-- ════════ 01 · AUDIT & REVIEW ════════ -->
+      <section class="uc-wf" id="wf-audit" data-title="Audit &amp; Review" style="--wf-c: var(--color-accent-green); --wf-cd: #037A00">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Audit &amp; Review</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to understand what my automation is doing and how it helps with my campaigns performance</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-audit-1" data-products="ai mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Review existing rules for errors and gaps</h3>
+          </div>
+          <p class="t-body">You ask for a review of all rules in your workspace. The AI reads each rule's conditions, actions, schedule, and filters, then flags issues: overlapping conditions, contradictory actions (one pauses what another starts), thresholds with no volume guard, long-disabled rules taking up space.</p>
+          <p class="t-body">Birch AI does this in-app with zero setup and can tie findings to live performance data. Birch MCP does this in Claude using <code>list_automation_rules</code> &rarr; <code>get_rule_details</code> per rule, and handles larger accounts (200+ rules tested) without timeouts.</p>
+          <p class="t-body">Neither tool fixes rules for you. Both describe issues; you decide what to change.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Audit all my Meta rules and identify outdated, duplicated, risky, or conflicting automations.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-audit-2" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Analyze rule execution logs</h3>
+          </div>
+          <p class="t-body">You want to know what your rules actually did: which ones fired, how often, which entities were affected, and whether there were errors. This is the "was my automation working while I wasn't looking?" question.</p>
+          <p class="t-body">Birch MCP with <code>list_rule_logs</code> returns run-by-run summaries (timestamp, entities evaluated/acted on/errored), and <code>get_rule_log</code> returns per-entity outcomes (which ad was paused, which budget changed, what condition values were evaluated, what errors occurred). Can filter by matched entities, errors only, or specific entity IDs.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">I want to see the logs for my rule called "Pause on high CPA" for the last week — what fired, what didn't, and why.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-audit-3" data-products="ai mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Audit rules structure + identify zombie rules and over-firing</h3>
+          </div>
+          <p class="t-body">An operator or manager on a mature account where rules accumulated over months. Often triggered by unexplained performance instability, a budget spike, or an account handover: "I have 80 rules and I've lost track — what's actually running, and is anything working against me?"</p>
+          <p class="t-body">Ask Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering (stale thresholds or conditions that no longer match), firing too broadly (acting on most entities every run), or fighting each other (one rule pauses what another restarts). If your account is organized into folders, scope the audit to one section at a time. Useful for: "show me all rules in the [Product X] folder and check if any conflict."</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">I have 80 rules and I've lost track — what's actually running, and is anything working against me?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-audit-4" data-products="meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Get the full picture of Meta account without opening Ads Manager</h3>
+          </div>
+          <h4 class="uc-card__sub t-para-lg">1. "What happened while I wasn't looking?" (overnight/weekend briefing)</h4>
+          <p class="t-body">You need: ad set and ad level performance and trends, change history (what was modified and when), anomaly alerts (spikes, drops, unusual patterns), budget and delivery status across active and paused campaigns. The job: get caught up before the first call.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Briefing</span>
+            <p class="uc-prompt__text">Access Meta Ads Manager history and show what recent changes were made to my campaigns — give me the briefing I'd build myself from Ads Manager if I had 45 minutes.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <h4 class="uc-card__sub t-para-lg">2. "My automation made changes — were they the right calls?" (rule validation)</h4>
+          <p class="t-body">You need: entity-level performance data (the ad set that got paused — was it actually underperforming?), auction insights (was it a bid problem or a creative quality problem?), change history (what other changes happened around the same time that might explain the shift). The job: close the loop between what the rules did and what actually happened.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Validation</span>
+            <p class="uc-prompt__text">The ad set "[ad set name]" that my rule paused this week — was it actually underperforming, or did something else change? Pull ad-level performance and auction context from around the time it paused.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <h4 class="uc-card__sub t-para-lg">3. "Am I doing the right things compared to others?" (calibration)</h4>
+          <p class="t-body">You need: industry benchmarks filtered by spend tier/goal, Opportunity Score, Ads Library for competitive creative. The job: zoom out from your own account and check whether your strategy makes sense in context.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Calibration</span>
+            <p class="uc-prompt__text">My campaign "[campaign name]" feels expensive lately. Compare its costs and delivery against auction benchmarks so I can tell if it's a me problem or a market problem.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ════════ 02 · BUILD & SET UP ════════ -->
+      <section class="uc-wf" id="wf-build" data-title="Build &amp; Set Up" style="--wf-c: var(--color-accent-light-blue); --wf-cd: #136F88">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Build &amp; Set Up</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to create rules &mdash; or figure out which ones to create</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-build-1" data-products="ai">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+            </div>
+            <h3 class="t-h3">Get starter rule suggestions based on actual account data</h3>
+          </div>
+          <p class="t-body">You ask "what rules should I set up?" Birch AI looks at connected ad accounts, current performance, and existing rules (or lack of them), then suggests rules from the Strategy Library tailored to what it sees. On Meta, it creates clickable draft links. On other platforms, it gives text recommendations.</p>
+          <p class="t-body">Also works proactively: when you visit the rules page, Birch AI can prompt you with "check new rule ideas for your account" — no need to know to ask.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Suggest new rules to expand my current rules setup based on what you see in my account.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-build-2" data-products="ai">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+            </div>
+            <h3 class="t-h3">Create a rule from natural language</h3>
+          </div>
+          <p class="t-body">You describe what you want: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. You review, edit if needed, and activate.</p>
+          <p class="t-para-sm" style="color: var(--color-text-grey);">Draft generation is Meta only — on TikTok, Snapchat and Google you get the rule logic as text to build from.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-build-3" data-products="ai mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Find which metrics are available for rules</h3>
+          </div>
+          <p class="t-body">When you want to ideate rules in Claude: <code>search_metrics</code> searches Birch's metric catalog by natural language ("purchase cost on TikTok," "frequency for Snapchat"). Returns canonical metric ID, label, platform, and whether it's usable in automation rules or reports. Supports Meta, Google, TikTok, Snapchat, and attribution platforms (Hyros, AppsFlyer, Wicked Reports, Adjust, Google Analytics).</p>
+          <p class="t-body">You can also get a list of available metrics from Birch AI.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Can you suggest metrics for TikTok to use in rules?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card uc-card--road" id="case-build-4" data-products="ai mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+              <span class="uc-badge uc-badge--road">In roadmap</span>
+            </div>
+            <h3 class="t-h3">Create rules from Claude</h3>
+          </div>
+          <p class="t-body">Today Birch MCP is read-only. Write tools (<code>create_automation_rule</code>, <code>update_automation_rule</code>) are in the engineering backlog. When shipped, rules will always be created as drafts — never live without user approval.</p>
+        </article>
+      </section>
+
+      <!-- ════════ 03 · MONITOR & CONTROL ════════ -->
+      <section class="uc-wf" id="wf-monitor" data-title="Monitor &amp; Control" style="--wf-c: var(--color-primary); --wf-cd: #826705">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Monitor &amp; Control</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to know what's happening &mdash; and whether my guardrails are holding</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-monitor-1" data-products="ai">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+            </div>
+            <h3 class="t-h3">Quick performance overview</h3>
+          </div>
+          <p class="t-body">"How is my ROAS across all ad accounts this week vs last week?" or "Compare spend for Meta and TikTok for Q1." Birch AI answers in natural language, supports custom timeframes (Q1, last 7 days, etc.), and works across all connected platforms at the ad account level. Entity-level breakdown (campaigns, ad sets, ads) is Meta only and limited to accounts with a manageable entity count.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">How is my ROAS across all ad accounts this week compared to last week?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-monitor-2" data-products="ai mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Bïrch<b>MCP</b><em>&middot; logic only</em></span>
+            </div>
+            <h3 class="t-h3">Setup health check</h3>
+          </div>
+          <p class="t-body">You notice yo-yoing budgets or unstable performance. You ask Birch AI to review the rule set for offense/defense imbalance. The AI reads the full setup and identifies patterns: scaling based on single-day data, no budget caps, aggressive percentage increases without guardrails, missing recovery rules for paused winners.</p>
+          <p class="t-body">Birch AI can correlate with actual account performance. Birch MCP can read rule logic via <code>get_rule_details</code> and spot the structural imbalance, but won't see the performance impact.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">My budgets keep swinging up and down week to week — can you check if my scaling rules are missing budget caps, relying on single-day data, or if I'm missing recovery rules for winners that got paused?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-monitor-3" data-products="ai">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+            </div>
+            <h3 class="t-h3">Find growth opportunities</h3>
+          </div>
+          <p class="t-body">You're not just looking at what happened — you want to know where you're leaving money on the table. Birch AI can identify high-performing ad sets that are underfunded, poor performers that are consuming budget, and recommend scaling or pausing decisions.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Identify high-performing ad sets that are underfunded and poor performers consuming budget, and recommend scaling or pausing decisions.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-monitor-4" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Trace what a rule did to specific entities</h3>
+          </div>
+          <p class="t-body">For debugging: "why did this rule pause this ad?" Use <code>get_rule_log</code> with specific entity IDs to see the per-entity outcome — which condition was evaluated, what metric value was checked, what action was applied, and any error messages. Also shows the historical rule snapshot at time of execution, so Claude can compare what the rule looked like when it ran vs. what it looks like now.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">My ad "[ad name]" got paused this morning by the rule "[rule name]" — pull the log for that run and show me exactly which condition triggered it, the metric value at the time, and whether the rule's been edited recently.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ════════ 04 · COMPETE & BENCHMARK ════════ -->
+      <section class="uc-wf" id="wf-compete" data-title="Compete &amp; Benchmark" style="--wf-c: var(--color-accent-pink); --wf-cd: #B2136F">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Compete &amp; Benchmark</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to know what's happening outside my account</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-compete-1" data-products="meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Competitive creative research via Ads Library</h3>
+          </div>
+          <p class="t-body">Search the Facebook Ads Library using plain language: "show me active video ads from [competitor] in the US." No need to navigate the Ads Library UI. Only covers publicly visible ads — not competitor performance data.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Category angles</span>
+            <p class="uc-prompt__text">Which creative angles are performing best in ecommerce supplements in the US right now? Pull active ads running 30+ days and show me what hooks, formats, and offers show up most.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Competitor</span>
+            <p class="uc-prompt__text">Show me all active ads from [Competitor Name] running in the US right now. Focus on ads that have been active for more than 30 days — I want to see what's been working for them, not just what's new. Prioritize video and carousel formats.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-compete-2" data-products="meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Industry and auction benchmarks</h3>
+          </div>
+          <p class="t-body">Compare ad account performance against auction and industry benchmarks. This data is only available through Meta MCP — it's not in the regular Meta API or Birch's own analytics.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">How is my account performing compared to other advertisers in my auction? I want to know where I'm above benchmark and where I'm losing ground — CPM, CTR, whatever is available.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-compete-3" data-products="meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Anomaly detection and Opportunity Score</h3>
+          </div>
+          <p class="t-body">Check for unusual spend patterns, sudden metric shifts, and Meta's Opportunity Score. Also supports listing custom audiences, images, and videos in the account — useful for quick creative audits without navigating Ads Manager.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Has anything unusual happened in my campaigns in the last 7 days? Flag anything that looks off — sudden drops in delivery, CPM spikes, CTR anomalies — before it gets expensive.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- ════════ 05 · CREATE & TEST AT SCALE ════════ -->
+      <section class="uc-wf" id="wf-create" data-title="Create &amp; Test at Scale" style="--wf-c: var(--color-accent-orange); --wf-cd: #A64F04">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Create &amp; Test at Scale</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need to get creatives into ad accounts and test them</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-create-1" data-products="ai">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+            </div>
+            <h3 class="t-h3">Suggest creative testing rules</h3>
+          </div>
+          <p class="t-body">Birch AI can suggest rules for creative fatigue detection (frequency + CTR decay), creative testing pipelines (auto-pause underperformers, scale winners), and late-attribution recovery ("phoenix" rules that restart paused ads when delayed conversions come in). These are text recommendations (all platforms) or draft rules (Meta only).</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Suggest rules for my creative testing pipeline — one to catch fatigue before CTR drops, one to auto-pause underperforming test ads, and one to recover ads that got paused right before a delayed conversion came in.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-create-2" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Monitor Stage task execution</h3>
+          </div>
+          <p class="t-body">Check which uploads completed, which failed, and which ads were created. Useful for teams doing high-volume creative testing who want to monitor Stage from Claude without logging into Birch. Supports Meta, TikTok, Snapchat.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ════════ 06 · INTEGRATE & EXTEND ════════ -->
+      <section class="uc-wf" id="wf-integrate" data-title="Integrate &amp; Extend" style="--wf-c: var(--color-accent-red); --wf-cd: #BB1B1B">
+        <div class="uc-banner">
+          <h2 class="uc-banner__title">Integrate &amp; Extend</h2>
+          <div class="uc-banner__chip">
+            <span class="uc-banner__mark" aria-hidden="true"><i>&ldquo;</i></span>
+            <p class="uc-banner__quote">I need Birch data inside my own AI workflow &mdash; not just inside the Birch app</p>
+          </div>
+        </div>
+
+        <article class="uc-card" id="case-integrate-1" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Work with Birch data in Claude</h3>
+          </div>
+          <p class="t-body">Connect at mcp.bir.ch/mcp. Claude can then pull workspaces, ad accounts, rules, rule details, execution logs, folder structures, Stage tasks, and help docs — all in natural language. No Birch UI needed.</p>
+          <p class="t-body">The differentiation from Birch AI: no UI constraints, exportable analysis, code execution against the data, and the ability to process very large rule sets (200+ rules). Better for deep audits, cross-account comparisons, and structured exports.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Pull every rule across all my ad accounts in this workspace and visualize it for my weekly presentation, alongside the numbers in my Google Sheets pacing tracker.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-integrate-2" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b><em>&middot; read-only</em></span>
+            </div>
+            <h3 class="t-h3">Plug Birch data into an internal AI bot</h3>
+          </div>
+          <p class="t-body">Enterprise teams that run their own AI bots (e.g., in Slack) can connect Birch MCP. Read-only by design — the bot reports, humans decide what to change.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Every morning, pull rule activity from the last 24 hours across all our ad accounts, flag anything that errored or hasn't fired in 7+ days, and post the summary in #paid-media.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-integrate-3" data-products="mcp">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Answer product questions from any AI client</h3>
+          </div>
+          <p class="t-body"><code>search_help</code> searches Birch Help Center articles by keyword. Useful when a user asks Claude "how does the ranking condition work in Birch?" — Claude can pull the answer from Birch's own documentation.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">How does the ranking condition in Automated rules work?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var nav = document.getElementById('ucNav');
+  var tabs = document.getElementById('ucTabs');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.uc-wf'));
+
+  /* ── Build accordion TOC from the rendered sections ──
+     Same approach the Webflow/CMS version will use: the sidebar is derived
+     from the cards, so content never has to be duplicated. */
+  var navHTML = '';
+  sections.forEach(function (sec) {
+    var cards = sec.querySelectorAll('.uc-card');
+    /* Carry the section color onto the group — closed-item hover uses it */
+    var wfColor = sec.style.getPropertyValue('--wf-c');
+    navHTML += '<div class="uc-toc__group"' + (wfColor ? ' style="--wf-c:' + wfColor + '"' : '') + '>';
+    navHTML += '<a class="uc-toc__wf t-para-lg" href="#' + sec.id + '" data-toc-for="' + sec.id + '">' +
+      '<span>' + sec.dataset.title + '</span><span class="uc-toc__cnt t-body">' + cards.length + '</span></a>';
+    navHTML += '<div class="uc-toc__sub"><div class="uc-toc__sub-inner"><div class="uc-toc__sub-pad">';
+    cards.forEach(function (card) {
+      navHTML += '<a class="uc-toc__case t-body" href="#' + card.id + '" data-sub-for="' + card.id + '">' +
+        card.querySelector('h3').textContent + '</a>';
+    });
+    navHTML += '</div></div></div></div>';
+  });
+  nav.innerHTML = navHTML;
+
+  /* ── Highlight [placeholders] inside prompts ── */
+  document.querySelectorAll('.uc-prompt__text').forEach(function (p) {
+    p.innerHTML = p.innerHTML.replace(/\[([^\]]+)\]/g, '<span class="uc-ph">[$1]</span>');
+  });
+
+  /* ── Accordion helpers ── */
+  function openGroup(g) {
+    if (!g) return;
+    nav.querySelectorAll('.uc-toc__group').forEach(function (x) {
+      x.classList.toggle('is-open', x === g);
+    });
+  }
+  function setActiveCase(link) {
+    nav.querySelectorAll('[data-sub-for]').forEach(function (l) { l.classList.remove('is-active'); });
+    if (link) link.classList.add('is-active');
+  }
+
+  /* ── Scroll-spy with a lock during programmatic scroll — without it the spy
+     fires on every section the smooth scroll passes and the accordion flips
+     them all one by one. Click sets the final state itself. ── */
+  var navLock = false, navLockTimer = null;
+  function lockSpy() {
+    navLock = true;
+    clearTimeout(navLockTimer);
+    navLockTimer = setTimeout(function () { navLock = false; }, 1500);
+  }
+  window.addEventListener('scrollend', function () {
+    navLock = false;
+    clearTimeout(navLockTimer);
+  });
+
+  var BAND = { rootMargin: '-15% 0px -75% 0px' };
+  var wfLinks = {};
+  nav.querySelectorAll('[data-toc-for]').forEach(function (l) { wfLinks[l.dataset.tocFor] = l; });
+  var ioWf = new IntersectionObserver(function (entries) {
+    if (navLock) return;
+    entries.forEach(function (e) {
+      if (e.isIntersecting && wfLinks[e.target.id]) {
+        openGroup(wfLinks[e.target.id].closest('.uc-toc__group'));
+      }
+    });
+  }, BAND);
+  sections.forEach(function (s) { ioWf.observe(s); });
+
+  var caseLinks = {};
+  nav.querySelectorAll('[data-sub-for]').forEach(function (l) { caseLinks[l.dataset.subFor] = l; });
+  var ioCase = new IntersectionObserver(function (entries) {
+    if (navLock) return;
+    entries.forEach(function (e) {
+      if (e.isIntersecting && caseLinks[e.target.id]) setActiveCase(caseLinks[e.target.id]);
+    });
+  }, BAND);
+  document.querySelectorAll('.uc-card').forEach(function (c) { ioCase.observe(c); });
+
+  /* ── Filter (product tabs) ── */
+  function applyFilter(pid) {
+    document.querySelectorAll('.uc-card').forEach(function (card) {
+      var ps = card.dataset.products.split(' ').filter(Boolean);
+      card.classList.toggle('is-hidden', pid !== 'all' && ps.indexOf(pid) === -1);
+    });
+    nav.querySelectorAll('[data-sub-for]').forEach(function (a) {
+      var card = document.getElementById(a.dataset.subFor);
+      if (card) a.classList.toggle('is-hidden', card.classList.contains('is-hidden'));
+    });
+    sections.forEach(function (sec) {
+      var any = sec.querySelector('.uc-card:not(.is-hidden)');
+      sec.classList.toggle('is-hidden', !any);
+      var link = wfLinks[sec.id];
+      if (link) {
+        link.classList.toggle('is-empty', !any);
+        link.querySelector('.uc-toc__cnt').textContent = sec.querySelectorAll('.uc-card:not(.is-hidden)').length;
+      }
+    });
+    document.querySelectorAll('.uc-tab').forEach(function (t) {
+      t.classList.toggle('is-on', t.dataset.p === pid);
+    });
+    /* The sidebar SELECTED box mirrors the active tab (plain text) */
+    var active = document.querySelector('.uc-tab[data-p="' + pid + '"]');
+    var sel = document.getElementById('ucSelValue');
+    if (active && sel) sel.textContent = active.textContent.trim();
+  }
+
+  /* ── Delegated clicks: tabs, toc links, copy buttons ── */
+  document.addEventListener('click', function (e) {
+    var tab = e.target.closest('.uc-tab');
+    if (tab) { applyFilter(tab.dataset.p); return; }
+
+    var wfLink = e.target.closest('[data-toc-for]');
+    if (wfLink) {
+      lockSpy();
+      var group = wfLink.closest('.uc-toc__group');
+      openGroup(group);
+      /* Section click lands on its first case — highlight it right away */
+      setActiveCase(group ? group.querySelector('[data-sub-for]:not(.is-hidden)') : null);
+      return;
+    }
+    var caseLink = e.target.closest('[data-sub-for]');
+    if (caseLink) { lockSpy(); setActiveCase(caseLink); return; }
+
+    var copy = e.target.closest('.uc-copy');
+    if (copy) {
+      var text = copy.closest('.uc-prompt').querySelector('.uc-prompt__text').textContent;
+      navigator.clipboard.writeText(text).catch(function () {});
+      copy.classList.add('is-done');
+      copy.insertAdjacentText('beforeend', '✓');
+      setTimeout(function () {
+        copy.classList.remove('is-done');
+        copy.lastChild.remove();
+      }, 1400);
+    }
+  });
+
+  /* ── SELECTED box (sidebar) ──
+     Mirrors the old floating button: it appears only once the tab bar has
+     scrolled out of view, and hides while the tabs are on screen. The round
+     button scrolls back up to the tabs. */
+  var selBox = document.querySelector('.uc-selected');
+  var tabsWrap = document.getElementById('ucTabsWrap');
+  function navPx() {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue('--nav-height').trim();
+    var rootFs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    return raw ? parseFloat(raw) * rootFs : 0;
+  }
+  function syncSelected() {
+    var gone = tabsWrap.getBoundingClientRect().bottom < navPx();
+    selBox.classList.toggle('is-visible', gone);
+  }
+  window.addEventListener('scroll', syncSelected, { passive: true });
+  window.addEventListener('resize', syncSelected, { passive: true });
+  syncSelected();
+
+  /* The whole SELECTED box is the click target, not just the arrow button.
+     scrollIntoView + the wrap's scroll-margin-top ride the page's CSS
+     scroll-behavior: smooth (programmatic scrollTo(smooth) proved flaky
+     alongside it). */
+  selBox.addEventListener('click', function () {
+    tabsWrap.scrollIntoView({ block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>

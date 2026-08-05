@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Use cases — голос текста: «the user» vs «you»</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", -apple-system, sans-serif;
+    background: #FFFFFF;
+    color: #1A1A1A;
+    line-height: 1.55;
+    padding: 3rem 1.5rem 5rem;
+  }
+  .wrap { max-width: 68rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; letter-spacing: -0.01em; margin-bottom: 0.75rem; }
+  .intro { color: #555; font-size: 0.95rem; max-width: 46rem; margin-bottom: 1rem; }
+  .legend { display: flex; gap: 1.25rem; font-size: 0.85rem; color: #555; margin-bottom: 2.5rem; }
+  .legend span { padding: 0.1rem 0.4rem; border-radius: 0.25rem; }
+
+  .old { background: #FDE3E3; color: #A81F1F; padding: 0.05rem 0.25rem; border-radius: 0.25rem; }
+  .new { background: #DFF2E4; color: #11702E; padding: 0.05rem 0.25rem; border-radius: 0.25rem; }
+
+  .case { margin-bottom: 2.75rem; }
+  .case__wf {
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #999; margin-bottom: 0.2rem;
+  }
+  .case h3 { font-size: 1.15rem; margin-bottom: 1rem; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .col {
+    border: 1px solid #E5E5E5; border-radius: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    font-size: 0.92rem;
+  }
+  .col__label {
+    font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #999; margin-bottom: 0.6rem;
+  }
+  .col--now  { background: #FAFAFA; }
+  .col--prop { background: #FFFFFF; }
+  .col p + p { margin-top: 0.7rem; }
+  .ellip { color: #AAA; font-size: 0.85rem; font-style: italic; }
+
+  .foot {
+    margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid #E5E5E5;
+    font-size: 0.9rem; color: #555; max-width: 46rem;
+  }
+  .foot h2 { font-size: 1rem; color: #1A1A1A; margin-bottom: 0.6rem; }
+  .foot li { margin: 0.35rem 0 0.35rem 1.2rem; }
+
+  @media (max-width: 767px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Use cases — голос текста в описаниях</h1>
+<p class="intro">
+  В описаниях кейсов сейчас смешаны два голоса: третье лицо («the&nbsp;user», «they») и обращение
+  к читателю («you»). Ниже — все места с третьим лицом и как они выглядят, если привести всё
+  ко второму лицу. Показаны только абзацы с изменениями; остальной текст не трогали.
+</p>
+<div class="legend">
+  <span class="old">как сейчас</span>
+  <span class="new">предложение</span>
+</div>
+
+<!-- ═══════════ 1 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Audit &amp; Review</div>
+  <h3>Review existing rules for errors and gaps</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user asks</span> for a review of all rules in <span class="old">their</span> workspace. The AI reads each rule's conditions, actions, schedule, and filters, then flags issues: overlapping conditions, contradictory actions (one pauses what another starts), thresholds with no volume guard, long-disabled rules taking up space.</p>
+      <p>Neither tool fixes rules for you. Both describe issues; <span class="old">the user decides</span> what to change.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You ask</span> for a review of all rules in <span class="new">your</span> workspace. The AI reads each rule's conditions, actions, schedule, and filters, then flags issues: overlapping conditions, contradictory actions (one pauses what another starts), thresholds with no volume guard, long-disabled rules taking up space.</p>
+      <p>Neither tool fixes rules for you. Both describe issues; <span class="new">you decide</span> what to change.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Audit &amp; Review</div>
+  <h3>Analyze rule execution logs</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user wants</span> to know what <span class="old">their</span> rules actually did: which ones fired, how often, which entities were affected, and whether there were errors. This is the "was my automation working while I wasn't looking?" question.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You want</span> to know what <span class="new">your</span> rules actually did: which ones fired, how often, which entities were affected, and whether there were errors. This is the "was my automation working while I wasn't looking?" question.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Audit &amp; Review</div>
+  <h3>Audit rules structure + identify zombie rules and over-firing</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">They can ask</span> Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering (stale thresholds or conditions that no longer match), firing too broadly (acting on most entities every run), or fighting each other (one rule pauses what another restarts).</p>
+      <p>If <span class="old">the account</span> is organized into folders, <span class="old">they scope</span> the audit to one section at a time rather than reviewing everything at once.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">Ask</span> Claude to inventory all rules, check recent execution history, and classify them: firing usefully, enabled but never triggering (stale thresholds or conditions that no longer match), firing too broadly (acting on most entities every run), or fighting each other (one rule pauses what another restarts).</p>
+      <p>If <span class="new">your account</span> is organized into folders, <span class="new">scope</span> the audit to one section at a time rather than reviewing everything at once.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 4 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Audit &amp; Review</div>
+  <h3>Get the full picture of Meta account without opening Ads Manager</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><em>1. Overnight briefing:</em> <span class="old">They need</span>: ad set and ad level performance and trends, change history (what was modified and when), anomaly alerts (spikes, drops, unusual patterns), budget and delivery status across active and paused campaigns.</p>
+      <p><em>2. Rule validation:</em> <span class="old">They need</span>: entity-level performance data (the ad set that got paused — was it actually underperforming?), auction insights (was it a bid problem or a creative quality problem?), change history <span class="ellip">&hellip;</span></p>
+      <p><em>3. Calibration:</em> <span class="old">They need</span>: industry benchmarks filtered by spend tier/goal, Opportunity Score, Ads Library for competitive creative.</p>
+      <p>The job: zoom out from <span class="old">their</span> own account and check whether <span class="old">their</span> strategy makes sense in context. Thresholds, budget allocation, creative approach — are <span class="old">they</span> in the right ballpark?</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><em>1. Overnight briefing:</em> <span class="new">You need</span>: ad set and ad level performance and trends, change history (what was modified and when), anomaly alerts (spikes, drops, unusual patterns), budget and delivery status across active and paused campaigns.</p>
+      <p><em>2. Rule validation:</em> <span class="new">You need</span>: entity-level performance data (the ad set that got paused — was it actually underperforming?), auction insights (was it a bid problem or a creative quality problem?), change history <span class="ellip">&hellip;</span></p>
+      <p><em>3. Calibration:</em> <span class="new">You need</span>: industry benchmarks filtered by spend tier/goal, Opportunity Score, Ads Library for competitive creative.</p>
+      <p>The job: zoom out from <span class="new">your</span> own account and check whether <span class="new">your</span> strategy makes sense in context. Thresholds, budget allocation, creative approach — are <span class="new">you</span> in the right ballpark?</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Build &amp; Set Up</div>
+  <h3>Get starter rule suggestions based on actual account data</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user asks</span> "what rules should I set up?" Birch AI looks at connected ad accounts, current performance, and existing rules (or lack of them), then suggests rules from the Strategy Library tailored to what it sees.</p>
+      <p>Also works proactively: when <span class="old">a user visits</span> the rules page, Birch AI can prompt <span class="old">them</span> with "check new rule ideas for your account" — no need to know to ask.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You ask</span> "what rules should I set up?" Birch AI looks at connected ad accounts, current performance, and existing rules (or lack of them), then suggests rules from the Strategy Library tailored to what it sees.</p>
+      <p>Also works proactively: when <span class="new">you visit</span> the rules page, Birch AI can prompt <span class="new">you</span> with "check new rule ideas for your account" — no need to know to ask.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 6 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Build &amp; Set Up</div>
+  <h3>Create a rule from natural language</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user describes</span> what <span class="old">they want</span>: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. <span class="old">The user reviews</span>, edits if needed, and activates.</p>
+      <p>TikTok, Snapchat, and Google get text descriptions of the rule logic; <span class="old">the user builds</span> it manually in the rule builder.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You describe</span> what <span class="new">you want</span>: "pause my ad sets if spend is over 100 for the last 3 days and cost per purchase is above 40." Birch AI creates a draft rule, saved to the "Birch AI Playbook" folder. <span class="new">You review</span>, edit if needed, and activate.</p>
+      <p>TikTok, Snapchat, and Google get text descriptions of the rule logic; <span class="new">you build</span> it manually in the rule builder.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 7 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Monitor &amp; Control</div>
+  <h3>Вводка воркфлоу Monitor &amp; Control</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p>This is the daily/weekly check-in workflow. <span class="old">The user wants</span> a quick performance read, wants to know if <span class="old">their</span> scaling rules are behaving, or wants to compare spend across platforms without building a report.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p>This is the daily/weekly check-in workflow. <span class="new">You want</span> a quick performance read, want to know if <span class="new">your</span> scaling rules are behaving, or want to compare spend across platforms without building a report.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 8 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Monitor &amp; Control</div>
+  <h3>Setup health check</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user notices</span> yo-yoing budgets or unstable performance. <span class="old">They ask</span> Birch AI to review the rule set for offense/defense imbalance. The AI reads the full setup and identifies patterns: scaling based on single-day data, no budget caps, aggressive percentage increases without guardrails, missing recovery rules for paused winners.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You notice</span> yo-yoing budgets or unstable performance. <span class="new">You ask</span> Birch AI to review the rule set for offense/defense imbalance. The AI reads the full setup and identifies patterns: scaling based on single-day data, no budget caps, aggressive percentage increases without guardrails, missing recovery rules for paused winners.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 9 ═══════════ -->
+<div class="case">
+  <div class="case__wf">Monitor &amp; Control</div>
+  <h3>Find growth opportunities</h3>
+  <div class="cols">
+    <div class="col col--now">
+      <div class="col__label">Сейчас в доке</div>
+      <p><span class="old">The user isn't</span> just looking at what happened — <span class="old">they want</span> to know where <span class="old">they're</span> leaving money on the table. Birch AI can identify high-performing ad sets that are underfunded, poor performers that are consuming budget, and recommend scaling or pausing decisions.</p>
+    </div>
+    <div class="col col--prop">
+      <div class="col__label">На «you»</div>
+      <p><span class="new">You're not</span> just looking at what happened — <span class="new">you want</span> to know where <span class="new">you're</span> leaving money on the table. Birch AI can identify high-performing ad sets that are underfunded, poor performers that are consuming budget, and recommend scaling or pausing decisions.</p>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <h2>Что уже на «you» и правки не требует</h2>
+  <ul>
+    <li>Карточки продуктов в интро («reads <em>your</em> rules and <em>your</em> performance together&hellip;»)</li>
+    <li>Кейс «Find which metrics are available» («When <em>you</em> want to ideate rules in Claude&hellip;», «<em>You</em> can also get a list of available metrics&hellip;»)</li>
+  </ul>
+  <h2 style="margin-top:1.25rem">Что осознанно не трогали</h2>
+  <ul>
+    <li>Промпты — говорят голосом пользователя («audit all <em>my</em> Meta rules») — так и должно быть</li>
+    <li>Описания сегментов в третьем лице о компаниях, не о читателе («Enterprise teams that run <em>their</em> own AI bots&hellip;») — корректно</li>
+    <li>Описания персон («An operator or manager on a mature account&hellip;») — вопрос вкуса, оставили</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

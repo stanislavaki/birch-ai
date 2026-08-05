@@ -1,0 +1,7 @@
+<svg width="14.4" height="14.4" viewBox="0 0 14.4 14.4" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Outline copy icon (per Figma 976:4597). Used as a CSS mask, so stroke
+     colour here is irrelevant — the section-dark tone is painted via the
+     mask's background. -->
+<path d="M8.4 0.8H2C1.33726 0.8 0.8 1.33726 0.8 2V8.8C0.8 9.46274 1.33726 10 2 10H8.4C9.06274 10 9.6 9.46274 9.6 8.8V2C9.6 1.33726 9.06274 0.8 8.4 0.8Z" stroke="#000" stroke-width="1.6"/>
+<path d="M9.6 4H12.4C13.0627 4 13.6 4.53726 13.6 5.2V12.4C13.6 13.0627 13.0627 13.6 12.4 13.6H5.2C4.53726 13.6 4 13.0627 4 12.4V10" stroke="#000" stroke-width="1.6"/>
+</svg>
