@@ -1,2 +1,6 @@
 # macOS: Finder создаёт эти файлы в каждой папке, которую открывали
 .DS_Store
+
+# Review artifact build output — regenerate with `python3 review/build_review.py`
+use-cases-review.html
+use-cases-review-test.html
