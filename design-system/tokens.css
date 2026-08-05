@@ -38,6 +38,10 @@
   --color-bg:      #0D0D12;   /* Background/Black */
   --color-bg-grey: #2A2A2A;   /* Background/Grey  */
 
+  /* ---- Colors: Surface (light greys for cards/chips on light pages) ---- */
+  --color-surface:       #F1F0F7;  /* Background/Grey (surface) — card / tab / product-card fill */
+  --color-surface-muted: #DBDAE2;  /* Background/Grey-muted (surface-muted) — chips on a surface */
+
   /* ---- Colors: Border ---- */
   /* Translucent white so a stroke stays "a touch lighter" on any dark fill */
   --color-border-subtle: rgba(255, 255, 255, 0.14);

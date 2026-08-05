@@ -111,7 +111,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: #F1F0F7; /* surface grey */
+    background: var(--color-surface); /* surface grey */
     color: var(--color-text-inverted);
     border-radius: var(--radius-lg);
     padding: var(--space-md);
@@ -140,7 +140,7 @@
   .uc-tabs {
     display: flex;
     gap: var(--space-xxs);
-    background: #F1F0F7; /* surface grey (Figma 989:1278) */
+    background: var(--color-surface); /* surface grey (Figma 989:1278) */
     /* var3 sizing: track radius = pill radius + track padding (concentric) */
     border-radius: calc(var(--radius-md) + var(--space-xs));
     padding: var(--space-xs);
@@ -364,7 +364,7 @@
      USE CASE CARD
   ───────────────────────────────────────── */
   .uc-card {
-    background: #F1F0F7; /* surface grey (Figma --background/grey-(surface)) */
+    background: var(--color-surface); /* surface grey (Figma --background/grey-(surface)) */
     border-radius: var(--radius-lg);
     padding: var(--space-md);
     display: grid;
@@ -412,7 +412,7 @@
     font-weight: 600;
     line-height: 1;
     color: var(--color-text-inverted);
-    background: #DBDAE2; /* surface-muted grey (Figma) */
+    background: var(--color-surface-muted); /* surface-muted grey (Figma) */
     border-radius: var(--radius-xs);
     /* more top than bottom padding: caps-heavy text sits optically high, so the
        extra top space pushes it down to the visual centre */
@@ -508,7 +508,7 @@
   .uc-copy.is-done::after { display: none; }
   /* Placeholder reads as an empty input slot: faint grey chip on the white prompt */
   .uc-ph {
-    background: #F1F0F7;
+    background: var(--color-surface);
     color: var(--color-text-inverted);
     border: 1px solid rgba(13, 13, 13, 0.12);
     border-radius: 0.25em;
@@ -527,7 +527,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-sm);
-    background: #F1F0F7; /* surface grey */
+    background: var(--color-surface); /* surface grey */
     border-radius: var(--radius-lg);
     padding: 0 var(--space-sm) 0 var(--space);
     margin-bottom: 0;
