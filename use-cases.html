@@ -222,12 +222,17 @@
   /* ─────────────────────────────────────────
      SIDEBAR: accordion TOC (built by JS)
   ───────────────────────────────────────── */
+  /* The sidebar splits in two: the SELECTED box sits outside the scroll area,
+     only the Workflows part below it scrolls — so the scrollbar (and the
+     scrolling) starts under the box, not alongside it. */
   .uc-toc {
     position: sticky;
     top: calc(var(--nav-height) + var(--space-sm));
     max-height: calc(100vh - var(--nav-height) - var(--space-md));
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
   }
+  .uc-toc__scroll { overflow-y: auto; min-height: 0; }
   .uc-toc__title {
     display: flex;
     align-items: center;
@@ -549,16 +554,10 @@
      SELECTED BOX — top of the sidebar (Figma 1017:11133)
      Shows the active product; the round button scrolls back to the tab bar.
   ───────────────────────────────────────── */
-  /* Shown only once the tab bar has scrolled out of view. Collapses smoothly
-     (max-height + opacity) so the Workflows list below slides instead of
-     jumping when the box appears/disappears. Sticky inside the scrollable
-     sidebar: the workflows list scrolls, the box stays put — that's its job. */
+  /* Sits in the fixed part of the sidebar, above the scroll area. Shown only
+     once the tab bar has scrolled out of view; collapses smoothly (max-height
+     + opacity) so the title/list below slide instead of jumping. */
   .uc-selected {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    /* white ring masks list items sliding under the rounded corners */
-    box-shadow: 0 0 0 0.375rem #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -716,6 +715,7 @@
   <div class="uc-layout">
 
     <aside class="uc-toc" id="ucToc">
+      <!-- Fixed part: SELECTED box + section title. Only the list below scrolls. -->
       <div class="uc-selected">
         <div class="uc-selected__text">
           <span class="uc-selected__label">Selected</span>
@@ -726,7 +726,9 @@
         </button>
       </div>
       <h2 class="uc-toc__title t-para-xl">Workflows</h2>
-      <nav id="ucNav"><!-- built by JS from sections below --></nav>
+      <div class="uc-toc__scroll">
+        <nav id="ucNav"><!-- built by JS from sections below --></nav>
+      </div>
     </aside>
 
     <div class="uc-content">
