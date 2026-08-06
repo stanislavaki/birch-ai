@@ -121,6 +121,10 @@
     justify-content: center;
   }
   .uc-pcard__title { margin: 0 0 0.625rem; }
+  /* Reset the t-body default margin so the description sits flush with the card
+     padding — otherwise its margin-bottom stacks on the padding and the bottom
+     gap reads larger than the other three sides. */
+  .uc-pcard__desc { margin: 0; }
   /* Brand lockups — full SVG (dark pill + wordmark + tag), uniform height */
   .uc-pcard__lockup { display: block; height: 5rem; width: auto; max-width: 100%; }
 
@@ -357,6 +361,9 @@
   }
   .uc-wf__note { color: var(--color-text-grey); padding: 0 var(--space-md); }
 
+  /* Mobile-only "Workflows" section title (desktop uses the sidebar title) */
+  .uc-mob-title { display: none; }
+
   /* ─────────────────────────────────────────
      USE CASE CARD
   ───────────────────────────────────────── */
@@ -579,13 +586,222 @@
   .uc-selected__btn:hover { background: var(--color-text-inverted); transform: translateY(-0.1em); }
   @media (prefers-reduced-motion: reduce) { .uc-selected__btn { transition: none; } }
 
-  /* Mobile is intentionally not designed yet — minimal safety fallback only */
+  /* ─────────────────────────────────────────
+     MOBILE (≤767px): visible product filter + floating Workflows menu
+     The product filter (tabs) stays a visible panel at the top — it's the page's
+     primary control. The secondary Workflows TOC collapses into a floating pill
+     (FAB) that opens a bottom sheet. Only the #ucNav node is reparented into the
+     sheet by JS on mobile and moved back on desktop — clicks are delegated on
+     document, so no listeners change. The FAB reveals only once the first
+     use-case card is on screen (JS toggles .is-shown). Hidden on desktop.
+  ───────────────────────────────────────── */
+  .uc-fab, .uc-sheet { display: none; }
+
+  /* FAB — full-width grey "Workflows" bar (Figma "Mobile menu" 1042:7240):
+     surface fill, radius-16, DemiBold label left, a 24px "+" (two 2px full-span
+     strokes) in a 40px tap area on the right. Hidden until the first use-case
+     card scrolls into view (JS toggles .is-shown), then fades/rises in. */
+  .uc-fab {
+    position: fixed;
+    left: var(--space);
+    right: var(--space);
+    bottom: 1.25rem;
+    z-index: 3100;   /* stays above the sheet backdrop while the panel is open */
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-sm) var(--space-sm) var(--space);
+    background: var(--color-bg);        /* black bar */
+    color: var(--color-text);           /* white — label + icon (currentColor) */
+    border: none;
+    border-radius: var(--radius-lg);    /* 16px (Figma radius-16) */
+    box-shadow: 0 0.5rem 1.75rem rgba(13, 13, 18, 0.28);
+    font-family: var(--font);
+    font-size: var(--text-para-lg-size);
+    font-weight: 600;
+    line-height: 1.1;
+    cursor: pointer;
+    /* Hidden by default — revealed only when the first card is on screen */
+    opacity: 0;
+    transform: translateY(1.5rem);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .uc-fab.is-shown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: reduce) { .uc-fab { transition: none; } }
+  .uc-fab__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* 40px round tap area holding the exact 24px Figma "+" icon */
+  .uc-fab__icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .uc-fab__icon svg {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+  /* Open → the "+" rotates 45° into the "×" (same exact cross) */
+  .uc-fab.is-open .uc-fab__icon svg { transform: rotate(45deg); }
+  @media (prefers-reduced-motion: reduce) { .uc-fab__icon svg { transition: none; } }
+
+  /* Sheet — backdrop + bottom panel; reuses cmtx drawer mechanics on translateY */
+  .uc-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+  }
+  .uc-sheet:not(.is-open) { pointer-events: none; }
+  .uc-sheet__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 13, 18, 0.45);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+  .uc-sheet.is-open .uc-sheet__backdrop { opacity: 1; }
+  /* Floating card ABOVE the persistent Workflows bar (bir.ch course menu style):
+     grey surface, 5px yellow (primary) border, radius-16 all corners. */
+  .uc-sheet__panel {
+    position: absolute;
+    left: var(--space);
+    right: var(--space);
+    bottom: 6.5rem;                 /* clears the bottom bar */
+    display: flex;
+    flex-direction: column;
+    max-height: 68dvh;
+    background: var(--color-surface);
+    border: 0.3125rem solid var(--color-primary);  /* 5px #FFE243 (ref) */
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0.75rem 2.5rem rgba(13, 13, 18, 0.28);
+    opacity: 0;
+    transform: translateY(1.5rem);
+    transition: transform 0.24s ease, opacity 0.2s ease;
+  }
+  .uc-sheet.is-open .uc-sheet__panel { transform: none; opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .uc-sheet__backdrop, .uc-sheet__panel { transition: none; }
+  }
+  .uc-sheet__grab {
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 0.25rem;
+    margin: 0.625rem auto 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-border-hairline);
+  }
+  .uc-sheet__head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space) var(--space-xs);
+  }
+  .uc-sheet__title { margin: 0; color: var(--color-text-inverted); }
+  /* Close — the exact Figma cross: the same 24px "+" rotated 45°, 2px strokes,
+     in a transparent 40px tap area (matches the trigger icon container). */
+  .uc-sheet__close {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--color-text-inverted);
+    cursor: pointer;
+  }
+  .uc-sheet__close svg {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    transform: rotate(45deg);
+  }
+  .uc-sheet__body {
+    overflow-y: auto;
+    min-height: 0;
+    padding: 0 var(--space) var(--space);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space);
+  }
+  .uc-sheet__label {
+    display: block;
+    margin: 0 0 var(--space-xs);
+    font-size: var(--text-eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-grey);
+  }
+
   @media (max-width: 767px) {
     .uc-pcards { grid-template-columns: 1fr; }
-    .uc-pcard { min-height: 0; gap: var(--space); }
-    .uc-layout { grid-template-columns: 1fr; }
+    /* Card padding steps down 32px → 24px on mobile (project convention) */
+    .uc-pcard { min-height: 0; gap: var(--space); padding: var(--space); }
+    .uc-card { padding: var(--space); }
+    .uc-layout {
+      grid-template-columns: 1fr;
+      padding-bottom: 6rem;   /* clearance so the last card clears the floating FAB */
+    }
     .uc-toc { display: none; }
-    .uc-tabs { flex-wrap: wrap; }
+
+    /* Product filter stays a VISIBLE panel at the top, laid out as a 2×2 grid
+       (the page's primary control — not hidden behind the FAB) */
+    .uc-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xxs);
+    }
+    .uc-tab { flex: none; min-height: 3rem; }
+
+    /* Banner height comes from content on mobile — drop the desktop floor;
+       give the divider title generous vertical air (space-xl = 80px) */
+    .uc-banner { min-height: 0; }
+    /* slightly less top than bottom — optical centring for the display text */
+    .uc-banner__title { padding: calc(var(--space-xl) - var(--space-sm)) 0 var(--space-xl); }
+
+    /* Mobile-only section title above the filter (H2 size), centered. Section-
+       break gap above (space-lg = 48px), normal gap down to the tabs. */
+    .uc-mob-title {
+      display: block;
+      margin: var(--space-lg) 0 var(--space);
+      text-align: center;
+    }
+
+    /* Reveal the floating Workflows menu (visibility still gated by .is-shown) */
+    .uc-fab { display: flex; }
+    .uc-sheet { display: block; }
+
+    /* Only the panel WRAPPER (grey card + yellow border) is borrowed from the
+       bir.ch course menu. The list keeps the DESKTOP text styles — same section
+       headers, cases, dots and active state as the sidebar. But there's no
+       accordion in the sheet: every section is shown open (no redundant expand
+       "tab"), so the section header is just a label. */
+    #ucSheetWorkflows nav { display: grid; gap: 0.125rem; }
+    #ucSheetWorkflows .uc-toc__sub { grid-template-rows: 1fr; }  /* always open */
+    #ucSheetWorkflows .uc-toc__group.is-open { background: none; }
+    #ucSheetWorkflows .uc-toc__wf { pointer-events: none; }      /* label, not a toggle */
+    /* Bar is the header/toggle — hide the panel's own header + grab handle
+       (id specificity to beat the base .uc-sheet__head display:flex) */
+    #ucSheet .uc-sheet__head,
+    #ucSheet .uc-sheet__grab { display: none; }
+    #ucSheet .uc-sheet__body { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; }
   }
 </style>
 </head>
@@ -658,6 +874,9 @@
 
 <!-- ═══════════════ FILTER TABS + LAYOUT ═══════════════ -->
 <div class="container">
+
+  <!-- Mobile-only section title above the filter (desktop uses the sidebar title) -->
+  <h2 class="uc-mob-title t-h2">Workflows</h2>
 
   <div class="uc-tabs-wrap" id="ucTabsWrap">
     <div class="uc-tabs" id="ucTabs">
@@ -1096,6 +1315,37 @@
   </div>
 </div>
 
+<!-- ═══════════════ MOBILE FLOATING MENU (≤767px) ═══════════════ -->
+<!-- FAB + sheet shell. #ucTabs and #ucNav are moved into the slots by JS on
+     mobile and moved back on desktop (see the mobile-menu block in the script). -->
+<button class="uc-fab" id="ucFab" type="button" aria-expanded="false" aria-controls="ucSheet">
+  <span class="uc-fab__label">Workflows</span>
+  <span class="uc-fab__icon" aria-hidden="true">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0V24" stroke="currentColor" stroke-width="2"/>
+      <path d="M0 12H24" stroke="currentColor" stroke-width="2"/>
+    </svg>
+  </span>
+</button>
+<div class="uc-sheet" id="ucSheet" aria-hidden="true">
+  <div class="uc-sheet__backdrop" data-sheet-close></div>
+  <div class="uc-sheet__panel" role="dialog" aria-modal="true" aria-label="Workflows">
+    <div class="uc-sheet__grab" aria-hidden="true"></div>
+    <div class="uc-sheet__head">
+      <h2 class="uc-sheet__title t-para-xl">Workflows</h2>
+      <button class="uc-sheet__close" type="button" data-sheet-close aria-label="Close menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0V24" stroke="currentColor" stroke-width="2"/>
+          <path d="M0 12H24" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+    <div class="uc-sheet__body">
+      <div class="uc-sheet__slot" id="ucSheetWorkflows"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   'use strict';
@@ -1200,7 +1450,8 @@
     document.querySelectorAll('.uc-tab').forEach(function (t) {
       t.classList.toggle('is-on', t.dataset.p === pid);
     });
-    /* The sidebar SELECTED box mirrors the active tab (plain text) */
+    /* The sidebar SELECTED box mirrors the active tab (the mobile FAB stays a
+       static "Filter" label). */
     var active = document.querySelector('.uc-tab[data-p="' + pid + '"]');
     var sel = document.getElementById('ucSelValue');
     if (active && sel) sel.textContent = active.textContent.trim();
@@ -1261,6 +1512,88 @@
      alongside it). */
   selBox.addEventListener('click', function () {
     tabsWrap.scrollIntoView({ block: 'start' });
+  });
+
+  /* ── Mobile floating Workflows menu (≤767px) ──
+     The product filter stays visible at the top; only #ucNav (the workflows TOC)
+     is reparented into the bottom sheet on mobile and moved back on desktop.
+     Clicks are delegated on `document` and the scroll-spy keys off element ids,
+     so the accordion keeps working wherever it lives. The FAB itself appears only
+     once the first (visible) use-case card has scrolled into view. */
+  var MOB = window.matchMedia('(max-width: 767px)');
+  var fab = document.getElementById('ucFab');
+  var sheet = document.getElementById('ucSheet');
+  var sheetWorkflows = document.getElementById('ucSheetWorkflows');
+  var navHome = document.getElementById('ucNav');
+  var navAnchor = navHome.parentNode;                  // .uc-toc__scroll
+  var _menuMode = false;
+
+  function openSheet() {
+    if (sheet.classList.contains('is-open')) return;
+    sheet.classList.add('is-open');
+    fab.classList.add('is-open');               // "+" → "×"
+    sheet.setAttribute('aria-hidden', 'false');
+    fab.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';   // lock the page behind the sheet
+  }
+  function closeSheet() {
+    if (!sheet.classList.contains('is-open')) return;
+    sheet.classList.remove('is-open');
+    fab.classList.remove('is-open');            // "×" → "+"
+    sheet.setAttribute('aria-hidden', 'true');
+    fab.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  /* Reveal the FAB once the first visible card's top has entered the viewport;
+     hide it again above that point (hero / product cards / filter). Re-queries
+     the first *visible* card so it tracks the active product filter. */
+  function syncFab() {
+    var card = document.querySelector('.uc-card:not(.is-hidden)') ||
+               document.querySelector('.uc-content');
+    if (!card) return;
+    var shown = card.getBoundingClientRect().top < window.innerHeight * 0.9;
+    fab.classList.toggle('is-shown', shown);
+    if (!shown) closeSheet();   // never leave the sheet open once the FAB hides
+  }
+
+  function initMenu() {
+    if (_menuMode) return;
+    _menuMode = true;
+    sheetWorkflows.appendChild(navHome);   // workflows → sheet
+    window.addEventListener('scroll', syncFab, { passive: true });
+    window.addEventListener('resize', syncFab, { passive: true });
+    syncFab();
+  }
+  function destroyMenu() {
+    if (!_menuMode) return;
+    _menuMode = false;
+    closeSheet();
+    window.removeEventListener('scroll', syncFab);
+    window.removeEventListener('resize', syncFab);
+    fab.classList.remove('is-shown');
+    navAnchor.appendChild(navHome);        // back to .uc-toc__scroll
+  }
+
+  fab.addEventListener('click', function () {
+    if (sheet.classList.contains('is-open')) closeSheet(); else openSheet();
+  });
+  sheet.addEventListener('click', function (e) {
+    if (e.target.closest('[data-sheet-close]')) { closeSheet(); return; }
+    /* A workflow group header only toggles its accordion inside the sheet — swallow
+       the anchor jump so the page doesn't scroll behind the open sheet. The
+       document-delegated handler still runs openGroup (no stopPropagation here). */
+    if (e.target.closest('[data-toc-for]')) { e.preventDefault(); return; }
+    /* Picking a specific case rides the native anchor scroll and closes the sheet. */
+    if (e.target.closest('[data-sub-for]')) { closeSheet(); return; }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && sheet.classList.contains('is-open')) closeSheet();
+  });
+
+  if (MOB.matches) initMenu();
+  MOB.addEventListener('change', function (e) {
+    if (e.matches) initMenu(); else destroyMenu();
   });
 })();
 </script>
