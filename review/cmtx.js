@@ -1,8 +1,8 @@
 /* ============================================================
    REVIEW COMMENTS LAYER — artifact build only.
-   Attach comments to any block, persist in localStorage, export via
-   window.claude.downloads (falls back to a Blob download when opened
-   outside the artifact runtime, e.g. local preview).
+   Attach comments to any block, persist in localStorage, export via a
+   copy-ready modal (clipboard + manual select). No window.claude.* /
+   capability is used, so the published artifact stays publicly shareable.
    ============================================================ */
 (function () {
   'use strict';
@@ -162,12 +162,12 @@
   bar.innerHTML =
     '<span class="cmtx-bar__count" id="cmtxCount"></span>' +
     '<span class="cmtx-bar__hint">наведи на блок и нажми &#128172;</span>' +
-    '<button class="cmtx-bar__dl" id="cmtxDl" type="button">Скачать</button>';
+    '<button class="cmtx-bar__dl" id="cmtxDl" type="button">Выгрузить</button>';
   document.body.appendChild(bar);
   var countEl = bar.querySelector('#cmtxCount');
   var dlBtn = bar.querySelector('#cmtxDl');
 
-  dlBtn.addEventListener('click', download);
+  dlBtn.addEventListener('click', openExport);
 
   function buildExport() {
     var lines = ['Bïrch — Use cases · комментарии ревью', 'Экспортировано: ' + new Date().toLocaleString('ru-RU'), ''];
@@ -184,31 +184,50 @@
     return lines.join('\n');
   }
 
-  function download() {
+  /* Export via a copy-ready modal — NO downloads capability, so the artifact
+     stays publicly shareable (a declared capability makes it "use connectors"
+     and blocks sharing). Clipboard + manual select both work in the sandboxed
+     iframe; a file download would be blocked there without the capability. */
+  var exp = el('div', 'cmtx-export');
+  exp.innerHTML =
+    '<div class="cmtx-export__card">' +
+      '<div class="cmtx-export__head">Комментарии — скопируйте и пришлите' +
+        '<button class="cmtx-export__close" type="button" aria-label="Закрыть">&times;</button></div>' +
+      '<textarea class="cmtx-export__text" readonly></textarea>' +
+      '<div class="cmtx-export__actions">' +
+        '<button class="cmtx-export__copy" type="button">Скопировать</button>' +
+        '<span class="cmtx-export__done"></span>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(exp);
+  var expText = exp.querySelector('.cmtx-export__text');
+  var expDone = exp.querySelector('.cmtx-export__done');
+  function closeExp() { exp.classList.remove('open'); }
+  exp.querySelector('.cmtx-export__close').addEventListener('click', closeExp);
+  exp.addEventListener('click', function (e) { if (e.target === exp) closeExp(); });
+  exp.querySelector('.cmtx-export__copy').addEventListener('click', function () {
+    expText.focus(); expText.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(expText.value).then(
+        function () { flash('Скопировано ✓'); },
+        function () { flash(ok ? 'Скопировано ✓' : 'Выделите текст и Cmd+C'); });
+    } else { flash(ok ? 'Скопировано ✓' : 'Выделите текст и Cmd+C'); }
+  });
+  function flash(m) { expDone.textContent = m; setTimeout(function () { expDone.textContent = ''; }, 2500); }
+  function openExport() {
     if (total() === 0) return;
-    var content = buildExport();
-    var fname = 'use-cases-комментарии.md';
-    var dl = window.claude && window.claude.downloads;
-    if (dl && typeof dl.save === 'function') {
-      dl.save({ filename: fname, data: content }).catch(function (err) {
-        if (err && err.code === 'declined') return;
-        blobFallback(content, fname);
-      });
-    } else {
-      blobFallback(content, fname);
-    }
-  }
-  function blobFallback(content, fname) {
-    try {
-      var blob = new Blob([content], { type: 'text/markdown' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob); a.download = fname;
-      document.body.appendChild(a); a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    } catch (e) {}
+    expText.value = buildExport();
+    exp.classList.add('open');
+    setTimeout(function () { expText.focus(); expText.select(); }, 60);
   }
 
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('open')) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (exp.classList.contains('open')) closeExp();
+    else if (drawer.classList.contains('open')) close();
+  });
 
   refreshCounts();
 })();

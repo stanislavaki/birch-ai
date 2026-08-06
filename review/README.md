@@ -31,10 +31,12 @@ Outputs (both **gitignored** — regenerated on demand):
 ## Publish / update the artifact
 
 Publishing is done from Claude (the `Artifact` tool), not from the shell.
-Republish `use-cases-review.html` to keep the **same URL**; declare the
-`downloads` capability so the export button works:
+Republish `use-cases-review.html` to keep the **same URL**. Declare **no
+capabilities** (`capabilities: {}`) so the artifact stays publicly shareable —
+any declared capability (`downloads`/`mcp`) makes it "use connectors" and blocks
+the Share menu.
 
-- capability: `{ "downloads": true }`
+- capabilities: `{}` (empty — clears any prior declaration)
 - current URL: `https://claude.ai/code/artifact/6e3a9053-45a0-4247-a523-7df0671ccf49`
 
 ## How the comment layer works
@@ -46,5 +48,6 @@ Republish `use-cases-review.html` to keep the **same URL**; declare the
   shared backend** (artifact runtime capabilities are `downloads` + `mcp`
   only). The reviewer exports a `.md` and sends it back.
 - The name field defaults to **Аноним** and is remembered as soon as it's typed.
-- Export uses `window.claude.downloads.save` in the artifact, with a Blob
-  download fallback for local preview.
+- Export opens a copy-ready modal (formatted `.md`, grouped by block) — the
+  reviewer copies it (clipboard + manual select) and sends it back. No
+  `window.claude.*` / capability is used, so the artifact stays shareable.

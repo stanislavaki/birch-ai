@@ -76,3 +76,37 @@
 
 @media (max-width: 600px) { .cmtx-bar__hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { .cmtx-drawer { transition: none; } }
+
+/* ── export modal (copy-ready text) ── */
+.cmtx-export {
+  position: fixed; inset: 0; z-index: 3500;
+  display: none; align-items: center; justify-content: center;
+  padding: 1.5rem; background: rgba(13,13,18,0.45);
+  font-family: var(--font, system-ui, sans-serif); color: #0D0D12;
+}
+.cmtx-export.open { display: flex; }
+.cmtx-export__card {
+  width: min(40rem, 100%); max-height: 82vh;
+  display: flex; flex-direction: column; gap: .8rem;
+  background: #fff; border-radius: 14px; padding: 1.25rem;
+  box-shadow: 0 20px 60px rgba(13,13,18,0.35);
+}
+.cmtx-export__head { position: relative; font-size: 1rem; font-weight: 600; padding-right: 2rem; }
+.cmtx-export__close {
+  position: absolute; top: -.35rem; right: -.35rem; width: 2rem; height: 2rem;
+  border: none; background: none; font-size: 1.4rem; line-height: 1; cursor: pointer;
+  color: #909090; border-radius: 50%;
+}
+.cmtx-export__close:hover { background: #F1F0F7; color: #0D0D12; }
+.cmtx-export__text {
+  flex: 1; min-height: 16rem; resize: vertical;
+  border: 1px solid rgba(13,13,13,0.14); border-radius: 10px; padding: .8rem .9rem;
+  font: 400 .82rem/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  white-space: pre; overflow: auto;
+}
+.cmtx-export__actions { display: flex; align-items: center; gap: .8rem; }
+.cmtx-export__copy {
+  border: none; border-radius: 999px; background: #0D0D12; color: #fff;
+  padding: .6rem 1.2rem; font: 600 .9rem/1 var(--font, sans-serif); cursor: pointer;
+}
+.cmtx-export__done { font-size: .85rem; color: #037A00; font-weight: 600; }
