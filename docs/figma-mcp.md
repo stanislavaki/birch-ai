@@ -1,4 +1,4 @@
-# Figma MCP - правка и сборка в Figma
+# Figma MCP — правка и сборка в Figma
 
 Раздел про работу с Figma через `use_figma` (Plugin API). Перед любым вызовом обязательно грузить скилл `figma-use` (через `get_figma_skill` по `skill://figma/figma-use/SKILL.md`), для компонентов — дополнительно `figma-generate-library`.
 
