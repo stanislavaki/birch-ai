@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Иконки стратегий</title>
+<style>
+  :root {
+    --ink: #161616; --ink-soft: #55534e; --ink-faint: #8b8981;
+    --ground: #f3f2ee; --card: #fff; --line: #e0ded6;
+    --warn-bg: #fff6d6; --warn-ink: #7a5c00; --ok: #1d7a4c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5; padding: 2rem 1.5rem 5rem;
+  }
+  .inner { max-width: 66rem; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+  .lede { color: var(--ink-soft); margin: 0 0 2rem; font-size: .92rem; max-width: 60ch; }
+  .lede a { color: inherit; }
+  h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-faint); margin: 2.5rem 0 .8rem; }
+
+  .icons { display: flex; flex-direction: column; gap: .7rem; }
+  .icon-row {
+    display: flex; gap: 1.1rem; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line); border-radius: .8rem; padding: 1rem 1.1rem;
+  }
+  .thumb {
+    flex: 0 0 4.5rem; height: 4.5rem; border-radius: .6rem; background: #fff;
+    border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; padding: .6rem;
+  }
+  .thumb img { max-width: 100%; max-height: 100%; display: block; }
+  .meta { flex: 1 1 auto; min-width: 0; }
+  .fname { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; word-break: break-all; }
+  .badge {
+    display: inline-block; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em;
+    border-radius: 99px; padding: .1rem .5rem; margin-left: .5rem; vertical-align: .1rem;
+  }
+  .badge.svg { background: #dff3e6; color: var(--ok); }
+  .badge.png { background: var(--warn-bg); color: var(--warn-ink); }
+  .uses { margin: .5rem 0 0; padding: 0; list-style: none; font-size: .85rem; color: var(--ink-soft); }
+  .uses li { padding: .12rem 0; }
+  .uses b { color: var(--ink); font-weight: 600; }
+  .uses a { color: var(--ink-faint); }
+
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: .8rem; overflow: hidden; }
+  th, td { text-align: left; padding: .55rem .8rem; border-bottom: 1px solid var(--line); font-size: .85rem; vertical-align: middle; }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-faint); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  td img { width: 1.9rem; height: 1.9rem; object-fit: contain; display: block; }
+  td a { color: var(--ink-soft); }
+  .same { color: var(--ok); }
+  .diff { color: var(--warn-ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="inner">
+  <h1>Иконки стратегий</h1>
+  <p class="lede">Все карточки стратегий во всех кейсах. Иконка в CMS сверена с иконкой на исходной странице —
+    расхождений нет, так что «старые» и «новые» это разнобой самих оригиналов.
+    Скажи, какие заменить и на что. <a href="./">← к сравнению кейсов</a></p>
+
+  <h2>Уникальные иконки</h2>
+  <div class="icons" id="icons"></div>
+
+  <h2>Все карточки</h2>
+  <table>
+    <thead><tr><th></th><th>Кейс</th><th>Стратегия</th><th>Ссылка</th><th>Сверка</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<script>
+fetch('icons.json').then(function (r) { return r.json(); }).then(function (rows) {
+  var groups = {};
+  rows.forEach(function (row) {
+    var key = row.name_cms || row.name_static;
+    (groups[key] = groups[key] || { icon: row.icon_cms || row.icon_static, name: key, uses: [] }).uses.push(row);
+  });
+
+  var iconsBox = document.getElementById('icons');
+  Object.keys(groups).forEach(function (key) {
+    var group = groups[key];
+    var isSvg = /\.svg$/i.test(group.name);
+    var row = document.createElement('div');
+    row.className = 'icon-row';
+    row.innerHTML =
+      '<div class="thumb"><img src="' + group.icon + '" alt=""></div>' +
+      '<div class="meta">' +
+        '<span class="fname">' + group.name + '</span>' +
+        '<span class="badge ' + (isSvg ? 'svg' : 'png') + '">' + (isSvg ? 'svg' : 'png') + '</span>' +
+        '<ul class="uses">' + group.uses.map(function (use) {
+          return '<li><b>' + use.case + '</b> — ' + (use.title || '—') +
+                 ' <a href="' + use.link + '" target="_blank" rel="noopener">↗</a></li>';
+        }).join('') + '</ul>' +
+      '</div>';
+    iconsBox.appendChild(row);
+  });
+
+  var body = document.getElementById('rows');
+  rows.forEach(function (row) {
+    var same = row.name_cms && row.name_cms === row.name_static;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><img src="' + (row.icon_cms || row.icon_static) + '" alt=""></td>' +
+      '<td>' + row.case + '</td>' +
+      '<td>' + (row.title || '—') + '</td>' +
+      '<td><a href="' + row.link + '" target="_blank" rel="noopener">' +
+        String(row.link || '').replace('https://app.bir.ch/', '') + '</a></td>' +
+      '<td class="' + (same ? 'same' : 'diff') + '">' + (same ? 'как в оригинале' : 'отличается') + '</td>';
+    body.appendChild(tr);
+  });
+});
+</script>
+</body>
+</html>

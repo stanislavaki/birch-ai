@@ -1,0 +1,336 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<title>Стенд: галерея кейсов</title>
+<style>
+/* cs-rich (case-body) child element styles — not settable via the Designer style tool */
+.cs-rich blockquote {
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin: 2rem 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+}
+/* Figure width/alignment comes from Webflow's native rich-text alignment classes */
+/* (content images are saved with w-richtext-align-fullwidth) — only spacing is set here. */
+.cs-rich figure { margin: 2rem 0; }
+/* Load-bearing, not cosmetic: without a definite width the lazy-loaded img inside the */
+/* inline-block figure wrapper resolves to 0x0 and never loads (same rule the blog uses). */
+.cs-rich figure img { width: 100%; height: auto; display: block; }
+.cs-rich figcaption { margin-top: 0.5rem; font-size: 0.875rem; line-height: 1.4; opacity: 0.7; text-align: left; }
+
+/* Strategy card (inside case-body) — fixed 4.5rem icon box so a large PNG icon can't stretch */
+/* the card; icon pinned to the top; darker, thicker wrapper stroke; consistent 1rem */
+/* icon-to-text gap on both axes; bottom spacing between stacked cards. */
+.cs-rich .str_frame { margin-bottom: 1.5rem; align-items: flex-start; border: 2px solid var(--_color---secondary--neutral--muted-gray); gap: 1rem; }
+.cs-rich .str_frame .img_wrap { width: 4.5rem; height: 4.5rem; flex: 0 0 auto; overflow: hidden; }
+.cs-rich .str_frame .img_wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Card type: title one step below the body h3; description per design spec (secondary text, */
+/* muted); the global .cs-rich h3 margin-top: 2rem is zeroed so the title lines up with the icon. */
+.cs-rich .str_frame .str_h3 { margin-top: 0; font-size: 1.25rem; line-height: 1.3; }
+.cs-rich .str_frame .str_text { font-size: 0.9rem; line-height: 1.25; font-weight: 500; opacity: 0.8; }
+.cs-rich .str_frame .str_button,
+.cs-rich .str_frame .str_button div { font-size: 1rem; }
+/* cs-rich steps its paragraphs down to 1rem from 1440px up (the root font-size grows there); */
+/* the button mirrors that step so it keeps its relation to the body copy. */
+@media screen and (min-width: 1440px) {
+  .cs-rich .str_frame .str_button,
+  .cs-rich .str_frame .str_button div { font-size: 0.875rem; }
+}
+
+/* Quote avatar — collapse the wrapper when the avatar field is empty (size is on the real class). */
+.cs-avatar-wrapper:not(:has(img[src]:not([src=""]))) { display: none; }
+
+/* Company card: the Signal Gateways row only applies to a few cases — collapse it when the */
+/* bound field is empty (Webflow marks empty bindings with .w-dyn-bind-empty). */
+#cs-secondary-row:has(.w-dyn-bind-empty) { display: none; }
+
+/* Metric band — single row, cards share width equally for any count (mirrors the real classes). */
+.cs-all-nums { display: flex; flex-wrap: nowrap; }
+.cs-all-nums .cs-nums-card { flex: 1 1 0%; width: auto; max-width: none; }
+@media screen and (max-width: 479px) {
+  .cs-all-nums { flex-direction: column; }
+  .cs-all-nums .cs-nums-card { flex: 0 0 auto; width: auto; }
+}
+
+/* Company-card platform badge — white background on the native square box. */
+.cs-about-client-wrapper .platform { background-color: #fff; }
+
+/* Related-card hover styles moved to site-wide head code — they are shared with the */
+/* /case-studies listing, which renders the same .u-cs-card-cont cards. */
+
+/* Case-study gallery — images come from the `gallery` MultiImage field via a Collection List. */
+/* Panel is full content width and tinted to each slide's saturated accent color by JS (token gray fallback). */
+/* Arrows reuse a higher-saturation shade of that accent (--cs-accent-vivid); dots stay black. */
+/* Image frame: 5:4 landscape on desktop (height-capped via vh); 4:5 portrait on mobile. */
+.cs-gallery-panel { transition: background-color 0.4s ease; box-sizing: border-box; padding-left: 4rem; padding-right: 4rem; }
+.cs-gallery-viewport { position: relative; overflow: hidden; min-width: 0; aspect-ratio: 5 / 4; width: min(100%, 60vh); }
+.cs-gallery-arrow-prev, .cs-gallery-arrow-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 3rem; height: 3rem; border-radius: 50%;
+  background-color: var(--cs-accent-vivid, rgba(0, 0, 0, 0.4));
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2; cursor: pointer; transition: background-color 0.25s ease;
+}
+.cs-gallery-arrow-prev { left: 0.5rem; }
+.cs-gallery-arrow-next { right: 0.5rem; }
+.cs-gallery-arrow-prev img, .cs-gallery-arrow-next img { width: 1.25rem; height: 1.25rem; filter: invert(1); }
+.cs-gallery-arrow-prev img { transform: rotate(225deg); }
+.cs-gallery-arrow-next img { transform: rotate(45deg); }
+.cs-gallery-arrow-prev:hover, .cs-gallery-arrow-next:hover { background-color: #0b0b0b; }
+.cs-gallery-viewport .w-dyn-list,
+.cs-gallery-viewport .w-dyn-items,
+.cs-gallery-viewport .w-dyn-item { position: static; display: block; width: 100%; height: 100%; margin: 0; padding: 0; }
+.cs-gallery-viewport .w-dyn-empty { display: none; }
+/* Each slide hugs its own picture instead of stretching to the frame: absolute + inset: 0 +
+   margin: auto centres any aspect ratio, while max-width/max-height cap it to the frame.
+   This is what makes the corner radius follow the visible picture. With the previous
+   width/height: 100% + object-fit: contain the element box stayed 5:4 whatever the image was,
+   so a radius on it rounded invisible corners outside the letterboxed picture.
+   Because the box is now image-sized, the slide transition can no longer travel in % of the
+   element — the footer script moves slides by the viewport width in px instead. */
+.cs-gallery-viewport img {
+  position: absolute; inset: 0; margin: auto;
+  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  opacity: 0; will-change: transform, opacity;
+}
+/* Gallery pagination dots — one per slide, below the panel; black, active is fully opaque. */
+.cs-gallery-dots { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+.cs-gallery-dot {
+  width: 0.5rem; height: 0.5rem; padding: 0; border: none; border-radius: 50%;
+  background-color: #0b0b0b;
+  opacity: 0.3; cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.cs-gallery-dot.is-active { opacity: 1; transform: scale(1.15); }
+/* Content image corners. Scoped to figures, which is what makes it safe: the footer script
+   lifts each strategy icon out of its figure into .str_frame, so strategy cards are never
+   matched and keep their own square icon box.
+   The gallery rule is deliberately on the image, not the viewport — see the gallery block
+   above: slides are object-fit: contain inside a fixed 5:4 frame, so this only takes visible
+   effect if a slide ever matches the frame ratio. */
+.cs-rich figure img,
+.cs-gallery-viewport img { border-radius: var(--_sizes---0-5rem); }
+
+/* Mobile: tighter gallery side padding; 4:5 portrait frame; 30% smaller arrows; */
+/* strategy card stacks (icon top-left, text full width below). */
+@media (max-width: 767px) {
+  .cs-rich figure img,
+  .cs-gallery-viewport img { border-radius: var(--_sizes---0-25rem); }
+  .cs-gallery-panel { padding-left: 2rem; padding-right: 2rem; }
+  .cs-gallery-viewport { aspect-ratio: 4 / 5; }
+  .cs-gallery-arrow-prev, .cs-gallery-arrow-next { width: 2.1rem; height: 2.1rem; }
+  .cs-gallery-arrow-prev img, .cs-gallery-arrow-next img { width: 0.875rem; height: 0.875rem; }
+  .cs-rich .str_frame { flex-direction: column; align-items: stretch; }
+  .cs-rich .str_frame .img_wrap { align-self: flex-start; max-width: none; }
+  .cs-rich .str_frame .img_wrap img { max-width: none; }
+}
+</style>
+<style>
+  /* The stand loads only the template's own styles, so the design tokens those styles
+     reference have to be declared here — otherwise var(--_sizes---0-5rem) resolves to
+     nothing and the corner radius silently reads as 0, which looks like a bug in the rule. */
+  :root { --_sizes---0-5rem: .5rem; --_sizes---0-25rem: .25rem;
+          --_color---secondary--neutral--muted-gray: #d9d9d9; }
+</style>
+<style>
+  body { margin:0; padding:2rem; font:14px/1.4 system-ui; background:#f4f4f6; }
+  .cs-gallery { max-width: 48rem; margin: 0 auto; }
+  #log { max-width:48rem; margin:1.5rem auto 0; font-family:ui-monospace,monospace; font-size:12px; white-space:pre; background:#fff; padding:1rem; border-radius:.5rem; }
+</style>
+</head><body>
+<div class="cs-gallery">
+  <div class="cs-gallery-panel">
+    <div class="cs-gallery-viewport">
+      <div class="w-dyn-list"><div class="w-dyn-items">
+<div class="w-dyn-item w-dyn-repeater-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDgwIiBoZWlnaHQ9IjEzNTAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNjMDM5MmIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiPjQ6NTwvdGV4dD48L3N2Zz4=" alt=""></div>
+<div class="w-dyn-item w-dyn-repeater-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjEyMDAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyN2FlNjAiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIyMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiPjE6MTwvdGV4dD48L3N2Zz4=" alt=""></div>
+<div class="w-dyn-item w-dyn-repeater-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDgwIiBoZWlnaHQ9IjE5MjAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiMyOTgwYjkiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1zaXplPSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiPjk6MTY8L3RleHQ+PC9zdmc+" alt=""></div>
+      </div></div>
+    </div>
+    <div class="cs-gallery-arrow-prev"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzAwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiPjwvdGV4dD48L3N2Zz4=" alt=""></div>
+    <div class="cs-gallery-arrow-next"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzAwMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiPjwvdGV4dD48L3N2Zz4=" alt=""></div>
+  </div>
+</div>
+<div id="log">жду…</div>
+<script>
+// Related-card hover tilt moved to site-wide footer code — the same handler serves
+// the /case-studies listing, which renders the same .u-cs-card-cont cards.
+
+// Strategy cards inside case-body: expand each strategy link marker into a native .str_frame card.
+// Marker in the RichText = [figure(icon)] + [p > a(strategy url, text=title)] + [p(description)].
+// Source pages use either /share/ or /my-strategies/ links, so both are matched.
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.cs-rich');
+  if (!body) return;
+  var links = Array.prototype.filter.call(body.querySelectorAll('a[href]'), function (a) {
+    return /\/(share|my-strategies)\//.test(a.getAttribute('href') || '');
+  });
+  links.forEach(function (link) {
+    var titleBlock = link.closest('p,h1,h2,h3,h4,h5,h6') || link;
+    var iconFig = titleBlock.previousElementSibling;
+    var descP = titleBlock.nextElementSibling;
+    var iconImg = iconFig ? iconFig.querySelector('img') : null;
+    var iconSrc = iconImg ? iconImg.getAttribute('src') : '';
+    var desc = (descP && descP.tagName === 'P') ? descP.textContent.trim() : '';
+
+    var card = document.createElement('a');
+    card.className = 'str_frame case';
+    card.setAttribute('href', link.getAttribute('href'));
+    card.setAttribute('target', '_blank');
+
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'img_wrap';
+    if (iconSrc) {
+      var ic = document.createElement('img');
+      ic.className = 'str_icon case';
+      ic.setAttribute('src', iconSrc);
+      ic.setAttribute('alt', '');
+      imgWrap.appendChild(ic);
+    }
+
+    var col = document.createElement('div');
+    var header = document.createElement('div');
+    header.className = 'str_header case';
+    var h3 = document.createElement('h3');
+    h3.className = 'str_h3 case';
+    h3.textContent = link.textContent.trim();
+    var txt = document.createElement('div');
+    txt.className = 'str_text';
+    txt.textContent = desc;
+    header.appendChild(h3);
+    header.appendChild(txt);
+    var content = document.createElement('div');
+    content.className = 'str_content case';
+    var btn = document.createElement('div');
+    btn.className = 'str_button case';
+    var btnInner = document.createElement('div');
+    btnInner.textContent = 'Use this strategy';
+    btn.appendChild(btnInner);
+    content.appendChild(btn);
+    col.appendChild(header);
+    col.appendChild(content);
+
+    card.appendChild(imgWrap);
+    card.appendChild(col);
+
+    titleBlock.parentNode.insertBefore(card, titleBlock);
+    if (iconImg) { iconFig.remove(); }
+    if (descP && descP.tagName === 'P') { descP.remove(); }
+    titleBlock.remove();
+  });
+});
+
+// Case-study gallery: direction-aware horizontal-slide slider with pagination dots, a saturated-accent
+// backdrop sampled per slide via canvas, and arrows tinted with a higher-saturation, darker shade.
+document.addEventListener('DOMContentLoaded', function () {
+  var g = document.querySelector('.cs-gallery');
+  if (!g) return;
+  var viewport = g.querySelector('.cs-gallery-viewport');
+  var panel = g.querySelector('.cs-gallery-panel');
+  var imgs = viewport ? Array.prototype.slice.call(viewport.querySelectorAll('img')) : [];
+  if (!imgs.length) { g.style.display = 'none'; return; }
+  var idx = 0, busy = false, DUR = 560;
+  var prev = g.querySelector('.cs-gallery-arrow-prev');
+  var next = g.querySelector('.cs-gallery-arrow-next');
+  function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+
+  var colorCache = [];
+  function setTint(rgb) {
+    var pd = 0.9;
+    panel.style.backgroundColor = 'rgb(' + clamp(rgb[0] * pd) + ',' + clamp(rgb[1] * pd) + ',' + clamp(rgb[2] * pd) + ')';
+    var lo = Math.min(rgb[0], rgb[1], rgb[2]), hi = Math.max(rgb[0], rgb[1], rgb[2]), l = (lo + hi) / 2, f = 1.9, dk = 0.62;
+    var vr = clamp((l + (rgb[0] - l) * f) * dk), vg = clamp((l + (rgb[1] - l) * f) * dk), vb = clamp((l + (rgb[2] - l) * f) * dk);
+    g.style.setProperty('--cs-accent-vivid', 'rgb(' + vr + ',' + vg + ',' + vb + ')');
+  }
+  function applyColor(i) {
+    if (!panel) return;
+    if (colorCache[i]) { if (idx === i) setTint(colorCache[i]); return; }
+    var src = imgs[i].currentSrc || imgs[i].getAttribute('src');
+    if (!src) return;
+    var probe = new Image();
+    probe.crossOrigin = 'anonymous';
+    probe.onload = function () {
+      try {
+        var s = 40, c = document.createElement('canvas'); c.width = s; c.height = s;
+        var ctx = c.getContext('2d'); ctx.drawImage(probe, 0, 0, s, s);
+        var d = ctx.getImageData(0, 0, s, s).data, SAT = 35;
+        var sr = 0, sg = 0, sb = 0, sn = 0, ar = 0, ag = 0, ab = 0, an = 0;
+        for (var p = 0; p < d.length; p += 4) {
+          if (d[p + 3] < 125) continue;
+          var R = d[p], G = d[p + 1], B = d[p + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+          if (mn < 232) { ar += R; ag += G; ab += B; an++; }
+          if ((mx - mn) > SAT && mx > 30 && mn < 245) { sr += R; sg += G; sb += B; sn++; }
+        }
+        var rgb;
+        if (sn >= 12) {
+          var r = sr / sn, gg = sg / sn, b2 = sb / sn, lo = Math.min(r, gg, b2), hi = Math.max(r, gg, b2), l = (lo + hi) / 2, f = 1.4;
+          rgb = [clamp(l + (r - l) * f), clamp(l + (gg - l) * f), clamp(l + (b2 - l) * f)];
+        } else if (an > 0) {
+          rgb = [Math.round(ar / an), Math.round(ag / an), Math.round(ab / an)];
+        } else { return; }
+        colorCache[i] = rgb;
+        if (idx === i) setTint(rgb);
+      } catch (e) { /* tainted canvas / CORS blocked — keep the token background */ }
+    };
+    probe.src = src;
+  }
+
+  var dots = [];
+  var dotsWrap = document.createElement('div');
+  dotsWrap.className = 'cs-gallery-dots';
+  imgs.forEach(function (im, k) {
+    var dot = document.createElement('button');
+    dot.type = 'button'; dot.className = 'cs-gallery-dot';
+    dot.setAttribute('aria-label', 'Go to slide ' + (k + 1));
+    dot.addEventListener('click', function (e) { e.preventDefault(); if (k !== idx) go(k > idx ? 1 : -1, k); });
+    dotsWrap.appendChild(dot); dots.push(dot);
+  });
+  g.appendChild(dotsWrap);
+
+  imgs.forEach(function (im) { im.style.opacity = '0'; im.style.transform = 'none'; });
+  imgs[0].style.opacity = '1'; imgs[0].style.zIndex = '1';
+  function mark(i) {
+    dots.forEach(function (d, k) { d.classList.toggle('is-active', k === i); });
+    imgs.forEach(function (im, k) { im.classList.toggle('is-active', k === i); });
+  }
+  mark(0); applyColor(0);
+  imgs.forEach(function (im, k) { if (k) applyColor(k); });
+
+  function go(dir, target) {
+    if (busy) return;
+    var nx = (target == null) ? (idx + dir + imgs.length) % imgs.length : target;
+    if (nx === idx) return;
+    busy = true;
+    var inc = imgs[nx], out = imgs[idx];
+    // Slides are sized to their own picture (see the head styles), so a % offset would be
+    // relative to the image and a narrow slide would never clear the frame. Travel the
+    // frame's width in px instead — always enough, whatever the image's aspect ratio.
+    var W = viewport.clientWidth;
+    inc.style.transition = 'none'; inc.style.opacity = '1'; inc.style.zIndex = '2';
+    inc.style.transform = 'translateX(' + (dir > 0 ? W : -W) + 'px)';
+    out.style.transition = 'none'; out.style.opacity = '1'; out.style.zIndex = '1'; out.style.transform = 'translateX(0)';
+    void inc.offsetWidth;
+    var ease = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1)';
+    inc.style.transition = ease; out.style.transition = ease;
+    inc.style.transform = 'translateX(0)';
+    out.style.transform = 'translateX(' + (dir > 0 ? -W : W) + 'px)';
+    idx = nx; mark(idx); applyColor(idx);
+    setTimeout(function () {
+      out.style.transition = 'none'; out.style.opacity = '0'; out.style.transform = 'none'; out.style.zIndex = '0';
+      busy = false;
+    }, DUR + 40);
+  }
+  if (prev) prev.addEventListener('click', function (e) { e.preventDefault(); go(-1); });
+  if (next) next.addEventListener('click', function (e) { e.preventDefault(); go(1); });
+  if (imgs.length < 2) {
+    if (prev) prev.style.display = 'none';
+    if (next) next.style.display = 'none';
+    dotsWrap.style.display = 'none';
+  }
+});
+</script>
+</body></html>

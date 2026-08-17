@@ -1,0 +1,286 @@
+{
+  "before_origin": "https://birch-testing.webflow.io/case-studies/",
+  "after_origin": "https://birch-testing.webflow.io/case-studies/",
+  "shared_checks": [
+    "Скругления у картинок в теле текста",
+    "Галерея: картинка со скруглением, поля по бокам, листается без рывков",
+    "Карточки стратегий не задеты — иконка в квадратном боксе",
+    "Ряд с цифрами под картинкой, во всю ширину, края совпадают с карточкой компании",
+    "Герой не обрезан"
+  ],
+  "cases": [
+    {
+      "key": "moovbuddy",
+      "name": "MoovBuddy",
+      "before": "moovbuddy",
+      "after": "moovbuddy",
+      "notes": [
+        "Заголовок вкладки на оригинале — просто «MoovBuddy», без общего хвоста"
+      ],
+      "checks": [
+        "Метрик нет ни там, ни там (2.5x только в тексте)",
+        "Стратегия «Stop Loss for Bad ROAS Days» на месте",
+        "Пять h3 в Solution без Bold",
+        "Аватар Elif Nur Sağır подтянулся"
+      ]
+    },
+    {
+      "key": "nothink",
+      "name": "Nothink",
+      "before": "nothink",
+      "after": "nothink",
+      "notes": [
+        "В карточке компании вместо сайта — LinkedIn: после миграции выводится полным URL"
+      ],
+      "checks": [
+        "Стратегия «Gradual budget reduction for suboptimal CPA» на месте",
+        "У цитаты нет аватара — как в оригинале",
+        "Метрик нет"
+      ]
+    },
+    {
+      "key": "adquantum",
+      "name": "AdQuantum",
+      "before": "adquantum",
+      "after": "adquantum",
+      "notes": [
+        "Год начала пустой — в оригинале «for 3 years»"
+      ],
+      "checks": [
+        "Три метрики: 5X / 30% / 10K",
+        "Фото команды во всю ширину",
+        "Абзацы Solution совпадают с оригиналом"
+      ]
+    },
+    {
+      "key": "pawz",
+      "name": "Pawz.rs",
+      "before": "pawz",
+      "after": "pawz",
+      "notes": [
+        "В оригинале у цитаты нет автора — блок не должен разъезжаться"
+      ],
+      "checks": [
+        "Две метрики: 22% / 25%",
+        "Под цитатой нет подписи и аватара",
+        "Строки «Локация» нет — как в оригинале"
+      ]
+    },
+    {
+      "key": "scentbird",
+      "name": "Scentbird",
+      "before": "scentbird",
+      "after": "scentbird",
+      "notes": [
+        "Подпись третьей метрики в оригинале в две строки, после миграции — в одну"
+      ],
+      "checks": [
+        "Три метрики: 76% / 30% / 1.8x",
+        "Картинка в теле во всю ширину",
+        "Ссылка на Facebook for Business в конце"
+      ]
+    },
+    {
+      "key": "cocosolis",
+      "name": "Cocosolis",
+      "before": "cocosolis",
+      "after": "cocosolis",
+      "notes": [
+        "meta-description в оригинале чужой — от AdParlor. Перенесён дословно, нужно решение"
+      ],
+      "checks": [
+        "Две метрики: up to 102 / up to 29K",
+        "Стратегия «Restart ads in case of late attribution» на месте",
+        "Вертикальное фото в конце не растянуто"
+      ]
+    },
+    {
+      "key": "ecom-house",
+      "name": "ECOM HOUSE",
+      "before": "emmanuele-and-daniel",
+      "after": "emmanuele-and-daniel",
+      "notes": [],
+      "checks": [
+        "Три метрики: 539% / 234% / 30%",
+        "Фото Emanuele и Daniel во всю ширину",
+        "Автор цитаты — «E.Maragno»"
+      ]
+    },
+    {
+      "key": "ignite",
+      "name": "Ignite Your Brand",
+      "before": "lalonie-farnell",
+      "after": "lalonie-farnell",
+      "notes": [
+        "Год начала пустой — в оригинале «1 year»"
+      ],
+      "checks": [
+        "Одна метрика «$3.9M» смотрится нормально на всю полосу",
+        "Тексты Challenge / Solution / Results совпадают"
+      ]
+    },
+    {
+      "key": "marco",
+      "name": "Marco Battaglia",
+      "before": "marco-battaglia",
+      "after": "marco-battaglia",
+      "notes": [],
+      "checks": [
+        "Две метрики: 253% / 6 figures",
+        "Нумерованный список из 5 пунктов остался списком",
+        "Фото-шапка в теле во всю ширину"
+      ]
+    },
+    {
+      "key": "voy",
+      "name": "Voy Media",
+      "before": "voy-media",
+      "after": "voy-media",
+      "notes": [
+        "В теле дважды осталось «Revealbot» — так в оригинале, перенесено дословно"
+      ],
+      "checks": [
+        "Три метрики: 987% / 1,160% / 9 hrs",
+        "Фото команды во всю ширину"
+      ]
+    },
+    {
+      "key": "alessandro",
+      "name": "Alessandro Gargiulo",
+      "before": "alessandro-gargiulo",
+      "after": "alessandro-gargiulo",
+      "notes": [
+        "В оригинале нет описания компании — только ссылка и город",
+        "Опечатка «saved per per day» перенесена дословно",
+        "Ссылка на Madgicx ведёт на старый домен revealbot.com"
+      ],
+      "checks": [
+        "Карточка компании без описания не выглядит обрубленной",
+        "Одна метрика «6 hrs»",
+        "Три ссылки в Solution кликабельны"
+      ]
+    },
+    {
+      "key": "ecom-dept",
+      "name": "ECOM DEPT",
+      "before": "ecom-dept",
+      "after": "ecom-dept",
+      "notes": [
+        "В оригинале абзац «Bïrch offers two key features…» разорван посреди фразы — склеен обратно"
+      ],
+      "checks": [
+        "Одна метрика «10's of thousands»",
+        "Абзац про две ключевые фичи — цельный",
+        "Лишнего пустого отступа в начале Results нет"
+      ]
+    },
+    {
+      "key": "cricksydog",
+      "name": "CricksyDog",
+      "before": "cricksydog",
+      "after": "cricksydog",
+      "notes": [
+        "Единственный кейс со строкой «Signal Gateways user»"
+      ],
+      "checks": [
+        "Строка «Signal Gateways user — 2025» на месте",
+        "Три метрики: 40% / 30% / 35%",
+        "Строки «Локация» нет — как в оригинале"
+      ]
+    },
+    {
+      "key": "hubx",
+      "name": "HubX",
+      "before": "hubx",
+      "after": "hubx",
+      "notes": [],
+      "checks": [
+        "Стратегия «Rapid Scaling of Campaign Budgets» на месте",
+        "У цитаты нет аватара и нет пустого кружка",
+        "Две метрики: up to 10 hours / up to 27k"
+      ]
+    },
+    {
+      "key": "fabulous",
+      "name": "The Fabulous",
+      "before": "the-fabulous",
+      "after": "the-fabulous",
+      "notes": [
+        "Слаг-заглушка birch-case-study-3 — меняем отдельной задачей"
+      ],
+      "checks": [
+        "Метрик нет — полоса не оставляет пустоты",
+        "Обе картинки во всю ширину, вертикальная не растянута",
+        "Стратегия «CPA-based scaling» на месте"
+      ]
+    },
+    {
+      "key": "loop",
+      "name": "Loop Earplugs",
+      "before": "loop-earplugs",
+      "after": "loop-earplugs",
+      "notes": [
+        "Единственный кейс с видео"
+      ],
+      "checks": [
+        "Видео в конце — во всю ширину, со скруглением",
+        "Кнопка стратегии ведёт на share/e734599163ab712c",
+        "Аватар Alexander Lodeweyckx подтянулся"
+      ]
+    },
+    {
+      "key": "adparlor",
+      "name": "AdParlor",
+      "before": "adparlor",
+      "after": "adparlor",
+      "notes": [],
+      "checks": [
+        "Локация «New York, USA» и год 2020",
+        "Стратегия «Alerts in Case of Spend Spikes» на месте",
+        "Платформа — только TikTok"
+      ]
+    },
+    {
+      "key": "colonbroom",
+      "name": "ColonBroom",
+      "before": "colonbroom",
+      "after": "colonbroom",
+      "notes": [
+        "Галерея из двух картинок вынесена в отдельное поле, в теле её нет"
+      ],
+      "checks": [
+        "Галерея-слайдер внизу работает, стрелки и точки на месте",
+        "Две метрики: 88% / 2x",
+        "Заголовок вкладки — «ColonBroom», как в оригинале"
+      ]
+    },
+    {
+      "key": "keiki",
+      "name": "Keiki",
+      "before": "keiki",
+      "after": "keiki",
+      "notes": [
+        "Год начала «2024» проставлен предварительно — ждём подтверждения sales"
+      ],
+      "checks": [
+        "Две метрики: ↓26% CPC / ↓17% CPA",
+        "Заголовки в теле — свои, не как у остальных кейсов",
+        "Строки «Локация» нет"
+      ]
+    },
+    {
+      "key": "webtopia",
+      "name": "Webtopia",
+      "before": "webtopia",
+      "after": "webtopia",
+      "notes": [
+        "Метрик нет — в оригинале полосы тоже нет"
+      ],
+      "checks": [
+        "Три карточки стратегий на месте",
+        "Фото команды во всю ширину, подпись под ним слева",
+        "Аватар в цитате совпадает с оригиналом"
+      ]
+    }
+  ]
+}
