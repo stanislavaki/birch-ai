@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кейсы: до и после миграции</title>
+<style>
+  :root {
+    --ink: #161616;
+    --ink-soft: #55534e;
+    --ink-faint: #8b8981;
+    --ground: #f3f2ee;
+    --card: #ffffff;
+    --line: #e0ded6;
+    --accent: #ffe243;
+    --warn-bg: #fff6d6;
+    --warn-ink: #7a5c00;
+    --bar: 3.25rem;
+    --tabs: 2.5rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--ground);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header { flex: 0 0 auto; background: var(--card); border-bottom: 1px solid var(--line); }
+
+  .bar {
+    height: var(--bar);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { font-weight: 600; font-size: .95rem; white-space: nowrap; }
+  .brand span { color: var(--ink-faint); font-weight: 400; }
+  .spacer { flex: 1 1 auto; }
+  .ctl { display: flex; align-items: center; gap: .4rem; font-size: .82rem; color: var(--ink-soft); }
+  .ctl select, .ctl button {
+    font: inherit; font-size: .82rem; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: .4rem;
+    padding: .25rem .5rem; cursor: pointer;
+  }
+  .ctl button[aria-pressed="true"] { background: var(--accent); border-color: #e6c700; }
+
+  .tabs {
+    height: var(--tabs);
+    display: flex;
+    align-items: stretch;
+    gap: .25rem;
+    padding: 0 .75rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .tabs button {
+    font: inherit; font-size: .8rem; white-space: nowrap;
+    background: none; border: 0; border-bottom: 2px solid transparent;
+    padding: 0 .6rem; color: var(--ink-soft); cursor: pointer;
+  }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+  .tabs button.done::before { content: "✓ "; color: #1d7a4c; font-weight: 600; }
+  .tabs button.noted::after { content: " ●"; color: #d29a00; }
+  .tabs button .dot {
+    display: inline-block; width: .4rem; height: .4rem; border-radius: 50%;
+    background: #d9b800; margin-left: .35rem; vertical-align: middle;
+  }
+
+  main { flex: 1 1 auto; display: flex; min-height: 0; }
+
+  .pane { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+  /* Fixed height and no wrapping: a path that wraps to a second line would push
+     one frame lower than the other and break the top-edge alignment. */
+  .pane-head {
+    flex: 0 0 2.1rem; height: 2.1rem; display: flex; align-items: center; gap: .5rem;
+    padding: 0 .75rem; font-size: .78rem; color: var(--ink-soft);
+    background: var(--card); border-bottom: 1px solid var(--line);
+    white-space: nowrap; overflow: hidden;
+  }
+  .pane-head b { color: var(--ink); font-size: .82rem; flex: 0 0 auto; }
+  .pane-head .path { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .pane-head a { color: var(--ink-soft); flex: 0 0 auto; }
+  .viewport { flex: 1 1 auto; overflow: hidden; position: relative; background: #fff; }
+  .viewport iframe { border: 0; display: block; transform-origin: 0 0; background: #fff; }
+  .stale {
+    position: absolute; inset: auto 0 0 0; z-index: 2;
+    background: var(--warn-bg); color: var(--warn-ink);
+    font-size: .78rem; padding: .4rem .75rem; border-top: 1px solid #e8d488;
+  }
+
+  aside {
+    flex: 0 0 22rem; min-width: 0; display: flex; flex-direction: column;
+    background: var(--card);
+  }
+  .block { border-top: 1px solid var(--line); padding-top: .9rem; margin-top: 1.2rem; }
+  .block:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .block > h2:first-child { margin-top: 0; }
+  /* Tabs inside the notes column: the page stays on screen, only this column
+     switches between the per-page checklist and the cross-cutting notes. */
+  .side-tabs {
+    flex: 0 0 2.1rem; height: 2.1rem; display: flex; align-items: stretch;
+    border-bottom: 1px solid var(--line); background: var(--card);
+  }
+  .side-tabs button {
+    flex: 1 1 0; font: inherit; font-size: .8rem; cursor: pointer;
+    background: none; border: 0; border-bottom: 2px solid transparent;
+    color: var(--ink-soft); padding: 0 .5rem; white-space: nowrap;
+  }
+  .side-tabs button:hover { color: var(--ink); }
+  .side-tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
+  .side-tabs button.noted::after { content: " ●"; color: #d29a00; font-weight: 400; }
+
+  .checks-head {
+    flex: 0 0 2.1rem; height: 2.1rem; display: flex; align-items: center; gap: .5rem;
+    padding: 0 .75rem; border-bottom: 1px solid var(--line);
+    font-size: .78rem; color: var(--ink-soft);
+  }
+  .checks-head .count { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .mini {
+    font: inherit; font-size: .76rem; color: var(--ink);
+    background: var(--card); border: 1px solid var(--line); border-radius: .4rem;
+    padding: .1rem .45rem; cursor: pointer;
+  }
+  .mini:hover { border-color: var(--ink-faint); }
+  a.mini { text-decoration: none; line-height: 1.5; }
+  .checks-head .mini { margin-left: auto; }
+  .checks-body { overflow-y: auto; padding: .85rem 1rem 2rem; }
+  aside h2 {
+    font-size: .82rem; margin: 0 0 .6rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-faint); display: flex; align-items: center; gap: .5rem;
+  }
+  aside h2 .mini { margin-left: auto; text-transform: none; letter-spacing: 0; color: var(--ink-soft); }
+  aside h2:not(:first-child) { margin-top: 1.4rem; }
+  aside h2.foldable { cursor: pointer; user-select: none; }
+  aside h2.foldable:hover { color: var(--ink-soft); }
+  .caret { font-size: .7rem; width: .7rem; display: inline-block; }
+  ul.checks.collapsed { display: none; }
+  ul.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  ul.checks li { display: flex; gap: .5rem; align-items: flex-start; font-size: .84rem; line-height: 1.4; }
+  ul.checks label { flex: 1 1 auto; min-width: 0; }
+  .note-input {
+    display: block; width: 100%; font: inherit; font-size: .82rem; line-height: 1.35;
+    border: 1px solid var(--line); border-radius: .45rem; padding: .35rem .45rem;
+    resize: vertical; min-height: 2.6rem; background: var(--card); color: var(--ink);
+  }
+  .note-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  .note-input.big { min-height: 11rem; }
+  .note-input.huge { min-height: 26rem; }
+  .block-hint { font-size: .78rem; color: var(--ink-faint); margin: -.3rem 0 .5rem; line-height: 1.4; }
+  .help { margin-top: 1.6rem; font-size: .8rem; color: var(--ink-faint); }
+  .help summary { cursor: pointer; }
+  .help p { margin: .5rem 0 0; line-height: 1.45; }
+  .export { margin-top: 1.4rem; padding-top: .9rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: .4rem; }
+  .export-status { flex: 1 1 100%; font-size: .76rem; color: var(--ink-faint); margin-top: .3rem; }
+  .export-status.warn { color: var(--warn-ink); }
+  ul.checks input { margin: .2rem 0 0; width: .95rem; height: .95rem; accent-color: var(--accent); flex: 0 0 auto; }
+  ul.checks input:checked + label { color: var(--ink-faint); text-decoration: line-through; }
+  ul.checks label { cursor: pointer; }
+  .note {
+    font-size: .82rem; line-height: 1.4; color: var(--warn-ink); background: var(--warn-bg);
+    border-radius: .5rem; padding: .5rem .6rem; margin-bottom: .5rem;
+  }
+  .hint { font-size: .78rem; color: var(--ink-faint); line-height: 1.45; margin-top: 1.4rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; background: #efeee9; padding: .05rem .3rem; border-radius: .25rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">Кейсы: до и после миграции <span>· снапшоты staging, ширина 1280</span></div>
+    <div class="spacer"></div>
+    <div class="ctl">
+      <label for="zoom">масштаб</label>
+      <select id="zoom">
+        <option value="fit" selected>по ширине</option>
+        <option value="0.9">90%</option>
+        <option value="0.75">75%</option>
+        <option value="0.6">60%</option>
+        <option value="1">100%</option>
+      </select>
+    </div>
+    <div class="ctl">
+      <button id="sync" type="button" aria-pressed="true">синхронный скролл</button>
+      <button id="proportional" type="button" aria-pressed="false">пропорционально</button>
+      <button id="chrome" type="button" aria-pressed="false">без шапки и подвала</button>
+      <button id="top" type="button" aria-pressed="false">наверх</button>
+      <a class="mini" href="icons.html">иконки</a>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</header>
+
+<main>
+  <section class="pane" data-side="after">
+    <div class="pane-head"><b>Сейчас — со скруглениями</b> <span class="path" id="after-path"></span><a id="after-link" target="_blank" rel="noopener">открыть ↗</a></div>
+    <div class="viewport" id="after-vp"><iframe id="after-frame" title="Сейчас — со скруглениями"></iframe></div>
+  </section>
+  <section class="pane" data-side="before">
+    <div class="pane-head"><b>Было — без скруглений</b> <span class="path" id="before-path"></span><a id="before-link" target="_blank" rel="noopener">открыть ↗</a></div>
+    <div class="viewport" id="before-vp"><iframe id="before-frame" title="Было — без скруглений"></iframe></div>
+  </section>
+  <aside>
+    <div class="side-tabs" id="side-tabs">
+      <button type="button" data-view="page" aria-selected="true">По странице</button>
+      <button type="button" data-view="general" aria-selected="false">Общие траблы</button>
+    </div>
+    <div class="checks-head" id="checks-head">
+      <span class="count" id="checks-count">0 / 0</span>
+      <button class="mini" id="check-all" type="button">отметить всё</button>
+    </div>
+    <div class="checks-body" id="checks"></div>
+  </aside>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var BOOT = Date.now();               // cache buster for freshly re-fetched snapshots
+  var VIEW_WIDTH = 1280;               // the width both pages are rendered at
+  var CHROME_HIDE = 'nav.navigation, .sect-cta, .footer-large, .hub-cs-cta { display: none !important; }';
+  var STORE = 'cs-compare-checks-v1';
+  var NOTES_STORE = 'cs-compare-notes-v1';
+  var FOLD_STORE = 'cs-compare-folded-v1';
+  var GENERAL = '__general__';
+  var NOTES_URL = 'notes.json';
+
+  var state = { cases: [], status: {}, current: null, sync: true, proportional: false, chrome: false, zoom: 'fit', view: 'page' };
+  try { state.view = localStorage.getItem('cs-compare-view-v1') === 'general' ? 'general' : 'page'; } catch (e) {}
+  var frames = { after: document.getElementById('after-frame'), before: document.getElementById('before-frame') };
+  var viewports = { after: document.getElementById('after-vp'), before: document.getElementById('before-vp') };
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (e) { saved = {}; }
+  var collapsed = {};
+  try { collapsed = JSON.parse(localStorage.getItem(FOLD_STORE) || '{}'); } catch (e) { collapsed = {}; }
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch (e) {}
+  }
+
+  // ---- notes --------------------------------------------------------------
+  // Kept in localStorage so nothing is lost, and pushed to notes.json whenever
+  // the page is served by serve.py — that file is the readable-outside copy.
+
+  // { general: "сквозные траблы", cases: { caseKey: "текст замечаний" } }
+  var notes = { general: '', cases: {} };
+  try {
+    var storedNotes = JSON.parse(localStorage.getItem(NOTES_STORE) || '{}');
+    if (storedNotes.cases || typeof storedNotes.general === 'string') {
+      notes = { general: storedNotes.general || '', cases: storedNotes.cases || {} };
+    }
+  } catch (e) { /* keep the empty shape */ }
+  var diskWrite = null; // null = unknown, true = notes.json is being written
+  var saveTimer = null;
+
+  function setCaseNote(key, text) {
+    if (text.trim()) notes.cases[key] = text; else delete notes.cases[key];
+    queueNoteSave();
+  }
+
+  function setGeneralNote(text) {
+    notes.general = text.trim() ? text : '';
+    queueNoteSave();
+  }
+
+  function noteCount() {
+    return Object.keys(notes.cases).length + (notes.general ? 1 : 0);
+  }
+
+  function queueNoteSave() {
+    try { localStorage.setItem(NOTES_STORE, JSON.stringify(notes)); } catch (e) {}
+    updateExportStatus();
+    markTabs();
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(pushNotes, 500);
+  }
+
+  function pushNotes() {
+    fetch(NOTES_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notes, null, 2)
+    }).then(function (response) {
+      diskWrite = response.ok;
+      updateExportStatus();
+    }).catch(function () {
+      diskWrite = false;
+      updateExportStatus();
+    });
+  }
+
+  function updateExportStatus() {
+    var status = document.getElementById('export-status');
+    if (!status) return;
+    var count = noteCount();
+    var where = diskWrite === true
+      ? 'пишется в review/cs-compare/notes.json'
+      : diskWrite === false
+        ? 'сервер без записи — сохрани файлом, иначе заметки останутся только в браузере'
+        : 'сохраняется в браузере';
+    status.textContent = 'Замечаний: ' + count + ' · ' + where;
+    status.className = 'export-status' + (diskWrite === false && count ? ' warn' : '');
+  }
+
+  function notesAsMarkdown() {
+    var lines = [];
+    if (notes.general) {
+      lines.push('## Общее по всем кейсам');
+      lines.push('');
+      lines.push(notes.general.trim());
+      lines.push('');
+    }
+    state.cases.forEach(function (item) {
+      if (!notes.cases[item.key]) return;
+      lines.push('## ' + item.name);
+      lines.push('/case-studies/' + item.after);
+      lines.push('');
+      lines.push(notes.cases[item.key].trim());
+      lines.push('');
+    });
+    return lines.join('\n') || 'Замечаний нет.';
+  }
+
+  function download(name, text, type) {
+    var url = URL.createObjectURL(new Blob([text], { type: type }));
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    link.click();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  // ---- layout -------------------------------------------------------------
+
+  function scaleFor(viewport) {
+    if (state.zoom === 'fit') return viewport.clientWidth / VIEW_WIDTH;
+    return parseFloat(state.zoom);
+  }
+
+  function layout() {
+    Object.keys(frames).forEach(function (side) {
+      var vp = viewports[side];
+      var scale = scaleFor(vp);
+      var frame = frames[side];
+      // The frame gets a real 1280-wide viewport, then is scaled down to fit the
+      // column. Height is divided by the scale so the scaled result still fills.
+      frame.style.width = VIEW_WIDTH + 'px';
+      frame.style.height = Math.round(vp.clientHeight / scale) + 'px';
+      frame.style.transform = 'scale(' + scale + ')';
+      vp.style.overflowX = scale * VIEW_WIDTH > vp.clientWidth + 1 ? 'auto' : 'hidden';
+    });
+  }
+
+  window.addEventListener('resize', layout);
+
+  // ---- scroll sync --------------------------------------------------------
+
+  // Position polling rather than scroll events: a scaled cross-document frame
+  // does not reliably deliver scroll events (and never does while the tab is
+  // backgrounded), whereas reading scrollY always works.
+  var last = { after: -1, before: -1 };
+
+  function win(side) {
+    try {
+      var w = frames[side].contentWindow;
+      return w && w.document && w.document.body ? w : null;
+    } catch (e) { return null; }
+  }
+
+  function maxScroll(w) {
+    return Math.max(1, w.document.documentElement.scrollHeight - w.innerHeight);
+  }
+
+  function mirror(fromSide) {
+    var from = win(fromSide);
+    var to = win(fromSide === 'after' ? 'before' : 'after');
+    if (!from || !to) return;
+    var y = state.proportional
+      ? Math.round((from.scrollY / maxScroll(from)) * maxScroll(to))
+      : from.scrollY;
+    to.scrollTo(0, y);
+  }
+
+  function pump() {
+    var a = win('after');
+    var b = win('before');
+    if (!a || !b) return;
+    var ay = a.scrollY;
+    var by = b.scrollY;
+    if (state.sync) {
+      // Whichever side moved since the last sample is the one being driven.
+      if (ay !== last.after && last.after >= 0) mirror('after');
+      else if (by !== last.before && last.before >= 0) mirror('before');
+    }
+    last.after = a.scrollY;
+    last.before = b.scrollY;
+  }
+
+  function loop() {
+    pump();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  setInterval(pump, 250); // keeps working when rAF is throttled
+
+  window.__csCompare = { pump: pump, mirror: mirror, state: state };
+
+  // ---- frame decoration ---------------------------------------------------
+
+  function decorate(side) {
+    var frame = frames[side];
+    var doc;
+    try { doc = frame.contentDocument; } catch (e) { return; }
+    if (!doc || !doc.head) return;
+    var style = doc.getElementById('cs-compare-style');
+    if (!style) {
+      style = doc.createElement('style');
+      style.id = 'cs-compare-style';
+      doc.head.appendChild(style);
+    }
+    style.textContent = state.chrome ? CHROME_HIDE : '';
+    last[side] = -1; // fresh document, do not treat its zero as a scroll
+    flagIfStale(side, doc);
+  }
+
+  function flagIfStale(side, doc) {
+    var vp = viewports[side];
+    var old = vp.querySelector('.stale');
+    if (old) old.remove();
+    if (side !== 'after') return;
+    // An unpublished item renders the template with empty CMS bindings.
+    var rich = doc.querySelector('.cs-rich');
+    var empty = !rich || rich.textContent.trim().length < 40;
+    if (!empty) return;
+    var note = doc.createElement ? document.createElement('div') : null;
+    if (!note) return;
+    note.className = 'stale';
+    note.textContent = 'Тело пустое — этот кейс ещё не опубликован на staging. Опубликуй сайт и перекачай снапшоты: python3 review/cs-compare/fetch.py --side after';
+    vp.appendChild(note);
+  }
+
+  // ---- checklist ----------------------------------------------------------
+
+  function idsFor(item, group) {
+    var ids = [];
+    if (group !== 'shared') {
+      (item.checks || []).forEach(function (_, i) { ids.push(item.key + '-' + i); });
+    }
+    if (group !== 'case') {
+      (state.shared || []).forEach(function (_, i) { ids.push('shared-' + item.key + '-' + i); });
+    }
+    return ids;
+  }
+
+  function allChecked(ids) {
+    return ids.length > 0 && ids.every(function (id) { return !!saved[id]; });
+  }
+
+  function setAll(ids) {
+    // One button for both directions: fill the group, or clear it when already full.
+    var target = !allChecked(ids);
+    ids.forEach(function (id) {
+      saved[id] = target;
+      var input = document.getElementById(id);
+      if (input) input.checked = target;
+    });
+    save();
+    refreshProgress();
+  }
+
+  function markTabs() {
+    state.cases.forEach(function (c) {
+      var tab = document.querySelector('#tabs button[data-key="' + c.key + '"]');
+      if (!tab) return;
+      tab.classList.toggle('done', allChecked(idsFor(c)));
+      tab.classList.toggle('noted', !!notes.cases[c.key]);
+    });
+    var generalTab = document.querySelector('#side-tabs button[data-view="general"]');
+    if (generalTab) generalTab.classList.toggle('noted', !!notes.general);
+  }
+
+  function refreshProgress() {
+    markTabs();
+    if (!state.current) return;
+    var ids = idsFor(state.current);
+    var done = ids.filter(function (id) { return !!saved[id]; }).length;
+    document.getElementById('checks-count').textContent = done + ' / ' + ids.length;
+    document.getElementById('check-all').textContent = allChecked(ids) ? 'снять всё' : 'отметить всё';
+  }
+
+  document.getElementById('check-all').addEventListener('click', function () {
+    setAll(idsFor(state.current));
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('#side-tabs button'), function (tab) {
+    tab.addEventListener('click', function () {
+      state.view = tab.dataset.view;
+      try { localStorage.setItem('cs-compare-view-v1', state.view); } catch (e) {}
+      renderSide();
+      if (state.view === 'page') refreshProgress();
+    });
+  });
+
+  function renderSide() {
+    if (state.view === 'general') renderGeneralView();
+    else if (state.current) renderChecks(state.current);
+    document.getElementById('checks-head').style.display = state.view === 'general' ? 'none' : '';
+    Array.prototype.forEach.call(document.querySelectorAll('#side-tabs button'), function (tab) {
+      tab.setAttribute('aria-selected', String(tab.dataset.view === state.view));
+    });
+    document.querySelector('#side-tabs button[data-view="general"]')
+      .classList.toggle('noted', !!notes.general);
+  }
+
+  function renderChecks(item) {
+    var box = document.getElementById('checks');
+    box.innerHTML = '';
+
+    (item.notes || []).forEach(function (text) {
+      var note = document.createElement('div');
+      note.className = 'note';
+      note.textContent = text;
+      box.appendChild(note);
+    });
+
+    function list(title, items, prefix, group) {
+      var heading = document.createElement('h2');
+      heading.className = 'foldable';
+      var caret = document.createElement('span');
+      caret.className = 'caret';
+      caret.textContent = collapsed[group] ? '▸' : '▾';
+      heading.appendChild(caret);
+      heading.appendChild(document.createTextNode(title));
+      var groupAll = document.createElement('button');
+      groupAll.type = 'button';
+      groupAll.className = 'mini';
+      groupAll.textContent = 'все';
+      groupAll.addEventListener('click', function (event) {
+        event.stopPropagation(); // the heading itself folds the group
+        setAll(idsFor(item, group));
+      });
+      heading.appendChild(groupAll);
+      heading.addEventListener('click', function () {
+        collapsed[group] = !collapsed[group];
+        try { localStorage.setItem(FOLD_STORE, JSON.stringify(collapsed)); } catch (e) {}
+        caret.textContent = collapsed[group] ? '▸' : '▾';
+        ul.classList.toggle('collapsed', !!collapsed[group]);
+      });
+      box.appendChild(heading);
+      var ul = document.createElement('ul');
+      ul.className = 'checks' + (collapsed[group] ? ' collapsed' : '');
+      items.forEach(function (text, index) {
+        var id = prefix + '-' + index;
+        var li = document.createElement('li');
+        var input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.checked = !!saved[id];
+        input.addEventListener('change', function () {
+          saved[id] = input.checked;
+          save();
+          refreshProgress();
+        });
+        var label = document.createElement('label');
+        label.setAttribute('for', id);
+        label.textContent = text;
+        li.appendChild(input);
+        li.appendChild(label);
+        ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+
+    list(item.name, item.checks || [], item.key, 'case');
+    list('Общее по шаблону', state.shared || [], 'shared-' + item.key, 'shared');
+
+    // Both note fields sit next to the checklist: the page is reviewed and the
+    // remarks are typed without leaving it.
+    foldSection(box, 'Косяки по кейсу', 'notes-case', function (body) {
+      var field = document.createElement('textarea');
+      field.className = 'note-input big';
+      field.placeholder = 'Что не так на этой странице — своими словами. Сохраняется само.';
+      field.value = notes.cases[item.key] || '';
+      field.addEventListener('input', function () { setCaseNote(item.key, field.value); });
+      body.appendChild(field);
+    });
+
+    appendExport(box);
+  }
+
+  function renderGeneralView() {
+    var box = document.getElementById('checks');
+    box.innerHTML = '';
+
+    var heading = document.createElement('h2');
+    heading.textContent = 'Общие траблы';
+    box.appendChild(heading);
+
+    var hint = document.createElement('p');
+    hint.className = 'block-hint';
+    hint.textContent = 'Одно поле на все кейсы — то, что чинится в шаблоне, а не в конкретной странице.';
+    box.appendChild(hint);
+
+    var field = document.createElement('textarea');
+    field.className = 'note-input huge';
+    field.placeholder = 'Общее для всех страниц.';
+    field.value = notes.general || '';
+    field.addEventListener('input', function () { setGeneralNote(field.value); });
+    box.appendChild(field);
+
+    appendExport(box);
+  }
+
+  function appendExport(box) {
+    var exportBox = document.createElement('div');
+    exportBox.className = 'export';
+    exportBox.appendChild(exportButton('скачать заметки', function () {
+      download('cs-notes.md', notesAsMarkdown(), 'text/markdown');
+    }));
+    exportBox.appendChild(exportButton('скопировать', null, true));
+    var status = document.createElement('div');
+    status.className = 'export-status';
+    status.id = 'export-status';
+    exportBox.appendChild(status);
+    box.appendChild(exportBox);
+
+    var help = document.createElement('details');
+    help.className = 'help';
+    help.innerHTML = '<summary>как это запускать</summary>'
+      + '<p><code>python3 review/cs-compare/serve.py</code> — сервер, который кладёт заметки '
+      + 'в <code>notes.json</code> рядом с инструментом. Обычный <code>http.server</code> тоже '
+      + 'работает, но тогда заметки живут только в браузере и их надо выгружать кнопкой.</p>'
+      + '<p><code>python3 review/cs-compare/fetch.py</code> — перекачать снапшоты '
+      + '(<code>--side after</code> — только правую колонку).</p>';
+    box.appendChild(help);
+
+    updateExportStatus();
+  }
+
+  function foldSection(parent, title, foldKey, build) {
+    var wrap = document.createElement('div');
+    wrap.className = 'block';
+    var heading = document.createElement('h2');
+    heading.className = 'foldable';
+    var caret = document.createElement('span');
+    caret.className = 'caret';
+    caret.textContent = collapsed[foldKey] ? '▸' : '▾';
+    heading.appendChild(caret);
+    heading.appendChild(document.createTextNode(title));
+    var body = document.createElement('div');
+    if (collapsed[foldKey]) body.style.display = 'none';
+    heading.addEventListener('click', function () {
+      collapsed[foldKey] = !collapsed[foldKey];
+      try { localStorage.setItem(FOLD_STORE, JSON.stringify(collapsed)); } catch (e) {}
+      caret.textContent = collapsed[foldKey] ? '▸' : '▾';
+      body.style.display = collapsed[foldKey] ? 'none' : '';
+    });
+    wrap.appendChild(heading);
+    wrap.appendChild(body);
+    parent.appendChild(wrap);
+    build(body);
+  }
+
+  function exportButton(label, action, isCopy) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mini';
+    button.textContent = label;
+    button.addEventListener('click', function () {
+      if (!isCopy) { action(); return; }
+      navigator.clipboard.writeText(notesAsMarkdown()).then(function () {
+        button.textContent = 'скопировано';
+        setTimeout(function () { button.textContent = label; }, 1500);
+      });
+    });
+    return button;
+  }
+
+  // ---- case switching -----------------------------------------------------
+
+  function selectTab(key) {
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs button'), function (tab) {
+      tab.setAttribute('aria-selected', String(tab.dataset.key === key));
+    });
+  }
+
+  function open(key) {
+    var item = state.cases.filter(function (c) { return c.key === key; })[0];
+    if (!item) return;
+    state.current = item;
+    state.currentKey = key;
+    selectTab(key);
+
+    // Cache buster: after re-running fetch.py the file name is unchanged, so a
+    // plain src would serve the browser's stale copy of the old snapshot.
+    frames.after.src = 'pages/after/' + key + '.html?v=' + BOOT;
+    frames.before.src = 'pages/before/' + key + '.html?v=' + BOOT;
+    var afterPath = document.getElementById('after-path');
+    var beforePath = document.getElementById('before-path');
+    afterPath.textContent = afterPath.title = '/case-studies/' + item.after;
+    beforePath.textContent = beforePath.title = '/case-studies/' + item.before;
+    document.getElementById('after-link').href = state.afterOrigin + item.after;
+    document.getElementById('before-link').href = state.beforeOrigin + item.before;
+
+    renderSide();
+    refreshProgress();
+    layout();
+    location.hash = key;
+  }
+
+  function step(delta) {
+    // Arrows walk the cases only; the general tab is reached by clicking it.
+    if (!state.current) return;
+    var index = state.cases.findIndex(function (c) { return c.key === state.current.key; });
+    open(state.cases[(index + delta + state.cases.length) % state.cases.length].key);
+  }
+
+  window.addEventListener('hashchange', function () {
+    var key = location.hash.replace('#', '');
+    if (key && key !== state.currentKey) open(key);
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') return;
+    if (event.key === 'ArrowRight') step(1);
+    if (event.key === 'ArrowLeft') step(-1);
+  });
+
+  // ---- controls -----------------------------------------------------------
+
+  function toggle(id, key, after) {
+    var button = document.getElementById(id);
+    button.addEventListener('click', function () {
+      state[key] = !state[key];
+      button.setAttribute('aria-pressed', String(state[key]));
+      if (after) after();
+    });
+  }
+
+  toggle('sync', 'sync');
+  toggle('proportional', 'proportional');
+  toggle('chrome', 'chrome', function () {
+    decorate('after');
+    decorate('before');
+  });
+
+  document.getElementById('top').addEventListener('click', function () {
+    Object.keys(frames).forEach(function (side) {
+      try { frames[side].contentWindow.scrollTo(0, 0); } catch (e) {}
+    });
+  });
+
+  document.getElementById('zoom').addEventListener('change', function (event) {
+    state.zoom = event.target.value;
+    layout();
+  });
+
+  Object.keys(frames).forEach(function (side) {
+    frames[side].addEventListener('load', function () { decorate(side); });
+  });
+
+  // ---- boot ---------------------------------------------------------------
+
+  Promise.all([
+    fetch('cases.json').then(function (r) { return r.json(); }),
+    fetch('pages/status.json').then(function (r) { return r.json(); }).catch(function () { return {}; }),
+    fetch(NOTES_URL).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+  ]).then(function (results) {
+    var config = results[0];
+    var onDisk = results[2];
+    // notes.json wins on a cold start: it is the copy that survives a different
+    // browser or a cleared localStorage.
+    if (onDisk && !noteCount()) {
+      notes = { general: onDisk.general || '', cases: onDisk.cases || {} };
+    }
+    state.cases = config.cases;
+    state.shared = config.shared_checks;
+    state.afterOrigin = config.after_origin;
+    state.beforeOrigin = config.before_origin;
+    state.status = results[1];
+
+    var tabs = document.getElementById('tabs');
+    state.cases.forEach(function (item) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.key = item.key;
+      button.setAttribute('role', 'tab');
+      button.textContent = item.name;
+      var codes = state.status[item.key] || {};
+      if (codes.after !== 200 || codes.before !== 200) {
+        var dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.title = 'снапшот не скачался';
+        button.appendChild(dot);
+      }
+      button.addEventListener('click', function () { open(item.key); });
+      tabs.appendChild(button);
+    });
+
+    var initial = location.hash.replace('#', '');
+    var known = state.cases.some(function (c) { return c.key === initial; });
+    open(known ? initial : state.cases[0].key);
+
+    // Probe the write endpoint once so the status line is honest before the
+    // first keystroke rather than after it.
+    pushNotes();
+  });
+})();
+</script>
+</body>
+</html>

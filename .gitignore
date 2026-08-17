@@ -4,3 +4,6 @@
 # Review artifact build output — regenerate with `python3 review/build_review.py`
 use-cases-review.html
 use-cases-review-test.html
+
+# Downloaded page snapshots for the case-study comparison tool (regenerate with fetch.py)
+review/cs-compare/pages/

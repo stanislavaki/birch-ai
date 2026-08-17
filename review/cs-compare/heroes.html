@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Кейсы — герои всех 20 страниц</title>
+<style>
+  :root { --shot-w: 1280; --shot-h: 760; --cols: 4; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 1.5rem 1.5rem 4rem;
+    font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f4f4f6; color: #1a1a1a;
+  }
+  header { display: flex; align-items: baseline; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  h1 { font-size: 1.1rem; margin: 0; }
+  .hint { color: #666; }
+  .toggle { display: flex; gap: 0; border: 1px solid #ccc; border-radius: 6px; overflow: hidden; }
+  .toggle button {
+    font: inherit; padding: .35rem .8rem; border: 0; background: #fff; cursor: pointer; color: #444;
+  }
+  .toggle button[aria-pressed="true"] { background: #1a1a1a; color: #fff; }
+
+  .sheet { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 1rem; }
+  figure { margin: 0; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  figcaption {
+    padding: .5rem .7rem; font-weight: 600; display: flex; justify-content: space-between; gap: .5rem;
+  }
+  figcaption a { color: #666; font-weight: 400; text-decoration: none; }
+  figcaption a:hover { text-decoration: underline; }
+
+  /* Each cell renders a real 1280px-wide page and scales it down to the column
+     width, so proportions match the desktop layout exactly rather than the
+     page re-flowing to a narrow viewport. */
+  .shot { position: relative; width: 100%; overflow: hidden; background: #fff; }
+  .shot iframe { border: 0; position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Герои всех 20 кейсов</h1>
+  <div class="toggle">
+    <button type="button" data-side="after"  aria-pressed="true">Сейчас — 4:3</button>
+    <button type="button" data-side="before" aria-pressed="false">Было — квадрат</button>
+  </div>
+  <span class="hint">Каждая карточка — настоящая страница шириной 1280&nbsp;px, ужатая до колонки. Клик по названию открывает её целиком.</span>
+</header>
+
+<div class="sheet" id="sheet"></div>
+
+<script>
+const SHOT_W = 1280, SHOT_H = 760;
+let side = 'after';
+
+fetch('cases.json').then(r => r.json()).then(cfg => {
+  const sheet = document.getElementById('sheet');
+  cfg.cases.forEach(item => {
+    const fig = document.createElement('figure');
+    fig.innerHTML =
+      '<div class="shot"><iframe loading="lazy" scrolling="no"></iframe></div>' +
+      '<figcaption><span>' + item.name + '</span>' +
+      '<a href="index.html#' + item.key + '">сравнить →</a></figcaption>';
+    fig.dataset.key = item.key;
+    sheet.appendChild(fig);
+  });
+  layout();
+  load();
+});
+
+// The iframe is a fixed 1280x760 viewport scaled to whatever width the column
+// ended up; the wrapper's height has to follow the same scale or the cell clips
+// at the wrong place.
+function layout() {
+  document.querySelectorAll('.shot').forEach(shot => {
+    const scale = shot.clientWidth / SHOT_W;
+    const frame = shot.querySelector('iframe');
+    frame.style.width = SHOT_W + 'px';
+    frame.style.height = SHOT_H + 'px';
+    frame.style.transform = 'scale(' + scale + ')';
+    shot.style.height = Math.round(SHOT_H * scale) + 'px';
+  });
+}
+
+function load() {
+  document.querySelectorAll('figure').forEach(fig => {
+    fig.querySelector('iframe').src = 'pages/' + side + '/' + fig.dataset.key + '.html';
+  });
+}
+
+document.querySelectorAll('.toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    side = btn.dataset.side;
+    document.querySelectorAll('.toggle button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b === btn)));
+    load();
+  });
+});
+
+addEventListener('resize', layout);
+</script>
+</body>
+</html>
