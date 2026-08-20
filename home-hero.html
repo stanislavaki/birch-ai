@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bïrch — Home hero (word pills)</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     HOME HERO — word-pill composition  (Figma 18223:294)
+     ═════════════════════════════════════════════════════════ */
+
+  .hh {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--space-xl) + var(--nav-height)) var(--pad-horizontal) var(--space-xl);
+    overflow-x: clip; /* shaped pills overhang their layout box */
+  }
+
+  /* ── H1: one wrapping flex line-box.
+     Line breaks come from zero-height separators (.hh__br), not from
+     duplicated markup — desktop breaks after "teams", mobile breaks in
+     three more places. See CLAUDE.md "Переносы строк в flex-композициях". */
+  .hh__h1 {
+    --ps: var(--text-pill-size);   /* shared token — design-system/tokens.css */
+
+    /* ── Single scale for the whole composition ──
+       The Figma frame is drawn at a 52px kegl, so one Figma px == 1em/52.
+       Every box, padding, radius and sliced-shape dimension below is written
+       as calc(<figma px> * var(--u)) and therefore stays exact at any kegl.
+       Note this deliberately differs from ai-promo.html / manage.html, which
+       compress the pill box to 1.312em (line-height 1.1 + 3/8px padding).
+       Here the box must stay at Figma's 71px because two of the words are
+       sliced SVG shapes measured against that same 71px. */
+    --u: calc(1em / 52);
+    --hh-h: calc(71 * var(--u));           /* pill / shape box height */
+    --hh-gap: calc(8 * var(--u));          /* Figma column gap */
+    --hh-row-gap: calc(28.5 * var(--u));   /* Figma gap between the two rows */
+
+    /* Hardcoded — neither colour exists in tokens.css, and neither is a Figma
+       variable (get_variable_defs returns only Accent/Orange, Text/*, radii).
+       #FC4830 additionally lives baked into wrap-performance-main-hero.svg. */
+    --hh-yellow: #FFAA00;
+
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.25;      /* Figma "normal" for TT Commons = 65px @ 52px */
+    /* From the library text style Birch/Text pills (and Birch/Mobile/Text
+       pills): −2.6%. The hero mockup renders at 0 only because the style was
+       never applied to those layers — the style is the source of truth. */
+    letter-spacing: -0.026em;
+    margin: 0;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--hh-gap);
+    row-gap: 0;             /* vertical rhythm comes from .hh__br height */
+  }
+
+  .hh img { border-radius: 0; max-width: none; display: block; }
+
+  /* Zero-height line separator — carries the row gap itself, so no row-gap
+     on the flex container (which would otherwise double up around it). */
+  .hh__br {
+    flex: 0 0 100%;
+    height: var(--hh-row-gap);
+  }
+  .hh__br--m { display: none; }  /* mobile-only breaks */
+
+  /* ── Word pills ───────────────────────────────────────── */
+  .hh__pill {
+    display: block;
+    flex: none;
+    /* Figma: px 24, pb 6, pt 0 — the bottom padding is the optical
+       compensation for TT Commons' high cap-height. */
+    padding: 0 calc(24 * var(--u)) calc(6 * var(--u));
+    white-space: nowrap;
+    color: var(--color-text);
+  }
+  .hh__pill--sq    { border-radius: calc(16 * var(--u)); }
+  .hh__pill--round { border-radius: var(--radius-pill); }
+
+  .hh__pill--yellow { background: var(--hh-yellow); color: var(--color-text-inverted); }
+  .hh__pill--orange { background: var(--color-accent-orange); }
+  .hh__pill--ink    { color: var(--color-text-inverted); }
+
+  /* Outlined pills — the 4px ring is drawn with an inset box-shadow rather
+     than a border, so it stays inside the box (Figma "inside" stroke) and the
+     outlined pills keep exactly the same outer height as the filled ones. */
+  .hh__pill--outline {
+    padding-left:  calc(19.88 * var(--u));
+    padding-right: calc(19.88 * var(--u));
+    box-shadow: inset 0 0 0 calc(4 * var(--u)) var(--color-text);
+  }
+
+  /* ── Sliced shapes (performance / agents) ─────────────────
+     The layout box keeps the Figma width and the SVG sits behind it at its own
+     Figma size. The SVG is never stretched to fit the text — its slanted ends
+     would skew. The copy here is fixed by the design. */
+  .hh__shape {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--hh-h);
+    white-space: nowrap;
+  }
+  .hh__shape-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: var(--hh-h);
+    translate: calc(-50% + var(--bg-dx, 0em)) calc(-50% + var(--bg-dy, 0em));
+  }
+  /* Same bottom padding as a pill, so the text sits at the identical height
+     inside the shape as it does inside its neighbours. */
+  .hh__shape-text {
+    position: relative;
+    padding-bottom: calc(6 * var(--u));
+  }
+
+  .hh__shape--perf { width: calc(357 * var(--u)); }
+  .hh__shape--perf .hh__shape-bg {
+    width: calc(381 * var(--u));
+    --bg-dx: calc(-2 * var(--u));
+    /* No --bg-dy. The desktop frame draws this vector 2px below its own box,
+       which leaves the shape sitting 2px lower than its row-mates and, on the
+       mobile staircase, makes the gap above it 4.69 where every other gap is
+       3.54 (and the one below it 2.39). The mobile frame has the offset at 0. */
+  }
+  .hh__shape--agents { width: calc(211 * var(--u)); }
+  .hh__shape--agents .hh__shape-bg {
+    width: calc(214 * var(--u));
+    --bg-dx: calc(-1 * var(--u));
+  }
+
+  /* ── Cursor ─────────────────────────────────────────────── */
+  .hh__cursor {
+    position: relative;
+    flex: none;
+    width: calc(66 * var(--u));
+    height: var(--hh-h);
+    /* It parks to the right of "agents" and ends up to its left, so it crosses
+       over the pill mid-flight. A cursor always paints on top. */
+    z-index: 2;
+  }
+  /* The SVG overhangs its slot to the left by 7.95 Figma px — that overhang is
+     part of the Figma composition, not a nudge. */
+  .hh__cursor img {
+    position: absolute;
+    left: calc(-7.95 * var(--u));
+    top:  calc(-1.5 * var(--u));
+    width:  calc(73 * var(--u));
+    height: calc(76 * var(--u));
+    /* Thin white stroke on a dark ground: without its own layer the edges get
+       re-antialiased at every subpixel step and shimmer while it travels. */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, translate;
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     ENTRANCE ANIMATION
+     Phase A — "and" → "their" → "agents" pop in one after another, with the
+               cursor slot collapsed, so the three pills sit as a tight line.
+     Phase B — the cursor pops in one gap past the end of that line, holds,
+               then swings under the row along an arc and comes up into its
+               slot; on the way up it shoves the pills apart.
+
+     The collapse is done with `translate`, never with an animated width: the
+     cursor slot is always 66px in layout, the pills just sit shifted over it
+     by half its footprint ((66 + 8) / 2 = 37) until phase B zeroes them out.
+     No layout animation → the 4px pill strokes never land on a subpixel and
+     shimmer. And because the shift is symmetric the collapsed line stays
+     perfectly centred.
+
+     Independent motion channels, so nothing overwrites anything:
+       .hh__cursor      opacity + scale (transition)  ·  translate (keyframes)
+       .hh__anim--pill  opacity + scale + translate   (transitions, own clocks)
+     `translate` / `scale` are used as INDIVIDUAL properties, not folded into
+     one `transform` — that is what lets the pop and the slide run on separate
+     clocks without wrapper elements.
+     ═════════════════════════════════════════════════════════ */
+
+  /* [data-anim] is set by JS, so a no-JS / failed-JS page stays fully visible */
+
+  /* ── Pills: pop in collapsed, then get shoved apart ──
+     The shove runs on its own delay (--push-d) near the END of the cursor's
+     flight, with an overshoot ease, so it reads as the cursor pushing them
+     rather than everything gliding in parallel. */
+  .hh__h1[data-anim="1"] .hh__anim--pill {
+    opacity: 0;
+    scale: 0.86;
+    translate: var(--sx, 0px) 0;
+    transition:
+      opacity   var(--dur, 380ms) ease-out,
+      scale     var(--dur, 380ms) cubic-bezier(0.22, 1.2, 0.36, 1),
+      translate var(--push-dur, 460ms) cubic-bezier(0.34, 1.45, 0.45, 1);
+    /* positional — matches the property order above */
+    transition-delay: var(--d, 0ms), var(--d, 0ms), var(--push-d, 0ms);
+    will-change: opacity, scale, translate;
+  }
+  /* "and" + "their" lean right, "agents" leans left, each by half the
+     cursor footprint. */
+  .hh__h1[data-anim="1"] .hh__anim--l { --sx: calc(37 * var(--u)); }
+  .hh__h1[data-anim="1"] .hh__anim--r { --sx: calc(-37 * var(--u)); }
+
+  .hh__h1[data-anim="1"].is-in   .hh__anim--pill { opacity: 1; scale: 1; }
+  .hh__h1[data-anim="1"].is-open .hh__anim--pill { translate: 0 0; }
+
+  /* ── Cursor: pops in parked, then flies the arc ──
+     Parks one gap past the collapsed "agents":
+     74 (slot → agents) + 211 (agents) − 37 (its collapse) + 8 (gap) + 7.95
+     (the SVG's own left overhang) = 263.95 Figma px.
+
+     The arc is split across two elements, and that split is a performance fix,
+     not a style choice. A single keyframe track cannot be used, because its
+     values would have to be `calc()` on custom properties — such keyframes are
+     NOT compositable, so every frame costs a main-thread style recalc, and a
+     multi-stop polyline adds a velocity kink at each stop. Together that reads
+     as the cursor flickering/stuttering along the path. So:
+       .hh__cursor      X — a plain transition. Both endpoints resolve once,
+                            so it runs on the compositor, and it takes one real
+                            cubic-bezier (--fly-ease) instead of 9 linear hops.
+       .hh__cursor img  Y — a 3-stop keyframe (the dip is non-monotonic, which
+                            a transition cannot express). Three stops, one var. */
+  .hh__h1[data-anim="1"] .hh__anim--cursor {
+    --fx: calc((74 + 211 - 37 + 8 + 7.95) * var(--u));
+    --dip: calc(60 * var(--u));   /* how far below the row the arc swings — JS overrides from CFG.dip */
+    --fly-ease: cubic-bezier(0.43, 0.01, 0.24, 1);
+    opacity: 0;
+    scale: 0.7;
+    translate: var(--fx) 0;
+    transition:
+      opacity   var(--dur, 380ms) ease-out,
+      scale     var(--dur, 380ms) cubic-bezier(0.22, 1.2, 0.36, 1),
+      translate var(--fly-dur, 580ms) var(--fly-ease);
+    /* positional — matches the property order above */
+    transition-delay: var(--d, 0ms), var(--d, 0ms), var(--fly-d, 0ms);
+    will-change: opacity, scale, translate;
+  }
+  .hh__h1[data-anim="1"].is-in   .hh__anim--cursor { opacity: 1; scale: 1; }
+  .hh__h1[data-anim="1"].is-open .hh__anim--cursor { translate: 0 0; }
+
+  .hh__h1[data-anim="1"].is-open .hh__anim--cursor img {
+    animation: hh-dip var(--fly-dur, 580ms) ease-in-out var(--fly-d, 0ms) both;
+  }
+  @keyframes hh-dip {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 var(--dip); }
+  }
+
+  /* Used for one frame when the timeline is restarted — see play() below.
+     Without it the reset is a no-op: `transition` also runs in reverse, so
+     removing .is-in starts a fade-OUT and the reflow reads the still-visible
+     value instead of the "from" state. Killing `animation` here is what
+     rewinds the cursor's flight. */
+  .hh__h1.hh-no-anim,
+  .hh__h1.hh-no-anim * { transition: none !important; animation: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hh__h1[data-anim="1"] .hh__anim--pill,
+    .hh__h1[data-anim="1"] .hh__anim--cursor {
+      opacity: 1 !important;
+      scale: 1 !important;
+      translate: 0 0 !important;
+      transition: none !important;
+      animation: none !important;
+    }
+    .hh__h1[data-anim="1"] .hh__anim--cursor img {
+      animation: none !important;
+      translate: 0 0 !important;
+    }
+  }
+
+  /* ═════════════════════════════════════════════════════════
+     MOBILE ≤767px — hand-placed staircase
+     Ported 1:1 from Figma "hero / mobile 320" (18238:2). Six lines, each with
+     its own left offset, and the cursor moved to the RIGHT of "agents".
+     Element sizes are untouched — they already matched the frame to a
+     hundredth (performance 205.96 vs 206, agents 121.7 vs 122, cursor 38.08
+     vs 38.1); only the arrangement differs from desktop.
+
+       line 1  Ad automation        offset 26
+       line 2  for                         102
+       line 3  performance                   0
+       line 4  teams                       161
+       line 5  and · their                  15
+       line 6  agents · cursor              85
+
+     Offsets are Figma px at the 30px mobile kegl, expressed in em (px ÷ 30),
+     measured from the composition's own left bound (x = 7 in the frame), so
+     the whole staircase stays centred at any width.
+     ═════════════════════════════════════════════════════════ */
+  @media (max-width: 767px) {
+    .hh {
+      padding-top: calc(var(--space-lg) + var(--nav-height));
+      padding-bottom: var(--space-lg);
+    }
+
+    .hh__h1 {
+      --ps: var(--text-pill-size-mobile);  /* shared token — 30px @ 320, which is
+                                              exactly Birch/Mobile/Text pills */
+      --hh-row-gap: 0.118em;   /* 3.54px @ 30 → row pitch 44.5, as in the frame */
+      --hh-gap: 0.103em;       /* 3.1px  @ 30 */
+
+      /* 8.89em is the true content width; the extra 0.06em is slack so line 4
+         (the widest, and exactly 8.890em) can never tip over into a wrap and
+         break the staircase. Costs ~1px of centring. */
+      width: 8.95em;
+      margin-inline: auto;
+      justify-content: flex-start;
+    }
+
+    .hh__br--m { display: block; }
+
+    /* The desktop row break doubles as the line-4 → line-5 break here. In the
+       frame that one gap is closed, and line 5 can ride up further still —
+       "teams" is off to the right, so the space under it is empty.
+
+       The ceiling is a real collision, not taste: "their" ends at x 170.6 and
+       "teams" starts at 161, so they share a 9.6px column. "their" is a pill,
+       and 9.6px in from its right edge its cap has already dropped 3.25px, so
+       that is the clearance. Past ~0.11em the two shapes start touching, and
+       going further needs "teams" moved right or line 5 shortened. */
+    .hh__br:not(.hh__br--m) { height: 0; }
+    .hh__h1 { --st5-lift: 0.1em; }
+    .hh__anim--l { margin-top: calc(-1 * var(--st5-lift)); }
+
+    /* The cursor sits after "agents" here, but before it in the DOM (desktop
+       order). `order` moves it to the end of the flex container, which is the
+       end of the last line. */
+    .hh__anim--cursor { order: 1; margin-left: 0.064em; }
+
+    /* Staircase offsets — .hh__st--N marks the first item of each line.
+       Explicit step classes on purpose: styling classes are ambiguous here
+       (both "for" and the outlined "and"/"their" are .hh__pill--round). */
+    .hh__st--1 { margin-left: 0.867em; }   /* Ad automation */
+    .hh__st--2 { margin-left: 3.400em; }   /* for */
+    .hh__st--3 { margin-left: 0; }         /* performance */
+    .hh__st--4 { margin-left: 5.367em; }   /* teams */
+    .hh__st--5 { margin-left: 0.500em; }   /* and */
+    .hh__st--6 { margin-left: 2.833em; }   /* agents */
+
+    /* ── Animation on mobile ──
+       The cursor's resting place IS the parked position here, so there is
+       nothing to fly to and nothing to shove: no arc, no dip, no spread.
+       What remains is the stagger — and · their · agents pop in, cursor last. */
+    .hh__h1[data-anim="1"] .hh__anim--pill { --sx: 0px; }
+    /* The cursor's travel lives in --fx, not --sx — zeroing --sx alone leaves
+       it sliding in from 178px. */
+    .hh__h1[data-anim="1"] .hh__anim--cursor { --sx: 0px; --fx: 0px; }
+    .hh__h1[data-anim="1"].is-open .hh__anim--cursor img { animation: none; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ── dev nav (design-system/webflow-env-nav.html) — injected below ── -->
+<div id="sim-nav-slot"></div>
+
+<!-- ═════════════════════════════════════════════════════════
+     HOME HERO
+     Figma: https://www.figma.com/design/qfwjMYSRMswozcmo3VfLP8/Website-2026?node-id=18223-294
+     ═════════════════════════════════════════════════════════ -->
+<section class="hh">
+  <h1 class="hh__h1" id="hh-h1">
+
+    <span class="hh__pill hh__pill--yellow hh__pill--sq hh__st hh__st--1">Ad automation</span>
+    <i class="hh__br hh__br--m" aria-hidden="true"></i>
+
+    <span class="hh__pill hh__pill--orange hh__pill--round hh__pill--ink hh__st hh__st--2">for</span>
+    <i class="hh__br hh__br--m" aria-hidden="true"></i>
+
+    <span class="hh__shape hh__shape--perf hh__st hh__st--3">
+      <img class="hh__shape-bg" aria-hidden="true" alt=""
+           src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a65069c1972278c4dc8_wrap-performance-main-hero.svg"
+           width="381" height="71">
+      <span class="hh__shape-text">performance</span>
+    </span>
+    <i class="hh__br hh__br--m" aria-hidden="true"></i>
+
+    <span class="hh__pill hh__pill--orange hh__pill--sq hh__st hh__st--4">teams</span>
+
+    <!-- desktop line break -->
+    <i class="hh__br" aria-hidden="true"></i>
+
+    <span class="hh__pill hh__pill--outline hh__pill--round hh__anim--pill hh__anim--l hh__st hh__st--5">and</span>
+    <span class="hh__pill hh__pill--outline hh__pill--round hh__anim--pill hh__anim--l">their</span>
+    <i class="hh__br hh__br--m" aria-hidden="true"></i>
+
+    <span class="hh__cursor hh__anim--cursor" aria-hidden="true">
+      <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a65fe26d9a01b1423f9_cursor-main-hero.svg"
+           alt="" width="73" height="76">
+    </span>
+
+    <span class="hh__shape hh__shape--agents hh__anim--pill hh__anim--r hh__st hh__st--6">
+      <img class="hh__shape-bg" aria-hidden="true" alt=""
+           src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a655e0fb912fe5f793a_wrap-agents-main-hero.svg"
+           width="214" height="71">
+      <span class="hh__shape-text">agents</span>
+    </span>
+
+  </h1>
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   HOME HERO — entrance timeline
+   ═══════════════════════════════════════════════════════════ */
+(function () {
+  var h1 = document.getElementById('hh-h1');
+  if (!h1) return;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var CFG = {
+    startAt:      320,   // ms — beat of silence before row 2 starts at all
+    pillDur:      520,   // ms — one pill's pop-in
+    stagger:      140,   // ms — gap between and → their → agents
+    cursorGap:    280,   // ms — pause before the cursor shows up
+    cursorDur:    400,   // ms — the cursor's own pop-in
+    hold:         360,   // ms — how long it sits at the end of the line
+    flyDur:       560,   // ms — the arc, park → under the row → into the slot
+    dip:          60,    // Figma px — how far below the row the arc swings
+    flyEase:      'cubic-bezier(0.43, 0.01, 0.24, 1)',  // easing of the horizontal travel
+    // pushAt is deliberately late in the flight (370 of 560): the pills stay
+    // shut while the cursor swings under the row, and only part as it rises
+    // into the gap — then keep settling past its landing. That late, overshot
+    // parting is what reads as a shove rather than a synchronised glide.
+    pushAt:       370,   // ms into the flight when the pills start parting
+    pushDur:      440,   // ms — the shove itself (overshoot ease)
+  };
+
+  // Pop-in order. The cursor is last and is handled separately — it pops in
+  // where it parks, then flies.
+  var seq    = h1.querySelectorAll('.hh__anim--pill');
+  var cursor = h1.querySelector('.hh__anim--cursor');
+
+  function schedule() {
+    // Everything downstream is measured from startAt, so the whole row-2
+    // sequence shifts as one when that beat changes.
+    var t0 = CFG.startAt;
+
+    seq.forEach(function (el, i) {
+      el.style.setProperty('--dur', CFG.pillDur + 'ms');
+      el.style.setProperty('--d', (t0 + i * CFG.stagger) + 'ms');
+    });
+
+    var cursorAt = t0 + seq.length * CFG.stagger + CFG.cursorGap;
+    cursor.style.setProperty('--dur', CFG.cursorDur + 'ms');
+    cursor.style.setProperty('--d', cursorAt + 'ms');
+
+    var flyAt = cursorAt + CFG.cursorDur + CFG.hold;
+    cursor.style.setProperty('--fly-dur', CFG.flyDur + 'ms');
+    cursor.style.setProperty('--fly-d', flyAt + 'ms');
+    // --dip is in Figma px, so it has to go through --u like everything else.
+    cursor.style.setProperty('--dip', 'calc(' + CFG.dip + ' * var(--u))');
+    cursor.style.setProperty('--fly-ease', CFG.flyEase);
+
+    // The shove fires late in the flight — while the cursor is still rising
+    // out of the arc — and outlasts its landing slightly, so the pills are
+    // still settling when it arrives.
+    seq.forEach(function (el) {
+      el.style.setProperty('--push-dur', CFG.pushDur + 'ms');
+      el.style.setProperty('--push-d', (flyAt + CFG.pushAt) + 'ms');
+    });
+  }
+
+  function play() {
+    h1.setAttribute('data-anim', '1');
+
+    // Snap back to the "from" state with transitions off, then flush it.
+    // Deliberately not requestAnimationFrame: rAF is paused in a backgrounded
+    // tab and the timeline would stall there. Two reflows are required — one
+    // to commit the reset, one to commit the re-enabled transitions.
+    h1.classList.add('hh-no-anim');
+    h1.classList.remove('is-in', 'is-open');
+    void h1.offsetWidth;
+
+    h1.classList.remove('hh-no-anim');
+    schedule();
+    void h1.offsetWidth;
+
+    // Both classes land at once — the whole sequence is driven by
+    // transition-delay, so there are no JS timers to drift or leak.
+    h1.classList.add('is-in', 'is-open');
+  }
+  window._hhPlay = play;
+  window._hhCfg  = CFG;
+
+  h1.setAttribute('data-anim', '1');
+  if (reduce) {
+    h1.classList.add('is-in', 'is-open');
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { io.disconnect(); play(); }
+      });
+    }, { threshold: 0.35 });
+    io.observe(h1);
+  }
+
+})();
+</script>
+
+<!-- ═══════════════ DEV ONLY — strip before Webflow ═══════════════ -->
+<style>
+  .hh-dev {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 9990;
+    width: 15rem; padding: 0.75rem 0.875rem;
+    max-height: calc(100vh - 2rem); overflow-y: auto;
+    background: rgba(20,20,26,0.92); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 0.75rem;
+    font: 500 0.75rem/1.4 var(--font); color: #cfcfd6;
+  }
+  .hh-dev h4 { margin: 0 0 0.5rem; font-size: 0.6875rem; letter-spacing: 0.06em;
+               text-transform: uppercase; color: #8a8a95; cursor: pointer;
+               user-select: none; }
+  .hh-dev h4::after { content: ' —'; }
+  .hh-dev.is-folded h4 { margin: 0; }
+  .hh-dev.is-folded h4::after { content: ' +'; }
+  .hh-dev.is-folded > *:not(h4) { display: none; }
+  .hh-dev label { display: flex; align-items: center; justify-content: space-between;
+                  gap: 0.5rem; margin-bottom: 0.375rem; }
+  .hh-dev input[type=range] { width: 7.5rem; accent-color: var(--color-accent-orange); }
+  .hh-dev select { width: 7.5rem; padding: 0.15rem 0.25rem; background: #0e0e13; color: #cfcfd6;
+                   border: 1px solid rgba(255,255,255,0.18); border-radius: 0.25rem;
+                   font: 500 0.6875rem var(--font); }
+  .hh-dev b { min-width: 2.5rem; text-align: right; color: #fff; font-weight: 600; }
+  .hh-dev button { width: 100%; margin-top: 0.5rem; padding: 0.4rem;
+                   background: var(--color-accent-orange); color: #000; border: 0;
+                   border-radius: 0.5rem; font: 600 0.8125rem var(--font); cursor: pointer; }
+  .hh-dev .row { display: flex; align-items: center; justify-content: space-between; }
+  .hh-dev button + button { background: transparent; color: #cfcfd6;
+                            border: 1px solid rgba(255,255,255,0.22); }
+  .hh-dev textarea { display: none; width: 100%; margin-top: 0.5rem; padding: 0.4rem;
+                     background: #0e0e13; color: #cfcfd6; border: 1px solid rgba(255,255,255,0.16);
+                     border-radius: 0.375rem; font: 400 0.6875rem/1.35 ui-monospace, monospace;
+                     resize: vertical; }
+  .hh-dev textarea.is-shown { display: block; }
+  .hh-dev svg { display: block; width: 100%; height: auto; margin-top: 0.5rem;
+                background: #0e0e13; border: 1px solid rgba(255,255,255,0.14);
+                border-radius: 0.5rem; touch-action: none; cursor: crosshair; }
+  .hh-dev svg .bz-grid  { stroke: rgba(255,255,255,0.10); stroke-width: 1; }
+  .hh-dev svg .bz-frame { stroke: rgba(255,255,255,0.22); stroke-width: 1; fill: none; }
+  .hh-dev svg .bz-curve { stroke: var(--color-accent-orange); stroke-width: 2; fill: none; }
+  .hh-dev svg .bz-arm   { stroke: rgba(255,255,255,0.45); stroke-width: 1; }
+  .hh-dev svg .bz-pt    { fill: var(--color-accent-orange); cursor: grab; }
+  .hh-dev #hh-dev-bezval { margin-top: 0.375rem; color: #fff;
+                           font: 500 0.6875rem ui-monospace, monospace;
+                           word-break: break-all; }
+  @media (max-width: 767px) { .hh-dev { display: none; } }
+</style>
+<div class="hh-dev">
+  <h4 id="hh-dev-fold">Hero animation</h4>
+  <div id="hh-dev-sliders"></div>
+  <label class="row">fly ease<select id="hh-dev-ease"></select></label>
+  <svg id="hh-dev-bez" viewBox="0 0 150 150"></svg>
+  <div id="hh-dev-bezval"></div>
+  <button id="hh-dev-replay">Replay</button>
+  <button id="hh-dev-copy">Copy config</button>
+  <textarea id="hh-dev-out" readonly rows="4"></textarea>
+</div>
+<script>
+(function () {
+  var C = window._hhCfg;
+  if (!C) return;
+  var defs = [
+    ['startAt',   'start delay',  0, 2000, 20],
+    ['pillDur',   'pill dur',   100, 900,  20],
+    ['stagger',   'stagger',      0, 400,  10],
+    ['cursorGap', 'cursor gap',   0, 600,  20],
+    ['cursorDur', 'cursor dur',  80, 900,  20],
+    ['hold',      'hold',         0, 1500, 20],
+    ['flyDur',    'fly dur',    200, 2000, 20],
+    ['dip',       'arc depth',    0, 200,   2],
+    ['pushAt',    'push at',      0, 1200, 10],
+    ['pushDur',   'push dur',   100, 1200, 20]
+  ];
+  var host = document.getElementById('hh-dev-sliders');
+  defs.forEach(function (d) {
+    var l = document.createElement('label');
+    l.innerHTML = '<span>' + d[1] + '</span>' +
+      '<input type="range" min="' + d[2] + '" max="' + d[3] + '" step="' + d[4] +
+      '" value="' + C[d[0]] + '"><b>' + C[d[0]] + '</b>';
+    var inp = l.querySelector('input'), out = l.querySelector('b');
+    inp.addEventListener('input', function () {
+      C[d[0]] = +inp.value; out.textContent = inp.value; window._hhPlay();
+    });
+    host.appendChild(l);
+  });
+  var EASES = [
+    ['swift',        'cubic-bezier(0.5, 0, 0.15, 1)'],
+    ['ease-in-out',  'cubic-bezier(0.65, 0, 0.35, 1)'],
+    ['glide',        'cubic-bezier(0.25, 0, 0.2, 1)'],
+    ['snap',         'cubic-bezier(0.75, 0, 0.18, 1)'],
+    ['overshoot',    'cubic-bezier(0.5, 0, 0.25, 1.25)'],
+    ['linear',       'linear']
+  ];
+  var sel = document.getElementById('hh-dev-ease');
+  EASES.forEach(function (e) {
+    var o = document.createElement('option');
+    o.value = e[1]; o.textContent = e[0];
+    if (e[1] === C.flyEase) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', function () {
+    C.flyEase = sel.value;
+    if (window._hhSetBez) window._hhSetBez(sel.value);
+    window._hhPlay();
+  });
+
+  /* ── cubic-bezier editor ──
+     P0 (0,0) and P3 (1,1) are fixed; P1/P2 are draggable. The y axis is drawn
+     over -0.4…1.4 so control points can be pulled past the box for overshoot,
+     which is exactly what CSS allows (x is clamped to 0…1, y is not). */
+  var svg = document.getElementById('hh-dev-bez');
+  var valEl = document.getElementById('hh-dev-bezval');
+  var W = 150, H = 150, YMIN = -0.4, YMAX = 1.4;
+  var P = [0.65, 0, 0.35, 1];    // p1x, p1y, p2x, p2y
+  var dragIdx = null;
+
+  var toX = x => x * W;
+  var toY = y => H * (YMAX - y) / (YMAX - YMIN);
+  var fromX = px => px / W;
+  var fromY = py => YMAX - (py / H) * (YMAX - YMIN);
+
+  function parse(str) {
+    var m = /cubic-bezier\(([^)]+)\)/.exec(str);
+    if (m) return m[1].split(',').map(Number);
+    if (str === 'linear') return [0, 0, 1, 1];
+    return null;
+  }
+  function fmt(p) {
+    return 'cubic-bezier(' + p.map(function (n) {
+      return Math.round(n * 100) / 100;
+    }).join(', ') + ')';
+  }
+  function sample(p, t) {
+    var u = 1 - t, a = 3 * u * u * t, b = 3 * u * t * t, c = t * t * t;
+    return [a * p[0] + b * p[2] + c, a * p[1] + b * p[3] + c];
+  }
+
+  function draw() {
+    var pts = [];
+    for (var t = 0; t <= 1.0001; t += 0.02) {
+      var q = sample(P, t);
+      pts.push(toX(q[0]).toFixed(1) + ',' + toY(q[1]).toFixed(1));
+    }
+    svg.innerHTML =
+      '<line class="bz-grid" x1="0" y1="' + toY(0.5) + '" x2="' + W + '" y2="' + toY(0.5) + '"/>' +
+      '<line class="bz-grid" x1="' + toX(0.5) + '" y1="0" x2="' + toX(0.5) + '" y2="' + H + '"/>' +
+      '<rect class="bz-frame" x="0.5" y="' + toY(1) + '" width="' + (W - 1) + '" height="' + (toY(0) - toY(1)) + '"/>' +
+      '<line class="bz-arm" x1="' + toX(0) + '" y1="' + toY(0) + '" x2="' + toX(P[0]) + '" y2="' + toY(P[1]) + '"/>' +
+      '<line class="bz-arm" x1="' + toX(1) + '" y1="' + toY(1) + '" x2="' + toX(P[2]) + '" y2="' + toY(P[3]) + '"/>' +
+      '<polyline class="bz-curve" points="' + pts.join(' ') + '"/>' +
+      '<circle class="bz-pt" data-i="0" cx="' + toX(P[0]) + '" cy="' + toY(P[1]) + '" r="5"/>' +
+      '<circle class="bz-pt" data-i="1" cx="' + toX(P[2]) + '" cy="' + toY(P[3]) + '" r="5"/>';
+    valEl.textContent = fmt(P);
+  }
+
+  function setFromString(str, redraw) {
+    var p = parse(str);
+    if (p) { P = p; if (redraw !== false) draw(); }
+  }
+
+  function evtUnit(e) {
+    var r = svg.getBoundingClientRect();
+    return [fromX((e.clientX - r.left) / r.width * W),
+            fromY((e.clientY - r.top) / r.height * H)];
+  }
+
+  svg.addEventListener('pointerdown', function (e) {
+    var u = evtUnit(e);
+    var d0 = Math.hypot(u[0] - P[0], u[1] - P[1]);
+    var d1 = Math.hypot(u[0] - P[2], u[1] - P[3]);
+    dragIdx = d0 <= d1 ? 0 : 1;
+    svg.setPointerCapture(e.pointerId);
+    move(e);
+  });
+  svg.addEventListener('pointermove', function (e) { if (dragIdx !== null) move(e); });
+  svg.addEventListener('pointerup', function () {
+    if (dragIdx === null) return;
+    dragIdx = null;
+    C.flyEase = fmt(P);
+    window._hhPlay();               // replay once, on release — not every frame
+  });
+
+  function move(e) {
+    var u = evtUnit(e);
+    var x = Math.max(0, Math.min(1, u[0]));           // CSS clamps x to 0…1
+    var y = Math.max(YMIN, Math.min(YMAX, u[1]));     // y is free (overshoot)
+    if (dragIdx === 0) { P[0] = x; P[1] = y; } else { P[2] = x; P[3] = y; }
+    C.flyEase = fmt(P);
+    draw();
+  }
+
+  window._hhSetBez = setFromString;
+  setFromString(C.flyEase);
+
+  document.getElementById('hh-dev-fold').addEventListener('click', function () {
+    document.querySelector('.hh-dev').classList.toggle('is-folded');
+  });
+  document.getElementById('hh-dev-replay').addEventListener('click', window._hhPlay);
+
+  // Values live in this browser's memory only — this dumps them so they can be
+  // pasted back and baked into CFG.
+  document.getElementById('hh-dev-copy').addEventListener('click', function () {
+    var txt = defs.map(function (d) { return '    ' + d[0] + ': ' + C[d[0]] + ','; }).join('\n');
+    txt += '\n    flyEase: ' + JSON.stringify(C.flyEase) + ',';
+    txt = 'CFG:\n' + txt;
+    var out = document.getElementById('hh-dev-out');
+    out.value = txt;
+    out.classList.add('is-shown');
+    out.select();
+    try { navigator.clipboard.writeText(txt); } catch (e) {}
+  });
+})();
+</script>
+
+<script>
+/* dev nav injection */
+fetch('design-system/webflow-env-nav.html')
+  .then(function (r) { return r.text(); })
+  .then(function (html) {
+    document.getElementById('sim-nav-slot').outerHTML = html;
+  })
+  .catch(function () {});
+</script>
+
+</body>
+</html>
