@@ -1,0 +1,542 @@
+<style>
+
+/* ===========================================================
+   INTRO PILLS - word-pill lockup with the cursor fly-in
+   Source of truth: home-hero.html (dev page) - keep both in sync.
+   Figma: 18223:294 (desktop) / 18238:2 (mobile staircase)
+
+   Embed rules applied (see EMBED-ISSUES.md):
+   - no background and no horizontal padding: both come from Webflow
+   - ASCII-only, comments included: Webflow mangles non-ASCII on save
+   - tokens: referenced from Webflow's :root variables where they exist,
+     copied only where they do not - see the wrapper block below
+   - no overflow guard on purpose. The parked cursor stays inside the
+     container at every width (measured 320 / 375 / 1280), and the arc
+     dips BELOW the row - overflow:hidden would clip it.
+   =========================================================== */
+
+/* The Webflow .w-embed wrapper collapses to 0 inside a flex slot. */
+.w-embed:has(> .intro-pills-embed) { width: 100%; }
+
+.intro-pills-embed {
+  /* An embed cannot link a stylesheet, but Webflow's variables already sit on
+     :root and any embed on the page can read them - no link, no extra request,
+     no new point of failure. So: reference what exists, copy only what does not,
+     and say per line which is which.
+
+     Referenced - values verified identical to this embed's needs. The second
+     argument is a fallback for environments without Webflow's :root (the local
+     embed harness). It never fires on the site, so it cannot drift production. */
+  --font:                var(--_typography---fonts--primary-font, "TT Commons Pro Variable", Arial, sans-serif);
+  --color-text:          var(--_color---secondary--neutral--white, #FFFFFF);
+  --color-accent-orange: var(--_color---secondary--orange, #FF7700);
+
+  /* Copied, with the reason:
+     - text-inverted: Figma says Text/Inverted #000000, the nearest Webflow
+       variable (secondary/neutral/black) is #0b0b0b. The Webflow value has
+       drifted from Figma, so referencing it would silently change the design.
+       Re-sync the variable, then switch this to a reference.
+     - radius-pill: no matching variable (button radius is 0px, card is 1rem).
+     - the pill kegl below is a clamp(); not one of the site's 134 variables
+       holds a clamp expression, so it cannot be referenced today. */
+  --color-text-inverted: #000000;
+  --radius-pill: 9999px;
+
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  font-family: var(--font);
+  /* no background - comes from Webflow */
+  /* no padding-inline - comes from Webflow */
+}
+
+
+  /* =========================================================
+     HOME HERO - word-pill composition  (Figma 18223:294)
+     ========================================================= */
+
+
+  /* -- H1: one wrapping flex line-box.
+     Line breaks come from zero-height separators (.ip-br), not from
+     duplicated markup - desktop breaks after "teams", mobile breaks in
+     three more places. See the line-break rule for flex compositions in CLAUDE.md. */
+  .ip-h1 {
+    /* THE one number this whole composition hangs on. Everything below is
+       expressed in em via --u, so changing this rescales the entire lockup:
+       pills, sliced shapes, gaps, the mobile staircase, the cursor's travel.
+
+       Set once on .container.intro inside the intro component - including the
+       mobile switch - so this embed needs only the one name. The clamp here is
+       a fallback for when that block is absent (and for the local harness).
+       52px @ 1280 - matches Birch/Text pills in the Figma library. */
+    --ps: var(--pill-size, clamp(1.625rem, 4.0625vw, 3.25rem));
+
+    /* -- Single scale for the whole composition --
+       The Figma frame is drawn at a 52px kegl, so one Figma px == 1em/52.
+       Every box, padding, radius and sliced-shape dimension below is written
+       as calc(<figma px> * var(--u)) and therefore stays exact at any kegl.
+       Note this deliberately differs from ai-promo.html / manage.html, which
+       compress the pill box to 1.312em (line-height 1.1 + 3/8px padding).
+       Here the box must stay at Figma's 71px because two of the words are
+       sliced SVG shapes measured against that same 71px. */
+    --u: calc(1em / 52);
+    --ip-h: calc(71 * var(--u));           /* pill / shape box height */
+    --ip-gap: calc(8 * var(--u));          /* Figma column gap */
+    --ip-row-gap: calc(28.5 * var(--u));   /* Figma gap between the two rows */
+
+    /* Hardcoded - neither colour exists in tokens.css, and neither is a Figma
+       variable (get_variable_defs returns only Accent/Orange, Text/*, radii).
+       #FC4830 additionally lives baked into wrap-performance-main-hero.svg. */
+    --ip-yellow: #FFAA00;
+
+    font-size: var(--ps);
+    font-weight: 600;
+    line-height: 1.25;      /* Figma "normal" for TT Commons = 65px @ 52px */
+    /* From the library text style Birch/Text pills (and Birch/Mobile/Text
+       pills): -2.6%. The hero mockup renders at 0 only because the style was
+       never applied to those layers - the style is the source of truth. */
+    letter-spacing: -0.026em;
+    margin: 0;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: var(--ip-gap);
+    row-gap: 0;             /* vertical rhythm comes from .ip-br height */
+  }
+
+  .intro-pills-embed img { border-radius: 0; max-width: none; display: block; }
+
+  /* Zero-height line separator - carries the row gap itself, so no row-gap
+     on the flex container (which would otherwise double up around it). */
+  .ip-br {
+    flex: 0 0 100%;
+    height: var(--ip-row-gap);
+  }
+  .ip-br--m { display: none; }  /* mobile-only breaks */
+
+  /* -- Word pills ----------------------------------------- */
+  .ip-pill {
+    display: block;
+    flex: none;
+    /* Figma: px 24, pb 6, pt 0 - the bottom padding is the optical
+       compensation for TT Commons' high cap-height. */
+    padding: 0 calc(24 * var(--u)) calc(6 * var(--u));
+    white-space: nowrap;
+    color: var(--color-text);
+  }
+  .ip-pill--sq    { border-radius: calc(16 * var(--u)); }
+  .ip-pill--round { border-radius: var(--radius-pill); }
+
+  .ip-pill--yellow { background: var(--ip-yellow); color: var(--color-text-inverted); }
+  .ip-pill--orange { background: var(--color-accent-orange); }
+  .ip-pill--ink    { color: var(--color-text-inverted); }
+
+  /* Outlined pills - the 4px ring is drawn with an inset box-shadow rather
+     than a border, so it stays inside the box (Figma "inside" stroke) and the
+     outlined pills keep exactly the same outer height as the filled ones. */
+  .ip-pill--outline {
+    padding-left:  calc(19.88 * var(--u));
+    padding-right: calc(19.88 * var(--u));
+    box-shadow: inset 0 0 0 calc(4 * var(--u)) var(--color-text);
+  }
+
+  /* -- Sliced shapes (performance / agents) -----------------
+     The layout box keeps the Figma width and the SVG sits behind it at its own
+     Figma size. The SVG is never stretched to fit the text - its slanted ends
+     would skew. The copy here is fixed by the design. */
+  .ip-shape {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--ip-h);
+    white-space: nowrap;
+  }
+  .ip-shape-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: var(--ip-h);
+    translate: calc(-50% + var(--bg-dx, 0em)) calc(-50% + var(--bg-dy, 0em));
+  }
+  /* Same bottom padding as a pill, so the text sits at the identical height
+     inside the shape as it does inside its neighbours. */
+  .ip-shape-text {
+    position: relative;
+    padding-bottom: calc(6 * var(--u));
+  }
+
+  .ip-shape--perf { width: calc(357 * var(--u)); }
+  .ip-shape--perf .ip-shape-bg {
+    width: calc(381 * var(--u));
+    --bg-dx: calc(-2 * var(--u));
+    /* No --bg-dy. The desktop frame draws this vector 2px below its own box,
+       which leaves the shape sitting 2px lower than its row-mates and, on the
+       mobile staircase, makes the gap above it 4.69 where every other gap is
+       3.54 (and the one below it 2.39). The mobile frame has the offset at 0. */
+  }
+  .ip-shape--agents { width: calc(211 * var(--u)); }
+  .ip-shape--agents .ip-shape-bg {
+    width: calc(214 * var(--u));
+    --bg-dx: calc(-1 * var(--u));
+  }
+
+  /* -- Cursor ----------------------------------------------- */
+  .ip-cursor {
+    position: relative;
+    flex: none;
+    width: calc(66 * var(--u));
+    height: var(--ip-h);
+    /* It parks to the right of "agents" and ends up to its left, so it crosses
+       over the pill mid-flight. A cursor always paints on top. */
+    z-index: 2;
+  }
+  /* The SVG overhangs its slot to the left by 7.95 Figma px - that overhang is
+     part of the Figma composition, not a nudge. */
+  .ip-cursor img {
+    position: absolute;
+    left: calc(-7.95 * var(--u));
+    top:  calc(-1.5 * var(--u));
+    width:  calc(73 * var(--u));
+    height: calc(76 * var(--u));
+    /* Thin white stroke on a dark ground: without its own layer the edges get
+       re-antialiased at every subpixel step and shimmer while it travels. */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform, translate;
+  }
+
+  /* =========================================================
+     ENTRANCE ANIMATION
+     Phase A - "and" -> "their" -> "agents" pop in one after another, with the
+               cursor slot collapsed, so the three pills sit as a tight line.
+     Phase B - the cursor pops in one gap past the end of that line, holds,
+               then swings under the row along an arc and comes up into its
+               slot; on the way up it shoves the pills apart.
+
+     The collapse is done with `translate`, never with an animated width: the
+     cursor slot is always 66px in layout, the pills just sit shifted over it
+     by half its footprint ((66 + 8) / 2 = 37) until phase B zeroes them out.
+     No layout animation -> the 4px pill strokes never land on a subpixel and
+     shimmer. And because the shift is symmetric the collapsed line stays
+     perfectly centred.
+
+     Independent motion channels, so nothing overwrites anything:
+       .ip-cursor      opacity + scale (transition)  .  translate (keyframes)
+       .ip-anim--pill  opacity + scale + translate   (transitions, own clocks)
+     `translate` / `scale` are used as INDIVIDUAL properties, not folded into
+     one `transform` - that is what lets the pop and the slide run on separate
+     clocks without wrapper elements.
+     ========================================================= */
+
+  /* [data-anim] is set by JS, so a no-JS / failed-JS page stays fully visible */
+
+  /* -- Pills: pop in collapsed, then get shoved apart --
+     The shove runs on its own delay (--push-d) near the END of the cursor's
+     flight, with an overshoot ease, so it reads as the cursor pushing them
+     rather than everything gliding in parallel. */
+  .ip-h1[data-anim="1"] .ip-anim--pill {
+    opacity: 0;
+    scale: 0.86;
+    translate: var(--sx, 0px) 0;
+    transition:
+      opacity   var(--dur, 380ms) ease-out,
+      scale     var(--dur, 380ms) cubic-bezier(0.22, 1.2, 0.36, 1),
+      translate var(--push-dur, 460ms) cubic-bezier(0.34, 1.45, 0.45, 1);
+    /* positional - matches the property order above */
+    transition-delay: var(--d, 0ms), var(--d, 0ms), var(--push-d, 0ms);
+    will-change: opacity, scale, translate;
+  }
+  /* "and" + "their" lean right, "agents" leans left, each by half the
+     cursor footprint. */
+  .ip-h1[data-anim="1"] .ip-anim--l { --sx: calc(37 * var(--u)); }
+  .ip-h1[data-anim="1"] .ip-anim--r { --sx: calc(-37 * var(--u)); }
+
+  .ip-h1[data-anim="1"].is-in   .ip-anim--pill { opacity: 1; scale: 1; }
+  .ip-h1[data-anim="1"].is-open .ip-anim--pill { translate: 0 0; }
+
+  /* -- Cursor: pops in parked, then flies the arc --
+     Parks one gap past the collapsed "agents":
+     74 (slot -> agents) + 211 (agents) - 37 (its collapse) + 8 (gap) + 7.95
+     (the SVG's own left overhang) = 263.95 Figma px.
+
+     The arc is split across two elements, and that split is a performance fix,
+     not a style choice. A single keyframe track cannot be used, because its
+     values would have to be `calc()` on custom properties - such keyframes are
+     NOT compositable, so every frame costs a main-thread style recalc, and a
+     multi-stop polyline adds a velocity kink at each stop. Together that reads
+     as the cursor flickering/stuttering along the path. So:
+       .ip-cursor      X - a plain transition. Both endpoints resolve once,
+                            so it runs on the compositor, and it takes one real
+                            cubic-bezier (--fly-ease) instead of 9 linear hops.
+       .ip-cursor img  Y - a 3-stop keyframe (the dip is non-monotonic, which
+                            a transition cannot express). Three stops, one var. */
+  .ip-h1[data-anim="1"] .ip-anim--cursor {
+    --fx: calc((74 + 211 - 37 + 8 + 7.95) * var(--u));
+    --dip: calc(60 * var(--u));   /* how far below the row the arc swings - JS overrides from CFG.dip */
+    --fly-ease: cubic-bezier(0.43, 0.01, 0.24, 1);
+    opacity: 0;
+    scale: 0.7;
+    translate: var(--fx) 0;
+    transition:
+      opacity   var(--dur, 380ms) ease-out,
+      scale     var(--dur, 380ms) cubic-bezier(0.22, 1.2, 0.36, 1),
+      translate var(--fly-dur, 580ms) var(--fly-ease);
+    /* positional - matches the property order above */
+    transition-delay: var(--d, 0ms), var(--d, 0ms), var(--fly-d, 0ms);
+    will-change: opacity, scale, translate;
+  }
+  .ip-h1[data-anim="1"].is-in   .ip-anim--cursor { opacity: 1; scale: 1; }
+  .ip-h1[data-anim="1"].is-open .ip-anim--cursor { translate: 0 0; }
+
+  .ip-h1[data-anim="1"].is-open .ip-anim--cursor img {
+    animation: ip-dip var(--fly-dur, 580ms) ease-in-out var(--fly-d, 0ms) both;
+  }
+  @keyframes ip-dip {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 var(--dip); }
+  }
+
+  /* Used for one frame when the timeline is restarted - see play() below.
+     Without it the reset is a no-op: `transition` also runs in reverse, so
+     removing .is-in starts a fade-OUT and the reflow reads the still-visible
+     value instead of the "from" state. Killing `animation` here is what
+     rewinds the cursor's flight. */
+  .ip-h1.ip-no-anim,
+  .ip-h1.ip-no-anim * { transition: none !important; animation: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ip-h1[data-anim="1"] .ip-anim--pill,
+    .ip-h1[data-anim="1"] .ip-anim--cursor {
+      opacity: 1 !important;
+      scale: 1 !important;
+      translate: 0 0 !important;
+      transition: none !important;
+      animation: none !important;
+    }
+    .ip-h1[data-anim="1"] .ip-anim--cursor img {
+      animation: none !important;
+      translate: 0 0 !important;
+    }
+  }
+
+  /* =========================================================
+     MOBILE <=767px - hand-placed staircase
+     Ported 1:1 from Figma "hero / mobile 320" (18238:2). Six lines, each with
+     its own left offset, and the cursor moved to the RIGHT of "agents".
+     Element sizes are untouched - they already matched the frame to a
+     hundredth (performance 205.96 vs 206, agents 121.7 vs 122, cursor 38.08
+     vs 38.1); only the arrangement differs from desktop.
+
+       line 1  Ad automation        offset 26
+       line 2  for                         102
+       line 3  performance                   0
+       line 4  teams                       161
+       line 5  and . their                  15
+       line 6  agents . cursor              85
+
+     Offsets are Figma px at the 30px mobile kegl, expressed in em (px / 30),
+     measured from the composition's own left bound (x = 7 in the frame), so
+     the whole staircase stays centred at any width.
+     ========================================================= */
+  @media (max-width: 767px) {
+    .ip-h1 {
+      /* Same variable as desktop - the intro component's own block already
+         swapped its value at this breakpoint. The fallback is the mobile clamp,
+         used only when that block is absent. 30px @ 320 - matches
+         Birch/Mobile/Text pills in the Figma library. */
+      --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem));
+      --ip-row-gap: 0.118em;   /* 3.54px @ 30 -> row pitch 44.5, as in the frame */
+      --ip-gap: 0.103em;       /* 3.1px  @ 30 */
+
+      /* 8.89em is the true content width; the extra 0.06em is slack so line 4
+         (the widest, and exactly 8.890em) can never tip over into a wrap and
+         break the staircase. Costs ~1px of centring. */
+      width: 8.95em;
+      margin-inline: auto;
+      justify-content: flex-start;
+    }
+
+    .ip-br--m { display: block; }
+
+    /* The desktop row break doubles as the line-4 -> line-5 break here. In the
+       frame that one gap is closed, and line 5 can ride up further still -
+       "teams" is off to the right, so the space under it is empty.
+
+       The ceiling is a real collision, not taste: "their" ends at x 170.6 and
+       "teams" starts at 161, so they share a 9.6px column. "their" is a pill,
+       and 9.6px in from its right edge its cap has already dropped 3.25px, so
+       that is the clearance. Past ~0.11em the two shapes start touching, and
+       going further needs "teams" moved right or line 5 shortened. */
+    .ip-br:not(.ip-br--m) { height: 0; }
+    .ip-h1 { --st5-lift: 0.1em; }
+    .ip-anim--l { margin-top: calc(-1 * var(--st5-lift)); }
+
+    /* The cursor sits after "agents" here, but before it in the DOM (desktop
+       order). `order` moves it to the end of the flex container, which is the
+       end of the last line. */
+    .ip-anim--cursor { order: 1; margin-left: 0.064em; }
+
+    /* Staircase offsets - .ip-st--N marks the first item of each line.
+       Explicit step classes on purpose: styling classes are ambiguous here
+       (both "for" and the outlined "and"/"their" are .ip-pill--round). */
+    .ip-st--1 { margin-left: 0.867em; }   /* Ad automation */
+    .ip-st--2 { margin-left: 3.400em; }   /* for */
+    .ip-st--3 { margin-left: 0; }         /* performance */
+    .ip-st--4 { margin-left: 5.367em; }   /* teams */
+    .ip-st--5 { margin-left: 0.500em; }   /* and */
+    .ip-st--6 { margin-left: 2.833em; }   /* agents */
+
+    /* -- Animation on mobile --
+       The cursor's resting place IS the parked position here, so there is
+       nothing to fly to and nothing to shove: no arc, no dip, no spread.
+       What remains is the stagger - and . their . agents pop in, cursor last. */
+    .ip-h1[data-anim="1"] .ip-anim--pill { --sx: 0px; }
+    /* The cursor's travel lives in --fx, not --sx - zeroing --sx alone leaves
+       it sliding in from 178px. */
+    .ip-h1[data-anim="1"] .ip-anim--cursor { --sx: 0px; --fx: 0px; }
+    .ip-h1[data-anim="1"].is-open .ip-anim--cursor img { animation: none; }
+  }
+</style>
+
+<div class="intro-pills-embed">
+
+  <h1 class="ip-h1" id="ip-h1">
+
+    <span class="ip-pill ip-pill--yellow ip-pill--sq ip-st ip-st--1">Ad automation</span>
+    <i class="ip-br ip-br--m" aria-hidden="true"></i>
+
+    <span class="ip-pill ip-pill--orange ip-pill--round ip-pill--ink ip-st ip-st--2">for</span>
+    <i class="ip-br ip-br--m" aria-hidden="true"></i>
+
+    <span class="ip-shape ip-shape--perf ip-st ip-st--3">
+      <img class="ip-shape-bg" aria-hidden="true" alt=""
+           src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a65069c1972278c4dc8_wrap-performance-main-hero.svg"
+           width="381" height="71">
+      <span class="ip-shape-text">performance</span>
+    </span>
+    <i class="ip-br ip-br--m" aria-hidden="true"></i>
+
+    <span class="ip-pill ip-pill--orange ip-pill--sq ip-st ip-st--4">teams</span>
+
+    <!-- desktop line break -->
+    <i class="ip-br" aria-hidden="true"></i>
+
+    <span class="ip-pill ip-pill--outline ip-pill--round ip-anim--pill ip-anim--l ip-st ip-st--5">and</span>
+    <span class="ip-pill ip-pill--outline ip-pill--round ip-anim--pill ip-anim--l">their</span>
+    <i class="ip-br ip-br--m" aria-hidden="true"></i>
+
+    <span class="ip-cursor ip-anim--cursor" aria-hidden="true">
+      <img src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a65fe26d9a01b1423f9_cursor-main-hero.svg"
+           alt="" width="73" height="76">
+    </span>
+
+    <span class="ip-shape ip-shape--agents ip-anim--pill ip-anim--r ip-st ip-st--6">
+      <img class="ip-shape-bg" aria-hidden="true" alt=""
+           src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a870a655e0fb912fe5f793a_wrap-agents-main-hero.svg"
+           width="214" height="71">
+      <span class="ip-shape-text">agents</span>
+    </span>
+
+  </h1>
+</div>
+
+<script>
+(function () {
+  var h1 = document.getElementById('ip-h1');
+  if (!h1) return;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var CFG = {
+    startAt:      320,   // ms - beat of silence before row 2 starts at all
+    pillDur:      520,   // ms - one pill's pop-in
+    stagger:      140,   // ms - gap between and -> their -> agents
+    cursorGap:    280,   // ms - pause before the cursor shows up
+    cursorDur:    400,   // ms - the cursor's own pop-in
+    hold:         360,   // ms - how long it sits at the end of the line
+    flyDur:       560,   // ms - the arc, park -> under the row -> into the slot
+    dip:          60,    // Figma px - how far below the row the arc swings
+    flyEase:      'cubic-bezier(0.43, 0.01, 0.24, 1)',  // easing of the horizontal travel
+    // pushAt is deliberately late in the flight (370 of 560): the pills stay
+    // shut while the cursor swings under the row, and only part as it rises
+    // into the gap - then keep settling past its landing. That late, overshot
+    // parting is what reads as a shove rather than a synchronised glide.
+    pushAt:       370,   // ms into the flight when the pills start parting
+    pushDur:      440,   // ms - the shove itself (overshoot ease)
+  };
+
+  // Pop-in order. The cursor is last and is handled separately - it pops in
+  // where it parks, then flies.
+  var seq    = h1.querySelectorAll('.ip-anim--pill');
+  var cursor = h1.querySelector('.ip-anim--cursor');
+
+  function schedule() {
+    // Everything downstream is measured from startAt, so the whole row-2
+    // sequence shifts as one when that beat changes.
+    var t0 = CFG.startAt;
+
+    seq.forEach(function (el, i) {
+      el.style.setProperty('--dur', CFG.pillDur + 'ms');
+      el.style.setProperty('--d', (t0 + i * CFG.stagger) + 'ms');
+    });
+
+    var cursorAt = t0 + seq.length * CFG.stagger + CFG.cursorGap;
+    cursor.style.setProperty('--dur', CFG.cursorDur + 'ms');
+    cursor.style.setProperty('--d', cursorAt + 'ms');
+
+    var flyAt = cursorAt + CFG.cursorDur + CFG.hold;
+    cursor.style.setProperty('--fly-dur', CFG.flyDur + 'ms');
+    cursor.style.setProperty('--fly-d', flyAt + 'ms');
+    // --dip is in Figma px, so it has to go through --u like everything else.
+    cursor.style.setProperty('--dip', 'calc(' + CFG.dip + ' * var(--u))');
+    cursor.style.setProperty('--fly-ease', CFG.flyEase);
+
+    // The shove fires late in the flight - while the cursor is still rising
+    // out of the arc - and outlasts its landing slightly, so the pills are
+    // still settling when it arrives.
+    seq.forEach(function (el) {
+      el.style.setProperty('--push-dur', CFG.pushDur + 'ms');
+      el.style.setProperty('--push-d', (flyAt + CFG.pushAt) + 'ms');
+    });
+  }
+
+  function play() {
+    h1.setAttribute('data-anim', '1');
+
+    // Snap back to the "from" state with transitions off, then flush it.
+    // Deliberately not requestAnimationFrame: rAF is paused in a backgrounded
+    // tab and the timeline would stall there. Two reflows are required - one
+    // to commit the reset, one to commit the re-enabled transitions.
+    h1.classList.add('ip-no-anim');
+    h1.classList.remove('is-in', 'is-open');
+    void h1.offsetWidth;
+
+    h1.classList.remove('ip-no-anim');
+    schedule();
+    void h1.offsetWidth;
+
+    // Both classes land at once - the whole sequence is driven by
+    // transition-delay, so there are no JS timers to drift or leak.
+    h1.classList.add('is-in', 'is-open');
+  }
+  window._ipPlay = play;
+  window._ipCfg  = CFG;
+
+  h1.setAttribute('data-anim', '1');
+  if (reduce) {
+    h1.classList.add('is-in', 'is-open');
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { io.disconnect(); play(); }
+      });
+    }, { threshold: 0.35 });
+    io.observe(h1);
+  }
+
+})();
+</script>
