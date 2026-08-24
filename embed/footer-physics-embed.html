@@ -14,7 +14,9 @@
   Animation/physics pause when off-screen or top edge of block reaches top of viewport.
 -->
 <style></style>
-<div id="falling-images-ft" style="width:100vw;min-height:100vh;position:relative;left:50%;transform:translateX(-50%);overflow:hidden;margin-top:-1px;border:none">
+<!-- width is set from JS (documentElement.clientWidth): 100vw includes the
+     scrollbar in browsers with classic scrollbars and causes a 15px h-scroll -->
+<div id="falling-images-ft" style="width:100%;min-height:100vh;position:relative;left:50%;transform:translateX(-50%);overflow:hidden;margin-top:-1px;border:none">
   <canvas id="ft-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block"></canvas>
   <button id="ft-enable-tilt" type="button" style="position:absolute;top:66.67%;left:50%;transform:translate(-50%,-50%);z-index:10;background:#6900FF;border:none;color:rgba(255,255,255,0.9);font-size:0.9rem;font-family:system-ui,sans-serif;line-height:1.4;padding:1.4em;border-radius:24px;cursor:pointer;display:none">Enable tilt and motion</button>
   <div id="ft-cursor" style="position:fixed;width:28px;height:28px;border-radius:50%;background:rgba(250,250,250,0.95);pointer-events:none;left:-999px;top:-999px;transform:translate(-50%,-50%);z-index:9999;opacity:0;transition:opacity 120ms ease"></div>
@@ -128,6 +130,8 @@
     }
 
     function resize(){
+      /* full-bleed via JS: clientWidth excludes the scrollbar, 100vw does not */
+      container.style.width = document.documentElement.clientWidth + 'px';
       var r = container.getBoundingClientRect();
       W = r.width;
       H = r.height;
