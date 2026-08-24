@@ -372,15 +372,20 @@
           Matter.Body.setVelocity(b, { x: b.velocity.x*f, y: b.velocity.y*f });
         }
         if(!isMobile || !orientationEnabled){
-          if(b.bounds.max.y >= H - 0.5){
-            var lowV = Math.abs(b.velocity.x)<0.35 && Math.abs(b.velocity.y)<0.35;
-            var lowA = Math.abs(b.angularVelocity)<0.03;
-            var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside);
-            if(lowV&&lowA&&canSleep){
-              Matter.Body.setVelocity(b, { x:0, y:0 });
-              Matter.Body.setAngularVelocity(b, 0);
-              Matter.Sleeping.set(b, true);
-            }
+          /* Any slow body may sleep - not only floor-touching ones. Bodies
+             resting on OTHER bodies never touch the floor, so the old
+             floor-only gate kept the whole pile simulating (and jittering)
+             forever. A streak counter keeps freshly spawned bodies (velocity
+             still ~0 for a frame) from falling asleep in mid-air. */
+          var lowV = Math.abs(b.velocity.x)<0.35 && Math.abs(b.velocity.y)<0.35;
+          var lowA = Math.abs(b.angularVelocity)<0.03;
+          var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside);
+          b._stillTicks = (lowV && lowA) ? (b._stillTicks||0) + 1 : 0;
+          if(b._stillTicks > 30 && canSleep){
+            Matter.Body.setVelocity(b, { x:0, y:0 });
+            Matter.Body.setAngularVelocity(b, 0);
+            Matter.Sleeping.set(b, true);
+            b._stillTicks = 0;
           }
         }
       }
