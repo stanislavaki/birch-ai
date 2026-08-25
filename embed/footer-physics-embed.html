@@ -328,10 +328,15 @@
       if(isMobile) return;
       if(!pointer.active||!pointer.inside) return;
       var now = Date.now();
-      /* a parked cursor must not keep buzzing the pile: after 150ms without
-         movement only overlap separation stays active, the constant velocity
-         push stops, and untouched bodies are free to fall asleep */
-      var pointerIdle = now - pointer.movedAt > 150;
+      /* A parked cursor is fully hands-off: even the overlap separation loops
+         (separate -> gravity pushes the body back -> separate again) and keeps
+         the pile shaking around the cursor. When idle, the cursor simply rests
+         on the pile; any movement instantly re-enables the repel. */
+      if(now - pointer.movedAt > 150){
+        prevPointer.x = pointer.x; prevPointer.y = pointer.y; prevPointer.t = now;
+        pointerVel.x = 0; pointerVel.y = 0;
+        return;
+      }
       if(prevPointer.t === 0) prevPointer.t = now;
       var dt = Math.min(0.1, (now - prevPointer.t) / 1000);
       if(dt > 0.001){
@@ -354,7 +359,6 @@
         if(dist>=safe) continue;
         var falloff = 1 - dist/safe;
         var pen = safe - dist;
-        if(pointerIdle && pen<=0) continue;
         if(b.isSleeping) Matter.Sleeping.set(b, false);
         if(pen>0){
           Matter.Body.setPosition(b, {
@@ -362,7 +366,6 @@
             y: b.position.y + uy*(pen*0.98)
           });
         }
-        if(pointerIdle) continue;
         var push = POINTER_FORCE * (0.3 + 0.7 * falloff * falloff);
         Matter.Body.setVelocity(b, {
           x: b.velocity.x + ux*push,
