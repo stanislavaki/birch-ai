@@ -17,6 +17,10 @@
    ============================================================ */
 
 :root {
+  /* -- mobile pill is two stacked layers in the mock -- */
+  --nav-m-pill-outer: rgba(63, 63, 63, 0.6);
+  --nav-m-pill-inner: rgba(41, 41, 41, 0.5);
+  --nav-m-pill-inner-blur: 0.25rem;   /* 4 */
   /* -- menu-local scale (Figma px / 16) -- */
   --nav-pill-h: 6.125rem;          /* 98 */
   --nav-pill-radius: 4.0625rem;    /* 65 */
@@ -51,6 +55,9 @@
   --nav-sheet-cta-bg: #0D0D12;
 }
 body.theme-light {
+  --nav-m-pill-outer: transparent;
+  --nav-m-pill-inner: rgba(221, 220, 228, 0.5);
+  --nav-m-pill-inner-blur: 0.75rem;   /* 12 */
   --nav-surface: rgba(221, 220, 228, 0.5);
   --nav-text: #000000;
   --nav-text-cta: #000000;
@@ -301,7 +308,8 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
     margin: 0.25rem 0.25rem 0;      /* 4 */
     height: 4rem;                    /* 64 */
     border-radius: 4.0625rem;
-    background: var(--nav-surface);
+    /* two stacked layers per mock: outer fill + blur 8 ... */
+    background: var(--nav-m-pill-outer);
     -webkit-backdrop-filter: blur(0.5rem);
     backdrop-filter: blur(0.5rem);
     display: flex;
@@ -310,7 +318,19 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
     padding: 0 0.6875rem 0 1rem;     /* 11 / 16 */
     color: var(--nav-text);
   }
-  .nav2m__logo { display: flex; align-items: center; height: 1.625rem; color: var(--nav-text); }
+  /* ... + inner tinted layer with its own blur */
+  .nav2m__pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--nav-m-pill-inner);
+    -webkit-backdrop-filter: blur(var(--nav-m-pill-inner-blur));
+    backdrop-filter: blur(var(--nav-m-pill-inner-blur));
+    pointer-events: none;
+  }
+  .nav2m__pill > * { position: relative; }
+  .nav2m__logo { display: flex; align-items: center; height: 1.625rem; margin-top: -0.125rem; color: var(--nav-text); }
   .nav2m__logo svg { height: 100%; width: auto; display: block; }
 
   .nav2m__burger {
