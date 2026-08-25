@@ -41,9 +41,8 @@
     align-items: center;
     gap: 0.154em;                /* 8px @ 52 */
   }
+  /* equal air on both sides of the dotted "to" (visual tweak vs the mock) */
   .stage-pills-embed .sp-row--2 { gap: 0.26em; } /* 13.5px @ 52 */
-  /* the dotted "to" sits a bit further from the circles than from the flag */
-  .stage-pills-embed .sp-row--2 .sp-circles { margin-left: 0.067em; } /* 17px total */
 
   /* shared text metrics - unified Birch pill recipe (71u box @ 52) */
   .stage-pills-embed .sp-arrow,
@@ -119,33 +118,34 @@
       --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); /* 30px @ 320 */
       font-size: var(--ps);
       width: 7.7em;              /* 231 / 30 */
-      height: 10.3em;            /* 309 / 30 */
+      height: 8.87em;            /* tightened staircase */
     }
     /* every step is placed by its centre from the Figma mock (coords /30) */
     .stage-pills-embed .sp-m-arrow {
       position: absolute;
-      left: 3.694em; top: 1.168em;
-      transform: translate(-50%, -50%) rotate(-7.27deg);
+      left: 3.694em; top: 0.93em;
+      /* tilt = the trapezoid's top edge slope: atan(14/198) */
+      transform: translate(-50%, -50%) rotate(-4.05deg);
     }
     .stage-pills-embed .sp-m-blue {
       position: absolute;
-      left: 3.701em; top: 3.096em;
-      transform: translate(-50%, -50%) rotate(-7.28deg);
+      left: 3.701em; top: 2.33em;
+      transform: translate(-50%, -50%) rotate(-4.05deg);
     }
     .stage-pills-embed .sp-m-scale {
       position: absolute;
-      left: 3.913em; top: 5.064em;
+      left: 3.913em; top: 3.73em;
       transform: translate(-50%, -50%);
     }
     .stage-pills-embed .sp-m-to {
       position: absolute;
-      left: 3.698em; top: 7.044em;
+      left: 3.698em; top: 5.63em;
       transform: translate(-50%, -50%);
       padding: 0 0.72em 0.115em;  /* mock keeps the mobile "to" box wider */
     }
     .stage-pills-embed .sp-m-circles {
       position: absolute;
-      left: 3.786em; top: 9.263em;
+      left: 50%; top: 7.85em;   /* platforms centred in the composition */
       transform: translate(-50%, -50%);
       gap: 0.433em;              /* 13px @ 30 - wider than desktop per mock */
     }
