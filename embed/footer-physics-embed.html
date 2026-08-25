@@ -74,7 +74,7 @@
     var MOTION_THRESHOLD = 2;
     var MOTION_SCALE = 0.8;
     var MOTION_DECAY = 0.92;
-    var pointer = { active: false, inside: false, x: 0, y: 0 };
+    var pointer = { active: false, inside: false, x: 0, y: 0, movedAt: 0 };
     var pointerVel = { x: 0, y: 0 };
     var prevPointer = { x: 0, y: 0, t: 0 };
     var INTERACTION_R = 58;
@@ -256,7 +256,7 @@
           Matter.Body.setVelocity(body, { x: 0, y: 0 });
           Matter.Body.setAngularVelocity(body, 0);
           Matter.Sleeping.set(body, true);
-          body._img = item.img;
+          body._img = makeSprite(item.img, o.w, o.h);
           body._w = o.w;
           body._h = o.h;
           body._imgName = o.n;
@@ -276,6 +276,23 @@
       }
       var target = W*H*0.42;
       fitScaleByCount = Math.min(1.5, Math.sqrt(target/Math.max(1,total)));
+    }
+
+    /* Pre-render each sticker to an offscreen canvas at its display size.
+       drawImage from a huge PNG decodes + downscales it on the raster thread
+       every first paint - long frames make the compositor drop fixed layers
+       (nav / chat bubble blink for a frame). A one-time high-quality prescale
+       makes every subsequent frame a cheap canvas-to-canvas blit. */
+    function makeSprite(img, w, h){
+      var dpr = Math.max(1, window.devicePixelRatio || 1);
+      var off = document.createElement('canvas');
+      off.width  = Math.max(1, Math.round(w * dpr));
+      off.height = Math.max(1, Math.round(h * dpr));
+      var octx = off.getContext('2d');
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = 'high';
+      octx.drawImage(img, 0, 0, off.width, off.height);
+      return off;
     }
 
     function spawnBody(){
@@ -299,7 +316,7 @@
       Matter.Body.setAngle(body, (Math.random()-0.5)*(isMobile ? 0.45 : 0.12));
       Matter.Body.setAngularVelocity(body, (Math.random()-0.5)*(isMobile ? 0.05 : 0.02));
       if(isMobile) Matter.Body.setVelocity(body, { x: (Math.random()-0.5)*2, y: 0 });
-      body._img = item.img;
+      body._img = makeSprite(item.img, w, h);
       body._w = w;
       body._h = h;
       body._imgName = item.name;
@@ -311,6 +328,10 @@
       if(isMobile) return;
       if(!pointer.active||!pointer.inside) return;
       var now = Date.now();
+      /* a parked cursor must not keep buzzing the pile: after 150ms without
+         movement only overlap separation stays active, the constant velocity
+         push stops, and untouched bodies are free to fall asleep */
+      var pointerIdle = now - pointer.movedAt > 150;
       if(prevPointer.t === 0) prevPointer.t = now;
       var dt = Math.min(0.1, (now - prevPointer.t) / 1000);
       if(dt > 0.001){
@@ -331,15 +352,17 @@
         var bodyHalf = Math.min(b._w,b._h)*0.5;
         var safe = INTERACTION_R + bodyHalf;
         if(dist>=safe) continue;
-        if(b.isSleeping) Matter.Sleeping.set(b, false);
         var falloff = 1 - dist/safe;
         var pen = safe - dist;
+        if(pointerIdle && pen<=0) continue;
+        if(b.isSleeping) Matter.Sleeping.set(b, false);
         if(pen>0){
           Matter.Body.setPosition(b, {
             x: b.position.x + ux*(pen*0.98),
             y: b.position.y + uy*(pen*0.98)
           });
         }
+        if(pointerIdle) continue;
         var push = POINTER_FORCE * (0.3 + 0.7 * falloff * falloff);
         Matter.Body.setVelocity(b, {
           x: b.velocity.x + ux*push,
@@ -379,7 +402,7 @@
              still ~0 for a frame) from falling asleep in mid-air. */
           var lowV = Math.abs(b.velocity.x)<0.35 && Math.abs(b.velocity.y)<0.35;
           var lowA = Math.abs(b.angularVelocity)<0.03;
-          var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside);
+          var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside||now_idle());
           b._stillTicks = (lowV && lowA) ? (b._stillTicks||0) + 1 : 0;
           if(b._stillTicks > 30 && canSleep){
             Matter.Body.setVelocity(b, { x:0, y:0 });
@@ -389,6 +412,11 @@
           }
         }
       }
+    }
+
+    /* pointer parked for a while: the pile may settle even under the cursor */
+    function now_idle(){
+      return Date.now() - pointer.movedAt > 150;
     }
 
     function updateCursorFx(){
@@ -603,6 +631,7 @@
         pointer.inside = true;
         pointer.x = e.clientX - r.left;
         pointer.y = e.clientY - r.top;
+        pointer.movedAt = Date.now();
         cursorEl.style.opacity = '1';
         updateCursor(e.clientX, e.clientY);
       });
@@ -612,6 +641,7 @@
         pointer.inside = true;
         pointer.x = e.clientX - r.left;
         pointer.y = e.clientY - r.top;
+        pointer.movedAt = Date.now();
         cursorEl.style.opacity = '1';
         updateCursor(e.clientX, e.clientY);
       });
