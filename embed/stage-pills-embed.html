@@ -1,0 +1,191 @@
+<!-- ===============================================================
+     Stage hero - word-pill lockup
+     "[>> Fastest way] [to launch ads] / [at scale] (to) (M)(T)(S)"
+     Figma: T93dxYfcrz1poscp7qb5gl 1294:2526 (desktop) / 1294:2452 (mobile)
+     Static by design - no animation (same as hub).
+     Drop into the Intro component's pills slot.
+     Background / horizontal padding come from Webflow; this block adds none.
+     No <script>, so it renders on the Designer canvas too.
+     Assets: stage-pills-arrow / stage-pills-scale-form / stage-pills-tt /
+     stage-pills-snap (uploaded 25.08) + hub-meta-icn reused for the Meta circle.
+     =============================================================== -->
+<style>
+  /* Webflow wraps every embed in .w-embed. In a flex slot that wrapper is a
+     flex item sized by its content, so a % width inside would collapse to 0 -
+     pin it to full width. */
+  .w-embed:has(> .stage-pills-embed) { width: 100%; }
+
+  .stage-pills-embed {
+    /* shared pill token if the site exposes it, else the literal fluid scale */
+    --ps: var(--pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* 52px @ 1280 */
+    --font-e: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+    --sp-blue: #388FFF;   /* one-off stage color from the mock */
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: var(--ps);
+    font-family: var(--font-e);
+  }
+
+  /* ---- Desktop: two centered rows ---- */
+  .stage-pills-embed .sp-dt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.481em;                /* 25px @ 52 - between the two rows */
+  }
+  .stage-pills-embed .sp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.154em;                /* 8px @ 52 */
+  }
+  .stage-pills-embed .sp-row--2 { gap: 0.26em; } /* 13.5px @ 52 */
+  /* the dotted "to" sits a bit further from the circles than from the flag */
+  .stage-pills-embed .sp-row--2 .sp-circles { margin-left: 0.067em; } /* 17px total */
+
+  /* shared text metrics - unified Birch pill recipe (71u box @ 52) */
+  .stage-pills-embed .sp-arrow,
+  .stage-pills-embed .sp-scale,
+  .stage-pills-embed .sp-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.026em;
+    white-space: nowrap;
+    color: #000;
+  }
+
+  /* Red chevron flag - the asset carries the full shape incl. the two
+     loose chevrons on the left; text centred in the flag body, so the
+     paddings mirror the asset geometry (74 / 34 px @ 52) */
+  .stage-pills-embed .sp-arrow {
+    padding: 0 0.654em 0.115em 1.423em;
+    height: 1.365em;             /* 71u */
+    box-sizing: border-box;
+    background: url("https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8de5555ebd447ce03638aa_stage-pills-arrow.svg") center / 100% 100% no-repeat;
+  }
+
+  /* Blue bar - sharp corners on purpose (mock has no radius) */
+  .stage-pills-embed .sp-pill--blue {
+    padding: 0 0.375em 0.115em;  /* 19.5px @ 52 */
+    background: var(--sp-blue);
+  }
+
+  /* Yellow trapezoid - CSS clip instead of the fixed-width asset, so the
+     shape hugs any text length. Edge slopes from the mock path:
+     left edge y 16.6..85.6, right edge y 2.6..99.6 (of 99). */
+  .stage-pills-embed .sp-scale {
+    height: 1.904em;             /* 99 / 52 */
+    box-sizing: border-box;
+    padding: 0 0.288em 0.077em;  /* 15px @ 52 */
+    background: #FBBC04;         /* one-off decorative color, not a token */
+    clip-path: polygon(0 16.8%, 100% 2.6%, 100% 100%, 0 86.5%);
+  }
+
+  /* Dotted "to" - shared outline recipe, white text */
+  .stage-pills-embed .sp-pill--dotted {
+    padding: 0 0.337em 0.115em;
+    color: #fff;
+    border-radius: 0.308em;
+    outline: 0.108em dotted #fff;
+    outline-offset: -0.108em;
+  }
+
+  /* Platform circles - assets carry their own white disc */
+  .stage-pills-embed .sp-circles {
+    display: flex;
+    align-items: center;
+    gap: 0.115em;                /* 6px @ 52 */
+  }
+  .stage-pills-embed .sp-circle {
+    display: block;
+    width: 1.923em;              /* 100 / 52 */
+    height: 1.923em;
+  }
+
+  /* Mobile staircase hidden on desktop */
+  .stage-pills-embed .sp-mb { display: none; }
+
+  /* ---- Mobile <=767px: tilted staircase, absolute like hub/manage ---- */
+  @media (max-width: 767px) {
+    .stage-pills-embed .sp-dt { display: none; }
+    .stage-pills-embed .sp-mb {
+      display: block;
+      position: relative;
+      --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); /* 30px @ 320 */
+      font-size: var(--ps);
+      width: 7.7em;              /* 231 / 30 */
+      height: 10.3em;            /* 309 / 30 */
+    }
+    /* every step is placed by its centre from the Figma mock (coords /30) */
+    .stage-pills-embed .sp-m-arrow {
+      position: absolute;
+      left: 3.694em; top: 1.168em;
+      transform: translate(-50%, -50%) rotate(-7.27deg);
+    }
+    .stage-pills-embed .sp-m-blue {
+      position: absolute;
+      left: 3.701em; top: 3.962em;
+      transform: translate(-50%, -50%) rotate(-7.28deg);
+    }
+    .stage-pills-embed .sp-m-scale {
+      position: absolute;
+      left: 3.913em; top: 5.064em;
+      transform: translate(-50%, -50%);
+    }
+    .stage-pills-embed .sp-m-to {
+      position: absolute;
+      left: 3.698em; top: 7.044em;
+      transform: translate(-50%, -50%);
+      padding: 0 0.72em 0.115em;  /* mock keeps the mobile "to" box wider */
+    }
+    .stage-pills-embed .sp-m-circles {
+      position: absolute;
+      left: 3.786em; top: 9.263em;
+      transform: translate(-50%, -50%);
+      gap: 0.433em;              /* 13px @ 30 - wider than desktop per mock */
+    }
+    .stage-pills-embed .sp-mb .sp-circle {
+      width: 2.04em;             /* 61.2 / 30 - mock keeps mobile circles bigger */
+      height: 2.04em;
+    }
+  }
+</style>
+
+<div class="stage-pills-embed">
+
+  <!-- Desktop: two rows -->
+  <div class="sp-dt">
+    <div class="sp-row">
+      <span class="sp-arrow">Fastest way</span>
+      <span class="sp-pill sp-pill--blue">to launch ads</span>
+    </div>
+    <div class="sp-row sp-row--2">
+      <span class="sp-scale">at scale</span>
+      <span class="sp-pill sp-pill--dotted">to</span>
+      <span class="sp-circles">
+        <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8c704e9c15377481bfd809_hub-meta-icn.svg" alt="Meta" />
+        <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8de506dd6bdb7cb24b8b40_stage-pills-tt.svg" alt="TikTok" />
+        <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8de506e23ea5f327d087f0_stage-pills-snap.svg" alt="Snapchat" />
+      </span>
+    </div>
+  </div>
+
+  <!-- Mobile: tilted staircase -->
+  <div class="sp-mb" aria-label="Fastest way to launch ads at scale to Meta, TikTok, Snapchat">
+    <span class="sp-arrow sp-m-arrow">Fastest way</span>
+    <span class="sp-pill sp-pill--blue sp-m-blue">to launch ads</span>
+    <span class="sp-scale sp-m-scale">at scale</span>
+    <span class="sp-pill sp-pill--dotted sp-m-to">to</span>
+    <span class="sp-circles sp-m-circles" style="display:flex">
+      <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8c704e9c15377481bfd809_hub-meta-icn.svg" alt="Meta" />
+      <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8de506dd6bdb7cb24b8b40_stage-pills-tt.svg" alt="TikTok" />
+      <img class="sp-circle" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8de506e23ea5f327d087f0_stage-pills-snap.svg" alt="Snapchat" />
+    </span>
+  </div>
+
+</div>
