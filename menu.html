@@ -67,42 +67,6 @@ body.theme-light {
   --nav-row-hover: rgba(144, 144, 144, 0.2);
 }
 
-/* ============ glass variants (dev experiment: clean pill over saturated bg) ============ */
-body.glass-sat .nav2__pill,
-body.glass-sat .nav2m__pill {
-  -webkit-backdrop-filter: blur(0.75rem) saturate(0.5);
-  backdrop-filter: blur(0.75rem) saturate(0.5);
-}
-body.glass-sat .nav2__panel {
-  -webkit-backdrop-filter: blur(3rem) saturate(0.5);
-  backdrop-filter: blur(3rem) saturate(0.5);
-}
-body.glass-satdim .nav2__pill,
-body.glass-satdim .nav2m__pill {
-  -webkit-backdrop-filter: blur(0.75rem) saturate(0.5) brightness(0.7);
-  backdrop-filter: blur(0.75rem) saturate(0.5) brightness(0.7);
-}
-body.glass-satdim .nav2__panel {
-  -webkit-backdrop-filter: blur(3rem) saturate(0.5) brightness(0.7);
-  backdrop-filter: blur(3rem) saturate(0.5) brightness(0.7);
-}
-body.glass-dense .nav2__pill,
-body.glass-dense .nav2m__pill { background: rgba(50, 50, 50, 0.85); }
-body.glass-dense .nav2__panel { background: rgba(50, 50, 50, 0.85); }
-/* light theme: same idea, lighter dense fill */
-body.theme-light.glass-satdim .nav2__pill,
-body.theme-light.glass-satdim .nav2m__pill {
-  -webkit-backdrop-filter: blur(0.75rem) saturate(0.5) brightness(1.1);
-  backdrop-filter: blur(0.75rem) saturate(0.5) brightness(1.1);
-}
-body.theme-light.glass-satdim .nav2__panel {
-  -webkit-backdrop-filter: blur(3rem) saturate(0.5) brightness(1.1);
-  backdrop-filter: blur(3rem) saturate(0.5) brightness(1.1);
-}
-body.theme-light.glass-dense .nav2__pill,
-body.theme-light.glass-dense .nav2m__pill { background: rgba(228, 227, 234, 0.85); }
-body.theme-light.glass-dense .nav2__panel { background: rgba(228, 227, 234, 0.85); }
-
 /* ============ page behind the menu: real prompts page in an iframe ============ */
 body { background: var(--color-bg); }
 body.theme-light { background: #FBFBFD; }
@@ -128,6 +92,10 @@ body.theme-light { background: #FBFBFD; }
   .dev-panel { right: auto; bottom: auto; left: 0.5rem; top: 5rem; z-index: 4; opacity: 0.85; }
 }
 .dev-panel select { font: inherit; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.4rem; padding: 0.15rem 0.3rem; }
+.dev-sliders { display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid #333; padding-top: 0.5rem; }
+.dev-sliders input[type="range"] { width: 7rem; }
+.dev-sliders span { min-width: 2.2rem; text-align: right; color: #9f9; }
+.dev-css { font-family: monospace; font-size: 0.65rem; color: #888; max-width: 16rem; user-select: all; }
 
 /* ============================================================
    DESKTOP PILL HEADER
@@ -607,14 +575,15 @@ body.theme-light { background: #FBFBFD; }
 <!-- ================= DEV CONTROLS ================= -->
 <div class="dev-panel">
   <label><input type="checkbox" id="dev-theme"> light theme</label>
-  <label>glass:
-    <select id="dev-glass">
-      <option value="">as is (blur only)</option>
-      <option value="glass-sat">+ saturate .5</option>
-      <option value="glass-satdim">+ saturate .5 + dim</option>
-      <option value="glass-dense">dense fill 85%</option>
-    </select>
-  </label>
+  <div class="dev-sliders">
+    <label>blur <input type="range" id="g-blur" min="0" max="48" step="1" value="12"><span id="g-blur-v">12</span></label>
+    <label>saturate <input type="range" id="g-sat" min="0" max="150" step="5" value="50"><span id="g-sat-v">0.50</span></label>
+    <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="70"><span id="g-dim-v">0.70</span></label>
+    <label>contrast <input type="range" id="g-con" min="50" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
+    <label>color <input type="color" id="g-col" value="#3F3F3F"> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
+    <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
+    <div id="g-css" class="dev-css"></div>
+  </div>
   <label>background:
     <select id="dev-bg">
       <option value="use-cases.html">prompts (light)</option>
@@ -932,10 +901,41 @@ document.getElementById('dev-theme').addEventListener('change', function () {
 document.getElementById('dev-bg').addEventListener('change', function () {
   setTheme(BG_THEME[this.value] === 'light', this.value);
 });
-document.getElementById('dev-glass').addEventListener('change', function () {
-  document.body.classList.remove('glass-sat', 'glass-satdim', 'glass-dense');
-  if (this.value) document.body.classList.add(this.value);
+/* live glass controls: write one <style> rule for both pills */
+var glassStyle = document.createElement('style');
+document.head.appendChild(glassStyle);
+function applyGlass() {
+  var blur = document.getElementById('g-blur').value;
+  var sat = document.getElementById('g-sat').value / 100;
+  var dim = document.getElementById('g-dim').value / 100;
+  var con = document.getElementById('g-con').value / 100;
+  var col = document.getElementById('g-col').value;
+  var a = document.getElementById('g-alpha').value / 100;
+  var toPanel = document.getElementById('g-panel').checked;
+  var r = parseInt(col.slice(1, 3), 16), g = parseInt(col.slice(3, 5), 16), b = parseInt(col.slice(5, 7), 16);
+  var bg = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+  var fx = (sat !== 1 ? ' saturate(' + sat + ')' : '')
+    + (dim !== 1 ? ' brightness(' + dim + ')' : '')
+    + (con !== 1 ? ' contrast(' + con + ')' : '');
+  var bf = 'blur(' + blur + 'px)' + fx;
+  var css = 'body .nav2__pill, body .nav2m__pill { background: ' + bg + '; -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }';
+  if (toPanel) {
+    /* panel keeps its own blur 48, shares the effect chain and fill */
+    var bfp = 'blur(48px)' + fx;
+    css += ' body .nav2__panel { background: ' + bg + '; -webkit-backdrop-filter: ' + bfp + '; backdrop-filter: ' + bfp + '; }';
+  }
+  glassStyle.textContent = css;
+  document.getElementById('g-blur-v').textContent = blur;
+  document.getElementById('g-sat-v').textContent = sat.toFixed(2);
+  document.getElementById('g-dim-v').textContent = dim.toFixed(2);
+  document.getElementById('g-con-v').textContent = con.toFixed(2);
+  document.getElementById('g-alpha-v').textContent = a.toFixed(2);
+  document.getElementById('g-css').textContent = 'pill: background: ' + bg + '; backdrop-filter: ' + bf + ';' + (toPanel ? ' | panel: blur(48px)' + fx : '');
+}
+['g-blur', 'g-sat', 'g-dim', 'g-con', 'g-col', 'g-alpha', 'g-panel'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', applyGlass);
 });
+applyGlass();
 /* default state: dark theme on a dark page */
 setTheme(false);
 document.getElementById('dev-active').addEventListener('change', function () {
