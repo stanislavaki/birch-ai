@@ -28,12 +28,6 @@ body { margin: 0; background: #000; font-family: Arial, sans-serif; }
 </head>
 <body>
 <div class="bar">
-  <label>бургер:
-    <select id="burger">
-      <option value="">жёлтый всегда (как сейчас)</option>
-      <option value="neutral">нейтральный в открытом состоянии</option>
-    </select>
-  </label>
   <span>слева тёмная тема, справа светлая; меню открыто</span>
 </div>
 <div class="cols">
@@ -41,14 +35,8 @@ body { margin: 0; background: #000; font-family: Arial, sans-serif; }
   <div class="ph"><span class="lbl">light</span><iframe id="fl"></iframe></div>
 </div>
 <script>
-function load() {
-  var b = document.getElementById('burger').value;
-  var extra = b ? '&burger=' + b : '';
-  document.getElementById('fd').src = 'menu.html?open=1&nopanel=1' + extra;
-  document.getElementById('fl').src = 'menu.html?open=1&nopanel=1&theme=light' + extra;
-}
-document.getElementById('burger').addEventListener('change', load);
-load();
+document.getElementById('fd').src = 'menu.html?open=1&nopanel=1';
+document.getElementById('fl').src = 'menu.html?open=1&nopanel=1&theme=light';
 </script>
 </body>
 </html>

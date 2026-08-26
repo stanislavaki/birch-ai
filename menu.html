@@ -536,11 +536,12 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
 
-/* burger experiment (?burger=neutral): the yellow circle goes neutral while
-   the menu is open, so Get started stays the only yellow accent on screen */
-body.burger-neutral .nav2m__burger { transition: background-color 300ms ease, color 300ms ease; }
-body.burger-neutral .nav2m.is-open .nav2m__burger { background: #ffffff; color: #0D0D12; }
-body.burger-neutral.theme-light .nav2m.is-open .nav2m__burger { background: #0D0D12; color: #ffffff; }
+/* the burger goes neutral while the menu is open — Get started stays the
+   only yellow accent on screen */
+body .nav2m__burger { transition: background-color 300ms ease; }
+/* only the circle recolors; the dots keep their color */
+body .nav2m.is-open .nav2m__burger { background: #ffffff; }
+body.theme-light .nav2m.is-open .nav2m__burger { background: #DBDAE2; }
 body.dev-hidden .dev-panel { display: none; }
 
 /* reduced motion: no movement, opacity only */
@@ -1150,7 +1151,6 @@ setTheme(false);
 /* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
 (function () {
   var q = new URLSearchParams(location.search);
-  if (q.get('burger')) document.body.classList.add('burger-neutral');
   if (q.get('theme') === 'light') setTheme(true);
   if (q.get('nopanel')) document.body.classList.add('dev-hidden');
   if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
