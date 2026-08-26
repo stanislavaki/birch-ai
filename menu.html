@@ -529,7 +529,8 @@ body.theme-light { background: #FBFBFD; }
   /* flex:1 only inside the row — on the full-width yellow button (a column
      item) it would zero the height basis and squash it to content height */
   .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
-  .nav2m__cta-btn {
+  /* a.-selector: outweigh the `.nav2m a { color: inherit }` rule */
+  .nav2m__cta-btn, .nav2m a.nav2m__cta-btn {
     display: flex; align-items: center; justify-content: center;
     height: 3.5rem;                  /* 56 */
     border-radius: 1.75rem;
@@ -560,6 +561,26 @@ body.sheetv-glass2 .nav2m__sheet {
 /* theme: sheet follows the page theme (light sheet on light pages) */
 body.sheetv-theme:not(.theme-light) { --nav-sheet-bg: rgba(41, 41, 41, 0.75); }
 body.sheetv-theme.theme-light {
+  --nav-sheet-bg: rgba(220, 219, 230, 0.8);
+  --nav-sheet-text: #000000;
+  --nav-sheet-line: rgba(0, 0, 0, 0.15);
+  --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+}
+/* card variants: bring back the rounded wrapper (mock geometry) on top of glass —
+   the card edge + blurred page around it separates the menu from the background */
+body.sheetv-card-glass .nav2m__sheet,
+body.sheetv-card-theme .nav2m__sheet {
+  top: 4.5rem; left: 0.1875rem; right: 0.1875rem; bottom: 0.25rem;
+  border-radius: 2.25rem;
+  padding-top: 1rem;
+  -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+}
+body.sheetv-card-glass .nav2m.is-open .nav2m__sheet,
+body.sheetv-card-theme .nav2m.is-open .nav2m__sheet { border-radius: 2.25rem; }
+body.sheetv-card-glass { --nav-sheet-bg: rgba(41, 41, 41, 0.8); }
+body.sheetv-card-theme:not(.theme-light) { --nav-sheet-bg: rgba(41, 41, 41, 0.8); }
+body.sheetv-card-theme.theme-light {
   --nav-sheet-bg: rgba(220, 219, 230, 0.8);
   --nav-sheet-text: #000000;
   --nav-sheet-line: rgba(0, 0, 0, 0.15);
