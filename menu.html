@@ -542,6 +542,31 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
 
+/* ============ mobile sheet background experiments (?sheet=...) ============ */
+/* glass: translucent dark + the pill's effect chain, page shows through */
+body.sheetv-glass { --nav-sheet-bg: rgba(41, 41, 41, 0.75); }
+body.sheetv-glass .nav2m__sheet,
+body.sheetv-glass2 .nav2m__sheet,
+body.sheetv-theme .nav2m__sheet {
+  -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+}
+/* glass2: lighter fill, deeper blur */
+body.sheetv-glass2 { --nav-sheet-bg: rgba(41, 41, 41, 0.55); }
+body.sheetv-glass2 .nav2m__sheet {
+  -webkit-backdrop-filter: blur(1.75rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(1.75rem) saturate(0.8) brightness(1.15);
+}
+/* theme: sheet follows the page theme (light sheet on light pages) */
+body.sheetv-theme:not(.theme-light) { --nav-sheet-bg: rgba(41, 41, 41, 0.75); }
+body.sheetv-theme.theme-light {
+  --nav-sheet-bg: rgba(220, 219, 230, 0.8);
+  --nav-sheet-text: #000000;
+  --nav-sheet-line: rgba(0, 0, 0, 0.15);
+  --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+}
+body.dev-hidden .dev-panel { display: none; }
+
 /* reduced motion: no movement, opacity only */
 @media (prefers-reduced-motion: reduce) {
   .nav2__hoverplate { transition: opacity 150ms ease; }
@@ -898,6 +923,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     }
   };
 
+  window.__nav2mOpen = openSheet;
   burger.addEventListener('click', function () {
     if (root.classList.contains('is-open')) closeSheet(); else openSheet();
   });
@@ -1144,6 +1170,17 @@ window.addEventListener('message', function (e) {
 
 /* default state: dark theme on a dark page */
 setTheme(false);
+
+/* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (q.get('sheet')) document.body.classList.add('sheetv-' + q.get('sheet'));
+  if (q.get('theme') === 'light') setTheme(true);
+  if (q.get('nopanel')) document.body.classList.add('dev-hidden');
+  if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
+    setTimeout(function () { if (window.__nav2mOpen) window.__nav2mOpen(); }, 300);
+  }
+})();
 document.getElementById('dev-active').addEventListener('change', function () {
   ACTIVE_URL = this.value;
   applyActive();
