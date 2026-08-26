@@ -582,6 +582,10 @@ body.theme-light { background: #FBFBFD; }
     <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
     <label>color <input type="color" id="g-col" value="#3F3F3F"> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
     <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
+    <label>presets:
+      <button type="button" class="g-preset" data-p="18,120,140,40,#3F3F3F,30">A</button>
+      <button type="button" class="g-preset" data-p="23,150,115,100,#3F3F3F,60">B</button>
+    </label>
     <div id="g-css" class="dev-css"></div>
   </div>
   <label>background:
@@ -934,6 +938,18 @@ function applyGlass() {
 }
 ['g-blur', 'g-sat', 'g-dim', 'g-con', 'g-col', 'g-alpha', 'g-panel'].forEach(function (id) {
   document.getElementById(id).addEventListener('input', applyGlass);
+});
+document.querySelectorAll('.g-preset').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var v = this.getAttribute('data-p').split(',');
+    document.getElementById('g-blur').value = v[0];
+    document.getElementById('g-sat').value = v[1];
+    document.getElementById('g-dim').value = v[2];
+    document.getElementById('g-con').value = v[3];
+    document.getElementById('g-col').value = v[4];
+    document.getElementById('g-alpha').value = v[5];
+    applyGlass();
+  });
 });
 applyGlass();
 /* default state: dark theme on a dark page */
