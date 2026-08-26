@@ -28,31 +28,15 @@ body { margin: 0; background: #000; font-family: Arial, sans-serif; }
 </head>
 <body>
 <div class="bar">
-  <label>фон шита:
-    <select id="variant">
-      <option value="">как сейчас — сплошной #292929</option>
-      <option value="glass" selected>стекло — тёмное 75% + blur 15</option>
-      <option value="glass2">стекло глубже — 55% + blur 28</option>
-      <option value="theme">в цвет темы — светлый шит на светлой</option>
-      <option value="card-glass">карточка + тёмное стекло (обе темы)</option>
-      <option value="card-theme">карточка + стекло в цвет темы</option>
-    </select>
-  </label>
-  <span>слева тёмная тема, справа светлая; меню открыто</span>
+  <span>карточка + стекло в цвет темы (зафиксировано); слева тёмная тема, справа светлая; меню открыто</span>
 </div>
 <div class="cols">
   <div class="ph"><span class="lbl">dark</span><iframe id="fd"></iframe></div>
   <div class="ph"><span class="lbl">light</span><iframe id="fl"></iframe></div>
 </div>
 <script>
-function load() {
-  var v = document.getElementById('variant').value;
-  var sheet = v ? '&sheet=' + v : '';
-  document.getElementById('fd').src = 'menu.html?open=1&nopanel=1' + sheet;
-  document.getElementById('fl').src = 'menu.html?open=1&nopanel=1&theme=light' + sheet;
-}
-document.getElementById('variant').addEventListener('change', load);
-load();
+document.getElementById('fd').src = 'menu.html?open=1&nopanel=1';
+document.getElementById('fl').src = 'menu.html?open=1&nopanel=1&theme=light';
 </script>
 </body>
 </html>
