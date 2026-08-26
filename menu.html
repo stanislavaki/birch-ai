@@ -65,7 +65,7 @@ body.theme-light {
   --nav-sheet-text: #000000;
   --nav-sheet-line: rgba(0, 0, 0, 0.15);
   --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
-  --nav-sheet-cta-bg: #DBDAE2;      /* grey chips on the white card */
+  --nav-sheet-cta-bg: #DBDAE2;      /* = design-system surface-muted token */
   --nav-sheet-cta-text: #0D0D12;
   --nav-card: #ffffff;
   --nav-scrim: rgba(13, 13, 18, 0.3);
@@ -520,8 +520,9 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__subrow.is-active .nav2m__subdot { opacity: 1; }
 
   /* bottom CTA block */
-  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.75rem; padding-top: 1.5rem; flex: none; }
-  .nav2m__cta-row { display: flex; gap: 0.75rem; }
+  /* 8px between the buttons (tighter cluster), 12px to the card edges */
+  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem; flex: none; }
+  .nav2m__cta-row { display: flex; gap: 0.5rem; }
   /* flex:1 only inside the row — on the full-width yellow button (a column
      item) it would zero the height basis and squash it to content height */
   .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
