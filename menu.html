@@ -571,6 +571,13 @@ body.theme-light { background: #FBFBFD; }
 <!-- ================= DEV CONTROLS ================= -->
 <div class="dev-panel">
   <label><input type="checkbox" id="dev-theme"> light theme</label>
+  <label>background:
+    <select id="dev-bg">
+      <option value="use-cases.html">prompts (light)</option>
+      <option value="ai-promo.html">ai-promo (dark)</option>
+      <option value="manage.html">manage (dark)</option>
+    </select>
+  </label>
   <label>active page:
     <select id="dev-active">
       <option value="">none</option>
@@ -866,6 +873,9 @@ document.querySelector('.mock-frame').addEventListener('load', function () {
 
 document.getElementById('dev-theme').addEventListener('change', function () {
   document.body.classList.toggle('theme-light', this.checked);
+});
+document.getElementById('dev-bg').addEventListener('change', function () {
+  document.querySelector('.mock-frame').src = this.value;
 });
 document.getElementById('dev-active').addEventListener('change', function () {
   ACTIVE_URL = this.value;
