@@ -515,8 +515,10 @@ body.theme-light { background: #FBFBFD; }
   /* bottom CTA block */
   .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.25rem; padding-top: 1.5rem; flex: none; }
   .nav2m__cta-row { display: flex; gap: 0.25rem; }
+  /* flex:1 only inside the row — on the full-width yellow button (a column
+     item) it would zero the height basis and squash it to content height */
+  .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
   .nav2m__cta-btn {
-    flex: 1;
     display: flex; align-items: center; justify-content: center;
     height: 3.5rem;                  /* 56 */
     border-radius: 1.75rem;
