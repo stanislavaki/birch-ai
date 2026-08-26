@@ -530,6 +530,17 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
 
+/* variant experiment (?sheet=solid): wrapper card with an OPAQUE fill —
+   white in light theme, solid dark in dark — plus a stronger scrim so the
+   card contrasts with the page behind */
+body.sheetv-solid { --nav-scrim: rgba(13, 13, 18, 0.6); }
+body.sheetv-solid.theme-light { --nav-scrim: rgba(13, 13, 18, 0.3); }
+body.sheetv-solid .nav2m__sheet {
+  background: #292929;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+body.sheetv-solid.theme-light .nav2m__sheet { background: #ffffff; }
 body.dev-hidden .dev-panel { display: none; }
 
 /* reduced motion: no movement, opacity only */
@@ -1139,6 +1150,7 @@ setTheme(false);
 /* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
 (function () {
   var q = new URLSearchParams(location.search);
+  if (q.get('sheet')) document.body.classList.add('sheetv-' + q.get('sheet'));
   if (q.get('theme') === 'light') setTheme(true);
   if (q.get('nopanel')) document.body.classList.add('dev-hidden');
   if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
