@@ -413,7 +413,7 @@ body.theme-light { background: #FBFBFD; }
     border-radius: 2.25rem;          /* 36 */
     background: var(--nav-card);
     color: var(--nav-sheet-text);
-    padding: 1rem 0.5rem 0.5rem;     /* 16 / 8 / 8 */
+    padding: 1rem 0.75rem 0.75rem;   /* 16 / 12 / 12 */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -431,7 +431,7 @@ body.theme-light { background: #FBFBFD; }
     transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .nav2m__list { width: 100%; padding: 0 0.875rem; }  /* center col ≈ 270/320 */
+  .nav2m__list { width: 100%; padding: 0 0.625rem; }  /* rows keep their inset */
 
   /* top-level row */
   .nav2m__item { border-bottom: 1px solid var(--nav-sheet-line); }
@@ -517,8 +517,8 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__subrow.is-active .nav2m__subdot { opacity: 1; }
 
   /* bottom CTA block */
-  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.25rem; padding-top: 1.5rem; flex: none; }
-  .nav2m__cta-row { display: flex; gap: 0.25rem; }
+  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.75rem; padding-top: 1.5rem; flex: none; }
+  .nav2m__cta-row { display: flex; gap: 0.75rem; }
   /* flex:1 only inside the row — on the full-width yellow button (a column
      item) it would zero the height basis and squash it to content height */
   .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
