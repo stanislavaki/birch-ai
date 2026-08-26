@@ -50,6 +50,7 @@
   --nav-sheet-line: rgba(255, 255, 255, 0.2);
   --nav-sheet-row-hover: rgba(255, 255, 255, 0.1);
   --nav-sheet-cta-bg: #0D0D12;
+  --nav-sheet-cta-text: #ffffff;
   /* opaque card fill for the open mobile menu (pill adopts it while open) */
   --nav-card: #292929;
   /* page scrim behind the open menu: tinted + blurred, page reads AROUND
@@ -64,6 +65,8 @@ body.theme-light {
   --nav-sheet-text: #000000;
   --nav-sheet-line: rgba(0, 0, 0, 0.15);
   --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+  --nav-sheet-cta-bg: #DBDAE2;      /* grey chips on the white card */
+  --nav-sheet-cta-text: #0D0D12;
   --nav-card: #ffffff;
   --nav-scrim: rgba(13, 13, 18, 0.3);
 }
@@ -528,7 +531,7 @@ body.theme-light { background: #FBFBFD; }
     height: 3.5rem;                  /* 56 */
     border-radius: 1.75rem;
     background: var(--nav-sheet-cta-bg);
-    color: #fff;
+    color: var(--nav-sheet-cta-text);
     font-size: 1.5rem;               /* 24 — same as top-level items */
     font-weight: 600;
     letter-spacing: -0.026em;
