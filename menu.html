@@ -61,7 +61,7 @@ body.theme-light {
   --nav-m-pill-inner: rgba(205, 203, 220, 0.4);
   --nav-m-pill-inner-blur: 0.75rem;   /* 12 */
   --nav-surface: rgba(205, 203, 220, 0.4);  /* user-approved, differs from dark on purpose */
-  --nav-hover: rgba(255, 255, 255, 0.5);
+  --nav-hover: rgba(255, 255, 255, 0.7);
   --nav-text: #000000;
   --nav-text-cta: #000000;
 }
@@ -91,6 +91,14 @@ body.theme-light { background: #FBFBFD; }
   .dev-panel { right: auto; bottom: auto; left: 0.5rem; top: 5rem; z-index: 4; opacity: 0.85; }
 }
 .dev-panel select { font: inherit; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.4rem; padding: 0.15rem 0.3rem; }
+.dev-tabs { display: flex; gap: 0.25rem; }
+.dev-tab {
+  flex: 1; font: inherit; padding: 0.25rem 0.75rem; cursor: pointer;
+  background: #1c1c1c; color: #999; border: 1px solid #444; border-radius: 0.4rem;
+}
+.dev-tab.is-on { background: #3a3a3a; color: #fff; border-color: #777; }
+.dev-panel:not(.is-light) .dev-only-light { display: none; }
+.dev-panel.is-light .dev-only-dark { display: none; }
 .dev-sliders { display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid #333; padding-top: 0.5rem; }
 .dev-sliders input[type="range"] { width: 7rem; }
 .dev-sliders span { min-width: 2.2rem; text-align: right; color: #9f9; }
@@ -593,15 +601,18 @@ body.theme-light { background: #FBFBFD; }
 <iframe class="mock-frame" src="use-cases.html" title="Page behind the menu"></iframe>
 
 <!-- ================= DEV CONTROLS ================= -->
-<div class="dev-panel">
-  <label><input type="checkbox" id="dev-theme"> light theme</label>
+<div class="dev-panel" id="dev-panel">
+  <div class="dev-tabs">
+    <button type="button" class="dev-tab is-on" data-theme="dark">dark</button>
+    <button type="button" class="dev-tab" data-theme="light">light</button>
+  </div>
   <div class="dev-sliders">
     <label>blur <input type="range" id="g-blur" min="0" max="48" step="1" value="23"><span id="g-blur-v">23</span></label>
     <label>saturate <input type="range" id="g-sat" min="0" max="150" step="5" value="80"><span id="g-sat-v">0.80</span></label>
     <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="115"><span id="g-dim-v">1.15</span></label>
     <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
-    <label>dark fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-r" min="0" max="255" value="63"><input type="number" id="g-col-g" min="0" max="255" value="63"><input type="number" id="g-col-b" min="0" max="255" value="63"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-hh" min="0" max="360" value="0"><input type="number" id="g-col-hs" min="0" max="100" value="0"><input type="number" id="g-col-hl" min="0" max="100" value="25"></span> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
-    <label>light fill <input type="color" id="g-col-l" value="#CDCBDC"><input type="text" class="g-hex" id="g-col-l-hex" value="#CDCBDC" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-l-r" min="0" max="255" value="205"><input type="number" id="g-col-l-g" min="0" max="255" value="203"><input type="number" id="g-col-l-b" min="0" max="255" value="220"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-l-hh" min="0" max="360" value="247"><input type="number" id="g-col-l-hs" min="0" max="100" value="20"><input type="number" id="g-col-l-hl" min="0" max="100" value="83"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="40"><span id="g-alpha-l-v">0.40</span></label>
+    <label class="dev-only-dark">fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-r" min="0" max="255" value="63"><input type="number" id="g-col-g" min="0" max="255" value="63"><input type="number" id="g-col-b" min="0" max="255" value="63"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-hh" min="0" max="360" value="0"><input type="number" id="g-col-hs" min="0" max="100" value="0"><input type="number" id="g-col-hl" min="0" max="100" value="25"></span> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
+    <label class="dev-only-light">fill <input type="color" id="g-col-l" value="#CDCBDC"><input type="text" class="g-hex" id="g-col-l-hex" value="#CDCBDC" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-l-r" min="0" max="255" value="205"><input type="number" id="g-col-l-g" min="0" max="255" value="203"><input type="number" id="g-col-l-b" min="0" max="255" value="220"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-l-hh" min="0" max="360" value="247"><input type="number" id="g-col-l-hs" min="0" max="100" value="20"><input type="number" id="g-col-l-hl" min="0" max="100" value="83"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="40"><span id="g-alpha-l-v">0.40</span></label>
     <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
     <label>presets:
       <button type="button" class="g-preset" data-p="18,120,140,40,#3F3F3F,30">A</button>
@@ -609,11 +620,15 @@ body.theme-light { background: #FBFBFD; }
     </label>
     <div id="g-css" class="dev-css"></div>
   </div>
-  <label>background:
-    <select id="dev-bg">
-      <option value="use-cases.html">prompts (light)</option>
-      <option value="ai-promo.html">ai-promo (dark)</option>
-      <option value="manage.html">manage (dark)</option>
+  <label class="dev-only-dark">background:
+    <select id="dev-bg-dark">
+      <option value="ai-promo.html">ai-promo</option>
+      <option value="manage.html">manage</option>
+    </select>
+  </label>
+  <label class="dev-only-light">background:
+    <select id="dev-bg-light">
+      <option value="use-cases.html">prompts</option>
     </select>
   </label>
   <label>active page:
@@ -927,23 +942,27 @@ document.querySelector('.mock-frame').addEventListener('load', function () {
   } catch (e) { /* cross-origin guard; same-origin in dev */ }
 });
 
-/* theme and background page are linked: light theme -> light page, dark -> dark.
-   Picking a page directly also flips the theme to match it. */
-var BG_THEME = { 'use-cases.html': 'light', 'ai-promo.html': 'dark', 'manage.html': 'dark' };
+/* theme tabs: each tab shows its own fill controls and only the background
+   pages that match the theme; switching tab switches page + theme together */
 function setTheme(light, bgSrc) {
   document.body.classList.toggle('theme-light', light);
-  document.getElementById('dev-theme').checked = light;
-  var src = bgSrc || (light ? 'use-cases.html' : 'ai-promo.html');
+  document.getElementById('dev-panel').classList.toggle('is-light', light);
+  document.querySelectorAll('.dev-tab').forEach(function (t) {
+    t.classList.toggle('is-on', (t.getAttribute('data-theme') === 'light') === light);
+  });
+  var sel = document.getElementById(light ? 'dev-bg-light' : 'dev-bg-dark');
+  var src = bgSrc || sel.value;
+  sel.value = src;
   var frame = document.querySelector('.mock-frame');
   if (frame.getAttribute('src') !== src) frame.src = src;
-  document.getElementById('dev-bg').value = src;
 }
-document.getElementById('dev-theme').addEventListener('change', function () {
-  setTheme(this.checked);
+document.querySelectorAll('.dev-tab').forEach(function (t) {
+  t.addEventListener('click', function () {
+    setTheme(t.getAttribute('data-theme') === 'light');
+  });
 });
-document.getElementById('dev-bg').addEventListener('change', function () {
-  setTheme(BG_THEME[this.value] === 'light', this.value);
-});
+document.getElementById('dev-bg-dark').addEventListener('change', function () { setTheme(false, this.value); });
+document.getElementById('dev-bg-light').addEventListener('change', function () { setTheme(true, this.value); });
 /* live glass controls: write one <style> rule for both pills */
 var glassStyle = document.createElement('style');
 document.head.appendChild(glassStyle);
