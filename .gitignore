@@ -7,3 +7,5 @@ use-cases-review-test.html
 
 # Downloaded page snapshots for the case-study comparison tool (regenerate with fetch.py)
 review/cs-compare/pages/
+review/menu/menu-artifact.html
+review/menu/_local_check.html
