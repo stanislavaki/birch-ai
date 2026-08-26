@@ -251,6 +251,7 @@ body.theme-light { background: #FBFBFD; }
   translate: 0 0;
 }
 .nav2__panel {
+  position: relative;
   width: var(--nav-panel-w);
   padding: var(--nav-panel-pad);
   border-radius: var(--nav-panel-radius);
@@ -261,15 +262,26 @@ body.theme-light { background: #FBFBFD; }
   flex-direction: column;
 }
 .nav2__row {
-  position: relative;
   display: flex;
   gap: 1.1875rem;                  /* 19 */
   align-items: flex-start;
   padding: var(--nav-row-py) var(--nav-row-px);
   border-radius: var(--nav-row-radius);
-  transition: background-color 120ms ease;
 }
-.nav2__row:hover { background: var(--nav-row-hover); }
+/* hover plate: a single element sliding between rows (not per-row fades) */
+.nav2__hoverplate {
+  position: absolute;
+  left: var(--nav-panel-pad);
+  right: var(--nav-panel-pad);
+  top: 0; height: 0;
+  border-radius: var(--nav-row-radius);
+  background: var(--nav-row-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: top 220ms cubic-bezier(0.3, 0.9, 0.3, 1), height 220ms cubic-bezier(0.3, 0.9, 0.3, 1), opacity 150ms ease;
+}
+.nav2__hoverplate.is-jump { transition: opacity 150ms ease; }
+.nav2__row { position: relative; }
 .nav2__row:hover .nav2__row-desc { opacity: 1; }
 .nav2__row.is-static { cursor: default; }
 .nav2__row.is-static:hover { background: none; }
@@ -517,6 +529,7 @@ body.theme-light { background: #FBFBFD; }
 
 /* reduced motion: no movement, opacity only */
 @media (prefers-reduced-motion: reduce) {
+  .nav2__hoverplate { transition: opacity 150ms ease; }
   .nav2__panel-wrap .nav2__panel { translate: 0 0; transition-property: opacity; }
   .nav2m__sheet {
     translate: 0 0; border-radius: 0;
@@ -690,8 +703,26 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
         + '<span class="nav2__row-title">' + sub.title + badge + '</span>'
         + '<span class="nav2__row-desc">' + sub.desc + '</span>' + (sub.url ? '</a>' : '</span>');
     }).join('');
-    wrap.innerHTML = '<div class="nav2__panel">' + rows + '</div>';
+    wrap.innerHTML = '<div class="nav2__panel"><span class="nav2__hoverplate"></span>' + rows + '</div>';
     document.querySelector('.nav2').appendChild(wrap);
+    /* sliding hover plate: jumps into place when appearing, glides between rows */
+    var panel = wrap.querySelector('.nav2__panel');
+    var plate = wrap.querySelector('.nav2__hoverplate');
+    panel.addEventListener('mouseover', function (e) {
+      var row = e.target.closest('.nav2__row');
+      if (!row || row.classList.contains('is-static')) return;
+      var hidden = getComputedStyle(plate).opacity === '0';
+      plate.classList.toggle('is-jump', hidden);
+      plate.style.top = row.offsetTop + 'px';
+      plate.style.height = row.offsetHeight + 'px';
+      plate.style.opacity = '1';
+    });
+    panel.addEventListener('mouseleave', function () { plate.style.opacity = '0'; });
+    panel.addEventListener('mouseover', function (e) {
+      /* hide when moving onto a static row */
+      var row = e.target.closest('.nav2__row');
+      if (row && row.classList.contains('is-static')) plate.style.opacity = '0';
+    });
   });
 
   var openId = null;
