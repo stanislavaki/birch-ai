@@ -953,11 +953,14 @@ function applyGlass() {
     + (dim !== 1 ? ' brightness(' + dim + ')' : '')
     + (con !== 1 ? ' contrast(' + con + ')' : '');
   var bf = 'blur(' + blur + 'px)' + fx;
-  var css = 'body .nav2__pill, body .nav2m__pill { background: ' + bg + '; -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }';
+  /* effects inherit into light theme; the custom fill color is dark-theme only */
+  var css = 'body .nav2__pill, body .nav2m__pill { -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }'
+    + ' body:not(.theme-light) .nav2__pill, body:not(.theme-light) .nav2m__pill { background: ' + bg + '; }';
   if (toPanel) {
-    /* panel keeps its own blur 48, shares the effect chain and fill */
+    /* panel keeps its own blur 48, shares the effect chain */
     var bfp = 'blur(48px)' + fx;
-    css += ' body .nav2__panel { background: ' + bg + '; -webkit-backdrop-filter: ' + bfp + '; backdrop-filter: ' + bfp + '; }';
+    css += ' body .nav2__panel { -webkit-backdrop-filter: ' + bfp + '; backdrop-filter: ' + bfp + '; }'
+      + ' body:not(.theme-light) .nav2__panel { background: ' + bg + '; }';
   }
   glassStyle.textContent = css;
   document.getElementById('g-blur-v').textContent = blur;
@@ -983,6 +986,13 @@ document.querySelectorAll('.g-preset').forEach(function (btn) {
   });
 });
 applyGlass();
+/* the host page has no scroll of its own: forward wheel to the iframe so
+   the background can be scrolled from anywhere (over the pill included) */
+window.addEventListener('wheel', function (e) {
+  var frame = document.querySelector('.mock-frame');
+  if (frame && frame.contentWindow) frame.contentWindow.scrollBy(0, e.deltaY);
+}, { passive: true });
+
 /* default state: dark theme on a dark page */
 setTheme(false);
 document.getElementById('dev-active').addEventListener('change', function () {
