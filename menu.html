@@ -57,7 +57,7 @@
   --nav-scrim: rgba(13, 13, 18, 0.6);
 }
 body.theme-light {
-  --nav-surface: rgba(205, 203, 220, 0.4);  /* user-approved, differs from dark on purpose */
+  --nav-surface: rgba(211, 209, 224, 0.4);  /* user-approved, differs from dark on purpose */
   --nav-hover: rgba(255, 255, 255, 0.7);
   --nav-text: #000000;
   --nav-text-cta: #000000;
@@ -536,6 +536,11 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
 
+/* burger experiment (?burger=neutral): the yellow circle goes neutral while
+   the menu is open, so Get started stays the only yellow accent on screen */
+body.burger-neutral .nav2m__burger { transition: background-color 300ms ease, color 300ms ease; }
+body.burger-neutral .nav2m.is-open .nav2m__burger { background: #ffffff; color: #0D0D12; }
+body.burger-neutral.theme-light .nav2m.is-open .nav2m__burger { background: #0D0D12; color: #ffffff; }
 body.dev-hidden .dev-panel { display: none; }
 
 /* reduced motion: no movement, opacity only */
@@ -608,7 +613,7 @@ body.dev-hidden .dev-panel { display: none; }
     <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="115"><span id="g-dim-v">1.15</span></label>
     <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
     <label class="dev-only-dark">fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-r" min="0" max="255" value="63"><input type="number" id="g-col-g" min="0" max="255" value="63"><input type="number" id="g-col-b" min="0" max="255" value="63"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-hh" min="0" max="360" value="0"><input type="number" id="g-col-hs" min="0" max="100" value="0"><input type="number" id="g-col-hl" min="0" max="100" value="25"></span> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
-    <label class="dev-only-light">fill <input type="color" id="g-col-l" value="#CDCBDC"><input type="text" class="g-hex" id="g-col-l-hex" value="#CDCBDC" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-l-r" min="0" max="255" value="205"><input type="number" id="g-col-l-g" min="0" max="255" value="203"><input type="number" id="g-col-l-b" min="0" max="255" value="220"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-l-hh" min="0" max="360" value="247"><input type="number" id="g-col-l-hs" min="0" max="100" value="20"><input type="number" id="g-col-l-hl" min="0" max="100" value="83"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="40"><span id="g-alpha-l-v">0.40</span></label>
+    <label class="dev-only-light">fill <input type="color" id="g-col-l" value="#D3D1E0"><input type="text" class="g-hex" id="g-col-l-hex" value="#D3D1E0" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-l-r" min="0" max="255" value="211"><input type="number" id="g-col-l-g" min="0" max="255" value="209"><input type="number" id="g-col-l-b" min="0" max="255" value="224"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-l-hh" min="0" max="360" value="248"><input type="number" id="g-col-l-hs" min="0" max="100" value="19"><input type="number" id="g-col-l-hl" min="0" max="100" value="85"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="40"><span id="g-alpha-l-v">0.40</span></label>
     <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
     <label>presets:
       <button type="button" class="g-preset" data-p="18,120,140,40,#3F3F3F,30">A</button>
@@ -1145,6 +1150,7 @@ setTheme(false);
 /* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
 (function () {
   var q = new URLSearchParams(location.search);
+  if (q.get('burger')) document.body.classList.add('burger-neutral');
   if (q.get('theme') === 'light') setTheme(true);
   if (q.get('nopanel')) document.body.classList.add('dev-hidden');
   if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
