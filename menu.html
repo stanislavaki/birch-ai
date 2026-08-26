@@ -349,7 +349,7 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__pill {
     position: relative;
     z-index: 20;
-    margin: 0.75rem 0.25rem 0;      /* top 12 = open-card bottom margin */
+    margin: 0.75rem 0.75rem 0;      /* 12 all around, same as the open card */
     height: 4rem;                    /* 64 */
     border-radius: 4.0625rem;
     /* same glass material as the sheet and desktop pill */
@@ -365,9 +365,9 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__logo { display: flex; align-items: center; height: 1.625rem; margin-top: -0.125rem; color: var(--nav-text); }
   .nav2m__logo svg { height: 100%; width: auto; display: block; }
 
-  .nav2m__pill { transition: background-color 300ms ease, margin 300ms ease; }
-  /* open: adopt the card color and align edges with the card below */
-  .nav2m.is-open .nav2m__pill { background: var(--nav-card); margin-left: 0.75rem; margin-right: 0.75rem; }
+  .nav2m__pill { transition: background-color 300ms ease; }
+  /* open: adopt the card color (edges already aligned with the card) */
+  .nav2m.is-open .nav2m__pill { background: var(--nav-card); }
 
   .nav2m__burger {
     width: 2.625rem; height: 2.625rem;   /* 42 */
