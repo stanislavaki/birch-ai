@@ -118,7 +118,7 @@
       --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); /* 30px @ 320 */
       font-size: var(--ps);
       width: 7.7em;              /* 231 / 30 */
-      height: 8.87em;            /* tightened staircase */
+      height: 9.31em;            /* staircase: 1.62em steps, ~7px air between bands */
     }
     /* every step is placed by its centre from the Figma mock (coords /30) */
     .stage-pills-embed .sp-m-arrow {
@@ -129,23 +129,23 @@
     }
     .stage-pills-embed .sp-m-blue {
       position: absolute;
-      left: 3.701em; top: 2.33em;
+      left: 3.701em; top: 2.55em;
       transform: translate(-50%, -50%) rotate(-4.05deg);
     }
     .stage-pills-embed .sp-m-scale {
       position: absolute;
-      left: 3.913em; top: 3.73em;
+      left: 3.913em; top: 4.17em;
       transform: translate(-50%, -50%);
     }
     .stage-pills-embed .sp-m-to {
       position: absolute;
-      left: 3.698em; top: 5.63em;
+      left: 3.698em; top: 6.07em;
       transform: translate(-50%, -50%);
       padding: 0 0.72em 0.115em;  /* mock keeps the mobile "to" box wider */
     }
     .stage-pills-embed .sp-m-circles {
       position: absolute;
-      left: 50%; top: 7.85em;   /* platforms centred in the composition */
+      left: 50%; top: 8.29em;   /* platforms centred in the composition */
       transform: translate(-50%, -50%);
       gap: 0.433em;              /* 13px @ 30 - wider than desktop per mock */
     }
