@@ -170,7 +170,7 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
 
 /* "New" badge — live-site .new-menu-item look, submenu rows only */
 .nav2__new {
-  font-size: 0.5625rem;
+  font-size: 0.5rem;
   font-weight: 600;
   line-height: 1.2;
   padding: 0.08rem 0.2rem 0.13rem;
@@ -179,7 +179,7 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
   color: #0D0D12;
   rotate: -18deg;
 }
-.nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.3em; }
+.nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
 
 /* -- right CTA group -- */
 .nav2__right { display: flex; align-items: center; gap: 0.5rem; }
@@ -220,25 +220,35 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
   .nav2__menu { gap: 0.75rem; }
 }
 
-/* ============ desktop dropdown panel ============ */
+/* ============ desktop dropdown panel ============
+   The wrap lives OUTSIDE the pill: an ancestor with backdrop-filter
+   (the pill) would become the backdrop root and the panel's own blur
+   would stop seeing the page behind it (Chrome behavior). The wrap
+   only positions and gates clicks; opacity animates on the panel
+   itself for the same reason. */
 .nav2__panel-wrap {
   position: absolute;
   top: calc(var(--nav-pill-top) + var(--nav-pill-h));
   left: 0;
   /* hover bridge: covers the gap between pill and panel */
   padding-top: var(--nav-panel-gap);
-  opacity: 0;
-  translate: 0 -0.5rem;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 180ms ease, translate 180ms ease, visibility 0s linear 180ms;
+  transition: visibility 0s linear 180ms;
 }
 .nav2__panel-wrap.is-open {
-  opacity: 1;
-  translate: 0 0;
   visibility: visible;
   pointer-events: auto;
+  transition: none;
+}
+.nav2__panel-wrap .nav2__panel {
+  opacity: 0;
+  translate: 0 -0.5rem;
   transition: opacity 180ms ease, translate 180ms ease;
+}
+.nav2__panel-wrap.is-open .nav2__panel {
+  opacity: 1;
+  translate: 0 0;
 }
 .nav2__panel {
   width: var(--nav-panel-w);
@@ -417,7 +427,7 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
     cursor: pointer;
     text-align: left;
   }
-  .nav2m__subrow-title .nav2__new { display: inline-block; translate: 0.125rem -0.3em; }
+  .nav2m__subrow-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
   .nav2m__toprow-label {
     position: relative;
     display: flex; align-items: center; gap: 0.5rem;
@@ -507,7 +517,7 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
 
 /* reduced motion: no movement, opacity only */
 @media (prefers-reduced-motion: reduce) {
-  .nav2__panel-wrap { translate: 0 0; transition-property: opacity, visibility; }
+  .nav2__panel-wrap .nav2__panel { translate: 0 0; transition-property: opacity; }
   .nav2m__sheet {
     translate: 0 0; border-radius: 0;
     opacity: 0;
@@ -666,7 +676,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
         + '<span class="nav2__row-desc">' + sub.desc + '</span>' + (sub.url ? '</a>' : '</span>');
     }).join('');
     wrap.innerHTML = '<div class="nav2__panel">' + rows + '</div>';
-    pill.appendChild(wrap);
+    document.querySelector('.nav2').appendChild(wrap);
   });
 
   var openId = null;
@@ -680,10 +690,11 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     if (!t || !w) return;
     var pr = pill.getBoundingClientRect();
     var tr = t.getBoundingClientRect();
-    /* center the panel under its trigger */
+    /* center the panel under its trigger (wrap sits in the nav root,
+       which spans the viewport, so coordinates are viewport-based) */
     var pad = w.querySelector('.nav2__panel');
-    var left = (tr.left + tr.width / 2) - pr.left - pad.offsetWidth / 2;
-    left = Math.max(8, Math.min(left, pr.width - pad.offsetWidth - 8));
+    var left = (tr.left + tr.width / 2) - pad.offsetWidth / 2;
+    left = Math.max(pr.left + 8, Math.min(left, pr.right - pad.offsetWidth - 8));
     w.style.left = left + 'px';
   }
 
@@ -726,7 +737,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
 
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNow(); });
   document.addEventListener('click', function (e) {
-    if (openId !== null && !e.target.closest('.nav2__pill')) closeNow();
+    if (openId !== null && !e.target.closest('.nav2__pill') && !e.target.closest('.nav2__panel-wrap')) closeNow();
   });
   window.addEventListener('resize', function () { if (openId !== null) positionPanel(openId); });
 })();
