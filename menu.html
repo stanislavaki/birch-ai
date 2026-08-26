@@ -268,8 +268,8 @@ body.theme-light { background: #FBFBFD; }
   padding: var(--nav-panel-pad);
   border-radius: var(--nav-panel-radius);
   background: var(--nav-surface);
-  -webkit-backdrop-filter: blur(3rem) saturate(0.8) brightness(1.15);
-  backdrop-filter: blur(3rem) saturate(0.8) brightness(1.15);
+  -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
   display: flex;
   flex-direction: column;
 }
@@ -989,9 +989,8 @@ function applyGlass() {
     + ' body:not(.theme-light) .nav2__pill, body:not(.theme-light) .nav2m__pill { background: ' + bg + '; }'
     + ' body.theme-light .nav2__pill, body.theme-light .nav2m__pill { background: ' + bgLight + '; }';
   if (toPanel) {
-    /* panel keeps its own blur 48, shares the effect chain */
-    var bfp = 'blur(48px)' + fx;
-    css += ' body .nav2__panel { -webkit-backdrop-filter: ' + bfp + '; backdrop-filter: ' + bfp + '; }'
+    /* panel shares the full chain including blur */
+    css += ' body .nav2__panel { -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }'
       + ' body:not(.theme-light) .nav2__panel { background: ' + bg + '; }'
       + ' body.theme-light .nav2__panel { background: ' + bgLight + '; }';
   }
@@ -1002,7 +1001,7 @@ function applyGlass() {
   document.getElementById('g-con-v').textContent = con.toFixed(2);
   document.getElementById('g-alpha-v').textContent = (document.getElementById('g-alpha').value / 100).toFixed(2);
   document.getElementById('g-alpha-l-v').textContent = (document.getElementById('g-alpha-l').value / 100).toFixed(2);
-  document.getElementById('g-css').textContent = 'dark: ' + bg + ' | light: ' + bgLight + ' | backdrop-filter: ' + bf + ';' + (toPanel ? ' | panel: blur(48px)' + fx : '');
+  document.getElementById('g-css').textContent = 'dark: ' + bg + ' | light: ' + bgLight + ' | backdrop-filter: ' + bf + ';' + (toPanel ? ' | panel: same' : '');
 }
 ['g-blur', 'g-sat', 'g-dim', 'g-con', 'g-col', 'g-alpha', 'g-col-l', 'g-alpha-l', 'g-panel'].forEach(function (id) {
   document.getElementById(id).addEventListener('input', applyGlass);
