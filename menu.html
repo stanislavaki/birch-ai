@@ -871,12 +871,25 @@ document.querySelector('.mock-frame').addEventListener('load', function () {
   } catch (e) { /* cross-origin guard; same-origin in dev */ }
 });
 
+/* theme and background page are linked: light theme -> light page, dark -> dark.
+   Picking a page directly also flips the theme to match it. */
+var BG_THEME = { 'use-cases.html': 'light', 'ai-promo.html': 'dark', 'manage.html': 'dark' };
+function setTheme(light, bgSrc) {
+  document.body.classList.toggle('theme-light', light);
+  document.getElementById('dev-theme').checked = light;
+  var src = bgSrc || (light ? 'use-cases.html' : 'ai-promo.html');
+  var frame = document.querySelector('.mock-frame');
+  if (frame.getAttribute('src') !== src) frame.src = src;
+  document.getElementById('dev-bg').value = src;
+}
 document.getElementById('dev-theme').addEventListener('change', function () {
-  document.body.classList.toggle('theme-light', this.checked);
+  setTheme(this.checked);
 });
 document.getElementById('dev-bg').addEventListener('change', function () {
-  document.querySelector('.mock-frame').src = this.value;
+  setTheme(BG_THEME[this.value] === 'light', this.value);
 });
+/* default state: dark theme on a dark page */
+setTheme(false);
 document.getElementById('dev-active').addEventListener('change', function () {
   ACTIVE_URL = this.value;
   applyActive();
