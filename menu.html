@@ -97,6 +97,8 @@ body.theme-light { background: #FBFBFD; }
 .dev-sliders span { min-width: 2.2rem; text-align: right; color: #9f9; }
 .dev-css { font-family: monospace; font-size: 0.65rem; color: #888; max-width: 16rem; user-select: all; }
 .g-hex { font-family: monospace; font-size: 0.7rem; width: 4.2rem; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.3rem; padding: 0.1rem 0.25rem; }
+.g-rgb { display: inline-flex; gap: 0.15rem; }
+.g-rgb input { font-family: monospace; font-size: 0.7rem; width: 2.6rem; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.3rem; padding: 0.1rem 0.15rem; }
 
 /* ============================================================
    DESKTOP PILL HEADER
@@ -597,8 +599,8 @@ body.theme-light { background: #FBFBFD; }
     <label>saturate <input type="range" id="g-sat" min="0" max="150" step="5" value="80"><span id="g-sat-v">0.80</span></label>
     <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="115"><span id="g-dim-v">1.15</span></label>
     <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
-    <label>dark fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
-    <label>light fill <input type="color" id="g-col-l" value="#DDDCE4"><input type="text" class="g-hex" id="g-col-l-hex" value="#DDDCE4" size="7"> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="50"><span id="g-alpha-l-v">0.50</span></label>
+    <label>dark fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"><span class="g-rgb"><input type="number" id="g-col-r" min="0" max="255" value="63"><input type="number" id="g-col-g" min="0" max="255" value="63"><input type="number" id="g-col-b" min="0" max="255" value="63"></span> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
+    <label>light fill <input type="color" id="g-col-l" value="#DDDCE4"><input type="text" class="g-hex" id="g-col-l-hex" value="#DDDCE4" size="7"><span class="g-rgb"><input type="number" id="g-col-l-r" min="0" max="255" value="221"><input type="number" id="g-col-l-g" min="0" max="255" value="220"><input type="number" id="g-col-l-b" min="0" max="255" value="228"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="50"><span id="g-alpha-l-v">0.50</span></label>
     <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
     <label>presets:
       <button type="button" class="g-preset" data-p="18,120,140,40,#3F3F3F,30">A</button>
@@ -985,16 +987,31 @@ function applyGlass() {
 ['g-blur', 'g-sat', 'g-dim', 'g-con', 'g-col', 'g-alpha', 'g-col-l', 'g-alpha-l', 'g-panel'].forEach(function (id) {
   document.getElementById(id).addEventListener('input', applyGlass);
 });
-/* hex fields mirror the pickers; Arrow Up/Down steps lightness ±1 (Shift = ±10) */
+/* hex fields mirror the pickers; Arrow Up/Down steps lightness ±1 (Shift = ±10);
+   R/G/B number inputs step per channel with native arrows/spinners */
 [['g-col', 'g-col-hex'], ['g-col-l', 'g-col-l-hex']].forEach(function (pair) {
   var picker = document.getElementById(pair[0]);
   var hex = document.getElementById(pair[1]);
-  picker.addEventListener('input', function () { hex.value = picker.value.toUpperCase(); });
+  var rgb = ['-r', '-g', '-b'].map(function (sfx) { return document.getElementById(pair[0] + sfx); });
+  function toRgbInputs() {
+    rgb.forEach(function (inp, i) { inp.value = parseInt(picker.value.slice(1 + i * 2, 3 + i * 2), 16); });
+  }
+  function fromRgbInputs() {
+    picker.value = '#' + rgb.map(function (inp) {
+      var n = Math.max(0, Math.min(255, parseInt(inp.value || '0', 10)));
+      return n.toString(16).padStart(2, '0');
+    }).join('');
+    hex.value = picker.value.toUpperCase();
+    applyGlass();
+  }
+  rgb.forEach(function (inp) { inp.addEventListener('input', fromRgbInputs); });
+  picker.addEventListener('input', function () { hex.value = picker.value.toUpperCase(); toRgbInputs(); });
   hex.addEventListener('change', function () {
     var v = hex.value.trim();
     if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
       picker.value = '#' + v.replace('#', '');
       hex.value = picker.value.toUpperCase();
+      toRgbInputs();
       applyGlass();
     } else { hex.value = picker.value.toUpperCase(); }
   });
@@ -1008,6 +1025,7 @@ function applyGlass() {
     });
     picker.value = '#' + ch.map(function (n) { return n.toString(16).padStart(2, '0'); }).join('');
     hex.value = picker.value.toUpperCase();
+    toRgbInputs();
     applyGlass();
   });
 });
