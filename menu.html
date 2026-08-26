@@ -43,11 +43,11 @@
   --nav-surface: rgba(63, 63, 63, 0.6);
   --nav-text: #ffffff;
   --nav-text-cta: #ffffff;
-  --nav-row-hover: rgba(255, 255, 255, 0.1);
+  /* one hover token: submenu plate and Book demo/Log in share it */
+  --nav-hover: rgba(255, 255, 255, 0.1);
   --nav-yellow: #FFE243;
   --nav-yellow-text: #1F1F1F;
   --nav-indigo: #4450F2;
-  --nav-btn-hover: rgba(255, 255, 255, 0.1);
 
   /* -- mobile sheet is ALWAYS dark (per mock) -- */
   --nav-sheet-bg: #292929;
@@ -61,10 +61,9 @@ body.theme-light {
   --nav-m-pill-inner: rgba(205, 203, 220, 0.4);
   --nav-m-pill-inner-blur: 0.75rem;   /* 12 */
   --nav-surface: rgba(205, 203, 220, 0.4);  /* user-approved, differs from dark on purpose */
-  --nav-btn-hover: #ffffff;
+  --nav-hover: rgba(255, 255, 255, 0.5);
   --nav-text: #000000;
   --nav-text-cta: #000000;
-  --nav-row-hover: #ffffff;
 }
 
 /* ============ page behind the menu: real prompts page in an iframe ============ */
@@ -198,7 +197,7 @@ body.theme-light { background: #FBFBFD; }
   color: var(--nav-text-cta);
 }
 .nav2__txtbtn { border-radius: 1rem; transition: background-color 150ms ease; }
-.nav2__txtbtn:hover { background: var(--nav-btn-hover); }
+.nav2__txtbtn:hover { background: var(--nav-hover); }
 .nav2__cta {
   display: flex; align-items: center; justify-content: center;
   height: var(--nav-cta-h);
@@ -280,7 +279,7 @@ body.theme-light { background: #FBFBFD; }
   right: var(--nav-panel-pad);
   top: 0; height: 0;
   border-radius: var(--nav-row-radius);
-  background: var(--nav-row-hover);
+  background: var(--nav-hover);
   opacity: 0;
   pointer-events: none;
   transition: top 320ms cubic-bezier(0.22, 0.9, 0.24, 1), height 320ms cubic-bezier(0.22, 0.9, 0.24, 1), opacity 200ms ease;
