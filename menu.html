@@ -993,6 +993,26 @@ window.addEventListener('wheel', function (e) {
   if (frame && frame.contentWindow) frame.contentWindow.scrollBy(0, e.deltaY);
 }, { passive: true });
 
+/* ?g=blur,sat,dim,con,colorHex,alpha — preset the glass controls (compare tool) */
+(function () {
+  var g = new URLSearchParams(location.search).get('g');
+  if (!g) return;
+  var v = g.split(',');
+  if (v.length < 6) return;
+  document.getElementById('g-blur').value = v[0];
+  document.getElementById('g-sat').value = v[1];
+  document.getElementById('g-dim').value = v[2];
+  document.getElementById('g-con').value = v[3];
+  document.getElementById('g-col').value = '#' + v[4].replace('#', '');
+  document.getElementById('g-alpha').value = v[5];
+  applyGlass();
+})();
+
+/* theme flip via postMessage (compare tool drives both halves at once) */
+window.addEventListener('message', function (e) {
+  if (e.data && e.data.type === 'nav2-theme') setTheme(!!e.data.light);
+});
+
 /* default state: dark theme on a dark page */
 setTheme(false);
 document.getElementById('dev-active').addEventListener('change', function () {
