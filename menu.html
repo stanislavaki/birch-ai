@@ -67,22 +67,18 @@ body.theme-light {
   --nav-row-hover: rgba(144, 144, 144, 0.2);
 }
 
-/* ============ page mock (content behind the menu) ============ */
+/* ============ page behind the menu: real prompts page in an iframe ============ */
 body { background: var(--color-bg); }
 body.theme-light { background: #FBFBFD; }
-.mock { padding-top: calc(var(--nav-pill-h) + var(--nav-pill-top) + 2rem); }
-.mock-hero {
-  margin: 1rem auto 0;
-  width: min(80rem, calc(100% - 3rem));
-  height: 24rem;
-  border-radius: 1.5rem;
-  background: var(--color-accent-green);
-  display: flex; align-items: center; justify-content: center;
-  color: #000; font-size: 3rem; letter-spacing: -0.02em;
+.mock-frame {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 1;             /* under the menu (1000) */
+  background: var(--color-bg);
 }
-.mock-row { width: min(80rem, calc(100% - 3rem)); margin: 1.5rem auto; display: flex; gap: 1.5rem; }
-.mock-card { flex: 1; height: 14rem; border-radius: 1.5rem; background: var(--color-bg-grey); }
-body.theme-light .mock-card { background: var(--color-surface-muted); }
 
 /* ============ dev controls (not for Webflow) ============ */
 .dev-panel {
@@ -569,13 +565,8 @@ body.theme-light .mock-card { background: var(--color-surface-muted); }
   </div>
 </nav>
 
-<!-- ================= MOCK PAGE ================= -->
-<main class="mock">
-  <div class="mock-hero">Mock page content</div>
-  <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div></div>
-  <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div></div>
-  <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div></div>
-</main>
+<!-- ================= PAGE BEHIND THE MENU (real prompts page) ================= -->
+<iframe class="mock-frame" src="use-cases.html" title="Page behind the menu"></iframe>
 
 <!-- ================= DEV CONTROLS ================= -->
 <div class="dev-panel">
@@ -863,6 +854,16 @@ function applyActive() {
 applyActive();
 
 /* ============ dev controls ============ */
+/* hide the background page's own sim navbar so only the new menu shows */
+document.querySelector('.mock-frame').addEventListener('load', function () {
+  try {
+    var doc = this.contentDocument;
+    var st = doc.createElement('style');
+    st.textContent = '.sim-nav { display: none !important; }';
+    doc.head.appendChild(st);
+  } catch (e) { /* cross-origin guard; same-origin in dev */ }
+});
+
 document.getElementById('dev-theme').addEventListener('change', function () {
   document.body.classList.toggle('theme-light', this.checked);
 });
