@@ -61,7 +61,7 @@ rep(""".mock-frame {
 }""",
 """.mock-bg { display: block; width: 100%; }""")
 
-rep('<iframe class="mock-frame" src="use-cases.html" title="Page behind the menu"></iframe>',
+rep('<iframe class="mock-frame" src="use-cases.html?v=2" title="Page behind the menu"></iframe>',
     '<img class="mock-bg" id="mock-bg" alt="">')
 
 # 3) JS: no live iframe to manage
