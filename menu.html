@@ -1102,17 +1102,39 @@ function applyActive() {
 applyActive();
 
 /* ============ dev controls ============ */
-/* hide the background page's own sim navbar so only the new menu shows */
-document.querySelector('.mock-frame').addEventListener('load', function () {
-  try {
-    var doc = this.contentDocument;
-    var st = doc.createElement('style');
-    /* emulate the new component's variable: pill bottom (6.5em) + prod-like
-       12px air below it, so sticky blocks pin with the same gap as live */
-    st.textContent = '.sim-nav, #dbg { display: none !important; } :root { --nav-height: 7.2em !important; }';
-    doc.head.appendChild(st);
-  } catch (e) { /* cross-origin guard; same-origin in dev */ }
-});
+/* Inject into the background page: hide its own sim navbar and emulate the
+   new component's variable — pill bottom (6.5em) + prod-like 12px air, so
+   sticky blocks pin with the same gap as live.
+   The page's own sticky math may run before OR after our injection, so:
+   (a) poll and inject as soon as the iframe document exists (beats load),
+   (b) after load, dispatch resize so sizeCards() recomputes with the var. */
+(function () {
+  var frame = document.querySelector('.mock-frame');
+  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; } :root { --nav-height: 7.2em !important; }';
+  function inject() {
+    try {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.head) return false;
+      var st = doc.getElementById('menu-dev-style');
+      if (!st) {
+        st = doc.createElement('style');
+        st.id = 'menu-dev-style';
+        doc.head.appendChild(st);
+      }
+      st.textContent = CSS_TEXT;
+      return true;
+    } catch (e) { return false; }
+  }
+  setInterval(inject, 60);  /* keeps up across src swaps and reloads */
+  frame.addEventListener('load', function () {
+    inject();
+    try {
+      var iw = frame.contentWindow;
+      setTimeout(function () { iw.dispatchEvent(new Event('resize')); }, 150);
+      setTimeout(function () { iw.dispatchEvent(new Event('resize')); }, 800);
+    } catch (e) {}
+  });
+})();
 
 /* theme tabs: each tab shows its own fill controls and only the background
    pages that match the theme; switching tab switches page + theme together */
