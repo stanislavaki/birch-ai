@@ -21,7 +21,7 @@
   --nav-pill-h: 6.125rem;          /* 98 */
   --nav-pill-radius: 4.0625rem;    /* 65 */
   --nav-pill-top: 0.375rem;        /* 6: top + pill = 6.5rem, matches the site's --nav-height (6.5em) — sticky embeds need no changes */
-  --nav-pill-side: 3rem;           /* 48 (1280 frame margins) */
+  --nav-pill-side: 0.75rem;        /* 12 side margins (user), same as mobile */
   --nav-link-size: 0.9rem;         /* 14.4 — matches the live site's nav links */
   --nav-link-gap: 1.75rem;         /* 28 — visually equals the Book demo/Log in gap */
   --nav-dot: 0.375rem;             /* 6  */
@@ -137,7 +137,7 @@ body.theme-light { background: #FBFBFD; }
 .nav2__pill {
   position: relative;
   margin: var(--nav-pill-top) auto 0;
-  width: min(74rem, calc(100% - 2 * var(--nav-pill-side)));
+  width: calc(100% - 2 * var(--nav-pill-side));
   height: var(--nav-pill-h);
   border-radius: var(--nav-pill-radius);
   background: var(--nav-surface);
@@ -269,7 +269,7 @@ body.theme-light { background: #FBFBFD; }
 /* tablet (≤991): tighten paddings so the centered menu and the
    right CTA group never collide (root font is smaller here too) */
 @media (max-width: 991px) {
-  .nav2__pill { width: calc(100% - 2rem); padding: 0 0.5rem 0 1.25rem; }
+  .nav2__pill { padding: 0 0.5rem 0 1.25rem; }
   .nav2__right { gap: 0.25rem; }
   .nav2__txtbtn { padding: 0 0.625rem; }
   .nav2__cta { padding: 0 1.25rem; }
