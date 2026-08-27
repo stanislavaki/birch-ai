@@ -11,6 +11,7 @@
 | Работа в Figma через `use_figma` | `docs/figma-mcp.md` |
 | Вёрстка / анимация dev-страницы (раскладка, мобилка, scroll, Debug Panel, ревью-артефакт) | `docs/dev-pages.md` |
 | Что осознанно отложено и почему (перед оценкой задачи — свериться) | `docs/tech-debt.md` |
+| План/статус переноса use-cases в Webflow (референс гибрид-порта) | `docs/use-cases-webflow-plan.md` |
 
 Индекс для людей — `docs/README.md`.
 
