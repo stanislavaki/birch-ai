@@ -153,7 +153,14 @@ body.theme-light { background: #FBFBFD; }
   padding: 0 var(--nav-pill-inset);
 }
 
-.nav2__logo { display: flex; align-items: center; height: 2.25rem; margin-top: -0.1875rem; color: var(--nav-text); }
+.nav2__logo {
+  display: flex; align-items: center;
+  height: 2.25rem;
+  margin-top: -0.1875rem;
+  /* left gap to the pill edge equals the logo's vertical inset, like the CTA */
+  margin-left: calc((var(--nav-pill-h) - 2.25rem) / 2 - var(--nav-pill-inset));
+  color: var(--nav-text);
+}
 .nav2__logo svg { height: 100%; width: auto; display: block; }
 
 /* -- center links -- */
