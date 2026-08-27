@@ -401,7 +401,7 @@ body.theme-light { background: #FBFBFD; }
   .nav2m__pill {
     position: relative;
     z-index: 20;
-    margin: 0.75rem 0.75rem 0;      /* 12 all around, same as the open card */
+    margin: 1.25rem 0.75rem 0;      /* top 20: air 20 + pill 64 + air 20 = 6.5em, like desktop */
     height: 4rem;                    /* 64 */
     border-radius: 4.0625rem;
     /* same glass material as the sheet and desktop pill */
@@ -458,7 +458,7 @@ body.theme-light { background: #FBFBFD; }
      app-style, radius stays. The scrim layer separates it from the page. */
   .nav2m__sheet {
     position: fixed;
-    top: 5.25rem;                    /* pill (12+64) + 8 gap */
+    top: 5.75rem;                    /* pill (20+64) + 8 gap */
     left: 0.75rem; right: 0.75rem;   /* 12 — page visible around the card */
     bottom: 0.75rem;
     z-index: 10;
