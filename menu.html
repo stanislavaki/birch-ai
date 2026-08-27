@@ -44,6 +44,8 @@
   --nav-yellow: #FFE243;
   --nav-yellow-text: #1F1F1F;
   --nav-indigo: #4450F2;
+  --nav-soon-bg: rgba(255, 255, 255, 0.14);
+  --nav-soon-text: rgba(255, 255, 255, 0.75);
 
   /* -- mobile sheet: same fill token as the pill, themed content colors -- */
   --nav-sheet-text: #ffffff;
@@ -60,6 +62,8 @@
 body.theme-light {
   --nav-surface: rgba(211, 209, 224, 0.4);  /* user-approved, differs from dark on purpose */
   --nav-hover: rgba(255, 255, 255, 0.7);
+  --nav-soon-bg: rgba(0, 0, 0, 0.08);
+  --nav-soon-text: rgba(0, 0, 0, 0.55);
   --nav-text: #000000;
   --nav-text-cta: #000000;
   --nav-sheet-text: #000000;
@@ -200,6 +204,26 @@ body.theme-light { background: #FBFBFD; }
   rotate: -18deg;
 }
 .nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+/* "Coming soon" chip: quiet informational tag, follows the theme */
+.nav2__soon {
+  display: inline-block;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.14rem 0.3rem 0.12rem;
+  border-radius: 62.4375rem;
+  background: var(--nav-soon-bg);
+  color: var(--nav-soon-text);
+  translate: 0.125rem -0.1em;
+  white-space: nowrap;
+}
+/* disabled submenu row: dimmed, inert (is-static already removes the link) */
+.nav2__row.is-disabled .nav2__row-title { opacity: 0.45; }
+.nav2__row.is-disabled .nav2__row-desc { opacity: 0.3; }
+.nav2m__subrow.is-disabled .nav2m__subrow-title { opacity: 0.45; }
+.nav2m__subrow.is-disabled .nav2m__subrow-desc { opacity: 0.3; }
 
 /* -- right CTA group -- */
 .nav2__right { display: flex; align-items: center; gap: 0; }
@@ -544,9 +568,8 @@ body.theme-light { background: #FBFBFD; }
     font-size: 1.5rem;               /* 24 — same as top-level items */
     font-weight: 600;
     letter-spacing: -0.01em;
-    /* optical: center the lowercase x-height band in the pill (TT Commons
-       baseline sits low in its line box, so lift the text) */
-    padding-bottom: 0.375rem;
+    /* optical: cap-height band (baseline to cap top) centered in the pill */
+    padding-bottom: 0.0625rem;
   }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
@@ -781,7 +804,7 @@ var MENU = [
     { title: 'Bïrch AI',     desc: 'Manage hundreds of campaigns with condition-based rules', url: '/ai',              isNew: false },
     { title: 'Birch MCP',        desc: 'Duplicate winning ads and form new campaigns',            url: '/mcp',             isNew: true  },
     { title: 'Prompting guide',  desc: 'Bulk-upload media and launch campaigns in Meta',          url: '/prompting-guide', isNew: false },
-    { title: 'Routines (TBD)',   desc: 'Creative insights through tailored reports',              url: null,               isNew: false }
+    { title: 'Routines',         desc: 'Schedule repeated workflows',                             url: null,               isNew: false, soon: true }
   ], matchUrls: ['/ai', '/mcp', '/prompting-guide'] },
   { label: 'Cases',   url: '/case-studies', matchPrefix: '/case-studies' },
   { label: 'Blog',    url: '/blog',         matchPrefix: '/blog' },
@@ -836,9 +859,10 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     wrap.className = 'nav2__panel-wrap';
     wrap.id = 'nav2-panel-' + i;
     var rows = item.submenu.map(function (sub) {
-      var badge = sub.isNew ? newBadge() : '';
-      var open2 = sub.url ? '<a class="nav2__row" href="' + sub.url + '" data-url="' + sub.url + '">'
-                          : '<span class="nav2__row is-static">';
+      var badge = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Coming soon</span>' : '');
+      var cls = 'nav2__row' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
+      var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
+                          : '<span class="' + cls + '">';
       return open2
         + '<span class="nav2__row-dot"></span>'
         + '<span class="nav2__row-title">' + sub.title + badge + '</span>'
@@ -944,9 +968,10 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
   MENU.forEach(function (item, i) {
     if (item.submenu) {
       var rows = item.submenu.map(function (sub) {
-        var b = sub.isNew ? newBadge() : '';
-        var open2 = sub.url ? '<a class="nav2m__subrow" href="' + sub.url + '" data-url="' + sub.url + '">'
-                            : '<span class="nav2m__subrow is-static">';
+        var b = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Coming soon</span>' : '');
+        var cls = 'nav2m__subrow' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
+        var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
+                            : '<span class="' + cls + '">';
         return open2
           + '<span class="nav2m__subdot"></span>'
           + '<span class="nav2m__subrow-title">' + sub.title + b + '</span>'
