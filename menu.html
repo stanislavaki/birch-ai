@@ -919,6 +919,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     triggerFor(i).setAttribute('aria-expanded', 'true');
   }
   function closeNow() {
+    if (window.__nav2Pin) return;
     if (openId === null) return;
     panelFor(openId).classList.remove('is-open');
     triggerFor(openId).setAttribute('aria-expanded', 'false');
@@ -1028,6 +1029,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     }
   }
   function closeSheet() {
+    if (window.__nav2Pin) return;
     root.classList.remove('is-open');
     burger.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
@@ -1305,6 +1307,7 @@ setTheme(false);
 /* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
 (function () {
   var q = new URLSearchParams(location.search);
+  if (q.get('pin')) window.__nav2Pin = true;
   if (q.get('theme') === 'light') setTheme(true);
   if (q.get('nopanel')) document.body.classList.add('dev-hidden');
   if (q.get('panel') === 'min') document.getElementById('dev-panel').classList.add('is-min');
