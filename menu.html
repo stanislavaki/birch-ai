@@ -204,16 +204,14 @@ body.theme-light { background: #FBFBFD; }
   rotate: -18deg;
 }
 .nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
-/* "Coming soon" chip: quiet informational tag, follows the theme */
+/* "Soon" chip: same text style as the New tag, muted theme colors */
 .nav2__soon {
   display: inline-block;
-  font-size: 0.5625rem;
+  font-size: 0.7rem;
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  padding: 0.14rem 0.3rem 0.12rem;
-  border-radius: 62.4375rem;
+  padding: 0.1rem 0.25rem 0.16rem;
+  border-radius: 0.25rem;
   background: var(--nav-soon-bg);
   color: var(--nav-soon-text);
   translate: 0.125rem -0.1em;
@@ -859,7 +857,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     wrap.className = 'nav2__panel-wrap';
     wrap.id = 'nav2-panel-' + i;
     var rows = item.submenu.map(function (sub) {
-      var badge = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Coming soon</span>' : '');
+      var badge = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Soon</span>' : '');
       var cls = 'nav2__row' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
       var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
                           : '<span class="' + cls + '">';
@@ -970,7 +968,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
   MENU.forEach(function (item, i) {
     if (item.submenu) {
       var rows = item.submenu.map(function (sub) {
-        var b = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Coming soon</span>' : '');
+        var b = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Soon</span>' : '');
         var cls = 'nav2m__subrow' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
         var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
                             : '<span class="' + cls + '">';
