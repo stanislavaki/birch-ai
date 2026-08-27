@@ -146,7 +146,9 @@ body.theme-light { background: #FBFBFD; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem 0 2.25rem;
+  /* inner padding aligns the pill's content with the site's .container
+     (max-width 80rem, 1.5rem gutters): container edge minus pill margin */
+  padding: 0 calc(max((100vw - 80rem) / 2, 0px) + 1.5rem - var(--nav-pill-side));
 }
 
 .nav2__logo { display: flex; align-items: center; height: 2.25rem; margin-top: -0.1875rem; color: var(--nav-text); }
@@ -269,7 +271,6 @@ body.theme-light { background: #FBFBFD; }
 /* tablet (≤991): tighten paddings so the centered menu and the
    right CTA group never collide (root font is smaller here too) */
 @media (max-width: 991px) {
-  .nav2__pill { padding: 0 0.5rem 0 1.25rem; }
   .nav2__right { gap: 0.25rem; }
   .nav2__txtbtn { padding: 0 0.625rem; }
   .nav2__cta { padding: 0 1.25rem; }
