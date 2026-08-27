@@ -1107,7 +1107,9 @@ document.querySelector('.mock-frame').addEventListener('load', function () {
   try {
     var doc = this.contentDocument;
     var st = doc.createElement('style');
-    st.textContent = '.sim-nav, #dbg { display: none !important; }';
+    /* emulate the new component's variable: pill bottom (6.5em) + prod-like
+       12px air below it, so sticky blocks pin with the same gap as live */
+    st.textContent = '.sim-nav, #dbg { display: none !important; } :root { --nav-height: 7.2em !important; }';
     doc.head.appendChild(st);
   } catch (e) { /* cross-origin guard; same-origin in dev */ }
 });
