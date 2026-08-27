@@ -1110,7 +1110,10 @@ applyActive();
    (b) after load, dispatch resize so sizeCards() recomputes with the var. */
 (function () {
   var frame = document.querySelector('.mock-frame');
-  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; }';
+  /* the component scopes the variable per breakpoint: desktop keeps the
+     legacy 6.5em; mobile gets 5.5em so pins sit 12px below the 12+64 pill */
+  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; }'
+    + ' @media (max-width: 767px) { :root { --nav-height: 5.5em !important; } }';
   function inject() {
     try {
       var doc = frame.contentDocument;
