@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu — expanded states</title>
+<style>
+/* Both menus with their AI submenu expanded (it carries the New tag and the
+   Coming soon row), side by side. Tweak CSS live in DevTools — the menu
+   styles live inside each iframe's document. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #000; overflow: hidden; }
+.cols { display: flex; height: 100vh; }
+.desk { flex: 1; min-width: 0; }
+.desk iframe { width: 100%; height: 100%; border: none; }
+.mob { width: 390px; border-left: 2px solid #333; }
+.mob iframe { width: 390px; height: 100%; border: none; background: #111; }
+</style>
+</head>
+<body>
+<div class="cols">
+  <div class="desk"><iframe src="menu.html?nopanel=1&openpanel=1"></iframe></div>
+  <div class="mob"><iframe src="menu.html?nopanel=1&open=1&expand=1"></iframe></div>
+</div>
+</body>
+</html>

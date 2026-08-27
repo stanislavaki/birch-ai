@@ -793,17 +793,17 @@ body.dev-hidden .dev-panel { display: none; }
    ============================================================ */
 var MENU = [
   { label: 'Product', isNew: false, submenu: [
-    { title: 'Automated Rules', desc: 'Manage hundreds of campaigns with condition-based rules', url: '/features', isNew: false },
-    { title: 'Stage',           desc: 'Duplicate winning ads and form new campaigns',            url: '/stage',    isNew: false },
-    { title: 'Launcher',        desc: 'Bulk-upload media and launch campaigns in Meta',          url: '/launcher', isNew: false },
-    { title: 'Explorer',        desc: 'Creative insights through tailored reports',              url: '/explorer', isNew: false },
-    { title: 'Hub',             desc: 'Track... server-side smth with minimal setup',            url: '/hub',      isNew: false },
+    { title: 'Rules',           desc: 'Manage ads at scale with condition-based rules',          url: '/features', isNew: false },
+    { title: 'Stage',           desc: 'Create ads from Drive media by duplicating your setups',  url: '/stage',    isNew: false },
+    { title: 'Launcher',        desc: 'Bulk create and test large volumes of ads in Meta',       url: '/launcher', isNew: false },
+    { title: 'Explorer',        desc: 'Track ad performance, spot fatigue, find top assets',     url: '/explorer', isNew: false },
+    { title: 'Hub',             desc: 'Set up server-side tracking for Meta',                    url: '/hub',      isNew: false },
     { title: 'All features',    desc: 'Learn about full product functionality',                  url: '/features', isNew: false }
   ], matchUrls: ['/features', '/stage', '/launcher', '/explorer', '/hub'] },
   { label: 'AI', isNew: true, submenu: [
-    { title: 'Bïrch AI',     desc: 'Manage hundreds of campaigns with condition-based rules', url: '/ai',              isNew: false },
-    { title: 'Birch MCP',        desc: 'Duplicate winning ads and form new campaigns',            url: '/mcp',             isNew: true  },
-    { title: 'Prompting guide',  desc: 'Bulk-upload media and launch campaigns in Meta',          url: '/prompting-guide', isNew: false },
+    { title: 'Bïrch AI',     desc: 'Scale your ad ops with an AI layer across your workflows', url: '/ai',              isNew: false },
+    { title: 'Bïrch MCP',        desc: 'Connect Birch to your AI tool',                           url: '/mcp',             isNew: true  },
+    { title: 'Prompting guide',  desc: 'Learn to use Birch AI, Meta MCP and Birch MCP',           url: '/prompting-guide', isNew: false },
     { title: 'Routines',         desc: 'Schedule repeated workflows',                             url: null,               isNew: false, soon: true }
   ], matchUrls: ['/ai', '/mcp', '/prompting-guide'] },
   { label: 'Cases',   url: '/case-studies', matchPrefix: '/case-studies' },
@@ -948,6 +948,7 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     });
   });
 
+  window.__nav2OpenPanel = openPanel;
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNow(); });
   document.addEventListener('click', function (e) {
     if (openId !== null && !e.target.closest('.nav2__pill') && !e.target.closest('.nav2__panel-wrap')) closeNow();
@@ -1044,6 +1045,10 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
   };
 
   window.__nav2mOpen = openSheet;
+  window.__nav2mExpand = function (i) {
+    var el = listEl.querySelector('.nav2m__item[data-item="' + i + '"]');
+    if (el) expandItem(el, true);
+  };
   burger.addEventListener('click', function () {
     if (root.classList.contains('is-open')) closeSheet(); else openSheet();
   });
@@ -1083,7 +1088,7 @@ document.querySelector('.mock-frame').addEventListener('load', function () {
   try {
     var doc = this.contentDocument;
     var st = doc.createElement('style');
-    st.textContent = '.sim-nav { display: none !important; }';
+    st.textContent = '.sim-nav, #dbg { display: none !important; }';
     doc.head.appendChild(st);
   } catch (e) { /* cross-origin guard; same-origin in dev */ }
 });
@@ -1305,6 +1310,12 @@ setTheme(false);
   if (q.get('panel') === 'min') document.getElementById('dev-panel').classList.add('is-min');
   if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
     setTimeout(function () { if (window.__nav2mOpen) window.__nav2mOpen(); }, 300);
+  }
+  if (q.get('expand') !== null && matchMedia('(max-width: 767px)').matches) {
+    setTimeout(function () { if (window.__nav2mExpand) window.__nav2mExpand(parseInt(q.get('expand'), 10)); }, 450);
+  }
+  if (q.get('openpanel') !== null && matchMedia('(min-width: 768px)').matches) {
+    setTimeout(function () { if (window.__nav2OpenPanel) window.__nav2OpenPanel(parseInt(q.get('openpanel'), 10)); }, 300);
   }
 })();
 document.getElementById('dev-active').addEventListener('change', function () {
