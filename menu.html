@@ -23,7 +23,7 @@
   --nav-pill-top: 0.75rem;         /* 12 — same as mobile */
   --nav-pill-side: 3rem;           /* 48 (1280 frame margins) */
   --nav-link-size: 1rem;           /* 16 */
-  --nav-link-gap: 1rem;            /* 16 */
+  --nav-link-gap: 1.75rem;         /* 28 — visually equals the Book demo/Log in gap */
   --nav-dot: 0.375rem;             /* 6  */
   --nav-cta-h: 4.5rem;             /* 72 */
   --nav-panel-w: 28.75rem;         /* 460 */
@@ -137,8 +137,8 @@ body.theme-light { background: #FBFBFD; }
   height: var(--nav-pill-h);
   border-radius: var(--nav-pill-radius);
   background: var(--nav-surface);
-  -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
-  backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+  -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -202,11 +202,11 @@ body.theme-light { background: #FBFBFD; }
 .nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
 
 /* -- right CTA group -- */
-.nav2__right { display: flex; align-items: center; gap: 0.5rem; }
+.nav2__right { display: flex; align-items: center; gap: 0.25rem; }
 .nav2__txtbtn {
   display: flex; align-items: center;
   height: var(--nav-cta-h);
-  padding: 0 1rem;
+  padding: 0 0.75rem;              /* text gap = .75 + .25 + .75 = 28, same as menu */
   font-size: var(--nav-link-size);
   font-weight: 600;
   letter-spacing: 0.004em;
@@ -229,6 +229,10 @@ body.theme-light { background: #FBFBFD; }
 .nav2 a.nav2__cta { color: #000000; }  /* outweigh the .nav2 a inherit rule */
 .nav2 a.nav2__cta:hover { background: var(--nav-indigo); color: #ffffff; }
 .nav2__cta:hover { background: var(--nav-indigo); }
+
+@media (max-width: 1099px) {
+  .nav2__menu { gap: 1rem; }
+}
 
 /* tablet (≤991): tighten paddings so the centered menu and the
    right CTA group never collide (root font is smaller here too) */
@@ -276,8 +280,8 @@ body.theme-light { background: #FBFBFD; }
   padding: var(--nav-panel-pad);
   border-radius: var(--nav-panel-radius);
   background: var(--nav-surface);
-  -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
-  backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+  -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
   display: flex;
   flex-direction: column;
 }
@@ -360,8 +364,8 @@ body.theme-light { background: #FBFBFD; }
     border-radius: 4.0625rem;
     /* same glass material as the sheet and desktop pill */
     background: var(--nav-surface);
-    -webkit-backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
-    backdrop-filter: blur(0.9375rem) saturate(0.8) brightness(1.15);
+    -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+    backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -457,7 +461,7 @@ body.theme-light { background: #FBFBFD; }
     display: flex; align-items: center; gap: 0.5rem;
     font-size: 1.5rem;               /* 24 */
     font-weight: 600;
-    letter-spacing: -0.026em;
+    letter-spacing: -0.01em;
     line-height: 1;
     position: relative;
   }
@@ -489,7 +493,7 @@ body.theme-light { background: #FBFBFD; }
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.375rem;
     padding: 0.5rem 1rem;            /* 8 / 16 */
     border-radius: 0.75rem;
   }
@@ -502,7 +506,7 @@ body.theme-light { background: #FBFBFD; }
     display: flex; align-items: baseline; gap: 0.375rem;
     font-size: 1rem;
     font-weight: 600;
-    letter-spacing: -0.026em;
+    letter-spacing: -0.01em;
     line-height: 1;
   }
   .nav2m__subrow-desc {
@@ -538,7 +542,9 @@ body.theme-light { background: #FBFBFD; }
     color: var(--nav-sheet-cta-text);
     font-size: 1.5rem;               /* 24 — same as top-level items */
     font-weight: 600;
-    letter-spacing: -0.026em;
+    letter-spacing: -0.01em;
+    /* optical: TT Commons mass sits high, nudge the text down a touch */
+    padding-top: 0.125rem;
   }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
@@ -717,7 +723,7 @@ body.dev-hidden .dev-panel { display: none; }
     <button type="button" class="dev-tab" data-theme="light">light</button>
   </div>
   <div class="dev-sliders">
-    <label>blur <input type="range" id="g-blur" min="0" max="48" step="1" value="15"><span id="g-blur-v">15</span></label>
+    <label>blur <input type="range" id="g-blur" min="0" max="48" step="1" value="30"><span id="g-blur-v">30</span></label>
     <label>saturate <input type="range" id="g-sat" min="0" max="150" step="5" value="80"><span id="g-sat-v">0.80</span></label>
     <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="115"><span id="g-dim-v">1.15</span></label>
     <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
@@ -869,10 +875,12 @@ function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
     if (!t || !w) return;
     var pr = pill.getBoundingClientRect();
     var tr = t.getBoundingClientRect();
-    /* center the panel under its trigger (wrap sits in the nav root,
-       which spans the viewport, so coordinates are viewport-based) */
+    /* align the panel's row titles with the trigger text's left edge */
     var pad = w.querySelector('.nav2__panel');
-    var left = (tr.left + tr.width / 2) - pad.offsetWidth / 2;
+    var padCS = getComputedStyle(pad);
+    var rowCS = getComputedStyle(pad.querySelector('.nav2__row'));
+    var inset = parseFloat(padCS.paddingLeft) + parseFloat(rowCS.paddingLeft);
+    var left = tr.left - inset;
     left = Math.max(pr.left + 8, Math.min(left, pr.right - pad.offsetWidth - 8));
     w.style.left = left + 'px';
   }
