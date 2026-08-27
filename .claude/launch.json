@@ -35,8 +35,7 @@
       "name": "static-menu",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
-        "-m",
-        "http.server",
+        "tools/serve.py",
         "8657"
       ],
       "port": 8657
