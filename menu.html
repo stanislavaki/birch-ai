@@ -218,7 +218,9 @@ body.theme-light { background: #FBFBFD; }
   translate: 0.125rem -0.35em;
   white-space: nowrap;
 }
-/* disabled submenu row: dimmed, inert (is-static already removes the link) */
+/* disabled submenu row: dimmed, inert (is-static already removes the link);
+   pointer-events off so no hover state can fire at all */
+.nav2__row.is-disabled, .nav2m__subrow.is-disabled { pointer-events: none; }
 .nav2__row.is-disabled .nav2__row-title { opacity: 0.45; }
 .nav2__row.is-disabled .nav2__row-desc { opacity: 0.3; }
 .nav2m__subrow.is-disabled .nav2m__subrow-title { opacity: 0.45; }
