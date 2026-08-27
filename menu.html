@@ -202,11 +202,12 @@ body.theme-light { background: #FBFBFD; }
 .nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
 
 /* -- right CTA group -- */
-.nav2__right { display: flex; align-items: center; gap: 0.25rem; }
+.nav2__right { display: flex; align-items: center; gap: 0; }
+.nav2__right .nav2__cta { margin-left: 0.5rem; }
 .nav2__txtbtn {
   display: flex; align-items: center;
   height: var(--nav-cta-h);
-  padding: 0 0.75rem;              /* text gap = .75 + .25 + .75 = 28, same as menu */
+  padding: 0 0.875rem;             /* plates flush: text gap = .875 + .875 = 28, same as menu */
   font-size: var(--nav-link-size);
   font-weight: 600;
   letter-spacing: 0.004em;
@@ -543,8 +544,9 @@ body.theme-light { background: #FBFBFD; }
     font-size: 1.5rem;               /* 24 — same as top-level items */
     font-weight: 600;
     letter-spacing: -0.01em;
-    /* optical: TT Commons mass sits high, nudge the text down a touch */
-    padding-top: 0.125rem;
+    /* optical: center the lowercase x-height band in the pill (TT Commons
+       baseline sits low in its line box, so lift the text) */
+    padding-bottom: 0.375rem;
   }
   .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
 }
