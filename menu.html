@@ -1110,7 +1110,8 @@ applyActive();
    (b) after load, dispatch resize so sizeCards() recomputes with the var. */
 (function () {
   var frame = document.querySelector('.mock-frame');
-  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; } :root { --nav-height: 7.2em !important; }';
+  /* pill bottom (6.5em) + 0.375em air below — same 6px as the pill's top gap */
+  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; } :root { --nav-height: 6.875em !important; }';
   function inject() {
     try {
       var doc = frame.contentDocument;
