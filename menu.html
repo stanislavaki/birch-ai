@@ -218,6 +218,12 @@ body.theme-light { background: #FBFBFD; }
   translate: 0.125rem -0.35em;
   white-space: nowrap;
 }
+/* tags sit on the title baseline and would overhang below it (descender +
+   bottom padding), inflating the title row and pushing descriptions down —
+   cancel the overhang so tagged and plain rows are the same height */
+.nav2__row-title .nav2__new, .nav2__row-title .nav2__soon,
+.nav2m__subrow-title .nav2__new, .nav2m__subrow-title .nav2__soon { margin-bottom: -0.35em; }
+
 /* disabled submenu row: dimmed, inert (is-static already removes the link);
    pointer-events off so no hover state can fire at all */
 .nav2__row.is-disabled, .nav2m__subrow.is-disabled { pointer-events: none; }
