@@ -1198,7 +1198,7 @@
           </span>
           <p class="pub__text"><span class="pub__tag">Meta MCP</span>Some text about the product update, can span the whole banner width</p>
         </div>
-        <a class="pub__link" href="#">Learn more...</a>
+        <a class="pub__link" href="#"><span class="pub__link-lead">Learn </span><span class="pub__link-tail">more...</span></a>
       </div>
     </div>
 
@@ -1210,7 +1210,7 @@
         <div class="pub__message">
           <p class="pub__text">Some text about the product update, can span the whole banner width</p>
         </div>
-        <a class="pub__link" href="#">Learn more...</a>
+        <a class="pub__link" href="#"><span class="pub__link-lead">Learn </span><span class="pub__link-tail">more...</span></a>
       </div>
     </div>
 
@@ -1268,6 +1268,21 @@
           <td>Off-token</td>
           <td class="muted">--pub-pad-*</td>
           <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring</td>
+        </tr>
+        <tr>
+          <td>Mobile &le;767px</td>
+          <td class="muted">.pub__label</td>
+          <td class="muted">hidden &mdash; its left inset moves to .pub__message</td>
+        </tr>
+        <tr>
+          <td>Mobile &le;767px</td>
+          <td class="muted">.pub__link-lead</td>
+          <td class="muted">hidden, tail capitalised &rarr; &ldquo;Learn more...&rdquo; becomes &ldquo;More...&rdquo;</td>
+        </tr>
+        <tr>
+          <td>Copy budget</td>
+          <td class="muted">.pub__text</td>
+          <td class="muted">stays one line and truncates. Measured at 375px: ~12 chars after the &ldquo;Meta MCP&rdquo; tag, ~23 with no mark/tag. Fitting the phone is an editing job.</td>
         </tr>
       </tbody>
     </table>

@@ -122,6 +122,18 @@
    The label was carrying the left inset, so hand it to the message,
    otherwise the text sits flush against the bar edge. */
 @media (max-width: 767px) {
+  /* Drop the "Product update" label so the message gets the width.
+     The label was carrying the left inset, so hand it to the message,
+     otherwise the text sits flush against the bar edge. */
   .pub__label { display: none; }
   .pub__message { padding-inline-start: var(--pub-pad-start); }
+
+  /* "Learn more..." shortens to "More...". The word is not duplicated
+     in the markup — the lead is hidden and the tail is capitalised. */
+  .pub__link-lead { display: none; }
+  .pub__link-tail { text-transform: capitalize; }
+
+  /* The message deliberately stays on one line and truncates with an
+     ellipsis — fitting the phone is an editing job, not a layout one.
+     Measured budget at 375px: see the styleguide spec table. */
 }

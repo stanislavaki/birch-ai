@@ -150,12 +150,21 @@
 }
 .pub-e__link:hover { opacity: 0.85; color: var(--pub-accent); }
 
-/* Mobile <=767px: drop the label so the message gets the width. The
-   label was carrying the left inset, so hand it to the message,
-   otherwise the text sits flush against the bar edge. */
 @media (max-width: 767px) {
+  /* Drop the "Product update" label so the message gets the width.
+     The label was carrying the left inset, so hand it to the message,
+     otherwise the text sits flush against the bar edge. */
   .pub-e__label { display: none !important; }
   .pub-e__message { padding-inline-start: var(--pub-pad-start) !important; }
+
+  /* "Learn more..." shortens to "More...". The word is not duplicated
+     in the markup - the lead is hidden and the tail is capitalised. */
+  .pub-e__link-lead { display: none !important; }
+  .pub-e__link-tail { text-transform: capitalize; }
+
+  /* The message deliberately stays on one line and truncates with an
+     ellipsis - fitting the phone is an editing job, not a layout one.
+     Measured budget at 375px: see the styleguide spec table. */
 }
 </style>
 
@@ -180,6 +189,6 @@
       </span>
       <p class="pub-e__text"><span class="pub-e__tag">Meta MCP</span>Some text about the product update, can span the whole banner width</p>
     </div>
-    <a class="pub-e__link" href="#">Learn more...</a>
+    <a class="pub-e__link" href="#"><span class="pub-e__link-lead">Learn </span><span class="pub-e__link-tail">more...</span></a>
   </div>
 </div>
