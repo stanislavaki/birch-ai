@@ -1,0 +1,143 @@
+/* ============================================================
+   PRODUCT UPDATE BANNER
+   Requires: tokens.css
+   Figma: Website 2026 — "Product updates banner" (node 18332-4305)
+
+   Sits above the site header. Three items on space-between:
+   label / message / link. The message carries an optional product
+   mark (icon + accent label) so the banner can be reused for
+   updates other than Meta MCP.
+
+   Off-token values, kept deliberately to match the mockup
+   (approved in briefing — see the --pub-pad-* block below).
+   Desktop only for now; mobile is a separate pass.
+   ============================================================ */
+
+.pub {
+  /* Component-scoped colours. #0081FB is Meta brand blue and
+     #161616 is a one-off darker-than-token ink, so neither is
+     promoted into tokens.css. */
+  --pub-ink:    #161616;
+  --pub-accent: #0081FB;
+
+  /* Off-token paddings — the design's optical centring puts more
+     weight at the bottom (18 top / 20 bottom). Rounding these to
+     the 8/16/24 scale would flatten that and shorten the bar. */
+  --pub-pad-top:    1.125rem; /* 18px */
+  --pub-pad-bottom: 1.25rem;  /* 20px */
+  --pub-pad-start:  1.375rem; /* 22px */
+  --pub-pad-link:   0.875rem; /* 14px */
+
+  width: 100%;
+  max-width: var(--container-lg);
+  margin-inline: auto;
+  /* 4px gutter between the bar and the container edge */
+  padding: var(--space-xxs);
+}
+
+.pub__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--gap-sm);
+  background: var(--color-bg-white);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.004em;
+  color: var(--pub-ink);
+}
+
+/* ── Left label ── */
+.pub__label {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding: var(--pub-pad-top) 0 var(--pub-pad-bottom) var(--pub-pad-start);
+  white-space: nowrap;
+}
+
+/* ── Centre message ── */
+.pub__message {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  min-width: 0;
+  /* Same vertical padding as label and link. Without it the unpadded
+     message centres 1px lower than they do — the asymmetric 18/20
+     padding puts their line box at y=18, plain centring puts this one
+     at y=19 — and the three baselines drift apart. */
+  padding: var(--pub-pad-top) 0 var(--pub-pad-bottom);
+}
+
+/* Product mark slot — swap the SVG for a different product.
+   Omitting .pub__mark entirely is supported: the gap collapses. */
+.pub__mark {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.pub__mark > svg,
+.pub__mark > img {
+  display: block;
+  height: 1.125rem; /* 18px */
+  width: auto;
+  /* Renders 18px but occupies the 16px text row, so the mark never
+     drives the row height and shifts the baselines down. */
+  margin-block: -0.0625rem;
+}
+
+.pub__text {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Accent label ahead of the message copy ("Meta MCP") */
+.pub__tag {
+  color: var(--pub-accent);
+  margin-inline-end: var(--space-xxs);
+}
+
+/* ── Right link ── */
+.pub__link {
+  /* Deliberately not a flex container: flex items discard the
+     whitespace between them, so the "Learn " and "more..." spans
+     would render as "Learnmore...". Normal inline flow keeps the
+     word space. Vertical position comes from the padding, so
+     nothing is lost by dropping flex here. */
+  display: block;
+  flex: none;
+  text-align: center;
+  padding: var(--pub-pad-top) var(--pub-pad-link) var(--pub-pad-bottom);
+  border-radius: var(--radius-sm);
+  color: var(--pub-accent);
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+.pub__link:hover { opacity: 0.85; }
+
+/* ── Mobile <=767px ──
+   Drop the "Product update" label so the message gets the width.
+   The label was carrying the left inset, so hand it to the message,
+   otherwise the text sits flush against the bar edge. */
+@media (max-width: 767px) {
+  /* Drop the "Product update" label so the message gets the width.
+     The label was carrying the left inset, so hand it to the message,
+     otherwise the text sits flush against the bar edge. */
+  .pub__label { display: none; }
+  .pub__message { padding-inline-start: var(--pub-pad-start); }
+
+  /* "Learn more..." shortens to "More...". The word is not duplicated
+     in the markup — the lead is hidden and the tail is capitalised. */
+  .pub__link-lead { display: none; }
+  .pub__link-tail { text-transform: capitalize; }
+
+  /* The message deliberately stays on one line and truncates with an
+     ellipsis — fitting the phone is an editing job, not a layout one.
+     Measured budget at 375px: see the styleguide spec table. */
+}
