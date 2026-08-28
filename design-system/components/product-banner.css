@@ -105,10 +105,14 @@
 
 /* ── Right link ── */
 .pub__link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Deliberately not a flex container: flex items discard the
+     whitespace between them, so the "Learn " and "more..." spans
+     would render as "Learnmore...". Normal inline flow keeps the
+     word space. Vertical position comes from the padding, so
+     nothing is lost by dropping flex here. */
+  display: block;
   flex: none;
+  text-align: center;
   padding: var(--pub-pad-top) var(--pub-pad-link) var(--pub-pad-bottom);
   border-radius: var(--radius-sm);
   color: var(--pub-accent);
