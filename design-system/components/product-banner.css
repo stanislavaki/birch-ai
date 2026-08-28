@@ -116,3 +116,12 @@
   transition: opacity 0.15s ease;
 }
 .pub__link:hover { opacity: 0.85; }
+
+/* ── Mobile <=767px ──
+   Drop the "Product update" label so the message gets the width.
+   The label was carrying the left inset, so hand it to the message,
+   otherwise the text sits flush against the bar edge. */
+@media (max-width: 767px) {
+  .pub__label { display: none; }
+  .pub__message { padding-inline-start: var(--pub-pad-start); }
+}

@@ -149,6 +149,14 @@
   transition: opacity 0.15s ease;
 }
 .pub-e__link:hover { opacity: 0.85; color: var(--pub-accent); }
+
+/* Mobile <=767px: drop the label so the message gets the width. The
+   label was carrying the left inset, so hand it to the message,
+   otherwise the text sits flush against the bar edge. */
+@media (max-width: 767px) {
+  .pub-e__label { display: none !important; }
+  .pub-e__message { padding-inline-start: var(--pub-pad-start) !important; }
+}
 </style>
 
 <div class="pub-e">
