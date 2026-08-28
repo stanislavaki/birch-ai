@@ -13,3 +13,4 @@
 
 При заведении нового md-файла — добавить его и сюда, и в «Docs map» в `CLAUDE.md`.
 - `use-cases-webflow-plan.md` — план/статус переноса use-cases в Webflow (референс гибрид-порта).
+- `menu-webflow-plan.md` — перенос нового меню (v2) в Webflow: спеки, архитектура, порядок работ.
