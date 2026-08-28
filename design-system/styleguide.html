@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="./components/button.css" />
 <link rel="stylesheet" href="./components/card-accordion.css" />
 <link rel="stylesheet" href="./components/chat-card.css" />
+<link rel="stylesheet" href="./components/product-banner.css" />
 <style>
   html { background: var(--color-bg); }
   body {
@@ -251,6 +252,7 @@
     <a href="#s-buttons">Buttons</a>
     <a href="#s-accordion">Card Accordion</a>
     <a href="#s-chat-card">Chat Card</a>
+    <a href="#s-product-banner">Product Update Banner</a>
     <a href="#s-live">Live Usage Demo</a>
   </nav>
 </div>
@@ -1164,6 +1166,109 @@
         <tr><td>Stats table</td><td class="muted">table.chat-card__stats · head 0.8em grey · counts 600 · zebra on odd rows</td></tr>
         <tr><td>Body text</td><td class="muted">500 — re-declared to survive the global * { font-weight: 600 } reset</td></tr>
         <tr><td>Input row</td><td class="muted">.chat-card__input-wrap · 1em, same size as the chat text</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ PRODUCT UPDATE BANNER ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label" id="s-product-banner">Product Update Banner</div>
+    <hr class="sg-divider" />
+
+    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Default &middot; with product mark</div>
+
+    <div class="pub">
+      <div class="pub__bar">
+        <div class="pub__label">Product update</div>
+        <div class="pub__message">
+          <span class="pub__mark">
+            <svg viewBox="25.17 32.45 40.67 27.11" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Meta">
+              <path d="M29.5643 50.3291C29.5643 51.8876 29.9051 53.0842 30.3505 53.8081C30.9346 54.7562 31.8057 55.1579 32.6938 55.1579C33.8393 55.1579 34.8872 54.8726 36.9066 52.0693C38.5244 49.8224 40.4307 46.6685 41.7133 44.6913L43.8855 41.3415C45.3944 39.0151 47.1409 36.429 49.1433 34.676C50.7781 33.2453 52.5415 32.4504 54.3163 32.4504C57.296 32.4504 60.1342 34.1835 62.3063 37.4339C64.6835 40.9938 65.8375 45.4776 65.8375 50.1049C65.8375 52.8556 65.2973 54.8768 64.3781 56.4737C63.49 58.018 61.7591 59.5609 58.8473 59.5609V55.1579C61.3405 55.1579 61.9627 52.8585 61.9627 50.2269C61.9627 46.4769 61.0916 42.3152 59.1725 39.3416C57.8107 37.2324 56.0458 35.9436 54.1042 35.9436C52.0042 35.9436 50.3142 37.5333 48.415 40.3678C47.4053 41.8738 46.3687 43.7091 45.2049 45.78L43.9237 48.0581C41.3499 52.6385 40.698 53.6817 39.4111 55.4034C37.1555 58.4182 35.2294 59.5609 32.6938 59.5609C29.6859 59.5609 27.7838 58.2536 26.6058 56.2835C25.6442 54.6781 25.1719 52.5718 25.1719 50.1716L29.5643 50.3291Z" fill="#0081FB"/>
+              <path d="M28.6352 37.7448C30.6489 34.6292 33.555 32.4504 36.8882 32.4504C38.8185 32.4504 40.7375 33.0239 42.7414 34.6661C44.9334 36.4617 47.2696 39.4183 50.1841 44.291L51.2292 46.0397C53.7521 50.2582 55.1874 52.4284 56.0275 53.4518C57.1079 54.7661 57.8645 55.1579 58.8473 55.1579C61.3405 55.1579 61.9627 52.8585 61.9627 50.2269L65.8375 50.1049C65.8375 52.8556 65.2973 54.8768 64.3781 56.4737C63.49 58.018 61.7591 59.5609 58.8473 59.5609C57.0372 59.5609 55.4335 59.1663 53.6602 57.4871C52.2969 56.1983 50.7031 53.9088 49.4771 51.8507L45.8299 45.736C44 42.6672 42.3214 40.3792 41.3499 39.343C40.3048 38.2288 38.9614 36.8832 36.8175 36.8832C35.0823 36.8832 33.6088 38.1053 32.3756 39.9746L28.6352 37.7448Z" fill="url(#pubMetaA)"/>
+              <path d="M36.8175 36.8832C35.0823 36.8832 33.6088 38.1053 32.3756 39.9746C30.6319 42.6161 29.5643 46.5507 29.5643 50.3291C29.5643 51.8876 29.9051 53.0842 30.3505 53.8081L26.6058 56.2835C25.6442 54.6781 25.1719 52.5718 25.1719 50.1716C25.1719 45.8069 26.3654 41.2578 28.6352 37.7448C30.6489 34.6292 33.555 32.4504 36.8882 32.4504L36.8175 36.8832Z" fill="url(#pubMetaB)"/>
+              <defs>
+                <linearGradient id="pubMetaA" x1="30.8156" y1="49.0573" x2="61.4082" y2="50.74" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0064E1"/><stop offset="0.4" stop-color="#0064E1"/><stop offset="0.83" stop-color="#0073EE"/><stop offset="1" stop-color="#0082FB"/>
+                </linearGradient>
+                <linearGradient id="pubMetaB" x1="31.5356" y1="52.18" x2="31.5356" y2="41.8184" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0082FB"/><stop offset="1" stop-color="#0064E0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <p class="pub__text"><span class="pub__tag">Meta MCP</span>Some text about the product update, can span the whole banner width</p>
+        </div>
+        <a class="pub__link" href="#">Learn more...</a>
+      </div>
+    </div>
+
+    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding: 2rem 0 0.5rem;">No product mark &middot; omit .pub__mark and .pub__tag</div>
+
+    <div class="pub">
+      <div class="pub__bar">
+        <div class="pub__label">Product update</div>
+        <div class="pub__message">
+          <p class="pub__text">Some text about the product update, can span the whole banner width</p>
+        </div>
+        <a class="pub__link" href="#">Learn more...</a>
+      </div>
+    </div>
+
+    <!-- Spec table -->
+    <table class="sg-pad-table" style="max-width: 860px; margin-top: 2rem;">
+      <thead>
+        <tr>
+          <th>PART</th>
+          <th>CLASS</th>
+          <th>SPEC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wrapper</td>
+          <td class="muted">.pub</td>
+          <td class="muted">max-width --container-lg &middot; padding --space-xxs (4px gutter)</td>
+        </tr>
+        <tr>
+          <td>Bar</td>
+          <td class="muted">.pub__bar</td>
+          <td class="muted">flex space-between &middot; bg --color-bg-white &middot; radius --radius-sm (8px)</td>
+        </tr>
+        <tr>
+          <td>Type</td>
+          <td class="muted">&mdash;</td>
+          <td class="muted">1rem &middot; 700 &middot; lh 1 &middot; ls 0.004em (16px tier)</td>
+        </tr>
+        <tr>
+          <td>Label</td>
+          <td class="muted">.pub__label</td>
+          <td class="muted">padding 1.125 / 0 / 1.25 / 1.375rem &middot; color --pub-ink</td>
+        </tr>
+        <tr>
+          <td>Message</td>
+          <td class="muted">.pub__message</td>
+          <td class="muted">flex &middot; gap --gap-sm (8px)</td>
+        </tr>
+        <tr>
+          <td>Mark slot</td>
+          <td class="muted">.pub__mark</td>
+          <td class="muted">any svg/img &middot; height 1.125rem &middot; optional</td>
+        </tr>
+        <tr>
+          <td>Accent tag</td>
+          <td class="muted">.pub__tag</td>
+          <td class="muted">color --pub-accent (#0081FB) &middot; optional</td>
+        </tr>
+        <tr>
+          <td>Link</td>
+          <td class="muted">.pub__link</td>
+          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85</td>
+        </tr>
+        <tr>
+          <td>Off-token</td>
+          <td class="muted">--pub-pad-*</td>
+          <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring</td>
+        </tr>
       </tbody>
     </table>
   </section>
