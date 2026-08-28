@@ -84,6 +84,11 @@
   align-items: center;
   gap: var(--pub-gap);
   min-width: 0;
+  /* Same vertical padding as label and link. Without it the unpadded
+     message centres 1px lower than they do (the asymmetric 18/20
+     padding puts their line box at y=18, plain centring at y=19) and
+     the three baselines drift apart. */
+  padding: var(--pub-pad-top) 0 var(--pub-pad-bottom) !important;
 }
 
 /* Product mark slot - swap the svg, or drop the element entirely. */
@@ -95,9 +100,12 @@
 .pub-e__mark > svg,
 .pub-e__mark > img {
   display: block;
-  height: 1.125rem;
+  height: 1.125rem; /* 18px */
   width: auto;
   max-width: none;
+  /* Renders 18px but occupies the 16px text row, so the mark never
+     drives the row height and shifts the baselines down. */
+  margin-block: -0.0625rem;
 }
 
 .pub-e__text {
