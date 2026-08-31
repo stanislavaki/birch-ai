@@ -135,3 +135,13 @@
 - **`data_style_tool` даёт `[Conflict] ... style block store`, когда тот же класс открыт у пользователя в Designer.** Это мультиплеер-конфликт, не баг данных. Лечение: попросить закрыть/переключить класс в Designer (или обновить вкладку) и повторить запись.
 - **Переиспользуемый ховер/эффект = именованный класс на элементе + правило в site-level custom-code** (`set_site_freeform_code` location `head`). Тогда `Cmd+D`/копипаст элемента на любую страницу тащит и класс, и эффект — ничего донастраивать не надо. Пример: класс `card-link` + `.card-link:hover .arrow-card-wrap img { transform: rotate(45deg) }` в site-head. Ховер на **глобальные** классы сайта (`bento-block-2`, `u-bg-lightgray`) не вешать - уедет на все страницы; вешать на свой класс-маркер. `card-link { height: 100% }` + `.card-link .bento-block-2 { height: 100% }` - чтобы карточка-ссылка тянулась на всю высоту колонки в flex-ряду.
 - **Скролл на нативной Webflow-странице: `scroll-behavior` = `auto`, а плавный скролл к якорям делает jQuery-обработчик Webflow** — см. правило про перехват кликов выше. Для своего скролла — capture-фаза + `stopImmediatePropagation` + `scrollIntoView({behavior:'smooth'})`, офсет через `scroll-margin-top`.
+
+## Text Field вне формы блокирует вставку компонента
+
+`insert_component_instance` падает с `MPS rejected update: … Text Field can only be placed in a Form`, если где-то в дереве компонента лежит Webflow-элемент **Form Text Input вне `<form>`**. Существующие инстансы при этом продолжают работать — валидация срабатывает только при вставке нового, поэтому проблема всплывает много позже правки.
+
+Так вышло с мобильным полем поиска в `super-navigation-component`: оно было добавлено как Text Field, но не внутри формы (десктопное сидит в легаси `search-form-block`, который формой является). Компонент перестал вставляться на новые страницы, хотя на 78 существующих работал.
+
+**Решение:** делать такой инпут обычным DOM-элементом — `data_element_builder` с `type: "BY_CUSTOM_TAG"`, `custom_tag: "input"`, класс через `set_style`, остальное через `set_attributes`. Оборачивать в Form ради валидации не стоит: Webflow добавит свой `w-form` и submit-поведение, которого у поля живого поиска быть не должно.
+
+**Смежное:** `insert_component_instance` не принимает якорь-инстанс компонента («Cannot insert relative to a component instance»). Вставлять надо относительно обычного родителя — например `prepend` в Body.
