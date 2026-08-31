@@ -32,12 +32,21 @@ html { font-size: 16px; }
 
 /* ── Global resets (from real site) ── */
 *, *::before, *::after { box-sizing: border-box; }
+/* Variable-font axis pin (fixes phantom italic in mobile Safari).
+   TT Commons Pro Variable ships 88 named instances, half of them Italic;
+   without explicit axis values iOS/CoreText can resolve to an Italic one.
+   font-style stays normal on purpose — engines disagree on how to resolve
+   `italic` against this font's slnt axis, so slant comes from the axis. */
 * {
-  /* Fix italic on variable fonts in Safari (mobile) */
   font-style: normal;
   font-weight: 600;
   font-stretch: 100%;
-  font-variation-settings: "ital" 0, "slnt" 0;
+  font-variation-settings: "slnt" var(--slnt, 0);
+}
+
+/* Opt-in italic: slnt 10 is where the font's own Italic instances sit. */
+em, i, cite, .u-italic {
+  --slnt: 10;
 }
 
 body {
