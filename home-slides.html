@@ -196,9 +196,9 @@
   --up: clamp(0px, (100cqh - 364 * var(--u)), 186 * var(--u));
   --dn: clamp(0px, (364 * var(--u) - 100cqh), 64 * var(--u));
 
-  --dx: 0; --dy: 0; --dw: 0;
+  --dx: 0; --dy: 0; --dw: 0; --dh: 0;
   --bx: 0; --by: 0; --bw: 0;
-  --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw);
+  --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw); --dh2: var(--dh);
   --bx2: var(--bx); --by2: var(--by); --bw2: var(--bw);
   --o1: 1; --o2: 1;
 
@@ -229,8 +229,8 @@
 /* Fragments whose height is authored rather than inherited from an
    image's own ratio — the clip frame and the chat. */
 .hs__frag--sized {
-  --ph1: calc(var(--h)  * var(--u));
-  --ph2: calc(var(--h2) * var(--u));
+  --ph1: calc(var(--h)  * var(--u) + var(--up) * var(--dh)  / 186);
+  --ph2: calc(var(--h2) * var(--u) + var(--up) * var(--dh2) / 186);
   height: calc((1 - var(--t)) * var(--ph1) + var(--t) * var(--ph2));
 }
 
@@ -275,6 +275,18 @@
      card is 4.8% of its width. */
   font-size: 4.8cqi;
   border-radius: 6.67cqi;
+}
+
+/* The app icon sits just outside the chat, to its left, and travels with
+   it. It is a sibling of .chat-card-wrap, so --u here still measures the
+   canvas rather than the chat. */
+.hs__chat-icon {
+  position: absolute;
+  left: calc(-67 * var(--u));
+  top: 0;
+  width: calc(64 * var(--u));
+  height: auto;
+  border-radius: 0;
 }
 
 /* Tool lines — what Birch is doing right now, one per source it reads.
@@ -508,6 +520,7 @@
                style="--x:48; --y:199; --w:336.44; --lit:0; z-index:16">
           <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
                style="--x:452; --y:19; --w:300; --h:352; z-index:17">
+            <img class="hs__chat-icon" src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
             <div class="chat-card-wrap">
               <div class="chat-card">
                 <div class="chat-card__body">
@@ -545,6 +558,20 @@
               </div>
             </div>
           </div>
+
+          <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
+          <img data-frag="ads-collage" class="hs__frag hs__frag--fade" src="images/slides/01/ads-collage.webp"
+               alt="Creatives" width="1205" height="1000" loading="lazy" decoding="async"
+               style="--x:723; --y:2; --w:501.98; z-index:9">
+          <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
+               alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
+               style="--x:434; --y:95; --w:371; z-index:18">
+          <img data-frag="routine" class="hs__frag hs__frag--fade" src="images/slides/01/routine.webp"
+               alt="Routine" width="650" height="338" loading="lazy" decoding="async"
+               style="--x:881; --y:108; --w:271; z-index:18">
+          <img data-frag="folder" class="hs__frag hs__frag--fade" src="images/slides/01/folder.webp"
+               alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
+               style="--x:986; --y:287.32; --w:159.47; z-index:19">
 
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
@@ -586,7 +613,8 @@
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
     { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
-    { slide: 1 }    /* 3 — geometry holds still; this segment is the chat */
+    { slide: 1 },   /* 3 — geometry holds still; this segment is the chat */
+    { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
   ];
 
   /* Keyframes per fragment, one entry per step. Anything omitted is
@@ -614,7 +642,7 @@
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0], b:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}],
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0], b:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {o:0}],
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -634,9 +662,17 @@
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
-    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0], b:[0,0,0]}, {}, {o:1}],
-    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0], b:[0,0,0]}, {}, {o:1}],
-    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0], b:[0,0,0]}, {}, {o:1, h:400}]
+    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0], b:[0,0,0]}, {}, {o:1}, {}, {o:0}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0], b:[0,0,0]}, {}, {o:1}, {}, {o:0}],
+    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0,48], b:[0,0,0]}, {}, {o:1}, {}, {x:103}],
+
+    /* Step 4 — the routine. Everything arrives in place; the chat slides
+       left to make room for it. Both h550 frames move the whole group by
+       the same 69, the folder by 75. */
+    'ads-collage':        [{x:723, y:2,      w:501.98, o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
+    'trigger':            [{x:434, y:95,     w:371,    o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
+    'routine':            [{x:881, y:108,    w:271,    o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
+    'folder':             [{x:986, y:287.32, w:159.47, o:0, d:[0,75,0], b:[0,0,0]}, {}, {}, {}, {o:1}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -702,6 +738,7 @@
       st.setProperty('--x',  ka.x);  st.setProperty('--y',  ka.y);  st.setProperty('--w',  ka.w);
       st.setProperty('--x2', kb.x);  st.setProperty('--y2', kb.y);  st.setProperty('--w2', kb.w);
       st.setProperty('--h',  ka.h);  st.setProperty('--h2', kb.h);
+      st.setProperty('--dh', ka.d[3] || 0); st.setProperty('--dh2', kb.d[3] || 0);
       st.setProperty('--dx', ka.d[0]); st.setProperty('--dy', ka.d[1]); st.setProperty('--dw', ka.d[2]);
       st.setProperty('--bx', ka.b[0]); st.setProperty('--by', ka.b[1]); st.setProperty('--bw', ka.b[2]);
       st.setProperty('--dx2', kb.d[0]); st.setProperty('--dy2', kb.d[1]); st.setProperty('--dw2', kb.d[2]);

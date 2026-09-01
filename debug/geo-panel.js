@@ -188,7 +188,8 @@ var FLOOR = 300;
       coreBox.style.height = (y2 - y1) + 'px';
     }
   }
-  function set(id, v) { document.getElementById(id).textContent = v; }
+  /* null-safe: the panel may be removed from the DOM (screenshots) while scroll listeners still fire */
+  function set(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; }
 
   render();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
