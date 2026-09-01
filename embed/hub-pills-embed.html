@@ -1,0 +1,175 @@
+<!-- ===============================================================
+     Hub hero - word-pill lockup
+     "Simple friendly [server-side tracking] / for (Meta) Meta ads"
+     Figma: W4xTxvpZ4ZVyZz5qIuP8v5 541:1606 (desktop) / 541:1565 (mobile)
+     Static by design - no animation (agreed 08.2026).
+     Drop into the Intro component's pills slot.
+     Background / horizontal padding come from Webflow; this block adds none.
+     No <script>, so it renders on the Designer canvas too.
+     =============================================================== -->
+<style>
+  /* Webflow wraps every embed in .w-embed. In a flex slot that wrapper is a
+     flex item sized by its content, so a % width inside would collapse to 0 -
+     pin it to full width. */
+  .w-embed:has(> .hub-pills-embed) { width: 100%; }
+
+  .hub-pills-embed {
+    /* shared pill token if the site exposes it, else the literal fluid scale */
+    --ps: var(--pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* 52px @ 1280 */
+    --font-e: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
+    /* palette straight from the Figma mock (one-off hub colors, not tokens) */
+    --hp-white:    #F6F5FA;
+    --hp-green:    #6AE858;
+    --hp-grad:     linear-gradient(-43.4deg, #4800FF 19%, #FF4AB6 82%);
+    width: 100%;
+    text-align: left;   /* the site often sets text-align:center on sections */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: var(--ps);
+    font-family: var(--font-e);
+  }
+
+  /* ---- Desktop: two centered rows ---- */
+  .hub-pills-embed .hp-dt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.231em;               /* 12px @ 52 - between the two rows */
+  }
+  .hub-pills-embed .hp-row {
+    display: flex;
+    align-items: center;
+    gap: 0.154em;               /* 8px @ 52 */
+  }
+  .hub-pills-embed .hp-row--2 { gap: 0.308em; }  /* 16px @ 52 - words row */
+
+  /* Unified Birch pill recipe: box = 71u @ 52 */
+  .hub-pills-embed .hp-pill {
+    display: block;
+    padding: 0 0.462em 0.115em; /* 0 24px 6px @ 52 */
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.026em;
+    white-space: nowrap;
+    color: #000;
+    border-radius: 9999px;      /* hub pills are round on desktop */
+  }
+  .hub-pills-embed .hp-pill--white { background: var(--hp-white); }
+  .hub-pills-embed .hp-pill--green { background: var(--hp-green); }
+
+  /* Gradient hexagon - CSS clip instead of the fixed-width SVG asset, so the
+     shape hugs any text length. Bevel 24px @ 52 on both pointed sides. */
+  .hub-pills-embed .hp-hex {
+    display: block;
+    padding: 0 0.577em 0.115em; /* bevel 0.462em + 6px breathing */
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.026em;
+    white-space: nowrap;
+    color: #fff;
+    background: var(--hp-grad);
+    clip-path: polygon(0.462em 0, calc(100% - 0.462em) 0, 100% 50%,
+                       calc(100% - 0.462em) 100%, 0.462em 100%, 0 50%);
+  }
+
+  /* Plain words in row 2 (kept as-is per the old design) */
+  .hub-pills-embed .hp-word {
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.026em;
+    white-space: nowrap;
+    color: #fff;
+    padding-bottom: 0.115em;    /* same optical baseline as the pills */
+  }
+
+  /* Meta mark - CDN asset already carries the white circle */
+  .hub-pills-embed .hp-meta {
+    display: block;
+    width: 1.389em;             /* 72.2 / 52 */
+    height: 1.389em;
+  }
+
+  /* Mobile staircase hidden on desktop */
+  .hub-pills-embed .hp-mb { display: none; }
+
+  /* ---- Mobile <=767px: tilted staircase, absolute like manage ---- */
+  @media (max-width: 767px) {
+    .hub-pills-embed .hp-dt { display: none; }
+    .hub-pills-embed .hp-mb {
+      display: block;
+      position: relative;
+      --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); /* 30px @ 320 */
+      font-size: var(--ps);
+      width: 9.32em;            /* 279.6 / 30 */
+      height: 10.333em;         /* 304 / 30 + 0.2em air under friendly */
+    }
+    /* every step is absolutely placed from the Figma mock (coords /30) */
+    .hub-pills-embed .hp-m-simple {
+      position: absolute;
+      left: 2.967em; top: 0;
+      border-radius: 0.223em;   /* mock: Simple is square-ish on mobile */
+    }
+    .hub-pills-embed .hp-m-friendly {
+      position: absolute;
+      left: 4.672em; top: 2.368em;
+      transform: translate(-50%, -50%) rotate(10.76deg);
+    }
+    .hub-pills-embed .hp-m-hex {
+      position: absolute;
+      left: 4.66em; top: 4.423em;   /* +0.2em: air under friendly */
+      transform: translate(-50%, -50%) rotate(-8.73deg);
+    }
+    .hub-pills-embed .hp-m-for {
+      position: absolute;
+      left: 4.671em; top: 6.225em;
+      transform: translate(-50%, -50%);
+      padding: 0 0.85em 0.092em;  /* wide box from the mock: 85x40 @ 30 */
+      color: #fff;
+      background: transparent;
+      /* dotted ring as an outline - takes no layout space (shared recipe) */
+      outline: 0.1em dotted #fff;
+      outline-offset: -0.1em;
+    }
+    .hub-pills-embed .hp-m-meta {
+      position: absolute;
+      left: 3.9em; top: 7.367em;
+      width: 1.622em;           /* 48.66 / 30 */
+      height: 1.622em;
+    }
+    .hub-pills-embed .hp-m-metaads {
+      position: absolute;
+      left: 4.683em; top: 9.067em;
+      transform: translateX(-50%);
+      padding-bottom: 0;
+    }
+  }
+</style>
+
+<div class="hub-pills-embed">
+
+  <!-- Desktop: two rows -->
+  <div class="hp-dt">
+    <div class="hp-row">
+      <span class="hp-pill hp-pill--white">Simple</span>
+      <span class="hp-pill hp-pill--green">friendly</span>
+      <span class="hp-hex">server-side tracking</span>
+    </div>
+    <div class="hp-row hp-row--2">
+      <span class="hp-word">for</span>
+      <img class="hp-meta" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8c704e9c15377481bfd809_hub-meta-icn.svg" alt="" />
+      <span class="hp-word">Meta ads</span>
+    </div>
+  </div>
+
+  <!-- Mobile: tilted staircase -->
+  <div class="hp-mb" aria-label="Simple friendly server-side tracking for Meta ads">
+    <span class="hp-pill hp-pill--white hp-m-simple">Simple</span>
+    <span class="hp-pill hp-pill--green hp-m-friendly">friendly</span>
+    <span class="hp-hex hp-m-hex">server-side tracking</span>
+    <span class="hp-pill hp-m-for">for</span>
+    <img class="hp-meta hp-m-meta" src="https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6a8c704e9c15377481bfd809_hub-meta-icn.svg" alt="" />
+    <span class="hp-word hp-m-metaads">Meta ads</span>
+  </div>
+
+</div>

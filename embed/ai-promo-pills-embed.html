@@ -17,7 +17,6 @@
   --color-text-grey:     #909090;
   --radius-pill: 9999px;
   --gap-sm: 0.45rem;
-  --space-md: 1.8rem;
 }
 
 /* ═══════════════════════════════════════════
@@ -27,7 +26,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 0 var(--space-md);
+  /* no padding: in component slots the container gap owns all spacing */
   font-family: var(--font);
   /* no background — comes from Webflow */
 }
@@ -36,7 +35,7 @@
    H1 COMPOSITION
 ═══════════════════════════════════════════ */
 .birch-pills-embed .ph1 {
-  --ps: clamp(1.62rem, 4.5vw, 3.24rem); /* × 0.81 on desktop */
+  --ps: var(--pill-size, clamp(1.62rem, 4.5vw, 3.24rem)); /* shared pill token, else x0.81 local scale */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,11 +54,11 @@
 /* Word pills */
 .birch-pills-embed .ppill {
   display: block;
-  padding: 0.058em 0.462em 0.154em;
+  padding: 0 0.462em 0.115em;  /* 0 24px 6px @ 52px - Figma pill box: 71px @ 52 */
   font-family: var(--font);
   font-size: var(--ps);
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.25;
   letter-spacing: -0.02em;
   white-space: nowrap;
   color: var(--color-text-inverted);
@@ -79,7 +78,7 @@
   overflow: hidden;
   font-size: var(--ps);
   width:  1.596em;
-  height: 1.312em;
+  height: 1.365em;  /* matches the 71u pill box */
 }
 .birch-pills-embed .pcol {
   position: absolute;
@@ -107,10 +106,10 @@
   flex-shrink: 0;
   font-size: var(--ps);
   width:  1.654em;
-  height: 1.312em;
+  height: 1.365em;  /* matches the 71u pill box */
 }
 .birch-pills-embed .pbar {
-  height: 0.399em;
+  height: 0.416em;  /* 3 bars + 2 gaps fill the 1.365em box */
   border-radius: var(--radius-pill);
 }
 .birch-pills-embed .pbar--lb   { width: 100%;  background: var(--color-accent-light-blue); }
@@ -128,7 +127,7 @@
     align-items: flex-start;
     gap: 0.15em;
     width: fit-content;
-    --ps: clamp(1.95rem, 11.93vw, 2.984rem); /* mobile × 1.0 — no coefficient */
+    --ps: var(--pill-size, clamp(1.95rem, 11.93vw, 2.984rem)); /* shared pill token, else local mobile scale */
     font-size: var(--ps);
   }
   .birch-pills-embed .pstep {

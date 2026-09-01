@@ -31,7 +31,7 @@
    DESKTOP — two centered rows
 ═══════════════════════════════════════════ */
 .manage-pills-embed .mp-h1--dt {
-  --ps: clamp(1.625rem, 4.0625vw, 3.25rem); /* 52px @ 1280 — same token as tokens.css --text-pill-size */
+  --ps: var(--pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* shared pill token, else 52px @ 1280 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -50,10 +50,10 @@
 .manage-pills-embed .mp-pill {
   display: block;
   font-size: var(--ps);
-  padding: 0.058em 0.462em 0.154em; /* pt=3px px=24px pb=8px at 52px design */
+  padding: 0 0.462em 0.115em; /* 0 24px 6px @ 52px - Figma pill box: 71px @ 52 */
   font-family: var(--font);
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.25;
   letter-spacing: -0.02em;
   white-space: nowrap;
   color: var(--color-text-inverted);
@@ -63,8 +63,10 @@
 .manage-pills-embed .mp-pill--dotted {
   background: transparent;
   color: var(--color-text);
-  border: 0.108em dotted var(--color-text); /* 5.6px / 52px */
-  padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em);
+  /* outline takes no layout space, so the box stays 71u without padding
+     compensation (top padding is already 0) */
+  outline: 0.108em dotted var(--color-text); /* 5.6px / 52px */
+  outline-offset: -0.108em;
 }
 .manage-pills-embed .mp-pill--light-blue { background: var(--color-accent-light-blue); }
 .manage-pills-embed .mp-pill--green      { background: var(--color-accent-green); }
@@ -131,7 +133,7 @@
   .manage-pills-embed .mp-h1--mb {
     display: block;
     position: relative;
-    --ps: clamp(1.875rem, 9.375vw, 4.4941rem); /* 30px @ 320 → ~72px @ 767 — same token as tokens.css --text-pill-size-mobile */
+    --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); /* shared pill token, else 30px @ 320 */
     font-size: var(--ps);
     width: 8.068em;  /* 233 / 28.889 */
     height: 8.517em; /* 246 / 28.889 */

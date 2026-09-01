@@ -14,7 +14,7 @@
 
   .hero-mcp-e {
     /* shared pill token if the site exposes it, else the literal fluid scale */
-    --ps: var(--text-pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* 52px @ 1280 */
+    --ps: var(--pill-size, clamp(1.625rem, 4.0625vw, 3.25rem)); /* 52px @ 1280 */
     --font-e: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
     width: 100%;
     /* Webflow sections often set text-align:center, which inherits into the embed.
@@ -36,10 +36,10 @@
   .hero-mcp-e__pill {
     display: flex;
     align-items: center;
-    padding: 0.058em 0.462em 0.154em;  /* 3px 24px 8px @ 52px */
+    padding: 0 0.462em 0.115em;  /* 0 24px 6px @ 52px - Figma pill box: 71px @ 52 */
     font-family: var(--font-e);
     font-weight: 600;
-    line-height: 1.1;
+    line-height: 1.25;
     letter-spacing: -0.02em;
     white-space: nowrap;
     color: #000;                       /* Text/Inverted */
@@ -58,9 +58,10 @@
   .hero-mcp-e__pill--dotted {
     background: transparent;
     color: #fff;
-    border: 0.108em dotted #fff;       /* 5.6px @ 52px */
-    /* border eats into the padding so the box keeps the same size */
-    padding: calc(0.058em - 0.108em) calc(0.462em - 0.108em) calc(0.154em - 0.108em);
+    /* the ring is an outline, not a border: it takes no layout space, so the
+       box stays 71u without padding compensation (top padding is already 0) */
+    outline: 0.108em dotted #fff;      /* 5.6px @ 52px */
+    outline-offset: -0.108em;
   }
 
   /* AI-tool mark on each cube face */
@@ -72,7 +73,7 @@
     /* the pill's vertical padding is asymmetric (optically centres the text),
        which pulls the content box up; nudge back down to the pill's centre */
     position: relative;
-    top: 0.048em;               /* (0.154em - 0.058em) / 2 */
+    top: 0.058em;               /* (0.115em - 0em) / 2 */
   }
 
   /* ── Speech bubble with typing dots — sits between "Talk" and "with" ── */
@@ -118,9 +119,9 @@
   .hero-mcp-e__swap {
     position: relative;
     flex: 0 0 auto;
-    height: 1.312em;            /* exactly one pill tall */
+    height: 1.365em;            /* exactly one pill tall (71u) */
     perspective: 16em;
-    --r: 0.3787em;              /* 1.312em / (2 * tan 60deg) */
+    --r: 0.3942em;              /* 1.365em / (2 * tan 60deg) */
     /* width is driven per-frame from JS (rounded), never by a CSS transition */
   }
   .hero-mcp-e__cube {
@@ -164,7 +165,7 @@
   }
 
   @media (max-width: 767px) {
-    .hero-mcp-e { --ps: var(--text-pill-size-mobile, clamp(1.875rem, 9.375vw, 4.4941rem)); }
+    .hero-mcp-e { --ps: var(--pill-size, clamp(1.875rem, 9.375vw, 4.4941rem)); }
     .hero-mcp-e__brk--mb { display: block; }
     /* faces centre in the slot instead of hugging its left edge */
     .hero-mcp-e__swap .hero-mcp-e__pill {
