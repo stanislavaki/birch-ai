@@ -39,6 +39,15 @@
         "8657"
       ],
       "port": 8657
+    },
+    {
+      "name": "static-tables",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "tools/serve.py",
+        "8661"
+      ],
+      "port": 8661
     }
   ]
 }

@@ -520,6 +520,69 @@
   }
 
   /* ─────────────────────────────────────────
+     READ-THE-RESULT TABLE — small matrix under a prompt: what came back, what
+     it means, what to do. Rows are flex with equal-width cells, so the columns
+     line up without a class per column; the wrapper scrolls sideways on narrow
+     screens instead of squeezing three columns into 320px.
+  ───────────────────────────────────────── */
+  /* A table is a heavier block than a paragraph, so it gets 24px of air above
+     it instead of the card's uniform 16px — the extra 8 comes as a margin on
+     top of the grid gap (the gap is uniform, one value for the whole card) */
+  .uc-tblock { display: grid; gap: var(--space-xs); margin-top: var(--space-xs); }
+  /* t-h6 (16px): the smallest step in the heading scale — it names a section
+     of the card without competing with the card title or the table header */
+  .uc-tblock__cap {
+    margin: 0;
+    color: var(--color-text-inverted);
+  }
+  .uc-table {
+    overflow-x: auto;
+    background: var(--color-bg-white);
+    border: 1px solid var(--color-border-hairline);
+    border-radius: var(--radius-sm);
+  }
+  .uc-table__t {
+    min-width: 34rem;   /* below this the columns start to shred — scroll instead */
+    display: flex;
+    flex-direction: column;
+  }
+  .uc-table__row { display: flex; align-items: stretch; }
+  .uc-table__th,
+  .uc-table__cell {
+    flex: 1 1 0;
+    min-width: 0;
+    /* 24px sides so the first and last column's text lines up with the prompt
+       text above (the prompt block has the same 24px inset), 16px top/bottom */
+    padding: var(--space-sm) var(--space);
+    font-size: var(--text-body-size);
+    line-height: 1.3;
+    text-wrap: pretty;
+  }
+  /* No fill on the header — a filled band (black or section-tinted) read as too
+     heavy inside a light card; the black rule below it does the separating.
+     700, not 600: the page's body weight already is 600, so a header (and the
+     bold lead-in inside a cell) only reads as emphasis one step above it */
+  .uc-table__th {
+    font-weight: 700;
+    color: var(--color-text-inverted);
+    background: var(--color-bg-white);
+    border-bottom: 2px solid var(--color-text-inverted);
+  }
+  /* One black 2px rule under the header, hairlines between the rows: the
+     table gets its structure from the header rule, not from a fill.
+     The first body row drops its hairline — it would stack under that rule */
+  .uc-table__cell {
+    color: var(--color-text-inverted);
+    border-top: 1px solid var(--color-border-hairline);
+  }
+  .uc-table__cell--flush { border-top-width: 0; }
+  .uc-table__cell b { font-weight: 700; }
+  /* Columns 2-3 explain and advise; the first column is the thing you look up.
+     The step down is weight, not colour: the page's body weight is 600, so 500
+     reads as the lighter voice while every cell keeps full contrast */
+  .uc-table__cell--soft { font-weight: 500; }
+
+  /* ─────────────────────────────────────────
      SELECTED BOX — top of the sidebar (Figma 1017:11133)
      Shows the active product; the round button scrolls back to the tab bar.
   ───────────────────────────────────────── */
@@ -1003,6 +1066,18 @@
             <p class="uc-prompt__text">My campaign "[campaign name]" feels expensive lately. Compare its costs and delivery against auction benchmarks so I can tell if it's a me problem or a market problem.</p>
             <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
           </div>
+          <h4 class="uc-card__sub t-para-lg">4. "Is my measurement sound?" (tracking audit)</h4>
+          <p class="t-body">You need: which pixels and datasets are connected, which standard events are actually coming through and at what volume, whether any custom conversion has stopped mapping to a live event, and Opportunity Score as context. The job: confirm your data before you compare it to anything else — a broken event doesn't just cost signal, it skews every benchmark read built on top of it.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Tracking audit</span>
+            <p class="uc-prompt__text">Audit my Meta conversion tracking — which pixels and datasets are connected, which standard events am I actually receiving, and is any custom conversion broken or no longer firing?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Rule impact</span>
+            <p class="uc-prompt__text">Which of my rules use a conversion event that's currently broken or not firing, and what would you suggest to fix each one?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
         </article>
       </section>
 
@@ -1179,6 +1254,11 @@
             <p class="uc-prompt__text">Show me all active ads from [Competitor Name] running in the US right now. Focus on ads that have been active for more than 30 days — I want to see what's been working for them, not just what's new. Prioritize video and carousel formats.</p>
             <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
           </div>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Longevity signal</span>
+            <p class="uc-prompt__text">Show me the longest-running ads in [category] — the ones that have been live the longest.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
         </article>
 
         <article class="uc-card" id="case-compete-2" data-products="meta">
@@ -1190,8 +1270,13 @@
           </div>
           <p class="t-body">Compare ad account performance against auction and industry benchmarks. This data is only available through Meta MCP — it's not in the regular Meta API or Birch's own analytics.</p>
           <div class="uc-prompt">
-            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Benchmark position</span>
             <p class="uc-prompt__text">How is my account performing compared to other advertisers in my auction? I want to know where I'm above benchmark and where I'm losing ground — CPM, CTR, whatever is available.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Trend check</span>
+            <p class="uc-prompt__text">Compare my CPA, CPM and CTR for the last 14 days against the previous 14 days, and against the industry benchmark for my vertical. Is my gap to benchmark widening, holding, or closing?</p>
             <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
           </div>
         </article>
@@ -1208,6 +1293,80 @@
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">Has anything unusual happened in my campaigns in the last 7 days? Flag anything that looks off — sudden drops in delivery, CPM spikes, CTR anomalies — before it gets expensive.</p>
             <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-compete-4" data-products="meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Diagnose what's driving a competitive gap</h3>
+          </div>
+          <p class="t-body">Auction ranking splits into three separate reads — quality, engagement rate, conversion rate — and a below-average score on each one points somewhere different: quality usually traces back to the ad itself, engagement rate to the hook or the audience match, conversion rate to what happens after the click. Reading which one is low tells you where to spend the next sprint before you spend it on the wrong one.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt</span>
+            <p class="uc-prompt__text">Show me my auction ranking versus advertisers like me for my top 5 ad sets by spend — quality ranking, engagement rate ranking, and conversion rate ranking. For any ranking below average, tell me what typically drives it.</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <div class="uc-tblock">
+            <h4 class="uc-tblock__cap t-h6">Reading a CPA move vs benchmark</h4>
+            <div class="uc-table">
+              <div class="uc-table__t">
+                <div class="uc-table__row">
+                  <div class="uc-table__th">What comes back</div>
+                  <div class="uc-table__th">What it means</div>
+                  <div class="uc-table__th">What to do</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell uc-table__cell--flush">Your CPA rose; the benchmark rose about the same</div>
+                  <div class="uc-table__cell uc-table__cell--soft uc-table__cell--flush">Market-wide. You held relative position.</div>
+                  <div class="uc-table__cell uc-table__cell--soft uc-table__cell--flush">Hold. Don't touch working creative. Consider whether the new cost still clears your payback target.</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell">Your CPA rose; the benchmark is flat</div>
+                  <div class="uc-table__cell uc-table__cell--soft">Specific to you.</div>
+                  <div class="uc-table__cell uc-table__cell--soft">Find out which part is broken — start with the ranking read below.</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell">Your CPA rose but by less than the benchmark</div>
+                  <div class="uc-table__cell uc-table__cell--soft">You're outperforming a hard week.</div>
+                  <div class="uc-table__cell uc-table__cell--soft">Consider scaling. This is a buying opportunity that looks like bad news on your dashboard.</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell">Your CPA is flat; the benchmark fell</div>
+                  <div class="uc-table__cell uc-table__cell--soft">You're quietly losing ground.</div>
+                  <div class="uc-table__cell uc-table__cell--soft">The most commonly missed signal in the set. Investigate as if costs had risen.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="uc-tblock">
+            <h4 class="uc-tblock__cap t-h6">Reading a below-average ranking</h4>
+            <div class="uc-table">
+              <div class="uc-table__t">
+                <div class="uc-table__row">
+                  <div class="uc-table__th">Below average on…</div>
+                  <div class="uc-table__th">Usually means</div>
+                  <div class="uc-table__th">Where to spend your week</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell uc-table__cell--flush">Quality ranking</div>
+                  <div class="uc-table__cell uc-table__cell--soft uc-table__cell--flush">The ad itself is underperforming — clarity, execution, believability of the claim</div>
+                  <div class="uc-table__cell uc-table__cell--soft uc-table__cell--flush">New creative. Test a different format, not just a new headline.</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell">Engagement rate ranking</div>
+                  <div class="uc-table__cell uc-table__cell--soft">The hook isn't landing, or the audience isn't the right match for it</div>
+                  <div class="uc-table__cell uc-table__cell--soft">First three seconds. Then targeting.</div>
+                </div>
+                <div class="uc-table__row">
+                  <div class="uc-table__cell">Conversion rate ranking</div>
+                  <div class="uc-table__cell uc-table__cell--soft">The problem is past the ad — landing page, offer, onboarding, checkout, or a trial that's too hard to start</div>
+                  <div class="uc-table__cell uc-table__cell--soft">Landing page and offer. Bring product or web in. <b>Do not</b> spend the sprint on creative.</div>
+                </div>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -1249,6 +1408,27 @@
           <div class="uc-prompt">
             <span class="uc-prompt__label t-eyebrow">Prompt</span>
             <p class="uc-prompt__text">Check my Stage tasks from the last 24 hours — which uploads to Meta and TikTok failed, which are still processing, and what's the error on each?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+        </article>
+
+        <article class="uc-card" id="case-create-3" data-products="ai meta">
+          <div class="uc-card__head">
+            <div class="uc-badges">
+              <span class="uc-badge">Bïrch<b>AI</b></span>
+              <span class="uc-badge">Meta<b>MCP</b></span>
+            </div>
+            <h3 class="t-h3">Turn a benchmark gap into a rule</h3>
+          </div>
+          <p class="t-body">Once you've found a gap against benchmark — CTR running below your vertical, CPA drifting wide of the auction — ask Bïrch AI to draft a rule around it, the same way you'd draft any rule from natural language: describe the trigger and the action, a draft rule is saved for review, you activate it if it looks right.</p>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Step 1, benchmark check</span>
+            <p class="uc-prompt__text">How does my CTR compare to the industry benchmark for my vertical over the last 30 days?</p>
+            <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
+          </div>
+          <div class="uc-prompt">
+            <span class="uc-prompt__label t-eyebrow">Prompt &middot; Step 2, rule from that number</span>
+            <p class="uc-prompt__text">Based on that benchmark, draft an automation rule that pauses any ad whose 3-day CTR falls more than 25% below it, once it's spent at least $100.</p>
             <button class="uc-copy" type="button" aria-label="Copy prompt"><img src="images/use-cases/copy-icon-black.svg" alt="" /></button>
           </div>
         </article>
