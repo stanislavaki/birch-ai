@@ -203,16 +203,58 @@
   --pw1: calc(var(--w)  * var(--u) + var(--up) * var(--dw)  / 186 - var(--dn) * var(--bw)  / 64);
   --pw2: calc(var(--w2) * var(--u) + var(--up) * var(--dw2) / 186 - var(--dn) * var(--bw2) / 64);
 
+  /* Zero for fragments nested inside another one — their left is already
+     measured from a parent that has been centred. */
+  --centre: calc(50cqw - var(--cx) * var(--u));
+
   position: absolute;
   display: block;
-  left:    calc((1 - var(--t)) * var(--px1) + var(--t) * var(--px2)
-           + (50cqw - var(--cx) * var(--u)));
+  left:    calc((1 - var(--t)) * var(--px1) + var(--t) * var(--px2) + var(--centre));
   top:     calc((1 - var(--t)) * var(--py1) + var(--t) * var(--py2));
   width:   calc((1 - var(--t)) * var(--pw1) + var(--t) * var(--pw2));
   height:  auto;
   opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
   /* webflow-env.css rounds every img; these carry their own corners */
   border-radius: 0;
+}
+
+/* Fragments whose height is authored rather than inherited from an
+   image's own ratio — the clip frame and the chat. */
+.hs__frag--sized {
+  --ph1: calc(var(--h)  * var(--u));
+  --ph2: calc(var(--h2) * var(--u));
+  height: calc((1 - var(--t)) * var(--ph1) + var(--t) * var(--ph2));
+}
+
+/* The rules frame is a closing window, not a picture laid on top: at the
+   first steps it is larger than the canvas and clips nothing, and by the
+   time it reaches 276x275 it has cropped the three cards exactly as the
+   Figma card does. Switching overflow on at the end would have shown as
+   a snap; closing the window is continuous the whole way. */
+.hs__frag--clip { overflow: hidden; border-radius: calc(16 * var(--u)); }
+.hs__frag--nested { --centre: 0px; }
+
+.hs__rules-face {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent-blue);
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
+}
+.hs__rules-title {
+  position: absolute;
+  left: calc(21 * var(--u));
+  top: calc(18 * var(--u));
+  color: var(--color-text);
+  font-size: calc(19.2 * var(--u));
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Placeholder for the live chat — geometry is real, contents are not. */
+.hs__chat-stub {
+  background: var(--color-bg-white);
+  border-radius: calc(24 * var(--u));
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
 }
 
 /* The integrations bar ships without its shadow (an earlier export baked
@@ -369,15 +411,6 @@
           <img data-frag="frequency-popover" class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
                width="432" height="445" loading="lazy" decoding="async"
                style="--x:1089; --y:89; --w:180; --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
-          <img data-frag="rule-card-pause" class="hs__frag" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
-               width="1381" height="461" loading="lazy" decoding="async"
-               style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:8">
-          <img data-frag="rule-card-increase" class="hs__frag" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
-               width="1552" height="518" loading="lazy" decoding="async"
-               style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:9">
-          <img data-frag="rule-card" class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
-               width="1793" height="595" loading="lazy" decoding="async"
-               style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10" data-core>
           <img data-frag="filter" class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
                width="1474" height="252" loading="lazy" decoding="async"
                style="--x:921; --y:240; --w:614.25; --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:11">
@@ -390,6 +423,33 @@
           <img data-frag="platform-snapchat" class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:14">
+
+          <!-- Closing window: holds the three rule cards and becomes the
+               "Your automation rules" card by shrinking around them. -->
+          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip"
+               style="--x:-200; --y:-100; --w:1632; --h:800; z-index:10">
+            <div data-frag="rules-face" class="hs__rules-face">
+              <span class="hs__rules-title">Your automation rules</span>
+            </div>
+            <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+                 width="1381" height="461" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:8">
+            <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+                 width="1552" height="518" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:9">
+            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+                 width="1793" height="595" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10" data-core>
+          </div>
+
+          <img data-frag="business-context" class="hs__frag" src="images/slides/01/business-context.webp"
+               alt="Your business context" width="466" height="542" loading="lazy" decoding="async"
+               style="--x:226; --y:114; --w:194.25; z-index:15">
+          <img data-frag="meta-ads-library" class="hs__frag" src="images/slides/01/meta-ads-library.webp"
+               alt="Meta ads library" width="807" height="613" loading="lazy" decoding="async"
+               style="--x:48; --y:199; --w:336.44; z-index:16">
+          <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat-stub"
+               style="--x:452; --y:19; --w:300; --h:352; z-index:17"></div>
 
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
@@ -429,7 +489,8 @@
   /* Which slide each step belongs to. */
   var STEPS = [
     { slide: 0 },   /* 0 — the collage */
-    { slide: 0 }    /* 1 — scatter, rules stack out */
+    { slide: 0 },   /* 1 — scatter, the rules stack out */
+    { slide: 1 }    /* 2 — the stack folds into "Your automation rules" */
   ];
 
   /* Keyframes per fragment, one entry per step. Anything omitted is
@@ -440,20 +501,46 @@
        b       — [bx, by, bw] toward h300
        o       — opacity */
   var K = {
-    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0],             b:[-6.533,2,48.6]},      {x:-395, y:146}],
-    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0],             b:[-4,22.533,23.335]},   {x:-376, y:300, o:0}],
-    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25],     b:[-10,10,8.333]},       {x:-192, y:78}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186],      b:[-7.466,39.333,49.6]}, {x:881,  y:371, w:359.857}],
-    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0],            b:[3,33,34.7]},          {x:-320, y:273}],
-    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0],             b:[31.068,0,45]},        {x:1274, y:0}],
-    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0],             b:[43.068,11.867,24]},   {x:1394, y:89}],
-    'rule-card-pause':    [{x:243,  y:38,  w:747,    d:[0,93,0],             b:[-49.733,5.6,99.6], o:0}, {x:328.45, y:20.75, w:575.45, o:1}],
-    'rule-card-increase': [{x:243,  y:38,  w:747,    d:[0,93,0],             b:[-49.733,5.6,99.6], o:0}, {x:292.35, y:62.45, w:646.7,  o:1}],
-    'rule-card':          [{x:243,  y:38,  w:747,    d:[0,93,0],             b:[-49.733,5.6,99.6]},   {x:261,  y:108.76, w:709.65}],
-    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0],            b:[40.667,44.133,81.9]}, {x:1429, y:213}],
-    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25],b:[52.933,39.6,8.333]},  {x:1309, y:205}],
-    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25],b:[31.334,2,8.333]},    {x:1239, y:21}],
-    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25],b:[-22.933,47.467,8.333]}, {x:-70, y:210}]
+    /* Background — scatters at step 1 and then stays put. Slide 02 does
+       not move it between h364 and h550, hence the zeroed deltas; the
+       h300 end is extrapolated from those two, as agreed. */
+    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0],              b:[-6.533,2,48.6]},      {x:-395, y:146}, {d:[0,0,0], b:[0,0,0]}],
+    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0],              b:[-4,22.533,23.335]},   {x:-376, y:300, o:0}, {d:[0,0,0], b:[0,0,0]}],
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25],      b:[-10,10,8.333]},       {x:-192, y:78},  {d:[0,0,0], b:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186],       b:[-7.466,39.333,49.6]}, {x:881,  y:371, w:359.857}, {d:[0,0,0], b:[0,0,0]}],
+    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0],             b:[3,33,34.7]},          {x:-320, y:273}, {d:[0,0,0], b:[0,0,0]}],
+    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0],              b:[31.068,0,45]},        {x:1274, y:0},   {d:[0,0,0], b:[0,0,0]}],
+    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0],              b:[43.068,11.867,24]},   {x:1394, y:89},  {d:[0,0,0], b:[0,0,0]}],
+    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0],             b:[40.667,44.133,81.9]}, {x:1429, y:213}, {d:[0,0,0], b:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25], b:[52.933,39.6,8.333]},  {x:1309, y:205}, {d:[0,0,0], b:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25],b:[31.334,2,8.333]},     {x:1239, y:21},  {d:[0,0,0], b:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25],b:[-22.933,47.467,8.333]}, {x:-70, y:210}, {d:[0,0,0], b:[0,0,0]}],
+
+    /* The closing window. Wider than the canvas until step 2, so it is
+       invisible as a frame and clips nothing. */
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0], b:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}],
+    'rules-face':         [{o:0}, {o:0}, {o:1}],
+
+    /* The three cards are children of the window, so their coordinates
+       are measured from it — hence the +200/+100 of the open window on
+       the first two steps. The step-2 numbers are Figma's own child
+       coordinates, which are already frame-relative: checked against the
+       exported card, where Pause starts at x≈91 / y≈62 inside 276×275. */
+    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6], o:0},
+                           {x:528.45, y:120.75, w:575.45, o:1},
+                           {x:86.756, y:62,     w:492.737, d:[0,0,0], b:[0,0,0]}],
+    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6], o:0},
+                           {x:492.35, y:162.45, w:646.7, o:1},
+                           {x:55.844, y:97.707, w:553.746, d:[0,0,0], b:[0,0,0]}],
+    'rule-card':          [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6]},
+                           {x:461,  y:208.76, w:709.65},
+                           {x:29,   y:137.366, w:607.65, d:[0,0,0], b:[0,0,0]}],
+
+    /* Slide 02. They arrive together for now — lighting them one by one
+       is the chat's job, and the chat is not wired yet. */
+    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0], b:[0,0,0]}, {}, {o:1}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0], b:[0,0,0]}, {}, {o:1}],
+    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0], b:[0,0,0]}, {}, {o:1, h:400}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -466,6 +553,7 @@
       var raw = K[id][i] || {};
       prev = {
         x: raw.x !== undefined ? raw.x : prev.x,
+        h: raw.h !== undefined ? raw.h : prev.h,
         y: raw.y !== undefined ? raw.y : prev.y,
         w: raw.w !== undefined ? raw.w : prev.w,
         d: raw.d || prev.d,
@@ -517,6 +605,7 @@
       var f = FRAGS[id], ka = f.k[a], kb = f.k[b], st = f.el.style;
       st.setProperty('--x',  ka.x);  st.setProperty('--y',  ka.y);  st.setProperty('--w',  ka.w);
       st.setProperty('--x2', kb.x);  st.setProperty('--y2', kb.y);  st.setProperty('--w2', kb.w);
+      st.setProperty('--h',  ka.h);  st.setProperty('--h2', kb.h);
       st.setProperty('--dx', ka.d[0]); st.setProperty('--dy', ka.d[1]); st.setProperty('--dw', ka.d[2]);
       st.setProperty('--bx', ka.b[0]); st.setProperty('--by', ka.b[1]); st.setProperty('--bw', ka.b[2]);
       st.setProperty('--dx2', kb.d[0]); st.setProperty('--dy2', kb.d[1]); st.setProperty('--dw2', kb.d[2]);
