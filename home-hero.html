@@ -32,7 +32,7 @@
   /* ── H1: one wrapping flex line-box.
      Line breaks come from zero-height separators (.hh__br), not from
      duplicated markup — desktop breaks after "teams", mobile breaks in
-     three more places. See CLAUDE.md "Переносы строк в flex-композициях". */
+     three more places. See the line-break rule for flex compositions in CLAUDE.md. */
   .hh__h1 {
     --ps: var(--text-pill-size);   /* shared token — design-system/tokens.css */
 
@@ -303,7 +303,7 @@
        line 5  and · their                  15
        line 6  agents · cursor              85
 
-     Offsets are Figma px at the 30px mobile kegl, expressed in em (px ÷ 30),
+     Offsets are Figma px at the 30px mobile kegl, expressed in em (px / 30),
      measured from the composition's own left bound (x = 7 in the frame), so
      the whole staircase stays centred at any width.
      ═════════════════════════════════════════════════════════ */

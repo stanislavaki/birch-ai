@@ -14,7 +14,9 @@
   Animation/physics pause when off-screen or top edge of block reaches top of viewport.
 -->
 <style></style>
-<div id="falling-images-ft" style="width:100vw;min-height:100vh;position:relative;left:50%;transform:translateX(-50%);overflow:hidden;margin-top:-1px;border:none">
+<!-- width is set from JS (documentElement.clientWidth): 100vw includes the
+     scrollbar in browsers with classic scrollbars and causes a 15px h-scroll -->
+<div id="falling-images-ft" style="width:100%;min-height:100vh;position:relative;left:50%;transform:translateX(-50%);overflow:hidden;margin-top:-1px;border:none">
   <canvas id="ft-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block"></canvas>
   <button id="ft-enable-tilt" type="button" style="position:absolute;top:66.67%;left:50%;transform:translate(-50%,-50%);z-index:10;background:#6900FF;border:none;color:rgba(255,255,255,0.9);font-size:0.9rem;font-family:system-ui,sans-serif;line-height:1.4;padding:1.4em;border-radius:24px;cursor:pointer;display:none">Enable tilt and motion</button>
   <div id="ft-cursor" style="position:fixed;width:28px;height:28px;border-radius:50%;background:rgba(250,250,250,0.95);pointer-events:none;left:-999px;top:-999px;transform:translate(-50%,-50%);z-index:9999;opacity:0;transition:opacity 120ms ease"></div>
@@ -72,7 +74,7 @@
     var MOTION_THRESHOLD = 2;
     var MOTION_SCALE = 0.8;
     var MOTION_DECAY = 0.92;
-    var pointer = { active: false, inside: false, x: 0, y: 0 };
+    var pointer = { active: false, inside: false, x: 0, y: 0, movedAt: 0 };
     var pointerVel = { x: 0, y: 0 };
     var prevPointer = { x: 0, y: 0, t: 0 };
     var INTERACTION_R = 58;
@@ -128,6 +130,8 @@
     }
 
     function resize(){
+      /* full-bleed via JS: clientWidth excludes the scrollbar, 100vw does not */
+      container.style.width = document.documentElement.clientWidth + 'px';
       var r = container.getBoundingClientRect();
       W = r.width;
       H = r.height;
@@ -252,7 +256,7 @@
           Matter.Body.setVelocity(body, { x: 0, y: 0 });
           Matter.Body.setAngularVelocity(body, 0);
           Matter.Sleeping.set(body, true);
-          body._img = item.img;
+          body._img = makeSprite(item.img, o.w, o.h);
           body._w = o.w;
           body._h = o.h;
           body._imgName = o.n;
@@ -272,6 +276,23 @@
       }
       var target = W*H*0.42;
       fitScaleByCount = Math.min(1.5, Math.sqrt(target/Math.max(1,total)));
+    }
+
+    /* Pre-render each sticker to an offscreen canvas at its display size.
+       drawImage from a huge PNG decodes + downscales it on the raster thread
+       every first paint - long frames make the compositor drop fixed layers
+       (nav / chat bubble blink for a frame). A one-time high-quality prescale
+       makes every subsequent frame a cheap canvas-to-canvas blit. */
+    function makeSprite(img, w, h){
+      var dpr = Math.max(1, window.devicePixelRatio || 1);
+      var off = document.createElement('canvas');
+      off.width  = Math.max(1, Math.round(w * dpr));
+      off.height = Math.max(1, Math.round(h * dpr));
+      var octx = off.getContext('2d');
+      octx.imageSmoothingEnabled = true;
+      octx.imageSmoothingQuality = 'high';
+      octx.drawImage(img, 0, 0, off.width, off.height);
+      return off;
     }
 
     function spawnBody(){
@@ -295,7 +316,7 @@
       Matter.Body.setAngle(body, (Math.random()-0.5)*(isMobile ? 0.45 : 0.12));
       Matter.Body.setAngularVelocity(body, (Math.random()-0.5)*(isMobile ? 0.05 : 0.02));
       if(isMobile) Matter.Body.setVelocity(body, { x: (Math.random()-0.5)*2, y: 0 });
-      body._img = item.img;
+      body._img = makeSprite(item.img, w, h);
       body._w = w;
       body._h = h;
       body._imgName = item.name;
@@ -307,6 +328,15 @@
       if(isMobile) return;
       if(!pointer.active||!pointer.inside) return;
       var now = Date.now();
+      /* A parked cursor is fully hands-off: even the overlap separation loops
+         (separate -> gravity pushes the body back -> separate again) and keeps
+         the pile shaking around the cursor. When idle, the cursor simply rests
+         on the pile; any movement instantly re-enables the repel. */
+      if(now - pointer.movedAt > 150){
+        prevPointer.x = pointer.x; prevPointer.y = pointer.y; prevPointer.t = now;
+        pointerVel.x = 0; pointerVel.y = 0;
+        return;
+      }
       if(prevPointer.t === 0) prevPointer.t = now;
       var dt = Math.min(0.1, (now - prevPointer.t) / 1000);
       if(dt > 0.001){
@@ -327,9 +357,9 @@
         var bodyHalf = Math.min(b._w,b._h)*0.5;
         var safe = INTERACTION_R + bodyHalf;
         if(dist>=safe) continue;
-        if(b.isSleeping) Matter.Sleeping.set(b, false);
         var falloff = 1 - dist/safe;
         var pen = safe - dist;
+        if(b.isSleeping) Matter.Sleeping.set(b, false);
         if(pen>0){
           Matter.Body.setPosition(b, {
             x: b.position.x + ux*(pen*0.98),
@@ -368,18 +398,28 @@
           Matter.Body.setVelocity(b, { x: b.velocity.x*f, y: b.velocity.y*f });
         }
         if(!isMobile || !orientationEnabled){
-          if(b.bounds.max.y >= H - 0.5){
-            var lowV = Math.abs(b.velocity.x)<0.35 && Math.abs(b.velocity.y)<0.35;
-            var lowA = Math.abs(b.angularVelocity)<0.03;
-            var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside);
-            if(lowV&&lowA&&canSleep){
-              Matter.Body.setVelocity(b, { x:0, y:0 });
-              Matter.Body.setAngularVelocity(b, 0);
-              Matter.Sleeping.set(b, true);
-            }
+          /* Any slow body may sleep - not only floor-touching ones. Bodies
+             resting on OTHER bodies never touch the floor, so the old
+             floor-only gate kept the whole pile simulating (and jittering)
+             forever. A streak counter keeps freshly spawned bodies (velocity
+             still ~0 for a frame) from falling asleep in mid-air. */
+          var lowV = Math.abs(b.velocity.x)<0.35 && Math.abs(b.velocity.y)<0.35;
+          var lowA = Math.abs(b.angularVelocity)<0.03;
+          var canSleep = isMobile ? !orientationEnabled : (!pointer.active||!pointer.inside||now_idle());
+          b._stillTicks = (lowV && lowA) ? (b._stillTicks||0) + 1 : 0;
+          if(b._stillTicks > 30 && canSleep){
+            Matter.Body.setVelocity(b, { x:0, y:0 });
+            Matter.Body.setAngularVelocity(b, 0);
+            Matter.Sleeping.set(b, true);
+            b._stillTicks = 0;
           }
         }
       }
+    }
+
+    /* pointer parked for a while: the pile may settle even under the cursor */
+    function now_idle(){
+      return Date.now() - pointer.movedAt > 150;
     }
 
     function updateCursorFx(){
@@ -594,6 +634,7 @@
         pointer.inside = true;
         pointer.x = e.clientX - r.left;
         pointer.y = e.clientY - r.top;
+        pointer.movedAt = Date.now();
         cursorEl.style.opacity = '1';
         updateCursor(e.clientX, e.clientY);
       });
@@ -603,6 +644,7 @@
         pointer.inside = true;
         pointer.x = e.clientX - r.left;
         pointer.y = e.clientY - r.top;
+        pointer.movedAt = Date.now();
         cursorEl.style.opacity = '1';
         updateCursor(e.clientX, e.clientY);
       });
