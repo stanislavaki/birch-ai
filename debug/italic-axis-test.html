@@ -1,0 +1,32 @@
+<!doctype html><meta charset="utf-8"><title>Italic axis test</title>
+<style>
+@font-face{
+  font-family:"Tt Commons Pro Variable";
+  src:url(https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/67bd8556e19dc6222c3d5ca2_TT_Commons_Pro_Variable.woff2) format("woff2");
+  font-weight:100 950; font-style:normal; font-display:swap;
+}
+/* ===== exact copy of the new "Global / Fluid Type" embed rules ===== */
+*{
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: 100%;
+  font-variation-settings: "slnt" var(--slnt, 0);
+}
+em, i, cite, .u-italic { --slnt: 10; }
+/* ===== /copy ===== */
+html{background:#fff;color:#111}
+body{font-family:"Tt Commons Pro Variable",Arial,sans-serif;font-size:44px;line-height:1.35;padding:20px 28px;margin:0}
+b,strong{font-weight:700}
+.lbl{font-size:15px;color:#8a8a8a;letter-spacing:.06em;text-transform:uppercase;margin-top:18px}
+.bad{color:#B00020}
+</style>
+<div class="lbl">1 — plain (must stay upright)</div>
+<div>Hamburgefonstiv</div>
+<div class="lbl">2 — &lt;em&gt; · CMS italic / Ctrl+I</div>
+<div>Ham<em>burgefons</em>tiv</div>
+<div class="lbl">3 — .u-italic on the whole element</div>
+<div class="u-italic">Hamburgefonstiv</div>
+<div class="lbl">4 — &lt;strong&gt; inside &lt;em&gt;</div>
+<div><em>Ham<strong>burgefons</strong>tiv</em></div>
+<div class="lbl bad">5 — control: font-style:italic (the path we avoid)</div>
+<div style="font-style:italic">Hamburgefonstiv</div>

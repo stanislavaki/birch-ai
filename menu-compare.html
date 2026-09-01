@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu glass — A/B compare</title>
+<style>
+/* Two live copies of menu.html side by side. Each renders at full desktop
+   width (1280) and is scaled down to fit its half, so the desktop layout
+   never collapses to mobile. Sliders are independent per half; the theme
+   toggle drives both; background scroll is mirrored. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #000; font-family: Arial, sans-serif; }
+.bar {
+  height: 2.5rem;
+  display: flex; align-items: center; gap: 1.5rem;
+  padding: 0 1rem;
+  color: #fff; font-size: 0.85rem;
+  background: #111; border-bottom: 1px solid #2a2a2a;
+}
+.bar label { display: flex; gap: 0.4rem; align-items: center; cursor: pointer; }
+.bar .tag { color: #9f9; }
+.cols { display: flex; height: calc(100vh - 2.5rem); }
+.half { position: relative; width: 50%; overflow: hidden; }
+.half + .half { border-left: 2px solid #333; }
+.half iframe { border: none; transform-origin: top left; }
+.half .lbl {
+  position: absolute; top: 0.4rem; left: 0.5rem; z-index: 10;
+  background: #9f9; color: #000; font-weight: 700;
+  padding: 0.1rem 0.5rem; border-radius: 0.3rem; font-size: 0.8rem;
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <label><input type="checkbox" id="theme"> light theme (обе половины)</label>
+  <span class="tag">A: blur18 · sat1.2 · dim1.4 · con0.4 · a0.3</span>
+  <span class="tag">B: blur23 · sat1.5 · dim1.15 · con1.0 · a0.6</span>
+  <span>скролл синхронный; слайдеры в каждой половине свои</span>
+</div>
+<div class="cols">
+  <div class="half"><span class="lbl">A</span>
+    <iframe id="fa" src="menu.html?g=18,120,140,40,3F3F3F,30"></iframe>
+  </div>
+  <div class="half"><span class="lbl">B</span>
+    <iframe id="fb" src="menu.html?g=23,150,115,100,3F3F3F,60"></iframe>
+  </div>
+</div>
+<script>
+var BASE_W = 1280;
+var frames = [document.getElementById('fa'), document.getElementById('fb')];
+
+function layout() {
+  var halfW = document.querySelector('.half').clientWidth;
+  var scale = halfW / BASE_W;
+  var h = (window.innerHeight - document.querySelector('.bar').offsetHeight) / scale;
+  frames.forEach(function (f) {
+    f.style.width = BASE_W + 'px';
+    f.style.height = h + 'px';
+    f.style.transform = 'scale(' + scale + ')';
+  });
+}
+layout();
+window.addEventListener('resize', layout);
+
+document.getElementById('theme').addEventListener('change', function () {
+  var light = this.checked;
+  frames.forEach(function (f) {
+    f.contentWindow.postMessage({ type: 'nav2-theme', light: light }, '*');
+  });
+});
+
+/* mirror the inner background scroll (poll in rAF — see cs-compare notes) */
+var last = [0, 0];
+function innerWin(f) {
+  try {
+    var m = f.contentDocument && f.contentDocument.querySelector('.mock-frame');
+    return m && m.contentWindow ? m.contentWindow : null;
+  } catch (e) { return null; }
+}
+/* behavior:'instant' bypasses the dev pages' CSS smooth scroll — otherwise the
+   mirror animates and the loop chases its own intermediate positions */
+function jump(w, y) { w.scrollTo({ top: y, behavior: 'instant' }); }
+(function sync() {
+  var wins = frames.map(innerWin);
+  if (wins[0] && wins[1]) {
+    var y = [wins[0].scrollY, wins[1].scrollY];
+    if (y[0] !== last[0]) { jump(wins[1], y[0]); }
+    else if (y[1] !== last[1]) { jump(wins[0], y[1]); }
+    last = [wins[0].scrollY, wins[1].scrollY];
+  }
+  requestAnimationFrame(sync);
+})();
+setInterval(function () { /* backstop for hidden-tab rAF throttling */
+  var wins = frames.map(innerWin);
+  if (wins[0] && wins[1] && Math.abs(wins[0].scrollY - wins[1].scrollY) > 2) {
+    jump(wins[1], wins[0].scrollY);
+  }
+}, 500);
+</script>
+</body>
+</html>

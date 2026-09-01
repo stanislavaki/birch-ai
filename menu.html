@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birch — New Menu (dev)</title>
+<link rel="stylesheet" href="design-system/tokens.css">
+<link rel="stylesheet" href="design-system/webflow-env.css">
+<style>
+/* ============================================================
+   NEW NAVIGATION MENU — dev prototype
+   Figma: Website 2026 → "Menu in code" (node 18327-38749)
+
+   Isolated scale: every menu size lives in the --nav-* block
+   below. Colors follow the page theme (light/dark) except the
+   mobile sheet, which is always dark (per mock).
+   ============================================================ */
+
+:root {
+  /* -- menu-local scale (Figma px / 16) -- */
+  --nav-pill-h: 5.75rem;           /* 92: air 6 + pill 92 + air 6 = 6.5em = legacy --nav-height */
+  --nav-pill-radius: 4.0625rem;    /* 65 */
+  --nav-pill-top: 0.375rem;        /* 6: top + pill = 6.5rem, matches the site's --nav-height (6.5em) — sticky embeds need no changes */
+  /* the glass hugs the content: side inset equals the CTA's vertical inset,
+     so the frame around the button is even on all sides */
+  --nav-pill-inset: calc((var(--nav-pill-h) - var(--nav-cta-h)) / 2);  /* 13 */
+  --nav-link-size: 0.9rem;         /* 14.4 — matches the live site's nav links */
+  --nav-link-gap: 1.75rem;         /* 28 — visually equals the Book demo/Log in gap */
+  --nav-dot: 0.375rem;             /* 6  */
+  --nav-cta-h: 4.5rem;             /* 72 */
+  --nav-panel-w: 30.75rem;         /* 460 + wider title column */
+  --nav-panel-pad: 0.5rem;         /* 16 -> 8: rows got taller, the outer frame slims down */
+  --nav-panel-radius: 1.25rem;     /* concentric: row radius 12 + outer pad 8 = 20 */
+  --nav-panel-gap: 0.5rem;         /* 8 — gap between pill and panel */
+  --nav-row-px: 1.5rem;            /* 24 */
+  --nav-row-py: 1rem;              /* 12 -> 16: air for the rotated tags inside the hover plate */
+  --nav-row-radius: 0.75rem;       /* 12 */
+  --nav-row-title-w: 10.5rem;      /* 136 -> 168: room for bigger tags and looser tracking */
+
+  /* -- theme'd colors (dark defaults) -- */
+  --nav-surface: rgba(63, 63, 63, 0.6);
+  --nav-text: #ffffff;
+  --nav-text-cta: #ffffff;
+  /* one hover token: submenu plate and Book demo/Log in share it */
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-yellow: #FFE243;
+  --nav-yellow-text: #1F1F1F;
+  --nav-indigo: #4450F2;
+  --nav-soon-bg: rgba(255, 255, 255, 0.14);
+  --nav-soon-text: rgba(255, 255, 255, 0.75);
+
+  /* -- mobile sheet: same fill token as the pill, themed content colors -- */
+  --nav-sheet-text: #ffffff;
+  --nav-sheet-line: rgba(255, 255, 255, 0.2);
+  --nav-sheet-row-hover: rgba(255, 255, 255, 0.1);
+  --nav-sheet-cta-bg: #3F3F3F;      /* grey chips on the dark card too */
+  --nav-sheet-cta-text: #ffffff;
+  /* opaque card fill for the open mobile menu (pill adopts it while open) */
+  --nav-card: #292929;
+  /* page scrim behind the open menu: tinted + blurred, page reads AROUND
+     the card, not through it */
+  --nav-scrim: rgba(13, 13, 18, 0.6);
+}
+body.theme-light {
+  --nav-surface: rgba(211, 209, 224, 0.4);  /* user-approved, differs from dark on purpose */
+  --nav-hover: rgba(255, 255, 255, 0.7);
+  --nav-soon-bg: rgba(0, 0, 0, 0.08);
+  --nav-soon-text: rgba(0, 0, 0, 0.55);
+  --nav-text: #000000;
+  --nav-text-cta: #000000;
+  --nav-sheet-text: #000000;
+  --nav-sheet-line: rgba(0, 0, 0, 0.15);
+  --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+  --nav-sheet-cta-bg: #DBDAE2;      /* = design-system surface-muted token */
+  --nav-sheet-cta-text: #0D0D12;
+  --nav-card: #ffffff;
+  --nav-scrim: rgba(13, 13, 18, 0.3);
+}
+
+/* ============ page behind the menu: real prompts page in an iframe ============ */
+body { background: var(--color-bg); }
+body.theme-light { background: #FBFBFD; }
+.mock-frame {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 1;             /* under the menu (1000) */
+  background: var(--color-bg);
+}
+
+/* ============ dev controls (not for Webflow) ============ */
+.dev-panel {
+  position: fixed; right: 0.75rem; bottom: 0.75rem; z-index: 5000;
+  background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 0.75rem; padding: 0.75rem; font-size: 0.8rem;
+  display: flex; flex-direction: column; gap: 0.5rem; opacity: 0.92;
+}
+.dev-panel label { display: flex; gap: 0.4rem; align-items: center; cursor: pointer; }
+.dev-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: #9f9; font-weight: 700; }
+.dev-head button { background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.3rem; width: 1.5rem; height: 1.5rem; cursor: pointer; font: inherit; line-height: 1; }
+.dev-panel.is-min > :not(.dev-head) { display: none; }
+@media (max-width: 767px) {
+  .dev-panel { right: auto; bottom: auto; left: 0.5rem; top: 5rem; z-index: 4; opacity: 0.85; }
+}
+.dev-panel select { font: inherit; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.4rem; padding: 0.15rem 0.3rem; }
+.dev-tabs { display: flex; gap: 0.25rem; }
+.dev-tab {
+  flex: 1; font: inherit; padding: 0.25rem 0.75rem; cursor: pointer;
+  background: #1c1c1c; color: #999; border: 1px solid #444; border-radius: 0.4rem;
+}
+.dev-tab.is-on { background: #3a3a3a; color: #fff; border-color: #777; }
+.dev-panel:not(.is-light) .dev-only-light { display: none; }
+.dev-panel.is-light .dev-only-dark { display: none; }
+.dev-sliders { display: flex; flex-direction: column; gap: 0.25rem; border-top: 1px solid #333; padding-top: 0.5rem; }
+.dev-sliders input[type="range"] { width: 7rem; }
+.dev-sliders span { min-width: 2.2rem; text-align: right; color: #9f9; }
+.dev-css { font-family: monospace; font-size: 0.65rem; color: #888; max-width: 16rem; user-select: all; }
+.g-hex { font-family: monospace; font-size: 0.7rem; width: 4.2rem; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.3rem; padding: 0.1rem 0.25rem; }
+.g-rgb { display: inline-flex; gap: 0.15rem; }
+.g-rgb input { font-family: monospace; font-size: 0.7rem; width: 2.6rem; background: #1c1c1c; color: #fff; border: 1px solid #444; border-radius: 0.3rem; padding: 0.1rem 0.15rem; }
+.g-hsl input { border-color: #365; }
+.dev-panel label { flex-wrap: wrap; }
+
+/* ============================================================
+   DESKTOP PILL HEADER
+   ============================================================ */
+.nav2 {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  font-family: var(--font);
+  color: var(--nav-text);
+}
+.nav2 * { box-sizing: border-box; }
+.nav2 a { text-decoration: none; color: inherit; }
+
+.nav2__pill {
+  position: relative;
+  margin: var(--nav-pill-top) auto 0;
+  /* container content width (min(100vw, 80rem) - gutters) + the inset frame */
+  width: calc(min(100vw, 80rem) - 3rem + 2 * var(--nav-pill-inset));
+  height: var(--nav-pill-h);
+  border-radius: var(--nav-pill-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* logo and CTA land exactly on the container grid */
+  padding: 0 var(--nav-pill-inset);
+}
+
+.nav2__logo {
+  display: flex; align-items: center;
+  height: 2.25rem;
+  margin-top: -0.1875rem;
+  /* left gap to the pill edge equals the logo's vertical inset, like the CTA */
+  margin-left: calc((var(--nav-pill-h) - 2.25rem) / 2 - var(--nav-pill-inset));
+  color: var(--nav-text);
+}
+.nav2__logo svg { height: 100%; width: auto; display: block; }
+
+/* -- center links -- */
+.nav2__menu {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;               /* all labels share one baseline (same size) */
+  gap: var(--nav-link-gap);
+}
+.nav2__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  background: none; border: none; color: inherit; font-family: inherit;
+}
+.nav2__word { position: relative; display: inline-block; }
+.nav2__dot {
+  /* below the word itself (not the link box, so the chevron doesn't skew it) */
+  position: absolute;
+  left: 50%; top: calc(100% + 0.375rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.5);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.nav2__link:hover .nav2__dot,
+.nav2__link.is-active .nav2__dot { opacity: 1; transform: translateX(-50%) scale(1); }
+
+.nav2__chev { display: block; width: 0.625rem; height: 0.625rem; transition: transform 200ms ease; }
+.nav2__link[aria-expanded="true"] .nav2__chev { transform: rotate(180deg); }
+
+/* "New" badge — live-site .new-menu-item look, submenu rows only */
+.nav2__new {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.08rem 0.2rem 0.13rem;
+  border-radius: 0.2rem;
+  background: var(--nav-yellow);
+  color: #0D0D12;
+  rotate: -18deg;
+}
+.nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+/* "Soon" chip: same text style as the New tag, muted theme colors */
+.nav2__soon {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.1rem 0.25rem 0.16rem;
+  border-radius: 0.25rem;
+  background: var(--nav-soon-bg);
+  color: var(--nav-soon-text);
+  rotate: -18deg;
+  translate: 0.125rem -0.35em;
+  white-space: nowrap;
+}
+/* tags sit on the title baseline and would overhang below it (descender +
+   bottom padding), inflating the title row and pushing descriptions down —
+   cancel the overhang so tagged and plain rows are the same height */
+.nav2__row-title .nav2__new, .nav2__row-title .nav2__soon,
+.nav2m__subrow-title .nav2__new, .nav2m__subrow-title .nav2__soon { margin-bottom: -0.35em; }
+
+/* disabled submenu row: dimmed, inert (is-static already removes the link);
+   pointer-events off so no hover state can fire at all */
+.nav2__row.is-disabled, .nav2m__subrow.is-disabled { pointer-events: none; }
+.nav2__row.is-disabled .nav2__row-title { opacity: 0.45; }
+.nav2__row.is-disabled .nav2__row-desc { opacity: 0.3; }
+.nav2m__subrow.is-disabled .nav2m__subrow-title { opacity: 0.45; }
+.nav2m__subrow.is-disabled .nav2m__subrow-desc { opacity: 0.3; }
+
+/* -- right CTA group -- */
+.nav2__right { display: flex; align-items: center; gap: 0; }
+.nav2__right .nav2__cta { margin-left: 0.5rem; }
+.nav2__txtbtn {
+  display: flex; align-items: center;
+  height: var(--nav-cta-h);
+  padding: 0 0.875rem;             /* plates flush: text gap = .875 + .875 = 28, same as menu */
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--nav-text-cta);
+}
+.nav2__txtbtn { border-radius: 1rem; transition: background-color 150ms ease; }
+.nav2__txtbtn:hover { background: var(--nav-hover); }
+.nav2__cta {
+  display: flex; align-items: center; justify-content: center;
+  height: var(--nav-cta-h);
+  padding: 0 2rem;
+  border-radius: calc(var(--nav-cta-h) / 2);
+  background: var(--nav-yellow);
+  color: #000000;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;          /* CTA reads tighter than the 16px tier (user) */
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.nav2 a.nav2__cta { color: #000000; }  /* outweigh the .nav2 a inherit rule */
+.nav2 a.nav2__cta:hover { background: var(--nav-indigo); color: #ffffff; }
+.nav2__cta:hover { background: var(--nav-indigo); }
+
+@media (max-width: 1099px) {
+  .nav2__menu { gap: 1rem; }
+}
+
+/* tablet (≤991): tighten paddings so the centered menu and the
+   right CTA group never collide (root font is smaller here too) */
+@media (max-width: 991px) {
+  .nav2__right { gap: 0.25rem; }
+  .nav2__txtbtn { padding: 0 0.625rem; }
+  .nav2__cta { padding: 0 1.25rem; }
+  .nav2__menu { gap: 0.75rem; }
+}
+
+/* ============ desktop dropdown panel ============
+   The wrap lives OUTSIDE the pill: an ancestor with backdrop-filter
+   (the pill) would become the backdrop root and the panel's own blur
+   would stop seeing the page behind it (Chrome behavior). The wrap
+   only positions and gates clicks; opacity animates on the panel
+   itself for the same reason. */
+.nav2__panel-wrap {
+  position: absolute;
+  top: calc(var(--nav-pill-top) + var(--nav-pill-h));
+  left: 0;
+  /* hover bridge: covers the gap between pill and panel */
+  padding-top: var(--nav-panel-gap);
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 180ms;
+}
+.nav2__panel-wrap.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transition: none;
+}
+.nav2__panel-wrap .nav2__panel {
+  opacity: 0;
+  translate: 0 -0.5rem;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+.nav2__panel-wrap.is-open .nav2__panel {
+  opacity: 1;
+  translate: 0 0;
+}
+.nav2__panel {
+  position: relative;
+  width: var(--nav-panel-w);
+  padding: var(--nav-panel-pad);
+  border-radius: var(--nav-panel-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+  display: flex;
+  flex-direction: column;
+}
+.nav2__row {
+  display: flex;
+  gap: 1.1875rem;                  /* 19 */
+  align-items: flex-start;
+  padding: var(--nav-row-py) var(--nav-row-px);
+  border-radius: var(--nav-row-radius);
+}
+/* hover plate: a single element sliding between rows (not per-row fades) */
+.nav2__hoverplate {
+  position: absolute;
+  left: var(--nav-panel-pad);
+  right: var(--nav-panel-pad);
+  top: 0; height: 0;
+  border-radius: var(--nav-row-radius);
+  background: var(--nav-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: top 320ms cubic-bezier(0.22, 0.9, 0.24, 1), height 320ms cubic-bezier(0.22, 0.9, 0.24, 1), opacity 200ms ease;
+}
+.nav2__hoverplate.is-jump { transition: opacity 150ms ease; }
+.nav2__row { position: relative; }
+.nav2__row:hover .nav2__row-desc { opacity: 1; }
+.nav2__row.is-static { cursor: default; }
+.nav2__row.is-static:hover { background: none; }
+.nav2__row.is-static:hover .nav2__row-desc { opacity: 0.5; }
+.nav2__row-title {
+  flex: none;
+  width: var(--nav-row-title-w);
+  font-size: 0.9rem;               /* 14.4, in step with the pill */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  display: flex; align-items: baseline; gap: 0.2rem;
+}
+.nav2__row-desc {
+  flex: 1;
+  font-size: 0.9rem;               /* 14.4 */
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+}
+.nav2__row-dot {
+  position: absolute;
+  left: 0.8125rem;                 /* 13 */
+  top: calc(var(--nav-row-py) + 0.3125rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+.nav2__row.is-active .nav2__row-dot { opacity: 1; }
+
+/* ============================================================
+   MOBILE (≤767): pill header + sheet
+   ============================================================ */
+.nav2m { display: none; }
+
+@media (max-width: 767px) {
+  .nav2 { display: none; }
+  .nav2m {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    font-family: var(--font);
+  }
+  .nav2m * { box-sizing: border-box; }
+  .nav2m a { text-decoration: none; color: inherit; }
+
+  .nav2m__pill {
+    position: relative;
+    z-index: 20;
+    margin: 0.75rem;                /* 12 all around, same as the sides; pin air below = 28 */
+    height: 4rem;                    /* 64 */
+    border-radius: 4.0625rem;
+    /* same glass material as the sheet and desktop pill */
+    background: var(--nav-surface);
+    -webkit-backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+    backdrop-filter: blur(1.875rem) saturate(0.8) brightness(1.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.6875rem 0 1.3125rem;  /* 11 / 21 per mock */
+    color: var(--nav-text);
+  }
+  .nav2m__logo { display: flex; align-items: center; height: 1.625rem; margin-top: -0.125rem; color: var(--nav-text); }
+  .nav2m__logo svg { height: 100%; width: auto; display: block; }
+
+  .nav2m__pill { transition: background-color 300ms ease; }
+  /* open: adopt the card color (edges already aligned with the card) */
+  .nav2m.is-open .nav2m__pill { background: var(--nav-card); }
+
+  .nav2m__burger {
+    width: 2.625rem; height: 2.625rem;   /* 42 */
+    border: none; border-radius: 50%;
+    background: var(--nav-yellow);
+    color: var(--nav-yellow-text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .nav2m__burger svg { width: 0.9375rem; height: 0.9375rem; display: block; }
+  /* closed: vertical pairs collapse into one middle row -> reads as 2 dots */
+  .nav2m__burger circle { transition: transform 250ms ease; }
+  .nav2m__burger circle:nth-of-type(1), .nav2m__burger circle:nth-of-type(2) { transform: translateY(3.5px); }
+  .nav2m__burger circle:nth-of-type(3), .nav2m__burger circle:nth-of-type(4) { transform: translateY(-3.5px); }
+  .nav2m__burger[aria-expanded="true"] circle { transform: translateY(0); }
+
+  /* full-page blur behind the sheet */
+  .nav2m__blur {
+    position: fixed; inset: 0;
+    z-index: 5;
+    background: var(--nav-scrim);
+    -webkit-backdrop-filter: blur(0.75rem);
+    backdrop-filter: blur(0.75rem);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__blur {
+    opacity: 1; visibility: visible;
+    transition: opacity 200ms ease;
+  }
+
+  /* the open menu: rounded card (mock geometry) in glass following the
+     theme; same fill token as the pill. Flies in from the bottom
+     app-style, radius stays. The scrim layer separates it from the page. */
+  .nav2m__sheet {
+    position: fixed;
+    top: 5.25rem;                    /* pill (12+64) + 8 gap */
+    left: 0.75rem; right: 0.75rem;   /* 12 — page visible around the card */
+    bottom: 0.75rem;
+    z-index: 10;
+    border-radius: 2.25rem;          /* 36 */
+    background: var(--nav-card);
+    color: var(--nav-sheet-text);
+    padding: 1rem 0.75rem 0.75rem;   /* 16 / 12 / 12 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    translate: 0 110%;
+    visibility: hidden;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1),
+                visibility 0s linear 400ms;
+  }
+  .nav2m.is-open .nav2m__sheet {
+    translate: 0 0;
+    visibility: visible;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .nav2m__list { width: 100%; padding: 0 0.625rem; }  /* rows keep their inset */
+
+  /* top-level row */
+  .nav2m__item { border-bottom: 1px solid var(--nav-sheet-line); }
+  .nav2m__toprow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.75rem 0.75rem 1rem;   /* 10 / 12 / 12 / 16 */
+    background: none; border: none; color: inherit; font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+  .nav2m__subrow-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+  .nav2m__toprow-label {
+    position: relative;
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 1.5rem;               /* 24 */
+    font-weight: 600;
+    letter-spacing: 0em;
+    line-height: 1;
+    position: relative;
+  }
+  .nav2m__topdot {
+    position: absolute;
+    left: -0.625rem; top: 50%;
+    translate: 0 -50%;
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__item.is-active .nav2m__topdot { opacity: 1; }
+  /* collapsed: points right (per mock), expanded: points down */
+  .nav2m__chev { width: 0.875rem; height: 0.875rem; transform: rotate(-90deg); transition: transform 250ms ease; flex: none; }
+  .nav2m__toprow[aria-expanded="true"] .nav2m__chev { transform: rotate(0deg); }
+
+  /* collapsible submenu: grid-rows trick animates height without JS measuring */
+  .nav2m__sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 280ms ease;
+  }
+  .nav2m__item.is-expanded .nav2m__sub { grid-template-rows: 1fr; }
+  .nav2m__sub-inner { overflow: hidden; min-height: 0; }
+  .nav2m__sub-list { padding-bottom: 0.75rem; }
+
+  .nav2m__subrow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;            /* 8 / 16 */
+    border-radius: 0.75rem;
+  }
+  .nav2m__subrow.is-active { }
+  .nav2m__subrow:active { background: var(--nav-sheet-row-hover); }
+  .nav2m__subrow:active .nav2m__subrow-desc { opacity: 1; }
+  .nav2m__subrow.is-static { cursor: default; }
+  .nav2m__subrow.is-static:active { background: none; }
+  .nav2m__subrow-title {
+    display: flex; align-items: baseline; gap: 0.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;    /* 16px tier */
+    line-height: 1;
+  }
+  .nav2m__subrow-desc {
+    font-size: 0.75rem;              /* 12 */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    opacity: 0.5;
+  }
+  .nav2m__subdot {
+    position: absolute;
+    left: 0.4375rem; top: 0.75rem;   /* 7 / 12 */
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__subrow.is-active .nav2m__subdot { opacity: 1; }
+
+  /* bottom CTA block */
+  /* 8px between the buttons (tighter cluster), 12px to the card edges */
+  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem; flex: none; }
+  .nav2m__cta-row { display: flex; gap: 0.5rem; }
+  /* flex:1 only inside the row — on the full-width yellow button (a column
+     item) it would zero the height basis and squash it to content height */
+  .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
+  /* a.-selector: outweigh the `.nav2m a { color: inherit }` rule */
+  .nav2m__cta-btn, .nav2m a.nav2m__cta-btn {
+    display: flex; align-items: center; justify-content: center;
+    height: 3.5rem;                  /* 56 */
+    border-radius: 1.75rem;
+    background: var(--nav-sheet-cta-bg);
+    color: var(--nav-sheet-cta-text);
+    font-size: 1.5rem;               /* 24 — same as top-level items */
+    font-weight: 600;
+    letter-spacing: 0em;
+    /* optical: cap-height band (baseline to cap top) centered in the pill */
+    padding-bottom: 0.0625rem;
+  }
+  .nav2m__cta-btn.is-yellow, .nav2m a.nav2m__cta-btn.is-yellow { background: var(--nav-yellow); color: #000000; }
+}
+
+/* the burger goes neutral while the menu is open — Get started stays the
+   only yellow accent on screen */
+body .nav2m__burger { transition: background-color 300ms ease; }
+/* only the circle recolors; the dots keep their color */
+body .nav2m.is-open .nav2m__burger { background: #ffffff; }
+body.theme-light .nav2m.is-open .nav2m__burger { background: #DBDAE2; }
+body.dev-hidden .dev-panel { display: none; }
+
+/* reduced motion: no movement, opacity only */
+@media (prefers-reduced-motion: reduce) {
+  .nav2__hoverplate { transition: opacity 150ms ease; }
+  .nav2__panel-wrap .nav2__panel { translate: 0 0; transition-property: opacity; }
+  .nav2m__sheet {
+    translate: 0 0; border-radius: 0;
+    opacity: 0;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__sheet { opacity: 1; transition: opacity 200ms ease; }
+  .nav2m__sub { transition: none; }
+  .nav2__chev, .nav2m__chev, .nav2m__burger svg { transition: none; }
+}
+
+/* ============================================================
+   Apple-style pass over the dev controls (overrides the base
+   dev-panel styles above; appended last so it wins the cascade)
+   ============================================================ */
+.dev-panel {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 0.75rem;
+  background: #1C1C1E;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.875rem;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.45);
+  padding: 0.75rem 0.875rem;
+  gap: 0.5rem;
+  opacity: 1;
+}
+.dev-head { color: #fff; font-weight: 600; letter-spacing: 0em; font-size: 0.8125rem; }
+.dev-head button {
+  background: rgba(118, 118, 128, 0.24);
+  border: none; border-radius: 50%;
+  width: 1.375rem; height: 1.375rem;
+  color: #fff; font-size: 0.8rem;
+  transition: background-color 150ms ease;
+}
+.dev-head button:hover { background: rgba(118, 118, 128, 0.44); }
+.dev-tabs {
+  padding: 0.125rem;
+  background: rgba(118, 118, 128, 0.24);
+  border-radius: 0.5rem;
+  gap: 0;
+}
+.dev-tab {
+  border: none; border-radius: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  background: transparent; color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+  transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+.dev-tab.is-on { background: #636366; color: #fff; border: none; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); }
+.dev-sliders { border-top: 1px solid rgba(255, 255, 255, 0.08); gap: 0.375rem; }
+.dev-sliders span { color: #98989D; font-variant-numeric: tabular-nums; }
+.dev-panel label { color: rgba(255, 255, 255, 0.85); }
+
+/* iOS-like range sliders */
+.dev-panel input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.25rem;
+  border-radius: 62.4375rem;
+  background: rgba(118, 118, 128, 0.36);
+  outline: none;
+}
+.dev-panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem; height: 1rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0.5px 2.5px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+}
+
+/* fields */
+.dev-panel select,
+.dev-panel .g-hex,
+.dev-panel .g-rgb input {
+  background: rgba(118, 118, 128, 0.24);
+  border: none;
+  border-radius: 0.375rem;
+  color: #fff;
+  padding: 0.2rem 0.35rem;
+}
+.dev-panel select:focus,
+.dev-panel .g-hex:focus,
+.dev-panel .g-rgb input:focus { outline: 2px solid rgba(10, 132, 255, 0.7); outline-offset: 0; }
+.g-hsl input { border: none; box-shadow: inset 0 0 0 1px rgba(48, 209, 88, 0.35); }
+.dev-panel input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.5rem; height: 1.5rem;
+  border: none; border-radius: 50%;
+  padding: 0; background: none;
+  cursor: pointer;
+}
+.dev-panel input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.dev-panel input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; }
+.dev-panel input[type="checkbox"] { accent-color: #0A84FF; }
+.g-preset {
+  font: inherit;
+  background: rgba(118, 118, 128, 0.24);
+  color: #fff; border: none; border-radius: 0.375rem;
+  padding: 0.2rem 0.65rem; cursor: pointer;
+  transition: background-color 150ms ease;
+}
+.g-preset:hover { background: rgba(118, 118, 128, 0.44); }
+.dev-css { color: #98989D; }
+</style>
+</head>
+<body>
+
+<!-- ================= DESKTOP ================= -->
+<nav class="nav2" aria-label="Main">
+  <div class="nav2__pill">
+    <a class="nav2__logo" href="#" aria-label="Home"></a>
+    <div class="nav2__menu" id="nav2-menu"></div>
+    <div class="nav2__right">
+      <a class="nav2__txtbtn" href="#">Book demo</a>
+      <a class="nav2__txtbtn" href="#">Log in</a>
+      <a class="nav2__cta" href="#">Get started</a>
+    </div>
+    <!-- dropdown panels injected here -->
+  </div>
+</nav>
+
+<!-- ================= MOBILE ================= -->
+<nav class="nav2m" aria-label="Main">
+  <div class="nav2m__blur" data-nav2m-close></div>
+  <div class="nav2m__pill">
+    <a class="nav2m__logo" href="#" aria-label="Home"></a>
+    <button class="nav2m__burger" aria-label="Menu" aria-expanded="false" aria-controls="nav2m-sheet">
+      <svg viewBox="0 0 15 15" fill="currentColor" aria-hidden="true">
+        <circle cx="4" cy="4" r="3"/><circle cx="11" cy="4" r="3"/>
+        <circle cx="4" cy="11" r="3"/><circle cx="11" cy="11" r="3"/>
+      </svg>
+    </button>
+  </div>
+  <div class="nav2m__sheet" id="nav2m-sheet">
+    <div class="nav2m__list" id="nav2m-list"></div>
+    <div class="nav2m__cta-block">
+      <div class="nav2m__cta-row">
+        <a class="nav2m__cta-btn" href="#">Book demo</a>
+        <a class="nav2m__cta-btn" href="#">Log in</a>
+      </div>
+      <a class="nav2m__cta-btn is-yellow" href="#">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= PAGE BEHIND THE MENU (real prompts page) ================= -->
+<iframe class="mock-frame" src="use-cases.html?v=2" title="Page behind the menu"></iframe>
+
+<!-- ================= DEV CONTROLS ================= -->
+<div class="dev-panel" id="dev-panel">
+  <div class="dev-head">
+    <span>menu dev</span>
+    <button type="button" id="dev-fold" aria-label="Collapse">&#8211;</button>
+  </div>
+  <div class="dev-tabs">
+    <button type="button" class="dev-tab is-on" data-theme="dark">dark</button>
+    <button type="button" class="dev-tab" data-theme="light">light</button>
+  </div>
+  <div class="dev-sliders">
+    <label>blur <input type="range" id="g-blur" min="0" max="48" step="1" value="30"><span id="g-blur-v">30</span></label>
+    <label>saturate <input type="range" id="g-sat" min="0" max="150" step="5" value="80"><span id="g-sat-v">0.80</span></label>
+    <label>dim <input type="range" id="g-dim" min="40" max="140" step="5" value="115"><span id="g-dim-v">1.15</span></label>
+    <label>contrast <input type="range" id="g-con" min="20" max="150" step="5" value="100"><span id="g-con-v">1.00</span></label>
+    <label class="dev-only-dark">fill <input type="color" id="g-col" value="#3F3F3F"><input type="text" class="g-hex" id="g-col-hex" value="#3F3F3F" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-r" min="0" max="255" value="63"><input type="number" id="g-col-g" min="0" max="255" value="63"><input type="number" id="g-col-b" min="0" max="255" value="63"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-hh" min="0" max="360" value="0"><input type="number" id="g-col-hs" min="0" max="100" value="0"><input type="number" id="g-col-hl" min="0" max="100" value="25"></span> alpha <input type="range" id="g-alpha" min="0" max="100" step="5" value="60"><span id="g-alpha-v">0.60</span></label>
+    <label class="dev-only-light">fill <input type="color" id="g-col-l" value="#D3D1E0"><input type="text" class="g-hex" id="g-col-l-hex" value="#D3D1E0" size="7"><span class="g-rgb" title="RGB"><input type="number" id="g-col-l-r" min="0" max="255" value="211"><input type="number" id="g-col-l-g" min="0" max="255" value="209"><input type="number" id="g-col-l-b" min="0" max="255" value="224"></span> <span class="g-rgb g-hsl" title="HSL"><input type="number" id="g-col-l-hh" min="0" max="360" value="248"><input type="number" id="g-col-l-hs" min="0" max="100" value="19"><input type="number" id="g-col-l-hl" min="0" max="100" value="85"></span> alpha <input type="range" id="g-alpha-l" min="0" max="100" step="5" value="40"><span id="g-alpha-l-v">0.40</span></label>
+    <label><input type="checkbox" id="g-panel" checked> apply to submenu panel</label>
+    <label>presets:
+      <button type="button" class="g-preset" data-p="18,120,140,40,#3F3F3F,30">A</button>
+      <button type="button" class="g-preset" data-p="23,150,115,100,#3F3F3F,60">B</button>
+    </label>
+    <div id="g-css" class="dev-css"></div>
+  </div>
+  <label class="dev-only-dark">background:
+    <select id="dev-bg-dark">
+      <option value="ai-promo.html?v=2">ai-promo</option>
+      <option value="manage.html?v=2">manage</option>
+    </select>
+  </label>
+  <label class="dev-only-light">background:
+    <select id="dev-bg-light">
+      <option value="use-cases.html?v=2">prompts</option>
+    </select>
+  </label>
+  <label>active page:
+    <select id="dev-active">
+      <option value="">none</option>
+      <option value="/features">/features (Product)</option>
+      <option value="/stage">/stage (Product → Stage)</option>
+      <option value="/ai">/ai (AI → Bïrch AI)</option>
+      <option value="/mcp">/mcp (AI → Birch MCP)</option>
+      <option value="/case-studies/foo">/case-studies/… (Cases)</option>
+      <option value="/pricing">/pricing</option>
+    </select>
+  </label>
+</div>
+
+<script>
+/* ============================================================
+   MENU DATA — single source of truth for both layouts.
+   In Webflow this maps to: top-level = component props,
+   submenu groups = CMS collection "Nav submenu items".
+   ============================================================ */
+var MENU = [
+  { label: 'Product', isNew: false, submenu: [
+    { title: 'Rules',           desc: 'Manage ads at scale with condition-based rules',          url: '/features', isNew: false },
+    { title: 'Stage',           desc: 'Create ads from Drive media by duplicating your setups',  url: '/stage',    isNew: false },
+    { title: 'Launcher',        desc: 'Bulk create and test large volumes of ads in Meta',       url: '/launcher', isNew: false },
+    { title: 'Explorer',        desc: 'Track ad performance, spot fatigue, find top assets',     url: '/explorer', isNew: false },
+    { title: 'Hub',             desc: 'Set up server-side tracking for Meta',                    url: '/hub',      isNew: false },
+    { title: 'All features',    desc: 'Learn about full product functionality',                  url: '/features', isNew: false }
+  ], matchUrls: ['/features', '/stage', '/launcher', '/explorer', '/hub'] },
+  { label: 'AI', isNew: true, submenu: [
+    { title: 'Bïrch AI',     desc: 'Scale your ad ops with an AI layer across your workflows', url: '/ai',              isNew: false },
+    { title: 'Bïrch MCP',        desc: 'Connect Birch to your AI tool',                           url: '/mcp',             isNew: true  },
+    { title: 'Prompting guide',  desc: 'Learn to use Birch AI, Meta MCP and Birch MCP',           url: '/prompting-guide', isNew: false },
+    { title: 'Routines',         desc: 'Schedule repeated workflows',                             url: null,               isNew: false, soon: true }
+  ], matchUrls: ['/ai', '/mcp', '/prompting-guide'] },
+  { label: 'Cases',   url: '/case-studies', matchPrefix: '/case-studies' },
+  { label: 'Blog',    url: '/blog',         matchPrefix: '/blog' },
+  { label: 'Pricing', url: '/pricing' }
+];
+
+var LOGO_SVG = document.querySelector('.sim-nav__logo') ? '' : null; /* placeholder guard */
+
+/* Birch logotype (from live site markup) */
+var LOGO = '<svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/><path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/><path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/><path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/><path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/><path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/></svg>';
+
+var CHEV = '<svg class="nav2__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CHEV_M = '<svg class="nav2m__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+var ACTIVE_URL = '';
+
+function newBadge() { return '<span class="nav2__new">New</span>'; }
+
+/* --------- active-state helpers --------- */
+function isItemActive(item) {
+  if (!ACTIVE_URL) return false;
+  if (item.matchPrefix) return ACTIVE_URL.indexOf(item.matchPrefix) === 0;
+  if (item.matchUrls) return item.matchUrls.indexOf(ACTIVE_URL) !== -1;
+  return item.url === ACTIVE_URL;
+}
+function isSubActive(sub) { return ACTIVE_URL && sub.url === ACTIVE_URL; }
+
+/* ============================================================
+   DESKTOP render + behavior
+   ============================================================ */
+(function initDesktop() {
+  var pill = document.querySelector('.nav2__pill');
+  var menuEl = document.getElementById('nav2-menu');
+  document.querySelector('.nav2__logo').innerHTML = LOGO;
+
+  var html = '';
+  MENU.forEach(function (item, i) {
+    var word = '<span class="nav2__word">' + item.label + '<span class="nav2__dot"></span></span>';
+    if (item.submenu) {
+      html += '<button class="nav2__link" data-panel="' + i + '" aria-expanded="false" aria-controls="nav2-panel-' + i + '">'
+        + word + CHEV + '</button>';
+    } else {
+      html += '<a class="nav2__link" href="' + item.url + '">' + word + '</a>';
+    }
+  });
+  menuEl.innerHTML = html;
+
+  /* panels */
+  MENU.forEach(function (item, i) {
+    if (!item.submenu) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'nav2__panel-wrap';
+    wrap.id = 'nav2-panel-' + i;
+    var rows = item.submenu.map(function (sub) {
+      var badge = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Soon</span>' : '');
+      var cls = 'nav2__row' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
+      var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
+                          : '<span class="' + cls + '">';
+      return open2
+        + '<span class="nav2__row-dot"></span>'
+        + '<span class="nav2__row-title">' + sub.title + badge + '</span>'
+        + '<span class="nav2__row-desc">' + sub.desc + '</span>' + (sub.url ? '</a>' : '</span>');
+    }).join('');
+    wrap.innerHTML = '<div class="nav2__panel"><span class="nav2__hoverplate"></span>' + rows + '</div>';
+    document.querySelector('.nav2').appendChild(wrap);
+    /* sliding hover plate: jumps into place when appearing, glides between rows */
+    var panel = wrap.querySelector('.nav2__panel');
+    var plate = wrap.querySelector('.nav2__hoverplate');
+    panel.addEventListener('mouseover', function (e) {
+      var row = e.target.closest('.nav2__row');
+      if (!row || row.classList.contains('is-static')) return;
+      var hidden = getComputedStyle(plate).opacity === '0';
+      plate.classList.toggle('is-jump', hidden);
+      plate.style.top = row.offsetTop + 'px';
+      plate.style.height = row.offsetHeight + 'px';
+      plate.style.opacity = '1';
+    });
+    panel.addEventListener('mouseleave', function () { plate.style.opacity = '0'; });
+    panel.addEventListener('mouseover', function (e) {
+      /* hide when moving onto a static row */
+      var row = e.target.closest('.nav2__row');
+      if (row && row.classList.contains('is-static')) plate.style.opacity = '0';
+    });
+  });
+
+  var openId = null;
+  var closeTimer = null, openTimer = null;
+
+  function panelFor(i) { return document.getElementById('nav2-panel-' + i); }
+  function triggerFor(i) { return menuEl.querySelector('[data-panel="' + i + '"]'); }
+
+  function positionPanel(i) {
+    var t = triggerFor(i), w = panelFor(i);
+    if (!t || !w) return;
+    var pr = pill.getBoundingClientRect();
+    var tr = t.getBoundingClientRect();
+    /* align the panel's row titles with the trigger text's left edge */
+    var pad = w.querySelector('.nav2__panel');
+    var padCS = getComputedStyle(pad);
+    var rowCS = getComputedStyle(pad.querySelector('.nav2__row'));
+    var inset = parseFloat(padCS.paddingLeft) + parseFloat(rowCS.paddingLeft);
+    var left = tr.left - inset;
+    left = Math.max(pr.left + 8, Math.min(left, pr.right - pad.offsetWidth - 8));
+    w.style.left = left + 'px';
+  }
+
+  function openPanel(i) {
+    if (openId !== null && openId !== i) closeNow();
+    openId = i;
+    positionPanel(i);
+    panelFor(i).classList.add('is-open');
+    triggerFor(i).setAttribute('aria-expanded', 'true');
+  }
+  function closeNow() {
+    if (window.__nav2Pin) return;
+    if (openId === null) return;
+    panelFor(openId).classList.remove('is-open');
+    triggerFor(openId).setAttribute('aria-expanded', 'false');
+    openId = null;
+  }
+  function scheduleClose() {
+    clearTimeout(openTimer);
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeNow, 250);      /* grace period */
+  }
+  function scheduleOpen(i) {
+    clearTimeout(closeTimer);
+    clearTimeout(openTimer);
+    if (openId !== null) { openPanel(i); return; } /* already open: switch instantly */
+    openTimer = setTimeout(function () { openPanel(i); }, 100); /* hover intent */
+  }
+
+  MENU.forEach(function (item, i) {
+    if (!item.submenu) return;
+    var t = triggerFor(i), w = panelFor(i);
+    t.addEventListener('mouseenter', function () { scheduleOpen(i); });
+    t.addEventListener('mouseleave', scheduleClose);
+    w.addEventListener('mouseenter', function () { clearTimeout(closeTimer); });
+    w.addEventListener('mouseleave', scheduleClose);
+    t.addEventListener('click', function () {
+      if (openId === i) closeNow(); else openPanel(i);
+    });
+  });
+
+  window.__nav2OpenPanel = openPanel;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNow(); });
+  document.addEventListener('click', function (e) {
+    if (openId !== null && !e.target.closest('.nav2__pill') && !e.target.closest('.nav2__panel-wrap')) closeNow();
+  });
+  window.addEventListener('resize', function () { if (openId !== null) positionPanel(openId); });
+})();
+
+/* ============================================================
+   MOBILE render + behavior
+   ============================================================ */
+(function initMobile() {
+  var root = document.querySelector('.nav2m');
+  var listEl = document.getElementById('nav2m-list');
+  var burger = root.querySelector('.nav2m__burger');
+  document.querySelector('.nav2m__logo').innerHTML = LOGO;
+
+  var html = '';
+  MENU.forEach(function (item, i) {
+    if (item.submenu) {
+      var rows = item.submenu.map(function (sub) {
+        var b = (sub.isNew ? newBadge() : '') + (sub.soon ? '<span class="nav2__soon">Soon</span>' : '');
+        var cls = 'nav2m__subrow' + (sub.url ? '' : ' is-static') + (sub.soon ? ' is-disabled' : '');
+        var open2 = sub.url ? '<a class="' + cls + '" href="' + sub.url + '" data-url="' + sub.url + '">'
+                            : '<span class="' + cls + '">';
+        return open2
+          + '<span class="nav2m__subdot"></span>'
+          + '<span class="nav2m__subrow-title">' + sub.title + b + '</span>'
+          + '<span class="nav2m__subrow-desc">' + sub.desc + '</span>' + (sub.url ? '</a>' : '</span>');
+      }).join('');
+      html += '<div class="nav2m__item" data-item="' + i + '">'
+        + '<button class="nav2m__toprow" aria-expanded="false">'
+        + '<span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>' + item.label + '</span>' + CHEV_M
+        + '</button>'
+        + '<div class="nav2m__sub"><div class="nav2m__sub-inner"><div class="nav2m__sub-list">' + rows + '</div></div></div>'
+        + '</div>';
+    } else {
+      html += '<div class="nav2m__item" data-item="' + i + '">'
+        + '<a class="nav2m__toprow" href="' + item.url + '">'
+        + '<span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>' + item.label + '</span>'
+        + '</a></div>';
+    }
+  });
+  listEl.innerHTML = html;
+
+  function expandItem(itemEl, expand) {
+    itemEl.classList.toggle('is-expanded', expand);
+    var btn = itemEl.querySelector('.nav2m__toprow');
+    if (btn.tagName === 'BUTTON') btn.setAttribute('aria-expanded', expand ? 'true' : 'false');
+  }
+
+  /* one open section at a time */
+  listEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('button.nav2m__toprow');
+    if (!btn) return;
+    var itemEl = btn.closest('.nav2m__item');
+    var wasOpen = itemEl.classList.contains('is-expanded');
+    listEl.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+    if (!wasOpen) expandItem(itemEl, true);
+  });
+
+  function openSheet() {
+    root.classList.add('is-open');
+    burger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    /* auto-expand the group of the active page + keep active row on screen */
+    listEl.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+    var activeSub = listEl.querySelector('.nav2m__subrow.is-active');
+    if (activeSub) {
+      var itemEl = activeSub.closest('.nav2m__item');
+      var sub = itemEl.querySelector('.nav2m__sub');
+      var prev = sub.style.transition;
+      sub.style.transition = 'none';           /* snap open, no animation on entry */
+      expandItem(itemEl, true);
+      void sub.offsetWidth;
+      sub.style.transition = prev;
+      activeSub.scrollIntoView({ block: 'center' });
+    }
+  }
+  function closeSheet() {
+    if (window.__nav2Pin) return;
+    root.classList.remove('is-open');
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  window.__nav2mSyncExpand = function () {
+    if (!root.classList.contains('is-open')) return;
+    var activeSub = listEl.querySelector('.nav2m__subrow.is-active');
+    if (!activeSub) return;
+    var itemEl = activeSub.closest('.nav2m__item');
+    if (!itemEl.classList.contains('is-expanded')) {
+      listEl.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+      expandItem(itemEl, true);
+    }
+  };
+
+  window.__nav2mOpen = openSheet;
+  window.__nav2mExpand = function (i) {
+    var el = listEl.querySelector('.nav2m__item[data-item="' + i + '"]');
+    if (el) expandItem(el, true);
+  };
+  burger.addEventListener('click', function () {
+    if (root.classList.contains('is-open')) closeSheet(); else openSheet();
+  });
+  root.querySelector('[data-nav2m-close]').addEventListener('click', closeSheet);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+  listEl.addEventListener('click', function (e) {
+    if (e.target.closest('a[href]')) closeSheet();
+  });
+})();
+
+/* ============================================================
+   Active state — applied to both layouts from ACTIVE_URL
+   ============================================================ */
+function applyActive() {
+  /* desktop */
+  document.querySelectorAll('#nav2-menu .nav2__link').forEach(function (el, i) {
+    el.classList.toggle('is-active', isItemActive(MENU[i]));
+  });
+  document.querySelectorAll('.nav2__row').forEach(function (el) {
+    el.classList.toggle('is-active', el.getAttribute('data-url') === ACTIVE_URL);
+  });
+  /* mobile */
+  document.querySelectorAll('.nav2m__item').forEach(function (el) {
+    var i = parseInt(el.getAttribute('data-item'), 10);
+    el.classList.toggle('is-active', isItemActive(MENU[i]));
+  });
+  document.querySelectorAll('.nav2m__subrow').forEach(function (el) {
+    el.classList.toggle('is-active', el.getAttribute('data-url') === ACTIVE_URL);
+  });
+  if (window.__nav2mSyncExpand) window.__nav2mSyncExpand();
+}
+applyActive();
+
+/* ============ dev controls ============ */
+/* Inject into the background page: hide its own sim navbar and emulate the
+   new component's variable — pill bottom (6.5em) + prod-like 12px air, so
+   sticky blocks pin with the same gap as live.
+   The page's own sticky math may run before OR after our injection, so:
+   (a) poll and inject as soon as the iframe document exists (beats load),
+   (b) after load, dispatch resize so sizeCards() recomputes with the var. */
+(function () {
+  var frame = document.querySelector('.mock-frame');
+  /* the component scopes the variable per breakpoint: desktop keeps the
+     legacy 6.5em; mobile gets 5.5em so pins sit 12px below the 12+64 pill */
+  var CSS_TEXT = '.sim-nav, #dbg { display: none !important; }'
+    + ' @media (max-width: 767px) { :root { --nav-height: 5.5em !important; } }';
+  function inject() {
+    try {
+      var doc = frame.contentDocument;
+      if (!doc || !doc.head) return false;
+      var st = doc.getElementById('menu-dev-style');
+      if (!st) {
+        st = doc.createElement('style');
+        st.id = 'menu-dev-style';
+        doc.head.appendChild(st);
+      }
+      st.textContent = CSS_TEXT;
+      return true;
+    } catch (e) { return false; }
+  }
+  setInterval(inject, 60);  /* keeps up across src swaps and reloads */
+  frame.addEventListener('load', function () {
+    inject();
+    try {
+      var iw = frame.contentWindow;
+      setTimeout(function () { iw.dispatchEvent(new Event('resize')); }, 150);
+      setTimeout(function () { iw.dispatchEvent(new Event('resize')); }, 800);
+    } catch (e) {}
+  });
+})();
+
+/* theme tabs: each tab shows its own fill controls and only the background
+   pages that match the theme; switching tab switches page + theme together */
+function setTheme(light, bgSrc) {
+  document.body.classList.toggle('theme-light', light);
+  document.getElementById('dev-panel').classList.toggle('is-light', light);
+  document.querySelectorAll('.dev-tab').forEach(function (t) {
+    t.classList.toggle('is-on', (t.getAttribute('data-theme') === 'light') === light);
+  });
+  var sel = document.getElementById(light ? 'dev-bg-light' : 'dev-bg-dark');
+  var src = bgSrc || sel.value;
+  sel.value = src;
+  var frame = document.querySelector('.mock-frame');
+  if (frame.getAttribute('src') !== src) frame.src = src;
+}
+document.querySelectorAll('.dev-tab').forEach(function (t) {
+  t.addEventListener('click', function () {
+    setTheme(t.getAttribute('data-theme') === 'light');
+  });
+});
+document.getElementById('dev-bg-dark').addEventListener('change', function () { setTheme(false, this.value); });
+document.getElementById('dev-bg-light').addEventListener('change', function () { setTheme(true, this.value); });
+document.getElementById('dev-fold').addEventListener('click', function () {
+  var pnl = document.getElementById('dev-panel');
+  pnl.classList.toggle('is-min');
+  this.innerHTML = pnl.classList.contains('is-min') ? '+' : '&#8211;';
+});
+
+/* live glass controls: write one <style> rule for both pills */
+var glassStyle = document.createElement('style');
+document.head.appendChild(glassStyle);
+function applyGlass() {
+  var blur = document.getElementById('g-blur').value;
+  var sat = document.getElementById('g-sat').value / 100;
+  var dim = document.getElementById('g-dim').value / 100;
+  var con = document.getElementById('g-con').value / 100;
+  var toPanel = document.getElementById('g-panel').checked;
+  function rgba(colorId, alphaId) {
+    var col = document.getElementById(colorId).value;
+    var a = document.getElementById(alphaId).value / 100;
+    var r = parseInt(col.slice(1, 3), 16), g = parseInt(col.slice(3, 5), 16), b = parseInt(col.slice(5, 7), 16);
+    return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+  }
+  var bg = rgba('g-col', 'g-alpha');
+  var bgLight = rgba('g-col-l', 'g-alpha-l');
+  var fx = (sat !== 1 ? ' saturate(' + sat + ')' : '')
+    + (dim !== 1 ? ' brightness(' + dim + ')' : '')
+    + (con !== 1 ? ' contrast(' + con + ')' : '');
+  var bf = 'blur(' + blur + 'px)' + fx;
+  /* effects apply to both themes; each theme has its own fill control */
+  var css = 'body .nav2__pill, body .nav2m__pill { -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }'
+    + ' body:not(.theme-light) .nav2__pill, body:not(.theme-light) .nav2m__pill { background: ' + bg + '; }'
+    + ' body.theme-light .nav2__pill, body.theme-light .nav2m__pill { background: ' + bgLight + '; }';
+  if (toPanel) {
+    /* panel shares the full chain including blur */
+    css += ' body .nav2__panel { -webkit-backdrop-filter: ' + bf + '; backdrop-filter: ' + bf + '; }'
+      + ' body:not(.theme-light) .nav2__panel { background: ' + bg + '; }'
+      + ' body.theme-light .nav2__panel { background: ' + bgLight + '; }';
+  }
+  glassStyle.textContent = css;
+  document.getElementById('g-blur-v').textContent = blur;
+  document.getElementById('g-sat-v').textContent = sat.toFixed(2);
+  document.getElementById('g-dim-v').textContent = dim.toFixed(2);
+  document.getElementById('g-con-v').textContent = con.toFixed(2);
+  document.getElementById('g-alpha-v').textContent = (document.getElementById('g-alpha').value / 100).toFixed(2);
+  document.getElementById('g-alpha-l-v').textContent = (document.getElementById('g-alpha-l').value / 100).toFixed(2);
+  document.getElementById('g-css').textContent = 'dark: ' + bg + ' | light: ' + bgLight + ' | backdrop-filter: ' + bf + ';' + (toPanel ? ' | panel: same' : '');
+}
+['g-blur', 'g-sat', 'g-dim', 'g-con', 'g-col', 'g-alpha', 'g-col-l', 'g-alpha-l', 'g-panel'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', applyGlass);
+});
+/* hex fields mirror the pickers; Arrow Up/Down steps lightness ±1 (Shift = ±10);
+   R/G/B number inputs step per channel with native arrows/spinners */
+[['g-col', 'g-col-hex'], ['g-col-l', 'g-col-l-hex']].forEach(function (pair) {
+  var picker = document.getElementById(pair[0]);
+  var hex = document.getElementById(pair[1]);
+  var rgb = ['-r', '-g', '-b'].map(function (sfx) { return document.getElementById(pair[0] + sfx); });
+  var hsl = ['-hh', '-hs', '-hl'].map(function (sfx) { return document.getElementById(pair[0] + sfx); });
+  function pickerRgb() {
+    return [1, 3, 5].map(function (i) { return parseInt(picker.value.slice(i, i + 2), 16); });
+  }
+  function toRgbInputs() {
+    rgb.forEach(function (inp, i) { inp.value = pickerRgb()[i]; });
+  }
+  function toHslInputs() {
+    var v = rgbToHsl(pickerRgb());
+    hsl.forEach(function (inp, i) { inp.value = v[i]; });
+  }
+  function setPicker(rgbArr) {
+    picker.value = '#' + rgbArr.map(function (n) { return n.toString(16).padStart(2, '0'); }).join('');
+    hex.value = picker.value.toUpperCase();
+    applyGlass();
+  }
+  function fromRgbInputs() {
+    setPicker(rgb.map(function (inp) {
+      return Math.max(0, Math.min(255, parseInt(inp.value || '0', 10)));
+    }));
+    toHslInputs();
+  }
+  function fromHslInputs() {
+    var h = Math.max(0, Math.min(360, parseInt(hsl[0].value || '0', 10)));
+    var sa = Math.max(0, Math.min(100, parseInt(hsl[1].value || '0', 10)));
+    var li = Math.max(0, Math.min(100, parseInt(hsl[2].value || '0', 10)));
+    setPicker(hslToRgb([h, sa, li]));
+    toRgbInputs();
+  }
+  rgb.forEach(function (inp) { inp.addEventListener('input', fromRgbInputs); });
+  hsl.forEach(function (inp) { inp.addEventListener('input', fromHslInputs); });
+  picker.addEventListener('input', function () { hex.value = picker.value.toUpperCase(); toRgbInputs(); toHslInputs(); });
+  hex.addEventListener('change', function () {
+    var v = hex.value.trim();
+    if (/^#?[0-9a-fA-F]{6}$/.test(v)) {
+      picker.value = '#' + v.replace('#', '');
+      hex.value = picker.value.toUpperCase();
+      toRgbInputs();
+      toHslInputs();
+      applyGlass();
+    } else { hex.value = picker.value.toUpperCase(); }
+  });
+  hex.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    var step = (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1);
+    var c = picker.value;
+    var ch = [1, 3, 5].map(function (i) {
+      return Math.max(0, Math.min(255, parseInt(c.slice(i, i + 2), 16) + step));
+    });
+    picker.value = '#' + ch.map(function (n) { return n.toString(16).padStart(2, '0'); }).join('');
+    hex.value = picker.value.toUpperCase();
+    toRgbInputs();
+    toHslInputs();
+    applyGlass();
+  });
+});
+
+function rgbToHsl(v) {
+  var r = v[0] / 255, g = v[1] / 255, b = v[2] / 255;
+  var max = Math.max(r, g, b), min = Math.min(r, g, b);
+  var h = 0, s = 0, l = (max + min) / 2, d = max - min;
+  if (d !== 0) {
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+}
+function hslToRgb(v) {
+  var h = v[0] / 360, s = v[1] / 100, l = v[2] / 100;
+  function f(p, q, t) {
+    if (t < 0) t += 1; if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  }
+  var r, g, b;
+  if (s === 0) { r = g = b = l; }
+  else {
+    var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    var p = 2 * l - q;
+    r = f(p, q, h + 1 / 3); g = f(p, q, h); b = f(p, q, h - 1 / 3);
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+document.querySelectorAll('.g-preset').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var v = this.getAttribute('data-p').split(',');
+    document.getElementById('g-blur').value = v[0];
+    document.getElementById('g-sat').value = v[1];
+    document.getElementById('g-dim').value = v[2];
+    document.getElementById('g-con').value = v[3];
+    document.getElementById('g-col').value = v[4];
+    document.getElementById('g-alpha').value = v[5];
+    applyGlass();
+  });
+});
+applyGlass();
+/* the host page has no scroll of its own: forward wheel to the iframe so
+   the background can be scrolled from anywhere (over the pill included) */
+window.addEventListener('wheel', function (e) {
+  var frame = document.querySelector('.mock-frame');
+  if (frame && frame.contentWindow) frame.contentWindow.scrollBy(0, e.deltaY);
+}, { passive: true });
+
+/* ?g=blur,sat,dim,con,colorHex,alpha — preset the glass controls (compare tool) */
+(function () {
+  var g = new URLSearchParams(location.search).get('g');
+  if (!g) return;
+  var v = g.split(',');
+  if (v.length < 6) return;
+  document.getElementById('g-blur').value = v[0];
+  document.getElementById('g-sat').value = v[1];
+  document.getElementById('g-dim').value = v[2];
+  document.getElementById('g-con').value = v[3];
+  document.getElementById('g-col').value = '#' + v[4].replace('#', '');
+  document.getElementById('g-alpha').value = v[5];
+  applyGlass();
+})();
+
+/* theme flip via postMessage (compare tool drives both halves at once) */
+window.addEventListener('message', function (e) {
+  if (e.data && e.data.type === 'nav2-theme') setTheme(!!e.data.light);
+});
+
+/* default state: dark theme on a dark page */
+setTheme(false);
+
+/* tooling params: ?theme=light&sheet=glass|glass2|theme&open=1&nopanel=1 */
+(function () {
+  var q = new URLSearchParams(location.search);
+  if (q.get('pin')) window.__nav2Pin = true;
+  if (q.get('theme') === 'light') setTheme(true);
+  if (q.get('nopanel')) document.body.classList.add('dev-hidden');
+  if (q.get('panel') === 'min') document.getElementById('dev-panel').classList.add('is-min');
+  if (q.get('open') && matchMedia('(max-width: 767px)').matches) {
+    setTimeout(function () { if (window.__nav2mOpen) window.__nav2mOpen(); }, 300);
+  }
+  if (q.get('expand') !== null && matchMedia('(max-width: 767px)').matches) {
+    setTimeout(function () { if (window.__nav2mExpand) window.__nav2mExpand(parseInt(q.get('expand'), 10)); }, 450);
+  }
+  if (q.get('openpanel') !== null && matchMedia('(min-width: 768px)').matches) {
+    setTimeout(function () { if (window.__nav2OpenPanel) window.__nav2OpenPanel(parseInt(q.get('openpanel'), 10)); }, 300);
+  }
+})();
+document.getElementById('dev-active').addEventListener('change', function () {
+  ACTIVE_URL = this.value;
+  applyActive();
+});
+</script>
+</body>
+</html>
