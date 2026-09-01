@@ -53,12 +53,19 @@
 }
 
 /* ---- Site integration: make room for the pinned banner ----
-   .nav2 is the visible pill bar (position: fixed, z 1000) and .nav is its
-   flow spacer; both anchor at top: 0, so without this they sit underneath
-   the banner. page-wrapper's padding replaces the flow height the banner
-   gave up when it went fixed, and .container.intro sizes the first screen
-   against the viewport minus the nav - it has to lose the banner too or
-   the hero overflows by exactly --pub-h.
+   .nav2 is the visible pill bar on desktop and .nav2m is the SEPARATE
+   mobile bar (both position: fixed, z 1000); .nav is their flow spacer.
+   All of them anchor at top: 0, so without this they sit underneath the
+   banner. .nav2m is easy to miss - it only exists below the breakpoint,
+   where .nav2 is display: none, so a desktop-only check passes while the
+   phone is broken. page-wrapper's padding replaces the flow height the
+   banner gave up when it went fixed, and .container.intro sizes the first
+   screen against the viewport minus the nav - it has to lose the banner
+   too or the hero overflows by exactly --pub-h.
+
+   .nav2m__blur is deliberately NOT offset: it is the full-viewport
+   backdrop behind the open mobile menu (z 5, below both bars), and it
+   should keep covering the whole screen, banner included.
 
    These rules live inside the banner's own <style> deliberately. Webflow
    omits a visibility-false element from the published DOM entirely (checked
@@ -67,8 +74,9 @@
    takes this block with it and the nav springs back to top: 0 on its own.
    Nothing to clean up when the campaign ends. */
 .page-wrapper { padding-top: var(--pub-h) !important; }
-.nav  { top: var(--pub-h) !important; }
-.nav2 { top: var(--pub-h) !important; }
+.nav   { top: var(--pub-h) !important; }
+.nav2  { top: var(--pub-h) !important; }
+.nav2m { top: var(--pub-h) !important; }
 .container.intro { min-height: calc(100svh - var(--nav-height) - var(--pub-h)) !important; }
 
 /* The .w-embed wrapper collapses to 0 inside a flex slot - force it wide. */
