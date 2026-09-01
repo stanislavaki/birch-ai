@@ -1,10 +1,24 @@
-<!-- ===== BIRCH: PRODUCT UPDATE BANNER =====
-     Pinned above the header/nav.
-     Source of truth: embed/product-banner-embed.html in the birch-ai repo.
-     Figma: Website 2026 / "Product updates banner" (18332-4305)
-
-     ASCII only (Webflow mangles non-ASCII on save), including comments.
-===== -->
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banner + fixed nav</title>
+<link rel="stylesheet" href="../design-system/webflow-env.css">
+<style>
+  body { margin: 0; background: #0D0D12; }
+  /* Stand-ins for the real bir.ch structure, matching the measured rules:
+     .nav is the static/sticky flow spacer, .nav2 the fixed pill bar. */
+  .nav  { width: 100%; height: var(--nav-height); position: sticky; top: 0; z-index: 999; }
+  .nav2 { position: fixed; top: 0; left: 0; right: 0; height: 87px; z-index: 1000;
+          background: #2b2b2b; color: #fff; display: flex; align-items: center;
+          justify-content: flex-end; gap: 2rem; padding: 0 2rem;
+          font-family: "Tt Commons Pro Variable", Arial, sans-serif; font-size: 0.9rem; }
+  .container.intro { min-height: calc(100svh - var(--nav-height));
+                     background: #14141c; color: #8a8a99; display: flex;
+                     align-items: center; justify-content: center;
+                     font-family: "Tt Commons Pro Variable", Arial, sans-serif; }
+  .after { height: 60vh; background: #0D0D12; }
+</style>
+<div class="page-wrapper">
 <style>
 /* Banner height as a constant the nav offset can be built on. It has to be
    ONE number: the site root font-size is fluid, so while these paddings were
@@ -95,7 +109,7 @@
      no-px rule: the live site sets a FLUID root font-size, so a rem
      here would breathe with the viewport (0.8125rem renders 10.6px at
      1024 and 15.6px at 1600) and the "always fits" budget would move
-     with it. Same reason --pub-container is stated in px above.
+     with it. Same reason --pub-container is stated in px below.
      design-system/components/product-banner.css says 0.8125rem for the
      same 13px, because it renders on a fixed 16px root. */
   font-size: 13px;
@@ -241,4 +255,10 @@
     </div>
     <a class="pub-e__link" href="#">Register<span class="pub-e__link-tail"> to webinar</span></a>
   </div>
+</div>
+
+  <div class="nav2">Product &nbsp; AI &nbsp; Cases &nbsp; Blog &nbsp; Pricing &nbsp; Get started</div>
+  <nav class="nav"></nav>
+  <div class="container intro">intro &mdash; first screen</div>
+  <div class="after"></div>
 </div>

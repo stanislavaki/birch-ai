@@ -1196,9 +1196,9 @@
               </defs>
             </svg>
           </span>
-          <p class="pub__text"><span class="pub__tag">Meta MCP</span>Some text about the product update, can span the whole banner width</p>
+          <p class="pub__text">AI agent in performance marketing: build your flow with B&iuml;rch AI, Meta MCP, business context</p>
         </div>
-        <a class="pub__link" href="#"><span class="pub__link-lead">Learn </span><span class="pub__link-tail">more...</span></a>
+        <a class="pub__link" href="#">Register<span class="pub__link-tail"> to webinar</span></a>
       </div>
     </div>
 
@@ -1210,7 +1210,7 @@
         <div class="pub__message">
           <p class="pub__text">Some text about the product update, can span the whole banner width</p>
         </div>
-        <a class="pub__link" href="#"><span class="pub__link-lead">Learn </span><span class="pub__link-tail">more...</span></a>
+        <a class="pub__link" href="#">Learn<span class="pub__link-tail"> more...</span></a>
       </div>
     </div>
 
@@ -1237,7 +1237,7 @@
         <tr>
           <td>Type</td>
           <td class="muted">&mdash;</td>
-          <td class="muted">1rem &middot; 700 &middot; lh 1 &middot; ls 0.004em (16px tier)</td>
+          <td class="muted">13px flat, desktop and mobile &middot; 700 &middot; lh 1 &middot; ls 0.004em. This file says <code>0.8125rem</code> (fixed 16px root); the embed says <code>13px</code>, because the live site's root is fluid and a rem there would breathe with the viewport. Same rendered size, different unit &mdash; don't harmonise them. Deliberately decoupled from the nav's 0.9rem.</td>
         </tr>
         <tr>
           <td>Label</td>
@@ -1252,7 +1252,7 @@
         <tr>
           <td>Mark slot</td>
           <td class="muted">.pub__mark</td>
-          <td class="muted">any svg/img &middot; height 1.125rem &middot; optional</td>
+          <td class="muted">any svg/img &middot; height <strong>1.125em</strong> &mdash; em so it shrinks with the text (14.6px at 13px) instead of towering over it &middot; optional</td>
         </tr>
         <tr>
           <td>Accent tag</td>
@@ -1262,7 +1262,12 @@
         <tr>
           <td>Link</td>
           <td class="muted">.pub__link</td>
-          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85</td>
+          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85 &middot; live copy &ldquo;Register to webinar&rdquo;</td>
+        </tr>
+        <tr>
+          <td>Webflow only</td>
+          <td class="muted">.pub-e</td>
+          <td class="muted">the embed pins itself: <code>position: fixed; top: 0; z-index: 1001</code>, and offsets <code>.nav2</code> / <code>.page-wrapper</code> / <code>.container.intro</code> by <code>--pub-h: 59px</code>. The live nav is <code>position: fixed</code>, so DOM order cannot push it down. This component stays in normal flow &mdash; the pinning is site integration, not part of the component.</td>
         </tr>
         <tr>
           <td>Off-token</td>
@@ -1276,13 +1281,13 @@
         </tr>
         <tr>
           <td>Mobile &le;767px</td>
-          <td class="muted">.pub__link-lead</td>
-          <td class="muted">hidden, tail capitalised &rarr; &ldquo;Learn more...&rdquo; becomes &ldquo;More...&rdquo;</td>
+          <td class="muted">.pub__link-tail</td>
+          <td class="muted">hidden &rarr; &ldquo;Register to webinar&rdquo; becomes &ldquo;Register&rdquo;. Wrap only the droppable trailing words; the short form is the plain text ahead of them</td>
         </tr>
         <tr>
           <td>Copy budget</td>
           <td class="muted">.pub__text</td>
-          <td class="muted">stays one line and truncates. Measured at 375px: ~12 chars after the &ldquo;Meta MCP&rdquo; tag, ~23 with no mark/tag. Fitting the phone is an editing job.</td>
+          <td class="muted">stays one line and truncates. Live copy is 92 chars / 556px at 13px. Measured in <code>debug/embed-harness.html</code> (fluid root, as on the site): fits <strong>whole down to ~910px</strong>, and again at 767px once the mobile rules drop the label and shorten the link. Between them it dips &mdash; 77 chars at 800px, 72 at 768px. On phones it still truncates: 39 chars at 430px, 30 at 375px, 21 at 320px. Fitting the phone is an editing job, not a layout one.</td>
         </tr>
       </tbody>
     </table>
