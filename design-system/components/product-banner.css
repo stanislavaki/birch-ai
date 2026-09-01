@@ -43,7 +43,16 @@
   background: var(--color-bg-white);
   border-radius: var(--radius-sm);
   font-family: var(--font);
-  font-size: 1rem;
+  /* 13px flat, desktop and mobile, to buy the message more characters.
+     Deliberately NOT tied to the site nav (0.9rem): the live site's root
+     is fluid, so any rem here would breathe with the viewport and the
+     "always fits" budget would move with it.
+
+     This file renders on a 16px root (styleguide, dev pages), so 0.8125rem
+     IS 13px here. The Webflow embed states the same size in px, because a
+     rem there would inherit the fluid root — same rendered size, different
+     unit, on purpose. Do not "harmonise" the two. */
+  font-size: 0.8125rem; /* 13px */
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.004em;
@@ -82,11 +91,13 @@
 .pub__mark > svg,
 .pub__mark > img {
   display: block;
-  height: 1.125rem; /* 18px */
-  width: auto;
-  /* Renders 18px but occupies the 16px text row, so the mark never
+  /* em, not rem: the mark has to shrink with the text, or it towers over
+     the 13px copy. 1.125em holds the designed 18/16 ratio — 14.6px at the
+     current size — and keeps the mark taller than its row, so it never
      drives the row height and shifts the baselines down. */
-  margin-block: -0.0625rem;
+  height: 1.125em;
+  width: auto;
+  margin-block: -0.0625em;
 }
 
 .pub__text {
@@ -106,10 +117,10 @@
 /* ── Right link ── */
 .pub__link {
   /* Deliberately not a flex container: flex items discard the
-     whitespace between them, so the "Learn " and "more..." spans
-     would render as "Learnmore...". Normal inline flow keeps the
-     word space. Vertical position comes from the padding, so
-     nothing is lost by dropping flex here. */
+     whitespace between them, so the label and its .pub__link-tail
+     would render glued together. Normal inline flow keeps the word
+     space. Vertical position comes from the padding, so nothing is
+     lost by dropping flex here. */
   display: block;
   flex: none;
   text-align: center;
@@ -132,10 +143,11 @@
   .pub__label { display: none; }
   .pub__message { padding-inline-start: var(--pub-pad-start); }
 
-  /* "Learn more..." shortens to "More...". The word is not duplicated
-     in the markup — the lead is hidden and the tail is capitalised. */
-  .pub__link-lead { display: none; }
-  .pub__link-tail { text-transform: capitalize; }
+  /* The link drops its trailing words: "Register to webinar" becomes
+     "Register". Only the droppable tail is marked up — the short form
+     is the plain text ahead of it, so no copy is duplicated. Verbs
+     lead, so what survives is the call to action, not a noun. */
+  .pub__link-tail { display: none; }
 
   /* The message deliberately stays on one line and truncates with an
      ellipsis — fitting the phone is an editing job, not a layout one.
