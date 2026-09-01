@@ -56,28 +56,56 @@
   --scene-base: 364;
   --scene-max:  550;
 
-  /* Measured by JS after fonts.ready */
+  /* Tallest top bar across the slides, measured after fonts.ready */
   --bar-h: 6.8125rem;
 
   /* Debug override */
   --canvas-force: 364;
 }
 
-/* ── Section ──────────────────────────────────────────────────
-   The card stops growing at the 550 ceiling, so on a tall window
-   there is height left over. Splitting it above and below reads as
-   section padding; letting it pile up under the card reads as the
-   block failing to reach the bottom. `safe center` keeps the top
-   edge reachable on short windows, where the card is the taller of
-   the two and centring would otherwise push its head under the nav. */
+/* ── Track and sticky viewport ─────────────────────────────────
+   The track is the scroll budget: --slides * --track-per-slide screens
+   tall, with the card pinned inside while the page scrolls past it.
+   --track-per-slide is the number worth arguing about, so it is tuned
+   in the debug panel rather than decided here. */
 .hs {
-  padding-top: var(--nav-height);
-  padding-bottom: 0;
-  min-height: 100dvh;
+  --slides: 3;
+  --track-per-slide: 1;
+  height: calc(var(--slides) * var(--track-per-slide) * 100dvh);
+}
+
+/* The card stops growing at the 550 ceiling, so on a tall window there
+   is height left over. Splitting it above and below reads as section
+   padding; letting it pile up under the card reads as the block failing
+   to reach the bottom. `safe center` keeps the top edge reachable on
+   short windows, where the card is taller than the space and ordinary
+   centring would push its head under the nav. */
+.hs__sticky {
+  position: sticky;
+  top: var(--nav-height);
+  height: calc(100dvh - var(--nav-height));
   display: flex;
   align-items: safe center;
 }
-.hs > .container { width: 100%; }
+.hs__sticky > .container { width: 100%; }
+
+/* Cards are stacked: the first is in flow and sets the height, the rest
+   lie over it. They differ only in copy, so their heights match once the
+   top bar is locked to the tallest of the three. */
+.hs__stack { position: relative; }
+.hs__stack > .hs__card + .hs__card { position: absolute; inset-inline: 0; top: 0; }
+.hs__card {
+  /* step blend, written by the block script and inherited by the scene */
+  --t: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.hs__card.is-active { opacity: 1; pointer-events: auto; }
+
+/* Stub slides stand in for 02 and 03 until their frames and assets
+   arrive — muted so nobody mistakes them for finished content. */
+.hs__canvas[data-stub] .hs__frag { opacity: 0.45; filter: grayscale(0.7); }
 
 /* ── Card ─────────────────────────────────────────────────── */
 .hs__card {
@@ -91,6 +119,7 @@
 
 /* ── Top bar — three equal columns, as in the Figma frame ──── */
 .hs__bar {
+  min-height: var(--bar-h);
   display: grid;
   /* minmax(0,…) — plain 1fr lets the button column's min-content win */
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -142,7 +171,19 @@
 /* Debug override — pin the canvas to a fixed design height */
 .is-forced .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
 
-/* ── Scene fragments ──────────────────────────────────────── */
+/* ── Scene fragments ──────────────────────────────────────────
+   Two layers of interpolation, applied in this order:
+
+   1. height — each step's geometry is resolved for the current canvas
+      height from its three authored frames (--up / --dn above);
+   2. step   — the two resolved geometries are blended by --t, which
+      the block script drives from scroll position inside the slide.
+
+   Step 2 of slide 01 exists only at h364, so it borrows step 1's
+   height deltas. That is safe here because the scatter puts almost
+   everything off-canvas — the only fragments still visible are the
+   three stacked cards, and they follow the core's behaviour.
+─────────────────────────────────────────────────────────────── */
 .hs__frag {
   --u:  calc(1cqw / 12.32);
   --up: clamp(0px, (100cqh - 364 * var(--u)), 186 * var(--u));
@@ -150,17 +191,25 @@
 
   --dx: 0; --dy: 0; --dw: 0;
   --bx: 0; --by: 0; --bw: 0;
+  --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw);
+  --bx2: var(--bx); --by2: var(--by); --bw2: var(--bw);
+  --o1: 1; --o2: 1;
+
+  --px1: calc(var(--x)  * var(--u) + var(--up) * var(--dx)  / 186 - var(--dn) * var(--bx)  / 64);
+  --px2: calc(var(--x2) * var(--u) + var(--up) * var(--dx2) / 186 - var(--dn) * var(--bx2) / 64);
+  --py1: calc(var(--y)  * var(--u) + var(--up) * var(--dy)  / 186 - var(--dn) * var(--by)  / 64);
+  --py2: calc(var(--y2) * var(--u) + var(--up) * var(--dy2) / 186 - var(--dn) * var(--by2) / 64);
+  --pw1: calc(var(--w)  * var(--u) + var(--up) * var(--dw)  / 186 - var(--dn) * var(--bw)  / 64);
+  --pw2: calc(var(--w2) * var(--u) + var(--up) * var(--dw2) / 186 - var(--dn) * var(--bw2) / 64);
 
   position: absolute;
   display: block;
-  left:  calc(var(--x) * var(--u) + var(--up) * var(--dx) / 186 - var(--dn) * var(--bx) / 64
-         + (50cqw - var(--cx) * var(--u)));
-  top:   calc(var(--y) * var(--u) + var(--up) * var(--dy) / 186 - var(--dn) * var(--by) / 64);
-  width: calc(var(--w) * var(--u) + var(--up) * var(--dw) / 186 - var(--dn) * var(--bw) / 64);
-  /* height follows the asset's own ratio — never forced, so a small
-     mismatch between the export and the Figma box shows up as a few
-     units of height rather than as a squashed image */
-  height: auto;
+  left:    calc((1 - var(--t)) * var(--px1) + var(--t) * var(--px2)
+           + (50cqw - var(--cx) * var(--u)));
+  top:     calc((1 - var(--t)) * var(--py1) + var(--t) * var(--py2));
+  width:   calc((1 - var(--t)) * var(--pw1) + var(--t) * var(--pw2));
+  height:  auto;
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
   /* webflow-env.css rounds every img; these carry their own corners */
   border-radius: 0;
 }
@@ -251,69 +300,364 @@
   </div>
 </nav>
 
-<section class="section hs">
-  <div class="container">
-    <article class="hs__card">
+<section class="section hs" id="hs">
+  <div class="hs__sticky">
+    <div class="container">
+      <div class="hs__stack">
 
-      <header class="hs__bar">
-        <div>
-          <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
-          <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+      <article class="hs__card is-active" data-slide="0">
+
+        <header class="hs__bar">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
+            <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+          </div>
+          <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+            <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+          </div>
+        </header>
+
+        <!-- Scene. --x/--y/--w are step 1, --x2/--y2/--w2 are step 2,
+             both in the design units of the 1232-wide Figma frame. -->
+        <div class="hs__canvas" id="canvas">
+          <img class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+               width="875" height="1271" loading="lazy" decoding="async"
+               style="--x:37; --y:15; --w:364.5;
+                      --x2:-395; --y2:146; --w2:364.5;
+                      --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
+          <img class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+               width="420" height="905" loading="lazy" decoding="async"
+               style="--x:56; --y:169; --w:175.02;
+                      --x2:-376; --y2:300; --w2:175.02;
+                      --dy:37; --bx:-4; --by:22.533; --bw:23.335; --o2:0; z-index:2">
+          <img class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:11; --y:75; --w:62.5;
+                      --x2:-192; --y2:78; --w2:62.5;
+                      --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
+          <img class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
+               width="1339" height="227" loading="lazy" decoding="async"
+               style="--x:560; --y:293; --w:372;
+                      --x2:881; --y2:371; --w2:359.857;
+                      --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
+          <img class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+               width="625" height="252" loading="lazy" decoding="async"
+               style="--x:155; --y:226; --w:260.25;
+                      --x2:-320; --y2:273; --w2:260.25;
+                      --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
+          <img class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+               width="810" height="421" loading="lazy" decoding="async"
+               style="--x:999; --y:0; --w:337.5;
+                      --x2:1274; --y2:0; --w2:337.5;
+                      --dy:58; --bx:31.068; --bw:45; z-index:6">
+          <img class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+               width="432" height="445" loading="lazy" decoding="async"
+               style="--x:1089; --y:89; --w:180;
+                      --x2:1394; --y2:89; --w2:180;
+                      --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
+          <img class="hs__frag" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+               width="1381" height="461" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:328.45; --y2:20.75; --w2:575.45;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:8">
+          <img class="hs__frag" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+               width="1552" height="518" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:292.35; --y2:62.45; --w2:646.7;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:9">
+          <img class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+               width="1793" height="595" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:261; --y2:108.76; --w2:709.65;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10" data-core>
+          <img class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+               width="1474" height="252" loading="lazy" decoding="async"
+               style="--x:921; --y:240; --w:614.25;
+                      --x2:1429; --y2:213; --w2:614.25;
+                      --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:11">
+          <img class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:1013; --y:207; --w:62.5;
+                      --x2:1309; --y2:205; --w2:62.5;
+                      --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:12">
+          <img class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:851; --y:15; --w:62.5;
+                      --x2:1239; --y2:21; --w2:62.5;
+                      --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:13">
+          <img class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:444; --y:281; --w:62.5;
+                      --x2:-70; --y2:210; --w2:62.5;
+                      --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:14">
+
+          <div class="hs__guide" data-label="364 — эталон"></div>
+          <div class="hs__core-box" id="coreBox"></div>
         </div>
-        <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
-        <div class="hs__buttons">
-          <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
-          <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+
+      </article>
+
+      <article class="hs__card" data-slide="1" style="background: var(--color-accent-indigo)">
+
+        <header class="hs__bar">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
+            <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
+          </div>
+          <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
+            <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
+          </div>
+        </header>
+
+        <!-- Scene. --x/--y/--w are step 1, --x2/--y2/--w2 are step 2,
+             both in the design units of the 1232-wide Figma frame. -->
+        <div class="hs__canvas" data-stub>
+          <img class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+               width="875" height="1271" loading="lazy" decoding="async"
+               style="--x:37; --y:15; --w:364.5;
+                      --x2:-395; --y2:146; --w2:364.5;
+                      --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
+          <img class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+               width="420" height="905" loading="lazy" decoding="async"
+               style="--x:56; --y:169; --w:175.02;
+                      --x2:-376; --y2:300; --w2:175.02;
+                      --dy:37; --bx:-4; --by:22.533; --bw:23.335; --o2:0; z-index:2">
+          <img class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:11; --y:75; --w:62.5;
+                      --x2:-192; --y2:78; --w2:62.5;
+                      --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
+          <img class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
+               width="1339" height="227" loading="lazy" decoding="async"
+               style="--x:560; --y:293; --w:372;
+                      --x2:881; --y2:371; --w2:359.857;
+                      --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
+          <img class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+               width="625" height="252" loading="lazy" decoding="async"
+               style="--x:155; --y:226; --w:260.25;
+                      --x2:-320; --y2:273; --w2:260.25;
+                      --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
+          <img class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+               width="810" height="421" loading="lazy" decoding="async"
+               style="--x:999; --y:0; --w:337.5;
+                      --x2:1274; --y2:0; --w2:337.5;
+                      --dy:58; --bx:31.068; --bw:45; z-index:6">
+          <img class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+               width="432" height="445" loading="lazy" decoding="async"
+               style="--x:1089; --y:89; --w:180;
+                      --x2:1394; --y2:89; --w2:180;
+                      --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
+          <img class="hs__frag" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+               width="1381" height="461" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:328.45; --y2:20.75; --w2:575.45;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:8">
+          <img class="hs__frag" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+               width="1552" height="518" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:292.35; --y2:62.45; --w2:646.7;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:9">
+          <img class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+               width="1793" height="595" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:261; --y2:108.76; --w2:709.65;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10">
+          <img class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+               width="1474" height="252" loading="lazy" decoding="async"
+               style="--x:921; --y:240; --w:614.25;
+                      --x2:1429; --y2:213; --w2:614.25;
+                      --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:11">
+          <img class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:1013; --y:207; --w:62.5;
+                      --x2:1309; --y2:205; --w2:62.5;
+                      --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:12">
+          <img class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:851; --y:15; --w:62.5;
+                      --x2:1239; --y2:21; --w2:62.5;
+                      --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:13">
+          <img class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:444; --y:281; --w:62.5;
+                      --x2:-70; --y2:210; --w2:62.5;
+                      --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:14">
         </div>
-      </header>
 
-      <!-- Scene. --x/--y/--w/--h are the Figma coordinates of frame 01_0. -->
-      <div class="hs__canvas" id="canvas">
-        <img class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
-             width="875" height="1271" loading="lazy" decoding="async"
-             style="--x:37; --y:15; --w:364.5; --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
-        <img class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
-             width="420" height="905" loading="lazy" decoding="async"
-             style="--x:56; --y:169; --w:175.02; --dy:37; --bx:-4; --by:22.533; --bw:23.335; z-index:2">
-        <img class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
-             width="225" height="225" loading="lazy" decoding="async"
-             style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
-        <img class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
-             width="1339" height="227" loading="lazy" decoding="async"
-             style="--x:560; --y:295; --w:372; --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
-        <img class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
-             width="625" height="252" loading="lazy" decoding="async"
-             style="--x:155; --y:226; --w:260.25; --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
-        <img class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
-             width="810" height="421" loading="lazy" decoding="async"
-             style="--x:999; --y:0; --w:337.5; --dy:58; --bx:31.068; --bw:45; z-index:6">
-        <img class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
-             width="432" height="445" loading="lazy" decoding="async"
-             style="--x:1089; --y:89; --w:180; --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
-        <img class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
-             width="1793" height="595" loading="lazy" decoding="async"
-             style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:8" data-core>
-        <img class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
-             width="1474" height="252" loading="lazy" decoding="async"
-             style="--x:921; --y:240; --w:614.25; --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:9">
-        <img class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
-             width="225" height="225" loading="lazy" decoding="async"
-             style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:10">
-        <img class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
-             width="225" height="225" loading="lazy" decoding="async"
-             style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:11">
-        <img class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
-             width="225" height="225" loading="lazy" decoding="async"
-             style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:12">
+      </article>
 
-        <div class="hs__guide" data-label="364 — эталон / пол"></div>
-        <div class="hs__core-box" id="coreBox"></div>
+      <article class="hs__card" data-slide="2" style="background: var(--color-accent-purple)">
+
+        <header class="hs__bar">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
+            <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
+          </div>
+          <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
+            <a class="btn btn-default btn-xs" href="#">More about MCP</a>
+          </div>
+        </header>
+
+        <!-- Scene. --x/--y/--w are step 1, --x2/--y2/--w2 are step 2,
+             both in the design units of the 1232-wide Figma frame. -->
+        <div class="hs__canvas" data-stub>
+          <img class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+               width="875" height="1271" loading="lazy" decoding="async"
+               style="--x:37; --y:15; --w:364.5;
+                      --x2:-395; --y2:146; --w2:364.5;
+                      --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
+          <img class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+               width="420" height="905" loading="lazy" decoding="async"
+               style="--x:56; --y:169; --w:175.02;
+                      --x2:-376; --y2:300; --w2:175.02;
+                      --dy:37; --bx:-4; --by:22.533; --bw:23.335; --o2:0; z-index:2">
+          <img class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:11; --y:75; --w:62.5;
+                      --x2:-192; --y2:78; --w2:62.5;
+                      --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
+          <img class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
+               width="1339" height="227" loading="lazy" decoding="async"
+               style="--x:560; --y:293; --w:372;
+                      --x2:881; --y2:371; --w2:359.857;
+                      --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
+          <img class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+               width="625" height="252" loading="lazy" decoding="async"
+               style="--x:155; --y:226; --w:260.25;
+                      --x2:-320; --y2:273; --w2:260.25;
+                      --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
+          <img class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+               width="810" height="421" loading="lazy" decoding="async"
+               style="--x:999; --y:0; --w:337.5;
+                      --x2:1274; --y2:0; --w2:337.5;
+                      --dy:58; --bx:31.068; --bw:45; z-index:6">
+          <img class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+               width="432" height="445" loading="lazy" decoding="async"
+               style="--x:1089; --y:89; --w:180;
+                      --x2:1394; --y2:89; --w2:180;
+                      --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
+          <img class="hs__frag" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+               width="1381" height="461" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:328.45; --y2:20.75; --w2:575.45;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:8">
+          <img class="hs__frag" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+               width="1552" height="518" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:292.35; --y2:62.45; --w2:646.7;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; --o1:0; z-index:9">
+          <img class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+               width="1793" height="595" loading="lazy" decoding="async"
+               style="--x:243; --y:38; --w:747;
+                      --x2:261; --y2:108.76; --w2:709.65;
+                      --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10">
+          <img class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+               width="1474" height="252" loading="lazy" decoding="async"
+               style="--x:921; --y:240; --w:614.25;
+                      --x2:1429; --y2:213; --w2:614.25;
+                      --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:11">
+          <img class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:1013; --y:207; --w:62.5;
+                      --x2:1309; --y2:205; --w2:62.5;
+                      --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:12">
+          <img class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:851; --y:15; --w:62.5;
+                      --x2:1239; --y2:21; --w2:62.5;
+                      --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:13">
+          <img class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:444; --y:281; --w:62.5;
+                      --x2:-70; --y2:210; --w2:62.5;
+                      --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:14">
+        </div>
+
+      </article>
+
       </div>
-
-    </article>
+    </div>
   </div>
 </section>
 
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Block logic — the part that ships. The debug panel only reads
+   from here and writes --track-per-slide.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var track  = document.getElementById('hs');
+  var sticky = track.querySelector('.hs__sticky');
+  var cards  = [].slice.call(track.querySelectorAll('.hs__card'));
+  var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
+  var root   = document.documentElement;
+
+  /* All slides share one top-bar height, otherwise the canvas — and with
+     it the whole scene — would jump on every slide change. Measured
+     twice: once now and once the real font metrics are in, because the
+     fallback font wraps the paragraph differently (dev-pages.md). */
+  function lockBarHeight() {
+    var rootPx = parseFloat(getComputedStyle(root).fontSize);
+    root.style.setProperty('--bar-h', '0rem');
+    var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
+    root.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
+  }
+
+  /* 0 at the moment the card pins, 1 when the track runs out. */
+  function progress() {
+    var navH = parseFloat(getComputedStyle(root).getPropertyValue('--nav-height')) *
+               parseFloat(getComputedStyle(root).fontSize);
+    var span = track.offsetHeight - sticky.offsetHeight;
+    if (span <= 0) return 0;
+    return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
+  }
+
+  /* Steps inside each slide. Slide 01 has two (collage → scatter); the
+     stubs have one until their own steps are drawn. */
+  var STEPS = [2, 1, 1];
+
+  /* The blend runs over the middle of a slide's segment, leaving a rest
+     at both ends — otherwise a step would start changing the instant the
+     slide appeared and never settle before the next one took over. */
+  var BLEND_FROM = 0.35, BLEND_TO = 0.75;
+
+  function smoothstep(a, b, x) {
+    var t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  }
+
+  var current = -1;
+  function apply() {
+    var p = progress();
+    var i = Math.min(cards.length - 1, Math.max(0, Math.floor(p * cards.length)));
+    var local = p * cards.length - i;
+    if (i !== current) {
+      current = i;
+      cards.forEach(function (c, n) { c.classList.toggle('is-active', n === i); });
+    }
+    var t = STEPS[i] > 1 ? smoothstep(BLEND_FROM, BLEND_TO, local) : 0;
+    cards[i].style.setProperty('--t', t.toFixed(4));
+    window.__hs = { p: p, index: i, local: local, t: t };
+  }
+
+  lockBarHeight();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockBarHeight);
+  new ResizeObserver(lockBarHeight).observe(document.body);
+
+  addEventListener('scroll', apply, { passive: true });
+  addEventListener('resize', apply);
+  apply();
+  window.__hsApply = apply;
+})();
+</script>
 <script src="debug/geo-panel.js"></script>
 </body>
 </html>

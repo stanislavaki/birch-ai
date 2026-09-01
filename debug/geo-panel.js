@@ -9,7 +9,8 @@
   'use strict';
 
   var root   = document.documentElement;
-  var canvas = document.getElementById('canvas');
+  var canvas = document.querySelector('.hs__canvas');
+  var track  = document.getElementById('hs');
   var bar    = document.querySelector('.hs__bar');
   var card   = document.querySelector('.hs__card');
   if (!canvas) return;
@@ -20,14 +21,6 @@ var FLOOR = 300;
      are no coefficients left to tune — only checkpoints to inspect. */
   var GROUPS = [];
   var CHECKPOINTS = [300, 364, 455, 550];
-
-  /* Top bar height feeds the corridor, so re-measure whenever it
-     reflows — a resize listener alone misses the font swap. */
-  function sizeBar() {
-    var rootPx = parseFloat(getComputedStyle(root).fontSize);
-    root.style.setProperty('--bar-h', (bar.offsetHeight / rootPx) + 'rem');
-    render();
-  }
 
   /* ── Panel chrome ──────────────────────────────────────── */
   var css = document.createElement('style');
@@ -62,6 +55,13 @@ var FLOOR = 300;
     '<div class="row"><span>canvas</span><b id="g-ch">—</b></div>' +
     '<div class="row" id="g-hd-row"><span>высота сцены</span><b id="g-hd">—</b></div>' +
     '<div class="row"><span>рул от центра</span><b id="g-cx">—</b></div>' +
+    '<div class="row"><span>слайд</span><b id="g-slide">—</b></div>' +
+    '<div class="row"><span>прогресс</span><b id="g-p">—</b></div>' +
+    '<div class="row"><span>шаг (blend)</span><b id="g-t">—</b></div>' +
+    '<hr>' +
+    '<label>экранов скролла на слайд — <b id="g-tps-out">1</b></label>' +
+    '<input id="g-tps" type="range" min="0.3" max="2.5" step="0.1" value="1">' +
+    '<div class="row"><span>трек всего</span><b id="g-track">—</b></div>' +
     '<hr><div id="g-sliders"></div><hr>' +
     '<label>высота canvas (единицы макета)</label>' +
     '<div class="btns" id="g-cps"></div>' +
@@ -71,6 +71,14 @@ var FLOOR = 300;
       '<button id="g-copy">copy</button>' +
     '</div>';
   document.body.appendChild(el);
+
+  var tps = document.getElementById('g-tps');
+  tps.addEventListener('input', function () {
+    track.style.setProperty('--track-per-slide', tps.value);
+    document.getElementById('g-tps-out').textContent = tps.value;
+    if (window.__hsApply) window.__hsApply();
+    render();
+  });
 
   var slidersEl = document.getElementById('g-sliders');
   GROUPS.forEach(function (g) {
@@ -158,6 +166,13 @@ var FLOOR = 300;
     }
     document.getElementById('g-hd-row').classList.toggle('warn', state !== 'свободно');
 
+    var hs = window.__hs || { p: 0, index: 0 };
+    set('g-slide', '0' + (hs.index + 1) + ' / 0' + document.querySelectorAll('.hs__card').length);
+    set('g-p', hs.p.toFixed(3));
+    set('g-t', (hs.t || 0).toFixed(2));
+    set('g-track', Math.round(track.offsetHeight) + 'px  ·  ' +
+        (track.offsetHeight / innerHeight).toFixed(1) + ' экрана');
+
     /* core bbox = union of the fragments that must stay visible */
     var cr = canvas.getBoundingClientRect();
     var x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
@@ -175,8 +190,8 @@ var FLOOR = 300;
   }
   function set(id, v) { document.getElementById(id).textContent = v; }
 
-  sizeBar();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeBar);
-  new ResizeObserver(sizeBar).observe(bar);
+  render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
   new ResizeObserver(render).observe(canvas);
+  addEventListener('scroll', render, { passive: true });
 })();
