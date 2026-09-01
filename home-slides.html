@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="design-system/tokens.css" />
 <link rel="stylesheet" href="design-system/webflow-env.css" />
 <link rel="stylesheet" href="design-system/components/button.css" />
+<link rel="stylesheet" href="design-system/components/chat-card.css" />
 <style>
 /* ═══════════════════════════════════════════════════════════
    HOME SLIDES — slide 01 skeleton
@@ -74,6 +75,11 @@
   --steps: 2;
   --track-per-step: 1;
   height: calc(var(--steps) * var(--track-per-step) * 100dvh);
+  /* .section brings 5rem top and bottom from the Webflow environment. On a
+     scroll track that padding is not spacing, it is 160px of scroll the
+     sticky does not cover — the card unpins early and slides under the nav.
+     The air around the card comes from centring inside the sticky instead. */
+  padding-block: 0;
 }
 
 /* The card stops growing at the 550 ceiling, so on a tall window there
@@ -213,7 +219,9 @@
   top:     calc((1 - var(--t)) * var(--py1) + var(--t) * var(--py2));
   width:   calc((1 - var(--t)) * var(--pw1) + var(--t) * var(--pw2));
   height:  auto;
-  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
+  /* --lit is the chat's own gate: the entities it consults appear as it
+     names them, which is a beat of the dialogue, not a step of the scene. */
+  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1));
   /* webflow-env.css rounds every img; these carry their own corners */
   border-radius: 0;
 }
@@ -250,11 +258,61 @@
   white-space: nowrap;
 }
 
-/* Placeholder for the live chat — geometry is real, contents are not. */
-.hs__chat-stub {
-  background: var(--color-bg-white);
-  border-radius: calc(24 * var(--u));
-  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
+/* ── Chat ──────────────────────────────────────────────────────
+   design-system/components/chat-card.css drives every inner size from
+   one font-size in em, so pointing that font-size at the scene's design
+   unit is the whole integration — no fork, no copied values. */
+.hs__chat { opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)); }
+.hs__chat .chat-card-wrap {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.hs__chat .chat-card {
+  /* Not var(--u): .chat-card-wrap declares its own inline-size container,
+     so inside the chat 1cqw measures the chat, not the canvas. Which is
+     exactly the component's own idiom — 14.4 design units of a 300-wide
+     card is 4.8% of its width. */
+  font-size: 4.8cqi;
+  border-radius: 6.67cqi;
+}
+
+/* Tool lines — what Birch is doing right now, one per source it reads.
+   They collapse into the "Used:" row once the answer starts. */
+.hs__tools {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.4s ease, opacity 0.3s ease;
+}
+.hs__tools.is-done { grid-template-rows: 0fr; opacity: 0; }
+.hs__tools > div { overflow: hidden; }
+
+.hs__tool {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.15em 0;
+  color: #6b6b76;
+  opacity: 0;
+  transform: translateY(0.4em);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.hs__tool.is-on { opacity: 1; transform: none; }
+.hs__tool::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* The rules card is already on stage when the chat names it, so it gets a
+   ring rather than a fade-in like the other two. */
+.hs__frag--fade { transition: opacity 0.35s ease; }
+.hs__frag--ring { transition: box-shadow 0.35s ease; }
+.hs__frag--ring.is-lit {
+  box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
 }
 
 /* The integrations bar ships without its shadow (an earlier export baked
@@ -426,7 +484,7 @@
 
           <!-- Closing window: holds the three rule cards and becomes the
                "Your automation rules" card by shrinking around them. -->
-          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip"
+          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip hs__frag--ring"
                style="--x:-200; --y:-100; --w:1632; --h:800; z-index:10">
             <div data-frag="rules-face" class="hs__rules-face">
               <span class="hs__rules-title">Your automation rules</span>
@@ -442,14 +500,51 @@
                  style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10" data-core>
           </div>
 
-          <img data-frag="business-context" class="hs__frag" src="images/slides/01/business-context.webp"
+          <img data-frag="business-context" class="hs__frag hs__frag--fade" src="images/slides/01/business-context.webp"
                alt="Your business context" width="466" height="542" loading="lazy" decoding="async"
-               style="--x:226; --y:114; --w:194.25; z-index:15">
-          <img data-frag="meta-ads-library" class="hs__frag" src="images/slides/01/meta-ads-library.webp"
+               style="--x:226; --y:114; --w:194.25; --lit:0; z-index:15">
+          <img data-frag="meta-ads-library" class="hs__frag hs__frag--fade" src="images/slides/01/meta-ads-library.webp"
                alt="Meta ads library" width="807" height="613" loading="lazy" decoding="async"
-               style="--x:48; --y:199; --w:336.44; z-index:16">
-          <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat-stub"
-               style="--x:452; --y:19; --w:300; --h:352; z-index:17"></div>
+               style="--x:48; --y:199; --w:336.44; --lit:0; z-index:16">
+          <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
+               style="--x:452; --y:19; --w:300; --h:352; z-index:17">
+            <div class="chat-card-wrap">
+              <div class="chat-card">
+                <div class="chat-card__body">
+                  <div class="chat-card__feed">
+                    <div class="chat-card__messages">
+                      <div class="chat-card__bubble" id="hsBubble">How healthy is my setup?</div>
+                    </div>
+                    <div class="chat-card__response" id="hsResponse">
+                      <div class="chat-card__response-content">
+                        <div class="hs__tools" id="hsTools"><div>
+                          <div class="hs__tool" data-lights="rules">Scanning your rule automations</div>
+                          <div class="hs__tool" data-lights="business-context">Reading your business context</div>
+                          <div class="hs__tool" data-lights="meta-ads-library">Checking Meta Ads Library</div>
+                        </div></div>
+                        <div class="chat-card__used" id="hsUsed" hidden>Used:</div>
+                        <div class="chat-card__used-row" id="hsUsedRow" hidden>
+                          <span class="chat-card__used-names">Rules · Business context · Meta Ads Library</span>
+                        </div>
+                        <p id="hsAnswerA"></p>
+                        <p id="hsAnswerB"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="chat-card__input-area">
+                  <div class="chat-card__input-wrap">
+                    <div class="chat-card__text-flow">
+                      <span class="chat-card__placeholder" id="hsPlaceholder">Ask anything</span><span class="chat-card__typed" id="hsTyped"></span><span class="chat-card__cursor" id="hsCursor"></span>
+                    </div>
+                    <button class="chat-card__send" id="hsSend" disabled aria-label="Send">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
@@ -490,7 +585,8 @@
   var STEPS = [
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
-    { slide: 1 }    /* 2 — the stack folds into "Your automation rules" */
+    { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
+    { slide: 1 }    /* 3 — geometry holds still; this segment is the chat */
   ];
 
   /* Keyframes per fragment, one entry per step. Anything omitted is
@@ -507,7 +603,7 @@
     'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0],              b:[-6.533,2,48.6]},      {x:-395, y:146}, {d:[0,0,0], b:[0,0,0]}],
     'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0],              b:[-4,22.533,23.335]},   {x:-376, y:300, o:0}, {d:[0,0,0], b:[0,0,0]}],
     'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25],      b:[-10,10,8.333]},       {x:-192, y:78},  {d:[0,0,0], b:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186],       b:[-7.466,39.333,49.6]}, {x:881,  y:371, w:359.857}, {d:[0,0,0], b:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186],       b:[-7.466,39.333,49.6]}, {x:881,  y:371, w:359.857}, {o:0, d:[0,0,0], b:[0,0,0]}],
     'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0],             b:[3,33,34.7]},          {x:-320, y:273}, {d:[0,0,0], b:[0,0,0]}],
     'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0],              b:[31.068,0,45]},        {x:1274, y:0},   {d:[0,0,0], b:[0,0,0]}],
     'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0],              b:[43.068,11.867,24]},   {x:1394, y:89},  {d:[0,0,0], b:[0,0,0]}],
@@ -625,6 +721,8 @@
     writePair(a);
     card.style.setProperty('--t', t.toFixed(4));
 
+    driveChat(a, q - a);
+
     var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
     if (si !== slide) {
       slide = si;
@@ -637,6 +735,91 @@
   lockBarHeight();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockBarHeight);
   new ResizeObserver(lockBarHeight).observe(document.body);
+
+  /* ── Chat ────────────────────────────────────────────────────
+     Hybrid, as agreed: scroll picks the beat, time types the letters.
+     Scrubbing forward or back lands on a state that is fully defined by
+     position, so a fast reader is never left mid-sentence and a reader
+     who goes back sees the same thing twice. */
+  var Q  = 'How healthy is my setup?';
+  var A1 = 'Gap found — a creative is about to hit fatigue.';
+  var A2 = 'UGC runs longest in your vertical — median 41 days.';
+  var BEATS = [0.14, 0.22, 0.40, 0.58, 0.74];   /* → six states */
+
+  var ch = {
+    bubble: document.getElementById('hsBubble'),
+    resp:   document.getElementById('hsResponse'),
+    tools:  document.getElementById('hsTools'),
+    tool:   [].slice.call(document.querySelectorAll('.hs__tool')),
+    used:   document.getElementById('hsUsed'),
+    usedRow:document.getElementById('hsUsedRow'),
+    a:      document.getElementById('hsAnswerA'),
+    b:      document.getElementById('hsAnswerB'),
+    typed:  document.getElementById('hsTyped'),
+    hint:   document.getElementById('hsPlaceholder'),
+    send:   document.getElementById('hsSend')
+  };
+  var LIT = { rules: card.querySelector('[data-frag="rules-frame"]') };
+  ['business-context', 'meta-ads-library'].forEach(function (id) {
+    LIT[id] = card.querySelector('[data-frag="' + id + '"]');
+  });
+
+  var timers = [];
+  function stopTyping() { timers.forEach(clearInterval); timers = []; }
+  function type(el, text, then) {
+    var i = 0;
+    el.textContent = '';
+    var t = setInterval(function () {
+      el.textContent = text.slice(0, ++i);
+      if (i >= text.length) { clearInterval(t); if (then) then(); }
+    }, 26);
+    timers.push(t);
+  }
+
+  var state = -1;
+  function setState(n) {
+    if (n === state) return;
+    var forward = n > state;
+    stopTyping();
+    state = n;
+
+    ch.bubble.classList.toggle('is-visible', n >= 1);
+    ch.resp.classList.toggle('is-visible', n >= 1);
+    ch.tool.forEach(function (el, i) { el.classList.toggle('is-on', n >= 2 + i); });
+    ch.tools.classList.toggle('is-done', n >= 5);
+    ch.used.hidden = ch.usedRow.hidden = n < 5;
+    ch.send.disabled = n !== 0;
+
+    LIT.rules.classList.toggle('is-lit', n >= 2 && n < 5);
+    LIT['business-context'].style.setProperty('--lit', n >= 3 ? 1 : 0);
+    LIT['meta-ads-library'].style.setProperty('--lit', n >= 4 ? 1 : 0);
+
+    ch.hint.style.display = n === 0 ? '' : 'none';
+    if (n === 0) {
+      /* only animate when the reader arrives here, not when scrubbing back
+         past it — going backwards should show the finished line, not replay */
+      if (forward) { type(ch.typed, Q); } else { ch.typed.textContent = Q; }
+    } else {
+      ch.typed.textContent = '';
+    }
+
+    if (n >= 5) {
+      if (forward) { type(ch.a, A1, function () { type(ch.b, A2); }); }
+      else { ch.a.textContent = A1; ch.b.textContent = A2; }
+    } else {
+      ch.a.textContent = ch.b.textContent = '';
+    }
+  }
+
+  /* The chat lives in the segment where the scene holds still. */
+  var CHAT_SEG = 2;
+  function driveChat(a, local) {
+    var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
+    if (cp < 0) { setState(-1); return; }
+    var n = 0;
+    while (n < BEATS.length && cp >= BEATS[n]) n++;
+    setState(n);
+  }
 
   addEventListener('scroll', apply, { passive: true });
   addEventListener('resize', apply);
