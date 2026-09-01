@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home slides — slide 01 (height corridor skeleton)</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
+<style>
+/* ═══════════════════════════════════════════════════════════
+   HOME SLIDES — slide 01 skeleton
+
+   Placeholders at the exact Figma geometry of three authored
+   keyframes in the "for test" section:
+
+     h300         18446:74772   floor — whole composition at 0.8667
+     h364         18446:68189   reference
+     h550+scale   18446:71454   full air, decor scaled 1.5x
+
+   (An earlier h300, 18446:69822, was produced by Figma constraints
+   rather than drawn, and is not used.)
+
+   COORDINATE SYSTEM
+   The scene is authored on a 1232-wide canvas. `--u` is one design
+   unit in real pixels, so every value is <figma number> * var(--u).
+
+     --u = 1cqw / 12.32
+
+   Width alone drives it — never height. An earlier version also fitted
+   by height on short windows, which shrank the scene below the card's
+   width and left empty background down both sides. The block sits in
+   the page flow rather than pinned to the viewport, so a card that runs
+   a few dozen pixels past the fold on a short wide window just costs a
+   little scrolling; empty margins would have been visible immediately.
+
+   INTERPOLATION
+   Each fragment carries its h364 geometry (--x/--y/--w) plus two
+   sets of deltas: --dx/--dy/--dw toward h550+scale (186 units up)
+   and --bx/--by/--bw toward h300 (64 units down). Two clamped
+   lengths pick which segment is live:
+
+     --up = clamp(0, canvas - 364u, 186u)
+     --dn = clamp(0, 364u - canvas, 64u)
+
+   At canvas = 364u both are zero and the frame renders exactly as
+   the reference. Width interpolates the same way as position, which
+   is what lets decor grow 1.5x upward while the interface stays 1:1
+   (non-zero --dw on decor only), and what lets the whole composition
+   shrink to 0.8667 downward (non-zero --bw on everything).
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Authored keyframes, in design units */
+  --scene-min:  300;   /* floor — authored frame 18446:74772 */
+  --scene-base: 364;
+  --scene-max:  550;
+
+  /* Measured by JS after fonts.ready */
+  --bar-h: 6.8125rem;
+
+  /* Debug override */
+  --canvas-force: 364;
+}
+
+/* ── Section ──────────────────────────────────────────────────
+   The card stops growing at the 550 ceiling, so on a tall window
+   there is height left over. Splitting it above and below reads as
+   section padding; letting it pile up under the card reads as the
+   block failing to reach the bottom. `safe center` keeps the top
+   edge reachable on short windows, where the card is the taller of
+   the two and centring would otherwise push its head under the nav. */
+.hs {
+  padding-top: var(--nav-height);
+  padding-bottom: 0;
+  min-height: 100dvh;
+  display: flex;
+  align-items: safe center;
+}
+.hs > .container { width: 100%; }
+
+/* ── Card ─────────────────────────────────────────────────── */
+.hs__card {
+  container-type: inline-size;
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: var(--color-accent-blue);
+  padding-top: var(--pad-card);
+  overflow: hidden;
+}
+
+/* ── Top bar — three equal columns, as in the Figma frame ──── */
+.hs__bar {
+  display: grid;
+  /* minmax(0,…) — plain 1fr lets the button column's min-content win */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-md);
+  padding-inline: var(--pad-card);
+}
+
+.hs__pills { display: flex; gap: var(--gap-sm); margin-bottom: var(--space-xs); }
+
+.hs__pill {
+  display: inline-block;
+  background: var(--color-accent-indigo);
+  color: var(--color-text);
+  border-radius: var(--radius-xs);
+  padding: 0.058em 0.462em 0.154em;
+}
+
+.hs__title { color: var(--color-text); text-wrap: balance; margin: 0; }
+.hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
+
+.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; }
+
+.hs__buttons .btn { flex: 1; }
+
+/* ── Canvas — the window into the scene ───────────────────── */
+.hs__canvas {
+  /* width-driven design unit, resolved against the card */
+  --u-w: calc(1cqw / 12.32);
+
+  /* Horizontal anchor of the composition, in design units: the centre
+     of the Rule card, which sits at 616.5 in all three keyframes. The
+     scene is only ever wider than 1232 units when it has been scaled
+     down to fit a short window; this keeps that surplus split evenly
+     instead of piling up on the right. */
+  --cx: 616.5;
+
+  position: relative;
+  container-type: size;
+  margin-top: var(--gap-md);
+  overflow: hidden;
+
+  height: clamp(
+    calc(var(--scene-min) * var(--u-w)),
+    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md)),
+    calc(var(--scene-max) * var(--u-w))
+  );
+}
+
+/* Debug override — pin the canvas to a fixed design height */
+.is-forced .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
+
+/* ── Scene fragments ──────────────────────────────────────── */
+.hs__frag {
+  --u:  calc(1cqw / 12.32);
+  --up: clamp(0px, (100cqh - 364 * var(--u)), 186 * var(--u));
+  --dn: clamp(0px, (364 * var(--u) - 100cqh), 64 * var(--u));
+
+  --dx: 0; --dy: 0; --dw: 0;
+  --bx: 0; --by: 0; --bw: 0;
+
+  position: absolute;
+  display: block;
+  left:  calc(var(--x) * var(--u) + var(--up) * var(--dx) / 186 - var(--dn) * var(--bx) / 64
+         + (50cqw - var(--cx) * var(--u)));
+  top:   calc(var(--y) * var(--u) + var(--up) * var(--dy) / 186 - var(--dn) * var(--by) / 64);
+  width: calc(var(--w) * var(--u) + var(--up) * var(--dw) / 186 - var(--dn) * var(--bw) / 64);
+  /* height follows the asset's own ratio — never forced, so a small
+     mismatch between the export and the Figma box shows up as a few
+     units of height rather than as a squashed image */
+  height: auto;
+  /* webflow-env.css rounds every img; these carry their own corners */
+  border-radius: 0;
+}
+
+/* The integrations bar ships without its shadow (an earlier export baked
+   it in, which put 5 units of transparent film under the bar and pushed
+   it off its box). Reproduced here from the alpha profile of that old
+   export — 2.3 units above, 5 below, i.e. dy 1.35 / blur 3.65 — so it
+   scales with the scene instead of blurring with the bitmap. */
+.hs__frag--shadow {
+  filter: drop-shadow(0 calc(1.35 * var(--u)) calc(3.65 * var(--u)) rgba(0, 0, 0, 0.42));
+}
+
+/* ── Guides ───────────────────────────────────────────────── */
+.hs__guide {
+  --u: calc(1cqw / 12.32);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--scene-base) * var(--u));
+  /* --u here matches the fragments' */
+  height: 0;
+  border-top: 0.0625rem dashed var(--color-primary);
+  pointer-events: none;
+  display: none;
+}
+.hs__guide::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 0.5rem;
+  top: 0.25rem;
+  color: var(--color-primary);
+  font-size: 0.6875rem;
+}
+.is-guides .hs__guide { display: block; }
+
+.hs__core-box {
+  position: absolute;
+  border: 0.125rem solid var(--color-accent-green);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  display: none;
+}
+.is-core .hs__core-box { display: block; }
+</style>
+</head>
+<body>
+<!--
+  WEBFLOW DEV ENVIRONMENT — NAV PARTIAL
+  Paste this markup right after <body> on new dev pages.
+  Pair with design-system/webflow-env.css (provides .sim-nav styles).
+-->
+<nav class="sim-nav">
+  <div class="sim-nav__inner">
+    <!-- Logo -->
+    <a class="sim-nav__logo" href="#">
+      <svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/>
+        <path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/>
+        <path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/>
+        <path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/>
+        <path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/>
+        <path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/>
+      </svg>
+    </a>
+
+    <!-- Center nav links -->
+    <div class="sim-nav__center">
+      <div class="sim-nav__center-links">
+        <a class="sim-nav__link" href="#">Performance<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Hub<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Stage<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#" style="position:relative;padding-top:1.4em;">
+          <span class="sim-nav__badge">New</span>AI<div class="sim-nav__link-dot"></div>
+        </a>
+        <a class="sim-nav__link" href="#">Cases<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Blog<div class="sim-nav__link-dot"></div></a>
+        <a class="sim-nav__link" href="#">Pricing<div class="sim-nav__link-dot"></div></a>
+      </div>
+    </div>
+
+    <!-- Right nav -->
+    <div class="sim-nav__right">
+      <a class="sim-nav__link-lg" href="#">Book demo</a>
+      <a class="sim-nav__link-lg" href="#">Log in</a>
+      <a class="sim-nav__btn" href="#">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<section class="section hs">
+  <div class="container">
+    <article class="hs__card">
+
+      <header class="hs__bar">
+        <div>
+          <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
+          <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+        </div>
+        <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+        <div class="hs__buttons">
+          <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+          <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+        </div>
+      </header>
+
+      <!-- Scene. --x/--y/--w/--h are the Figma coordinates of frame 01_0. -->
+      <div class="hs__canvas" id="canvas">
+        <img class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+             width="875" height="1271" loading="lazy" decoding="async"
+             style="--x:37; --y:15; --w:364.5; --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
+        <img class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+             width="420" height="905" loading="lazy" decoding="async"
+             style="--x:56; --y:169; --w:175.02; --dy:37; --bx:-4; --by:22.533; --bw:23.335; z-index:2">
+        <img class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+             width="225" height="225" loading="lazy" decoding="async"
+             style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
+        <img class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
+             width="1339" height="227" loading="lazy" decoding="async"
+             style="--x:560; --y:295; --w:372; --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
+        <img class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+             width="625" height="252" loading="lazy" decoding="async"
+             style="--x:155; --y:226; --w:260.25; --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
+        <img class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+             width="810" height="421" loading="lazy" decoding="async"
+             style="--x:999; --y:0; --w:337.5; --dy:58; --bx:31.068; --bw:45; z-index:6">
+        <img class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+             width="432" height="445" loading="lazy" decoding="async"
+             style="--x:1089; --y:89; --w:180; --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
+        <img class="hs__frag hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+             width="1793" height="595" loading="lazy" decoding="async"
+             style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:8" data-core>
+        <img class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+             width="1474" height="252" loading="lazy" decoding="async"
+             style="--x:921; --y:240; --w:614.25; --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:9">
+        <img class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+             width="225" height="225" loading="lazy" decoding="async"
+             style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:10">
+        <img class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+             width="225" height="225" loading="lazy" decoding="async"
+             style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:11">
+        <img class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+             width="225" height="225" loading="lazy" decoding="async"
+             style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:12">
+
+        <div class="hs__guide" data-label="364 — эталон / пол"></div>
+        <div class="hs__core-box" id="coreBox"></div>
+      </div>
+
+    </article>
+  </div>
+</section>
+
+<script src="debug/geo-panel.js"></script>
+</body>
+</html>
