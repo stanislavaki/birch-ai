@@ -12,7 +12,7 @@
   var canvas = document.querySelector('.hs__canvas');
   var track  = document.getElementById('hs');
   var bar    = document.querySelector('.hs__bar');
-  var card   = document.querySelector('.hs__card');
+  var card   = document.getElementById('card');
   if (!canvas) return;
 
   var BASE = 364;
@@ -59,7 +59,7 @@ var FLOOR = 300;
     '<div class="row"><span>прогресс</span><b id="g-p">—</b></div>' +
     '<div class="row"><span>шаг (blend)</span><b id="g-t">—</b></div>' +
     '<hr>' +
-    '<label>экранов скролла на слайд — <b id="g-tps-out">1</b></label>' +
+    '<label>экранов скролла на шаг — <b id="g-tps-out">1</b></label>' +
     '<input id="g-tps" type="range" min="0.3" max="2.5" step="0.1" value="1">' +
     '<div class="row"><span>трек всего</span><b id="g-track">—</b></div>' +
     '<hr><div id="g-sliders"></div><hr>' +
@@ -74,7 +74,7 @@ var FLOOR = 300;
 
   var tps = document.getElementById('g-tps');
   tps.addEventListener('input', function () {
-    track.style.setProperty('--track-per-slide', tps.value);
+    track.style.setProperty('--track-per-step', tps.value);
     document.getElementById('g-tps-out').textContent = tps.value;
     if (window.__hsApply) window.__hsApply();
     render();
@@ -167,7 +167,7 @@ var FLOOR = 300;
     document.getElementById('g-hd-row').classList.toggle('warn', state !== 'свободно');
 
     var hs = window.__hs || { p: 0, index: 0 };
-    set('g-slide', '0' + (hs.index + 1) + ' / 0' + document.querySelectorAll('.hs__card').length);
+    set('g-slide', '0' + ((hs.slide || 0) + 1) + '  ·  шаг ' + ((hs.step || 0) + 1) + '/' + (hs.steps || 1));
     set('g-p', hs.p.toFixed(3));
     set('g-t', (hs.t || 0).toFixed(2));
     set('g-track', Math.round(track.offsetHeight) + 'px  ·  ' +
