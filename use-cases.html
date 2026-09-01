@@ -533,6 +533,8 @@
      of the card without competing with the card title or the table header */
   .uc-tblock__cap {
     margin: 0;
+    font-family: var(--font);
+    text-align: left;
     color: var(--color-text-inverted);
   }
   .uc-table {
@@ -551,9 +553,11 @@
   .uc-table__cell {
     flex: 1 1 0;
     min-width: 0;
-    /* 24px sides so the first and last column's text lines up with the prompt
-       text above (the prompt block has the same 24px inset), 16px top/bottom */
-    padding: var(--space-sm) var(--space);
+    /* 12px between the columns, 24px on the outer edges (below): the first and
+       last column line up with the prompt text above, and the middle column
+       keeps the room it needs instead of a 48px gutter */
+    padding: var(--space-sm) 0.75rem;
+    text-align: left;
     font-size: var(--text-body-size);
     line-height: 1.3;
     text-wrap: pretty;
@@ -576,6 +580,8 @@
     border-top: 1px solid var(--color-border-hairline);
   }
   .uc-table__cell--flush { border-top-width: 0; }
+  .uc-table__row > *:first-child { padding-left: var(--space); }
+  .uc-table__row > *:last-child  { padding-right: var(--space); }
   .uc-table__cell b { font-weight: 700; }
   /* Columns 2-3 explain and advise; the first column is the thing you look up.
      The step down is weight, not colour: the page's body weight is 600, so 500
