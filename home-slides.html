@@ -1820,23 +1820,25 @@
        d       — [dx, dy, dw, dh] toward h550
        o       — opacity */
   var K = {
-    /* Background — scatters at step 1 and then stays put. Slide 02 does
+    /* Background — scatters at step 1, one fragment after another and late
+       into the segment, so the stack is already out while the surroundings
+       are still leaving and the bare screen never has to be waited through. Slide 02 does
        not move it between h364 and h550, hence the zeroed deltas. */
-    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
-    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
-    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78},  {d:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0]}],   /* leaves downward with the scatter */
-    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
-    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
-    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
-    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213}, {d:[0,0,0]}],
-    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205}, {d:[0,0,0]}],
-    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21},  {d:[0,0,0]}],
-    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210}, {d:[0,0,0]}],
+    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146, e:[0.46,0.89]}, {d:[0,0,0]}],
+    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0, e:[0.40,0.83]}, {d:[0,0,0]}],
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78, e:[0.52,0.95]},  {d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0], e:[0.64,1.00]}],   /* leaves downward with the scatter */
+    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273, e:[0.34,0.78]}, {d:[0,0,0]}],
+    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0, e:[0.37,0.80]},   {d:[0,0,0]}],
+    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89, e:[0.43,0.86]},  {d:[0,0,0]}],
+    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213, e:[0.49,0.92]}, {d:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205, e:[0.61,1.00]}, {d:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21, e:[0.55,0.97]},  {d:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210, e:[0.58,1.00]}, {d:[0,0,0]}],
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0], arm:0.22, auto:{delay:0, rate:0.075}}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -1847,14 +1849,14 @@
     /* The stack cards start exactly behind the front card (same box, lower
        z) and slide out — no fade, the front card is what hides them. */
     'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:528.45, y:120.75, w:575.45},
-                           {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
+                           {x:528.45, y:120.75, w:575.45, e:[0.10,0.52]},
+                           {x:86.756, y:62,     w:492.737, d:[0,0,0], arm:0.22, auto:{delay:120, rate:0.075}}],
     'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:492.35, y:162.45, w:646.7},
-                           {x:55.844, y:103,    w:553.746, d:[0,0,0]}],
+                           {x:492.35, y:162.45, w:646.7, e:[0.14,0.56]},
+                           {x:55.844, y:103,    w:553.746, d:[0,0,0], arm:0.22, auto:{delay:60,  rate:0.075}}],
     'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:461,  y:208.76, w:709.65},
-                           {x:29,   y:147,     w:607.65, d:[0,0,0]}],
+                           {x:461,  y:208.76, w:709.65, e:[0.18,0.60]},
+                           {x:29,   y:147,     w:607.65, d:[0,0,0], arm:0.22, auto:{delay:0,   rate:0.075}}],
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
@@ -1890,7 +1892,7 @@
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, arm:0.5, auto:{delay:0,   rate:0.11}}, {x:1400, arm:0.02, auto:{delay:0,   rate:0.10}}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, arm:0.5, auto:{delay:220, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:120, rate:0.10}}],
     'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, arm:0.5, auto:{delay:420, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:240, rate:0.10}}],
-    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}, {x:-520, arm:0.02, auto:{delay:0, rate:0.10}}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, arm:0.22, auto:{delay:700, rate:0.09}}, {}, {x:103, e:[0.32,0.55], ease:'out'}, {x:-520, arm:0.02, auto:{delay:0, rate:0.10}}],
 
     /* Slide 03 — MCP. Chips fly in from the left one after another, the
        phone from the right; the logo pops in the reference rhythm and the
@@ -2082,18 +2084,20 @@
         var ka0 = f.k[a], armedL = local >= (kb.arm !== undefined ? kb.arm : 0.02) && (!kb.after || GATES[kb.after]);
         if (!armedL) { f.autoStart = null; f.lerp = null; }
         else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, w: ka0.w, r: ka0.r || 0, t: performance.now() }; }
+          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0, t: performance.now() }; }
           var elL = performance.now() - f.autoStart;
           var tgtL = elL >= kb.auto.delay ? kb : ka0;
           var dtL = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
           var kL = 1 - Math.pow(1 - kb.auto.rate, dtL);
           f.lerp.x += (tgtL.x - f.lerp.x) * kL; f.lerp.y += (tgtL.y - f.lerp.y) * kL; f.lerp.r += ((tgtL.r || 0) - f.lerp.r) * kL;
           f.lerp.w += ((tgtL.w !== undefined ? tgtL.w : ka0.w) - f.lerp.w) * kL;
+          f.lerp.h += ((tgtL.h !== undefined ? tgtL.h : ka0.h) - f.lerp.h) * kL;
           if (Math.abs(tgtL.x - f.lerp.x) + Math.abs(tgtL.y - f.lerp.y) + Math.abs((tgtL.r || 0) - f.lerp.r) > 0.3 || elL < kb.auto.delay) autoLive = true;
         }
-        var curL = f.lerp || { x: ka0.x, y: ka0.y, w: ka0.w, r: ka0.r || 0 };
+        var curL = f.lerp || { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0 };
         st.setProperty('--x',  curL.x); st.setProperty('--y',  curL.y); st.setProperty('--r',  curL.r); st.setProperty('--w', curL.w);
         st.setProperty('--x2', curL.x); st.setProperty('--y2', curL.y); st.setProperty('--r2', curL.r); st.setProperty('--w2', curL.w);
+        if (curL.h !== undefined) { st.setProperty('--h', curL.h); st.setProperty('--h2', curL.h); }
         tt = 0;
       } else if (kb.auto && !kb.via) {
         /* plays on its own clock from the moment the segment is entered —
@@ -2157,7 +2161,7 @@
     /* the rules frame counts as closed from 90% of its closing leg onward */
     var closing = FRAGS['rules-frame'];
     if (closing) {
-      closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && curve(closing.k[2], local) >= 0.9));
+      closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && closing.lerp && closing.lerp.w < 420));
       closing.el.classList.toggle('is-stacked', a > 0 || local > 0.03);
     }
 
