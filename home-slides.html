@@ -2400,30 +2400,30 @@
   function phPlay() {
     if (phState === 1) return;
     phReset(); phState = 1;
-    var t = 600, PER = 85;
+    var t = 350, PER = 50;
     PHQ.split('').forEach(function (ch, i) {
       var lower = ch.toLowerCase(), upper = ch !== lower;
       if (upper) phAt(t, function () { tap('shift', 110); });
       if (ch === '?') phAt(t, function () { tap('123', 110); });
-      phAt(t + (upper ? 60 : 0), function () {
+      phAt(t + (upper ? 40 : 0), function () {
         tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1);
         /* the caret is always in view: text and caret scroll together, like a real field */
         var sc = ph.scroll, over = sc.offsetWidth - sc.parentNode.clientWidth;
         sc.style.translate = (over > 0 ? -over : 0) + 'px 0';
       });
-      t += PER + (ch === ' ' ? 40 : 0);
+      t += PER + (ch === ' ' ? 20 : 0);
     });
-    t += 350;
+    t += 220;
     phAt(t, function () {
       tap('send', 140);
       ph.greet.classList.add('is-gone');
       ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
       ph.typed.textContent = ''; ph.scroll.style.translate = '';   /* the keyboard stays, as in the app */
     });
-    t += 700;
+    t += 450;
     var words = PHA.split(' ');
     words.forEach(function (w, i) {
-      phAt(t + i * 110, function () { ph.a.textContent = words.slice(0, i + 1).join(' '); ph.a.classList.add('is-in'); });
+      phAt(t + i * 60, function () { ph.a.textContent = words.slice(0, i + 1).join(' '); ph.a.classList.add('is-in'); });
     });
   }
   /* segment 5 is the phone's hold: play once it has arrived, reset when scrolled back before it */
