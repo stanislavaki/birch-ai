@@ -377,7 +377,6 @@
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
   transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
-.hs__frag--ring { transition: box-shadow 0.35s ease; }
 .hs__frag--ring.is-lit {
   box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
 }
@@ -1619,7 +1618,7 @@
           <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
           <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
           <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
-               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:192.2; --w:209.24; z-index:9; border-radius: calc(12 * var(--u))">
+               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:192.2; --w:209.24; z-index:7; border-radius: calc(12 * var(--u))">
           <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
                width="573" height="741" loading="lazy" decoding="async" style="--x:829.5; --y:56.4; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
           <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
@@ -1725,7 +1724,7 @@
        is the chat's job, and the chat is not wired yet. */
     'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, e:[0.05,0.32], ease:'in'}],
     'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, e:[0.10,0.35], ease:'in'}],
-    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.35,0.85], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
@@ -1738,13 +1737,14 @@
        209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
        each unrotated box is placed on its bbox centre and rotated there.
        bboxes: juice 723/176, cherry 810/42, jar 957/2. */
-    /* A stack that fans out: the pile rises from under the canvas onto the
-       jar's final spot (the bottom card of the pile is the anchor and does
-       not travel further), then the cards on top peel off it in order —
-       juice first, cherry second — to their Figma placements. */
-    'ad-1':               [{x:991, y:640, w:209.24, r:-3, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:985, y:46, r:-3, e:[0.62,0.80]}, e:[0.82,0.96], ease:'out'}],
-    'ad-2':               [{x:991, y:640, w:199.94, r:3,  d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:988, y:41, r:3,  e:[0.62,0.80]}, e:[0.88,1.00], ease:'out'}],
-    'ad-3':               [{x:991, y:640, w:199.94, r:8,  d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:991, y:36, r:8,  e:[0.62,0.80]}, e:[0.90,1.00], ease:'out'}],
+    /* A stack that fans out. The pile rises from under the canvas onto the
+       juice card's final spot: juice is the bottom of the pile, arrives
+       already at its final angle and never moves again. Cherry (top) and
+       then jar peel off it, turning while they travel — rotation and
+       movement share one window. */
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, e:[0.62,0.80]}, e:[0.80,0.81]}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6,    e:[0.62,0.80]}, e:[0.88,1.00], ease:'out'}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3,    e:[0.62,0.80]}, e:[0.82,0.96], ease:'out'}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
     'folder':             [{x:986+400, y:264, w:159.47, d:[0,75,0]}, {}, {}, {}, {x:986, e:[0.45,0.85], ease:'out'}]
@@ -1927,7 +1927,7 @@
   var Q  = 'How healthy is my setup?';
   var A1 = 'Gap found — a creative is about to hit fatigue.';
   var A2 = 'UGC runs longest in your vertical — median 41 days.';
-  var BEATS = [0.10, 0.14, 0.36, 0.58, 0.80];   /* → six states */
+  var BEATS = [0.05, 0.08, 0.30, 0.50, 0.70];   /* → six states */
 
   var ch = {
     bubble: document.getElementById('hsBubble'),
@@ -1956,7 +1956,7 @@
       el.textContent = text.slice(0, ++i);
       if (el === ch.typed) ch.hint.style.display = 'none';
       if (i >= text.length) { clearInterval(t); if (then) then(); }
-    }, 26);
+    }, 14);
     timers.push(t);
   }
 
@@ -2011,9 +2011,11 @@
     clearTimeout(dwellTimer);
     if (n <= state) { setState(n); stateAt = performance.now(); return; }   /* backwards: immediate */
     /* forwards: one state at a time, each held for at least DWELL */
-    var wait = Math.max(0, DWELL - (performance.now() - stateAt));
+    /* typing and sending need no hold; the three scan states do */
+    var need = (state >= 1 && state <= 3) ? DWELL : 250;
+    var wait = Math.max(0, need - (performance.now() - stateAt));
     if (wait === 0) { setState(state + 1); stateAt = performance.now(); }
-    if (state < n) dwellTimer = setTimeout(function () { driveChat(a, local); }, wait || DWELL);
+    if (state < n) dwellTimer = setTimeout(function () { driveChat(a, local); }, wait || need);
   }
 
   addEventListener('scroll', apply, { passive: true });
