@@ -57,6 +57,11 @@
   /* Tallest top bar across the slides, measured after fonts.ready */
   --bar-h: 6.8125rem;
 
+  /* Air under the card so it does not sit on the viewport edge. Comes out
+     of the canvas budget, so on the 1280×600 reference the canvas drops
+     below 364 by this much and the card runs past the fold instead. */
+  --slide-gap-bottom: 2rem;
+
   /* Debug override */
   --canvas-force: 364;
 }
@@ -89,6 +94,8 @@
   position: sticky;
   top: var(--nav-height);
   height: calc(100dvh - var(--nav-height));
+  padding-bottom: var(--slide-gap-bottom);
+  box-sizing: border-box;
   display: flex;
   align-items: safe center;
 }
@@ -167,7 +174,7 @@
 
   height: clamp(
     calc(var(--scene-min) * var(--u-w)),
-    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md)),
+    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md) - var(--slide-gap-bottom)),
     calc(var(--scene-max) * var(--u-w))
   );
 }
@@ -315,7 +322,11 @@
 
 /* The rules card is already on stage when the chat names it, so it gets a
    ring rather than a fade-in like the other two. */
-.hs__frag--fade { transition: opacity 0.35s ease; }
+.hs__frag--fade {
+  /* the chat lights these (--lit 0→1); they rise the last 40 units as they do */
+  translate: 0 calc(40 * var(--u) * (1 - var(--lit, 1)));
+  transition: opacity 0.35s ease, translate 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
 .hs__frag--ring { transition: box-shadow 0.35s ease; }
 .hs__frag--ring.is-lit {
   box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
@@ -1644,11 +1655,13 @@
        the first two steps. The step-2 numbers are Figma's own child
        coordinates, which are already frame-relative: checked against the
        exported card, where Pause starts at x≈91 / y≈62 inside 276×275. */
-    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0], o:0},
-                           {x:528.45, y:120.75, w:575.45, o:1},
+    /* The stack cards start exactly behind the front card (same box, lower
+       z) and slide out — no fade, the front card is what hides them. */
+    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0]},
+                           {x:528.45, y:120.75, w:575.45},
                            {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
-    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0], o:0},
-                           {x:492.35, y:162.45, w:646.7, o:1},
+    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0]},
+                           {x:492.35, y:162.45, w:646.7},
                            {x:55.844, y:97.707, w:553.746, d:[0,0,0]}],
     'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
                            {x:461,  y:208.76, w:709.65},
@@ -1658,15 +1671,16 @@
        is the chat's job, and the chat is not wired yet. */
     'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0]}, {}, {o:1}, {}, {o:0}],
     'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0]}, {}, {o:1}, {}, {o:0}],
-    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0,48]}, {}, {o:1}, {}, {x:103}],
+    'chat':               [{x:452, y:19+40, w:300, h:352, o:0, d:[0,56,0,48]}, {}, {y:19, o:1}, {}, {x:103}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
        the same 69, the folder by 75. */
-    'ads-collage':        [{x:723, y:2,      w:501.98, o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
-    'trigger':            [{x:434, y:95,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
-    'routine':            [{x:881, y:108,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
-    'folder':             [{x:986, y:287.32, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {o:1}]
+    /* Entrances start 40 units low and rise into place while they fade. */
+    'ads-collage':        [{x:723, y:2+40,      w:501.98, o:0, d:[0,69,0]}, {}, {}, {}, {y:2,      o:1}],
+    'trigger':            [{x:434, y:95+40,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {y:95,     o:1}],
+    'routine':            [{x:881, y:108+40,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {y:108,    o:1}],
+    'folder':             [{x:986, y:287.32+40, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {y:287.32, o:1}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
