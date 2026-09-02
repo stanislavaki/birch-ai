@@ -54,7 +54,7 @@ em, i, cite, .u-italic {
    <em> inside a 500-weight paragraph rendered heavier than its own text.
    Element selectors lose to any class rule, so classed links, buttons and
    headings keep the weight their class gives them. */
-em, i, cite, span, sub, sup, small, mark, code, abbr, dfn, q {
+em, i, cite, a, span, sub, sup, small, mark, code, abbr, dfn, q {
   font-weight: inherit;
 }
 
