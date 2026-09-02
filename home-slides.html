@@ -451,8 +451,37 @@
   transition: clip-path 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .hs__line.is-in { clip-path: inset(0 0 0 0); }
-.hs__phone { overflow: hidden; border-radius: calc(32 * var(--u)); }
+.hs__phone { overflow: hidden; border-radius: calc(32 * var(--u)); font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
 .hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
+.hs__phone > * { position: absolute; }
+/* everything inside the phone is measured in its own units off the screenshot */
+.hs__ph-msg { left: calc(14 * var(--u)); right: calc(14 * var(--u)); top: calc(70 * var(--u)); height: calc(180 * var(--u)); color: #1d1d1f; }
+.hs__ph-greet { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(14 * var(--u)); transition: opacity 0.25s ease; }
+.hs__ph-greet.is-gone { opacity: 0; }
+.hs__ph-star { width: calc(28 * var(--u)); height: auto; border-radius: 0; }
+.hs__ph-title { font-family: "PP Pangaia", "Times New Roman", serif; font-size: calc(15 * var(--u)); letter-spacing: -0.01em; text-align: center; }
+.hs__ph-q, .hs__ph-a { position: absolute; left: 0; right: 0; font-size: calc(11.5 * var(--u)); line-height: 1.35; opacity: 0; transition: opacity 0.25s ease, translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); translate: 0 calc(10 * var(--u)); }
+.hs__ph-q { top: 0; text-align: right; }
+.hs__ph-q span { display: inline-block; background: #ececea; border-radius: calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); max-width: 80%; text-align: left; }
+.hs__ph-a { top: calc(46 * var(--u)); }
+.hs__ph-q.is-in, .hs__ph-a.is-in { opacity: 1; translate: 0 0; }
+.hs__ph-typed { left: calc(12 * var(--u)); top: calc(261 * var(--u)); height: calc(19 * var(--u)); font-size: calc(13 * var(--u)); line-height: calc(19 * var(--u)); color: #1d1d1f; white-space: nowrap; }
+.hs__ph-caret { display: inline-block; width: calc(1.5 * var(--u)); height: calc(15 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
+@keyframes hs-caret { 50% { opacity: 0; } }
+.hs__ph-strip { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(32 * var(--u)); background: #e0e2e4; }
+/* keyboard layer: the same screenshot, clipped to the keyboard, so it can leave */
+.hs__ph-kb {
+  left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u));
+  background: url(images/slides/03/phone.webp) 0 calc(-300 * var(--u)) / 100% auto no-repeat;
+  transition: translate 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hs__ph-kb.is-down { translate: 0 calc(215 * var(--u)); }
+.hs__ph-keys { position: absolute; inset: 0; }
+.hs__ph-key { position: absolute; border-radius: calc(4 * var(--u)); background: rgba(0, 0, 0, 0); transition: background-color 0.09s ease, scale 0.09s ease; }
+.hs__ph-key.is-down { background: rgba(0, 0, 0, 0.14); scale: 0.94; }
+/* the send arrow lives on the base screenshot, at the input's right */
+.hs__ph-send { left: calc(214 * var(--u)); top: calc(282 * var(--u)); width: calc(16 * var(--u)); height: calc(16 * var(--u)); border-radius: 50%; background: rgba(255,255,255,0); transition: background-color 0.09s ease, scale 0.09s ease; }
+.hs__ph-send.is-down { background: rgba(255, 255, 255, 0.35); scale: 0.9; }
 
 /* ── Guides ───────────────────────────────────────────────── */
 .hs__guide {
@@ -1719,6 +1748,21 @@
           <div data-frag="mcp-line" class="hs__frag hs__frag--sized hs__line" style="--x:684; --y:189; --w:134; --h:2; z-index:19"></div>
           <div data-frag="phone" class="hs__frag hs__frag--sized hs__phone" style="--x:1300; --y:24; --w:242; --h:526; z-index:22">
             <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy" decoding="async">
+            <!-- message area: greeting first, then the exchange -->
+            <div class="hs__ph-msg" id="phMsg">
+              <div class="hs__ph-greet" id="phGreet">
+                <img class="hs__ph-star" src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
+                <div class="hs__ph-title">Where should we scale?</div>
+              </div>
+              <div class="hs__ph-q" id="phQ"></div>
+              <div class="hs__ph-a" id="phA"></div>
+            </div>
+            <!-- typed text in the input, with a caret -->
+            <div class="hs__ph-typed" id="phTyped"><span id="phTypedText"></span><span class="hs__ph-caret"></span></div>
+            <!-- the predictive strip is not part of this story -->
+            <div class="hs__ph-strip"></div>
+            <!-- keyboard: a clipped copy of the screenshot that can slide away, with tap plates on top -->
+            <div class="hs__ph-kb" id="phKb"><div class="hs__ph-keys" id="phKeys"></div></div>
           </div>
 
           <div class="hs__guide" data-label="364 — эталон"></div>
@@ -2103,6 +2147,7 @@
     });
 
     driveChat(a, local);
+    drivePhone(a, local);
 
     /* the rules frame counts as closed from 90% of its closing leg onward */
     var closing = FRAGS['rules-frame'];
@@ -2245,6 +2290,79 @@
     GATES.story = state >= 5 && litAt !== null && performance.now() - litAt >= 1700;
     if (elapsed < STORY[STORY.length - 1] + 2500) autoLive = true;         /* keep frames coming while it plays */
     if (!GATES.story) autoLive = true;                                      /* something may be waiting on the story */
+  }
+
+  /* ── Phone (slide 03) ────────────────────────────────────────
+     The screenshot stays; the message area, the typed text and the tap
+     plates are DOM laid over it. Key rectangles are measured off the
+     screenshot in its own units (242 wide): four rows, pitch ~31. */
+  var ph = {
+    greet: document.getElementById('phGreet'), q: document.getElementById('phQ'), a: document.getElementById('phA'),
+    typed: document.getElementById('phTypedText'), kb: document.getElementById('phKb'), keys: document.getElementById('phKeys'),
+    frag: card.querySelector('[data-frag="phone"]')
+  };
+  var KEYMAP = {};
+  (function buildKeys() {
+    if (!ph.keys) return;
+    var rows = [
+      { y: 35,  h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
+      { y: 66,  h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
+      { y: 98,  h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
+    ];
+    function add(ch, x, y, w, h) {
+      var k = document.createElement('div'); k.className = 'hs__ph-key';
+      k.style.left = 'calc(' + x + ' * var(--u))'; k.style.top = 'calc(' + y + ' * var(--u))';
+      k.style.width = 'calc(' + w + ' * var(--u))'; k.style.height = 'calc(' + h + ' * var(--u))';
+      ph.keys.appendChild(k); KEYMAP[ch] = k;
+    }
+    rows.forEach(function (r) { r.keys.split('').forEach(function (ch, i) { add(ch, r.x0 + i * r.pitch, r.y, r.w, r.h); }); });
+    add('shift', 12.1, 98, 25, 25); add('del', 204.9, 98, 25, 25);
+    add('123', 12.5, 129, 23.3, 25); add(' ', 67.5, 129, 107, 25); add('ret', 178.7, 129, 51, 25);
+    var send = document.createElement('div'); send.className = 'hs__ph-send'; ph.frag.appendChild(send); KEYMAP.send = send;
+  })();
+  function tap(ch, ms) {
+    var k = KEYMAP[ch]; if (!k) return;
+    k.classList.add('is-down'); setTimeout(function () { k.classList.remove('is-down'); }, ms || 90);
+  }
+  var PHQ = 'How did the weekly UGC launch go?';
+  var PHA = 'Weekly UGC launch — Q4. Ran Sunday 03:00 (your time). 6 ads live. No gaps found in your current setup.';
+  var phTimers = [], phState = -1;
+  function phStop() { phTimers.forEach(clearTimeout); phTimers = []; }
+  function phAt(ms, fn) { phTimers.push(setTimeout(fn, ms)); }
+  function phReset() {
+    phStop(); phState = -1;
+    ph.greet.classList.remove('is-gone'); ph.q.classList.remove('is-in'); ph.a.classList.remove('is-in');
+    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.kb.classList.remove('is-down');
+  }
+  function phPlay() {
+    if (phState === 1) return;
+    phReset(); phState = 1;
+    var t = 600, PER = 85;
+    PHQ.split('').forEach(function (ch, i) {
+      var lower = ch.toLowerCase(), upper = ch !== lower;
+      if (upper) phAt(t, function () { tap('shift', 110); });
+      if (ch === '?') phAt(t, function () { tap('123', 110); });
+      phAt(t + (upper ? 60 : 0), function () { tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1); });
+      t += PER + (ch === ' ' ? 40 : 0);
+    });
+    t += 350;
+    phAt(t, function () {
+      tap('send', 140);
+      ph.greet.classList.add('is-gone');
+      ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
+      ph.typed.textContent = ''; ph.kb.classList.add('is-down');
+    });
+    t += 700;
+    var words = PHA.split(' ');
+    words.forEach(function (w, i) {
+      phAt(t + i * 110, function () { ph.a.textContent = words.slice(0, i + 1).join(' '); ph.a.classList.add('is-in'); });
+    });
+  }
+  /* segment 5 is the phone's hold: play once it has arrived, reset when scrolled back before it */
+  var PHONE_SEG = 5;
+  function drivePhone(a, local) {
+    if (a < PHONE_SEG - 1 || (a === PHONE_SEG - 1 && local < 0.6)) { if (phState !== -1) phReset(); return; }
+    if (phState === -1) { phPlay(); }
   }
 
   addEventListener('scroll', apply, { passive: true });
