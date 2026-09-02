@@ -259,12 +259,14 @@
   background: var(--color-accent-blue);
   opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
 }
-.hs__frag--clip.is-closed .hs__rules-title { opacity: 1; translate: 0 0; }
+.hs__frag--clip.is-closed .hs__rules-title { opacity: 1; translate: 0 0; scale: 1; }
 .hs__rules-title {
-  /* snaps in the moment the frame has closed (class from the block script) */
+  /* snaps in the moment the frame has closed — 120 ms, reference rhythm */
   opacity: 0;
-  translate: 0 calc(12 * var(--u));
-  transition: opacity 0.15s ease-out, translate 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
+  translate: 0 calc(8 * var(--u));
+  scale: 0.96;
+  transform-origin: left top;
+  transition: opacity 0.12s steps(3, end), translate 0.12s cubic-bezier(0.2, 0, 0, 1), scale 0.12s cubic-bezier(0.2, 0, 0, 1);
   position: absolute;
   left: calc(21 * var(--u));
   top: calc(18 * var(--u));
@@ -322,8 +324,10 @@
   padding: 0.15em 0;
   color: #6b6b76;
   opacity: 0;
-  transform: translateY(0.4em);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0.94);
+  transform-origin: left center;
+  /* reference rhythm: a hard 120 ms step-in, no drift */
+  transition: opacity 0.12s steps(3, end), transform 0.12s cubic-bezier(0.2, 0, 0, 1);
 }
 .hs__tool.is-on { opacity: 1; transform: none; }
 .hs__tool::before {
@@ -1742,9 +1746,9 @@
        the juice card's spot (leg 1, dur), and the cards on top peel off it
        while the rise is still settling (leg 2, delay counted from arming).
        Juice is the bottom of the pile and arrives at its final angle. */
-    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, dur:800}, auto:{delay:800, dur:10}, arm:0.5}],
-    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, dur:800}, auto:{delay:1150, dur:750}, arm:0.5, ease:'out'}],
-    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, dur:800}, auto:{delay:900,  dur:750}, arm:0.5, ease:'out'}],
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, dur:800, rate:0.10}, auto:{delay:800, dur:10}, arm:0.5}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, dur:800, rate:0.10}, auto:{delay:1000, dur:750}, arm:0.5}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, dur:800, rate:0.10}, auto:{delay:750,  dur:750}, arm:0.5}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
     'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, e:[0.45,0.85], ease:'out'}]
@@ -1900,22 +1904,27 @@
           if (el2 < kb.auto.dur) autoLive = true;
         }
       } else if (kb.via && kb.via.dur) {
-        /* fully timed two-leg motion: armed at `arm` of the segment, leg 1
-           runs for via.dur, leg 2 starts at auto.delay from arming — the
-           two overlap, so the pile is still settling as the cards peel */
+        /* Timed two-leg flight driven by a lerp: the target is the pile
+           (via) from the moment the segment is armed, and the final spot
+           once auto.delay has passed; x, y and rotation chase the current
+           target exponentially (rate per frame at 60 fps). Velocity never
+           drops to zero between the legs, so rise and peel read as one
+           motion. Scrolling back re-parks the card instantly. */
         var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
-        if (!armedV) f.autoStart = null; else if (!f.autoStart) f.autoStart = performance.now();
-        var elV = armedV ? performance.now() - f.autoStart : 0;
-        var t1v = EASES.smooth(Math.min(1, Math.max(0, elV / kb.via.dur)));
-        var t2v = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, (elV - kb.auto.delay) / kb.auto.dur)));
-        var leg1v = t2v <= 0;
-        var fromV = leg1v ? ka : kb.via, toV = leg1v ? kb.via : kb;
-        st.setProperty('--x',  fromV.x !== undefined ? fromV.x : ka.x); st.setProperty('--y',  fromV.y !== undefined ? fromV.y : ka.y);
-        st.setProperty('--r',  fromV.r || 0);
-        st.setProperty('--x2', toV.x !== undefined ? toV.x : kb.x);    st.setProperty('--y2', toV.y !== undefined ? toV.y : kb.y);
-        st.setProperty('--r2', toV.r || 0);
-        tt = leg1v ? t1v : t2v;
-        if (armedV && elV < kb.auto.delay + kb.auto.dur) autoLive = true;
+        if (!armedV) { f.autoStart = null; f.lerp = null; }
+        else {
+          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, r: ka.r || 0, t: performance.now() }; }
+          var elV = performance.now() - f.autoStart;
+          var tgt = elV >= kb.auto.delay ? kb : kb.via;
+          var rate = kb.via.rate || 0.12, dtV = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
+          var kV = 1 - Math.pow(1 - rate, dtV);
+          f.lerp.x += (tgt.x - f.lerp.x) * kV; f.lerp.y += (tgt.y - f.lerp.y) * kV; f.lerp.r += ((tgt.r || 0) - f.lerp.r) * kV;
+          if (Math.abs(tgt.x - f.lerp.x) + Math.abs(tgt.y - f.lerp.y) + Math.abs((tgt.r || 0) - f.lerp.r) > 0.3 || elV < kb.auto.delay) autoLive = true;
+        }
+        var cur = f.lerp || { x: ka.x, y: ka.y, r: ka.r || 0 };
+        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r);
+        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r);
+        tt = 0;
       } else if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
            together); leg 2: via → final — on the keyframe's window, or on
@@ -2054,7 +2063,7 @@
      scroll starts it and may only hurry it, never hold it. Scrolling back
      before the chat resets it. */
   var CHAT_SEG = 2;
-  var STORY = [0, 600, 900, 1800, 2700, 3500];   /* ms at which each state begins */
+  var STORY = [0, 600, 950, 1900, 2850, 3800];   /* ms at which each state begins — 350 ms breath, then a step */
   var storyStart = null;
   function driveChat(a, local) {
     var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
