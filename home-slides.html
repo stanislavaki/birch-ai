@@ -1632,7 +1632,7 @@
                style="--x:881; --y:108; --w:271; z-index:18">
           <img data-frag="folder" class="hs__frag hs__frag--fade" src="images/slides/01/folder.webp"
                alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
-               style="--x:986; --y:287.32; --w:159.47; z-index:12">
+               style="--x:986; --y:264; --w:159.47; z-index:12">
 
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
@@ -1738,14 +1738,16 @@
        209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
        each unrotated box is placed on its bbox centre and rotated there.
        bboxes: juice 723/176, cherry 810/42, jar 957/2. */
-    /* A stack that fans out: the three arrive from the right as one pile
-       (via:), then spread to the Figma placement and freeze. */
-    'ad-1':               [{x:1350, y:120, w:209.24, r:-4, d:[0,69,0]}, {}, {}, {}, {x:739.3,  y:192.2, r:-9.74, via:{x:900, y:100, r:-4, e:[0.66,0.82]}, e:[0.82,0.96], ease:'out'}],
-    'ad-2':               [{x:1350, y:110, w:199.94, r:2,  d:[0,69,0]}, {}, {}, {}, {x:829.5,  y:56.4,  r:9.26,  via:{x:908, y:90,  r:2,  e:[0.66,0.82]}, e:[0.86,0.98], ease:'out'}],
-    'ad-3':               [{x:1350, y:100, w:199.94, r:6,  d:[0,69,0]}, {}, {}, {}, {x:991,    y:36,    r:26.39, via:{x:916, y:80,  r:6,  e:[0.66,0.82]}, e:[0.90,1.00], ease:'out'}],
+    /* A stack that fans out: the pile rises from under the canvas onto the
+       jar's final spot (the bottom card of the pile is the anchor and does
+       not travel further), then the cards on top peel off it in order —
+       juice first, cherry second — to their Figma placements. */
+    'ad-1':               [{x:991, y:640, w:209.24, r:-3, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:985, y:46, r:-3, e:[0.62,0.80]}, e:[0.82,0.96], ease:'out'}],
+    'ad-2':               [{x:991, y:640, w:199.94, r:3,  d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:988, y:41, r:3,  e:[0.62,0.80]}, e:[0.88,1.00], ease:'out'}],
+    'ad-3':               [{x:991, y:640, w:199.94, r:8,  d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:991, y:36, r:8,  e:[0.62,0.80]}, e:[0.90,1.00], ease:'out'}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
-    'folder':             [{x:986+400, y:287.32, w:159.47, d:[0,75,0]}, {}, {}, {}, {x:986, e:[0.45,0.85], ease:'out'}]
+    'folder':             [{x:986+400, y:264, w:159.47, d:[0,75,0]}, {}, {}, {}, {x:986, e:[0.45,0.85], ease:'out'}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
