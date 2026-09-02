@@ -77,7 +77,7 @@
   --text-h4-ls:   0em;
 
   --text-h5-size: 1.2rem;        /* 19.2px */
-  --text-h5-lh:   1.4;
+  --text-h5-lh:   1.2;           /* Birch/H5 in the Figma library is 1.2, not 1.4 */
   --text-h5-ls:   0em;
 
   --text-h6-size: 1rem;          /* 16px  */
@@ -107,6 +107,8 @@
   --text-btn-size: 1.5rem;       /* 24px  */
   --text-btn-lh:   1.0;
   --text-btn-ls:  -0.02em;
+
+  --text-btn-xs-size: 0.9rem;    /* 14.4px — in-card buttons */
 
   /* ---- Typography: Pill/chip text (word-pill hero compositions, e.g. ai-promo, manage) ---- */
   /* Fluid: scales with viewport, plateaus at 52px once the 1280px design width is reached */
@@ -142,6 +144,16 @@
   --pad-horizontal: 1.5rem; /* 24px desktop */
   --pad-card:       1.5rem; /* 24px — same across all breakpoints */
   --pad-gutter:     1.5rem; /* 24px desktop */
+
+  /* ---- Button sizes ----
+     Height is the only size knob: padding-inline and border-width are
+     derived from it in button.css (0.48h / 0.05h), calibrated so that
+     .btn-s keeps its current 48 / 5 rendering. Adding a size means
+     adding a height here and nothing else. */
+  --btn-h-xs: 2.5rem;   /*  40px — inside cards, in a text row */
+  --btn-h-s:  6.25rem;  /* 100px — page CTA */
+  --btn-h-m:  8.75rem;  /* 140px */
+  --btn-h-l:  10rem;    /* 160px — hero */
 
   /* ---- Border radius ---- */
   --radius-xs:   0.25rem;  /*  4px — Radius/Radius 4 */

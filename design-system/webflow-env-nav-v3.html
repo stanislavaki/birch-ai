@@ -1,0 +1,1043 @@
+<!--
+  WEBFLOW DEV ENVIRONMENT — NAVIGATION V3 (live copy)
+  Captured from https://bir.ch/ on 2026-09-02: the <nav class="nav-v3-root">
+  block verbatim (its own <style> and behaviour <script> included), plus the
+  44 skeleton rules the site stylesheet contributes and the Webflow runtime
+  classes it relies on. Two of the three embedded scripts are dropped: the
+  skip-to-main link (no <main> on dev pages) and blog search (no blog DOM).
+  Paste right after <body>. Pair with design-system/webflow-env.css, which
+  already sets --nav-height: 6.5em to match .nav-v3-root's 6.5rem.
+  Re-capture rather than edit: the source of truth is the Webflow component.
+-->
+<style>
+/* site variables the nav references, mapped onto the design-system tokens */
+:root {
+  --colors--text: var(--color-text);
+  --_color---secondary--neutral--mid-gray: var(--color-text-grey);
+  --_responsive---font-size--body: var(--text-body-size);
+}
+/* Webflow runtime classes used by the markup */
+.w-inline-block { max-width: 100%; display: inline-block; }
+.w-form { margin: 0; }
+.w-container, .w-layout-blockcontainer { max-width: 940px; margin-left: auto; margin-right: auto; }
+.w-layout-blockcontainer { display: block; }
+.w-embed { display: block; }
+/* skip link is visually hidden until focused, as on the live site */
+.nav-skip-link{z-index:9998;opacity:0;color:#fff;letter-spacing:.05em;text-transform:uppercase;background-color:#ffe243;border-radius:.5rem;height:3em;margin-top:-8em;padding:.8em 1.5em;font-size:.75rem;font-weight:500;line-height:1;text-decoration:none;transition:opacity .3s cubic-bezier(.165,.84,.44,1),margin .3s cubic-bezier(.165,.84,.44,1);position:absolute;inset:0% auto auto 50%;transform:translate(-50%)}
+/* skeleton rules from birch-testing.shared.*.min.css (selectors matching nav-v3|nav2|search-bl|cta-track) */
+.search-blog{width:100%;height:100%;color:var(--colors--text);font-family:Tt Commons Pro Variable,Arial,sans-serif;font-size:var(--_responsive---font-size--body);font-variation-settings:"wght" 600,"wdth" 100,"slnt" 0;background-color:#0000;border:0 solid #000;margin-bottom:0;padding:0;font-weight:600}
+.search-blog::placeholder{color:var(--_color---secondary--neutral--mid-gray);font-family:Tt Commons Pro Variable,Arial,sans-serif;font-size:var(--_responsive---font-size--body);font-weight:600}
+.nav2{z-index:1000}
+.nav2__pill{justify-content:space-between;align-items:center;display:flex;position:relative}
+.nav2__logo,.nav2__menu{align-items:center;display:flex}
+.nav2__link{cursor:pointer;align-items:center;display:flex;position:relative}
+.nav2__word{display:inline-block;position:relative}
+.nav2__dot{position:absolute}
+.nav2__right,.nav2__txtbtn{align-items:center;display:flex}
+.nav2__cta{justify-content:center;align-items:center;display:flex}
+.nav2__panel-wrap{position:absolute}
+.nav2__panel{flex-direction:column;display:flex;position:relative}
+.nav2__hoverplate{position:absolute}
+.nav2m{z-index:1000}
+.nav2m__blur{position:fixed}
+.nav2m__pill{justify-content:space-between;align-items:center;display:flex;position:relative}
+.nav2m__logo{align-items:center;display:flex}
+.nav2m__sheet{flex-direction:column;justify-content:space-between;display:flex;position:fixed}
+.nav2m__list{flex-grow:1;width:100%}
+.nav2m__item{position:relative}
+.nav2m__toprow{cursor:pointer;justify-content:space-between;align-items:center;display:flex}
+.nav2m__toprow-label{align-items:center;display:flex;position:relative}
+.nav2m__topdot{position:absolute}
+.nav2m__sub{position:relative}
+.nav2m__sub-inner{min-height:0;overflow:hidden}
+.nav2m__sub-list{position:relative}
+.nav2m__cta-block{flex-direction:column;display:flex}
+.nav2m__cta-row{display:flex}
+.nav2m__cta-btn,.nav2m__cta-main{justify-content:center;align-items:center;display:flex}
+.nav2__row{align-items:flex-start;display:flex;position:relative}
+.nav2__row-dot{position:absolute}
+.nav2__row-title{align-items:baseline;display:flex}
+.nav2__row-name{display:block}
+.nav2__new,.nav2__soon{display:inline-block}
+.nav2__row-desc{display:block}
+.nav2m__subrow{flex-direction:column;display:flex;position:relative}
+.nav2m__subdot{position:absolute}
+.nav2m__subrow-title{align-items:baseline;display:flex}
+.nav2m__subrow-name,.nav2m__subrow-desc{display:block}
+.nav2__customlogo,.nav2m__customlogo,.nav2m__pagetitle{display:none}
+.nav2__rows,.nav2m__subrows{flex-direction:column;display:flex}
+.nav-v3-root{width:100%;height:6.5rem}
+.nav2m__search{width:100%;padding-bottom:.75rem;padding-left:.625rem;padding-right:.625rem}
+@media screen and (max-width:767px){.search-blog{width:80%;display:none}.nav-v3-root{height:5.5rem}}
+</style>
+<nav aria-label="Main" data-cta-type="nav" class="nav-v3-root"><div class="nav-custom-js w-embed w-script"><!-- skip-to-main script omitted: dev pages have no <main> --></div><a id="skip-link" href="#main" class="nav-skip-link">Skip to Main Content</a><div class="nav-inner"><div data-nav-v3="1" class="nav-v3"><div class="w-embed"><style>
+/* ============================================================
+   NAVIGATION V3 - ported 1:1 from the dev prototype menu.html.
+   All nav styling lives HERE (single source of truth); the
+   nav2/nav2m classes on elements are hooks.
+   States toggled by JS: .is-open on .nav2__panel-wrap and
+   .nav2m, .is-searching on .nav2 / .nav2m, .is-expanded on
+   .nav2m__item, .is-active on links and rows,
+   .is-static/.is-disabled on Soon rows. Add these combo
+   classes by hand on the canvas to preview states.
+   ============================================================ */
+
+/* Site-wide nav height: desktop keeps the legacy 6.5em; mobile
+   scopes to 5.5em so sticky pins sit 12px below the pill. */
+:root { --nav-height: 6.5em; }
+@media (max-width: 767px) {
+  :root { --nav-height: 5.5em; }
+}
+
+.nav-v3 {
+  /* -- menu-local scale (Figma px / 16) -- */
+  --nav-pill-h: 5.75rem;           /* air 6 + pill 92 + air 6 = 6.5em */
+  --nav-pill-radius: 4.0625rem;
+  --nav-pill-top: 0.375rem;        /* top + pill = 6.5rem = --nav-height */
+  --nav-pill-inset: calc((var(--nav-pill-h) - var(--nav-cta-h)) / 2);
+  --nav-link-size: 0.9rem;         /* 14.4, matches the live nav links */
+  --nav-link-gap: 1.75rem;         /* 28, equals the Book demo/Log in gap */
+  --nav-dot: 0.375rem;
+  --nav-cta-h: 4.5rem;
+  --nav-panel-w: 30.75rem;
+  --nav-panel-pad: 0.5rem;
+  --nav-panel-radius: 1.25rem;     /* concentric: row 12 + pad 8 */
+  --nav-panel-gap: 0.5rem;
+  --nav-row-px: 1.5rem;
+  --nav-row-py: 1rem;
+  --nav-row-radius: 0.75rem;
+  --nav-row-title-w: 10.5rem;
+  /* Glass blur is pinned in px on purpose: the site's root font is
+     fluid (17.6px at 1440), so 1.875rem rendered as 33px here versus
+     30px in the prototype - a visibly softer, more diluted backdrop. */
+  --nav-blur: 30px;
+
+  /* -- themed colors (dark defaults) -- */
+  --nav-surface: rgba(63, 63, 63, 0.6);
+  --nav-text: #ffffff;
+  --nav-text-cta: #ffffff;
+  /* one hover token: submenu plate and Book demo/Log in share it */
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-yellow: #FFE243;
+  --nav-yellow-text: #1F1F1F;
+  --nav-indigo: #4450F2;
+  --nav-soon-bg: rgba(255, 255, 255, 0.14);
+  --nav-soon-text: rgba(255, 255, 255, 0.75);
+  /* dark pages: brightness lifts the glass off a dark backdrop */
+  --nav-glass: blur(var(--nav-blur)) saturate(0.8) brightness(1.15);
+
+  /* -- mobile sheet -- */
+  --nav-sheet-text: #ffffff;
+  --nav-sheet-line: rgba(255, 255, 255, 0.2);
+  --nav-sheet-row-hover: rgba(255, 255, 255, 0.1);
+  --nav-sheet-cta-bg: #3F3F3F;
+  --nav-sheet-cta-text: #ffffff;
+  --nav-card: #292929;
+  --nav-scrim: rgba(13, 13, 18, 0.6);
+}
+/* LIGHT PAGES. The color-mode prop writes its value into the class
+   attribute of the .nav-inner wrapper that holds this nav:
+     "inverted-bg" = light theme (site default, ~270 pages)
+     ""            = dark (12 product pages incl. home)
+     "white"/"blog" = legacy light values
+   so the theme arrives as an ANCESTOR class, not on .nav-v3 itself.
+   .nav-v3.is-light stays as the manual/dev toggle (?nav3theme=light).
+
+   NO brightness() in the light theme. It lightens the backdrop toward
+   white, and 0.4 lavender over white lands on ~#EDEDF3 - which is the
+   exact tone of the site's own light cards, so the pill and the panel
+   dissolve into the page (and on iOS the tint washed out entirely).
+   Without it the glass composites ~10 units darker than those cards and
+   reads as a separate surface, with the blur fully intact. */
+.nav-v3.is-light,
+.inverted-bg .nav-v3,
+.white .nav-v3,
+.blog .nav-v3 {
+  --nav-surface: rgba(211, 209, 224, 0.4);
+  --nav-glass: blur(var(--nav-blur)) saturate(0.8);
+  --nav-hover: rgba(255, 255, 255, 0.7);
+  --nav-soon-bg: rgba(0, 0, 0, 0.08);
+  --nav-soon-text: rgba(0, 0, 0, 0.55);
+  --nav-text: #000000;
+  --nav-text-cta: #000000;
+  --nav-sheet-text: #000000;
+  --nav-sheet-line: rgba(0, 0, 0, 0.15);
+  --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+  --nav-sheet-cta-bg: #DBDAE2;
+  --nav-sheet-cta-text: #0D0D12;
+  --nav-card: #ffffff;
+  --nav-scrim: rgba(13, 13, 18, 0.3);
+}
+
+/* ============ DESKTOP PILL HEADER ============ */
+.nav2 {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  color: var(--nav-text);
+}
+.nav2 * { box-sizing: border-box; }
+.nav2 a { text-decoration: none; color: inherit; }
+
+.nav2__pill {
+  position: relative;
+  margin: var(--nav-pill-top) auto 0;
+  /* container content width (min(100vw, 80rem) - gutters) + inset frame */
+  width: calc(min(100vw, 80rem) - 3rem + 2 * var(--nav-pill-inset));
+  height: var(--nav-pill-h);
+  border-radius: var(--nav-pill-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: var(--nav-glass);
+  backdrop-filter: var(--nav-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* logo and CTA land exactly on the container grid */
+  padding: 0 var(--nav-pill-inset);
+}
+
+.nav2__logo {
+  display: flex; align-items: center;
+  height: 2.25rem;
+  margin-top: -0.1875rem;
+  margin-left: calc((var(--nav-pill-h) - 2.25rem) / 2 - var(--nav-pill-inset));
+  color: var(--nav-text);
+  flex: none;
+}
+/* Webflow wraps embeds in .w-embed; keep the height chain intact */
+.nav2__logo .w-embed, .nav2m__logo .w-embed { height: 100%; display: flex; align-items: center; }
+.nav2__logo svg { height: 100%; width: auto; display: block; }
+
+/* ---- blog search, desktop (Figma blog-layout 525-1043 / 525-1309):
+   a compact field always sits next to the logo; focusing it expands the
+   field across the pill and steps the centered menu and the CTA group
+   aside. Bound to the "Search field" prop, so it exists only on the blog.
+   The bar is the ONLY visual container - the legacy field chrome inside
+   (its own white box and stroke) is flattened, so there is one wrapper,
+   not three.
+   TRANSITION notes, both learned the hard way:
+   - every property that changes is in the transition list, and both
+     states are explicit interpolatable lengths. Animating width to
+     `auto` while the height animated made the field visibly jump.
+   - shrink stays enabled (flex 0 1 auto) because the expanded width is
+     100% of the pill's content box, which overflows by the logo width;
+     flexbox shrinks it back to the free space, so the animation reaches
+     its visual end slightly before the timeline does.
+   - margin-right:auto stays in BOTH states: it keeps the compact field
+     hugging the logo, and during the expansion it soaks up the shrinking
+     free space. Dropping it mid-transition hands that space to
+     space-between, which shoves the growing field to the right. */
+.nav2__searchbar {
+  display: flex;
+  flex: 0 1 auto;
+  width: 15.625rem;                /* 250 per mock */
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;                 /* 44 per mock */
+  margin-left: 1.5rem;
+  margin-right: auto;
+  padding: 0 0.75rem 0 1rem;
+  border-radius: 0.75rem;
+  background: var(--nav-card);
+  transition: width 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              height 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              padding 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              border-radius 260ms ease;
+}
+.nav2.is-searching .nav2__searchbar {
+  width: 100%;
+  height: var(--nav-cta-h);
+  /* the close button keeps the same inset all around it:
+     (bar height - button height) / 2 */
+  padding: 0 calc((var(--nav-cta-h) - 2.5rem) / 2) 0 1.5rem;
+  border-radius: calc(var(--nav-cta-h) / 2);
+}
+.nav2.is-searching .nav2__menu,
+.nav2.is-searching .nav2__right { display: none; }
+/* flatten the legacy field chrome so the bar is the only visible box */
+.nav2__searchbar .search-form-block,
+.nav2__searchbar .search-form,
+.nav2__searchbar .search-flex,
+.nav2__searchbar .search-blog {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+.nav2__searchbar .search-form-block { flex: 1; min-width: 0; max-width: none; }
+.nav2__searchbar .w-form, .nav2__searchbar .search-form, .nav2__searchbar .search-flex { width: 100%; }
+.nav2__searchbar .search-blog {
+  display: block;
+  width: 100%; max-width: none;
+  height: 2.5rem;
+  font-size: 1rem; color: var(--nav-sheet-text);
+}
+.nav2__searchbar .search-blog::placeholder { color: var(--nav-sheet-text); opacity: 0.45; }
+/* the legacy magnifier/cross images are replaced by our own close button */
+.nav2__searchbar .search-icon, .nav2__searchbar .search-close { display: none; }
+.nav2__searchclose {
+  display: none;
+  flex: none;
+  width: 2.5rem; height: 2.5rem;
+  border: none; border-radius: 0.625rem;
+  padding: 0;
+  background: var(--nav-sheet-cta-bg);
+  color: var(--nav-sheet-cta-text);
+  align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.nav2.is-searching .nav2__searchclose { display: flex; }
+.nav2__searchclose .w-embed { display: flex; }
+.nav2__searchclose svg { width: 1rem; height: 1rem; display: block; }
+
+/* -- center links -- */
+.nav2__menu {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: var(--nav-link-gap);
+}
+.nav2__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  background: none; border: none; color: inherit; font-family: inherit;
+  max-width: none;
+}
+.nav2__word { position: relative; display: inline-block; }
+.nav2__dot {
+  /* below the word itself, not the link box */
+  position: absolute;
+  left: 50%; top: calc(100% + 0.375rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.5);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.nav2__link:hover .nav2__dot,
+.nav2__link.is-active .nav2__dot { opacity: 1; transform: translateX(-50%) scale(1); }
+
+.nav2__chev { display: block; width: 0.625rem; height: 0.625rem; transition: transform 200ms ease; }
+.nav2__link[aria-expanded="true"] .nav2__chev { transform: rotate(180deg); }
+
+/* "New" badge - submenu rows only */
+.nav2__new {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.08rem 0.2rem 0.13rem;
+  border-radius: 0.2rem;
+  background: var(--nav-yellow);
+  color: #0D0D12;
+  rotate: -18deg;
+}
+.nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+/* "Soon" chip: New tag twin in muted colors */
+.nav2__soon {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.1rem 0.25rem 0.16rem;
+  border-radius: 0.25rem;
+  background: var(--nav-soon-bg);
+  color: var(--nav-soon-text);
+  rotate: -18deg;
+  translate: 0.125rem -0.35em;
+  white-space: nowrap;
+}
+/* cancel the tags' baseline overhang so tagged rows equal plain rows */
+.nav2__row-title .nav2__new, .nav2__row-title .nav2__soon,
+.nav2m__subrow-title .nav2__new, .nav2m__subrow-title .nav2__soon { margin-bottom: -0.35em; }
+
+/* disabled (Soon) row: dimmed, inert */
+.nav2__row.is-disabled, .nav2m__subrow.is-disabled { pointer-events: none; }
+.nav2__row.is-disabled .nav2__row-title { opacity: 0.45; }
+.nav2__row.is-disabled .nav2__row-desc { opacity: 0.3; }
+.nav2m__subrow.is-disabled .nav2m__subrow-title { opacity: 0.45; }
+.nav2m__subrow.is-disabled .nav2m__subrow-desc { opacity: 0.3; }
+
+/* -- right CTA group -- */
+.nav2__right { display: flex; align-items: center; gap: 0; flex: none; }
+.nav2__right .nav2__cta { margin-left: 0.5rem; }
+.nav2__txtbtn {
+  display: flex; align-items: center;
+  height: var(--nav-cta-h);
+  padding: 0 0.875rem;             /* plates flush: text gap 28, like menu */
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--nav-text-cta);
+  border-radius: 1rem;
+  transition: background-color 150ms ease;
+  white-space: nowrap;
+}
+.nav2__txtbtn:hover { background: var(--nav-hover); }
+.nav2__cta {
+  display: flex; align-items: center; justify-content: center;
+  height: var(--nav-cta-h);
+  padding: 0 2rem;
+  border-radius: calc(var(--nav-cta-h) / 2);
+  background: var(--nav-yellow);
+  color: #000000;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.nav2 a.nav2__cta { color: #000000; }  /* outweigh .nav2 a inherit */
+.nav2 a.nav2__cta:hover { background: var(--nav-indigo); color: #ffffff; }
+.nav2__cta:hover { background: var(--nav-indigo); }
+
+@media (max-width: 1099px) {
+  .nav2__menu { gap: 1rem; }
+  .nav2__searchbar { width: 11rem; margin-left: 1rem; }
+}
+/* tablet: tighten so the centered menu and CTAs never collide */
+@media (max-width: 991px) {
+  .nav2__right { gap: 0.25rem; }
+  .nav2__txtbtn { padding: 0 0.625rem; }
+  .nav2__cta { padding: 0 1.25rem; }
+  .nav2__menu { gap: 0.75rem; }
+  .nav2__searchbar { width: 8.5rem; margin-left: 0.75rem; }
+}
+
+/* ============ desktop dropdown panel ============
+   The wrap lives OUTSIDE the pill: an ancestor with
+   backdrop-filter would become the backdrop root and the
+   panel's own blur would stop seeing the page (Chrome). */
+.nav2__panel-wrap {
+  position: absolute;
+  top: calc(var(--nav-pill-top) + var(--nav-pill-h));
+  left: 0;
+  /* hover bridge over the pill-panel gap */
+  padding-top: var(--nav-panel-gap);
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 180ms;
+}
+.nav2__panel-wrap.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transition: none;
+}
+.nav2__panel-wrap .nav2__panel {
+  opacity: 0;
+  translate: 0 -0.5rem;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+.nav2__panel-wrap.is-open .nav2__panel {
+  opacity: 1;
+  translate: 0 0;
+}
+.nav2__panel {
+  position: relative;
+  width: var(--nav-panel-w);
+  padding: var(--nav-panel-pad);
+  border-radius: var(--nav-panel-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: var(--nav-glass);
+  backdrop-filter: var(--nav-glass);
+  display: flex;
+  flex-direction: column;
+}
+.nav2__rows { display: flex; flex-direction: column; }
+.nav2__row {
+  position: relative;
+  display: flex;
+  gap: 1.1875rem;
+  align-items: flex-start;
+  padding: var(--nav-row-py) var(--nav-row-px);
+  border-radius: var(--nav-row-radius);
+}
+/* hover plate: one element sliding between rows */
+.nav2__hoverplate {
+  position: absolute;
+  left: var(--nav-panel-pad);
+  right: var(--nav-panel-pad);
+  top: 0; height: 0;
+  border-radius: var(--nav-row-radius);
+  background: var(--nav-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: top 320ms cubic-bezier(0.22, 0.9, 0.24, 1), height 320ms cubic-bezier(0.22, 0.9, 0.24, 1), opacity 200ms ease;
+  z-index: 0;
+}
+.nav2__hoverplate.is-jump { transition: opacity 150ms ease; }
+.nav2__row:hover .nav2__row-desc { opacity: 1; }
+.nav2__row.is-static { cursor: default; }
+.nav2__row.is-static:hover { background: none; }
+.nav2__row.is-static:hover .nav2__row-desc { opacity: 0.5; }
+.nav2__row-title {
+  flex: none;
+  width: var(--nav-row-title-w);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  display: flex; align-items: baseline; gap: 0.2rem;
+}
+.nav2__row-desc {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+}
+.nav2__row-dot {
+  position: absolute;
+  left: 0.8125rem;
+  top: calc(var(--nav-row-py) + 0.3125rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+.nav2__row.is-active .nav2__row-dot { opacity: 1; }
+
+/* ============ MOBILE (max 767): pill header + sheet ============ */
+.nav2m { display: none; }
+
+@media (max-width: 767px) {
+  .nav2 { display: none; }
+  .nav2m {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+  }
+  .nav2m * { box-sizing: border-box; }
+  .nav2m a { text-decoration: none; color: inherit; }
+
+  .nav2m__pill {
+    position: relative;
+    z-index: 20;
+    margin: 0.75rem;                 /* 12 all around */
+    height: 4rem;                    /* 64 */
+    border-radius: 4.0625rem;
+    background: var(--nav-surface);
+    -webkit-backdrop-filter: var(--nav-glass);
+    backdrop-filter: var(--nav-glass);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.6875rem 0 1.3125rem;  /* 11 / 21 per mock */
+    color: var(--nav-text);
+    transition: background-color 300ms ease;
+  }
+  .nav2m__logo { display: flex; align-items: center; height: 1.625rem; margin-top: -0.125rem; color: var(--nav-text); flex: none; }
+  .nav2m__logo svg { height: 100%; width: auto; display: block; }
+
+  /* open: adopt the card color (edges already aligned) */
+  .nav2m.is-open .nav2m__pill { background: var(--nav-card); }
+
+  .nav2m__burger {
+    width: 2.625rem; height: 2.625rem;   /* 42 */
+    border: none; border-radius: 50%;
+    background: var(--nav-yellow);
+    color: var(--nav-yellow-text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+  }
+  .nav2m__burger .w-embed { display: flex; align-items: center; justify-content: center; }
+  .nav2m__burger svg { width: 0.9375rem; height: 0.9375rem; display: block; }
+  /* closed: vertical pairs collapse into one middle row = 2 dots */
+  .nav2m__burger circle { transition: transform 250ms ease; }
+  .nav2m__burger circle:nth-of-type(1), .nav2m__burger circle:nth-of-type(2) { transform: translateY(3.5px); }
+  .nav2m__burger circle:nth-of-type(3), .nav2m__burger circle:nth-of-type(4) { transform: translateY(-3.5px); }
+  .nav2m__burger[aria-expanded="true"] circle { transform: translateY(0); }
+
+  /* ---- blog search in the mobile pill: magnifier that expands a field
+     over the pill, per Figma blog-layout 541-3465 / 541-3752 ---- */
+  .nav2m__searchbtn {
+    width: 2.625rem; height: 2.625rem;
+    margin-left: auto; margin-right: 0.5rem;
+    border: none; border-radius: 50%;
+    background: transparent;
+    color: var(--nav-text);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; cursor: pointer;
+    flex: none;
+  }
+  .nav2m__searchbtn .w-embed { display: flex; }
+  .nav2m__searchbtn svg { width: 1.25rem; height: 1.25rem; display: block; }
+
+  .nav2m__searchbar {
+    position: absolute;
+    left: 0.625rem;
+    right: 3.5rem;                   /* burger stays visible to the right */
+    top: 0.5rem; bottom: 0.5rem;
+    display: none;
+    flex: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+    align-items: center;
+    gap: 0.25rem;
+    /* same inset all around the close button: (bar height - button) / 2 */
+    padding: 0 0.5rem 0 1rem;
+    border-radius: 4.0625rem;
+    background: var(--nav-card);
+    transition: none;
+  }
+  .nav2m.is-searching .nav2m__searchbar { display: flex; }
+  .nav2m.is-searching .nav2m__searchbtn { visibility: hidden; }
+  .nav2m__searchbar .search-blog {
+    display: block;
+    flex: 1; min-width: 0;
+    width: auto; max-width: none; margin: 0;
+    height: 2.25rem; padding: 0;
+    border: none; background: transparent; box-shadow: none;
+    font-size: 1rem; color: var(--nav-sheet-text);
+  }
+  .nav2m__searchbar .search-blog::placeholder { color: var(--nav-sheet-text); opacity: 0.45; }
+  .nav2m__searchclose {
+    display: flex;
+    flex: none;
+    width: 2rem; height: 2rem;
+    border: none; border-radius: 50%; padding: 0;
+    background: var(--nav-sheet-cta-bg);
+    color: var(--nav-sheet-cta-text);
+    align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .nav2m__searchclose .w-embed { display: flex; }
+  .nav2m__searchclose svg { width: 0.875rem; height: 0.875rem; display: block; }
+
+  /* full-page scrim behind the sheet */
+  .nav2m__blur {
+    position: fixed; inset: 0;
+    z-index: 5;
+    background: var(--nav-scrim);
+    -webkit-backdrop-filter: blur(0.75rem);
+    backdrop-filter: blur(0.75rem);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__blur {
+    opacity: 1; visibility: visible;
+    transition: opacity 200ms ease;
+  }
+
+  /* the open menu: opaque card, flies in from the bottom */
+  .nav2m__sheet {
+    position: fixed;
+    top: 5.25rem;                    /* pill (12+64) + 8 gap */
+    left: 0.75rem; right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 10;
+    border-radius: 2.25rem;          /* 36 */
+    background: var(--nav-card);
+    color: var(--nav-sheet-text);
+    padding: 1rem 0.75rem 0.75rem;   /* 16 / 12 / 12 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    translate: 0 110%;
+    visibility: hidden;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1),
+                visibility 0s linear 400ms;
+  }
+  .nav2m.is-open .nav2m__sheet {
+    translate: 0 0;
+    visibility: visible;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .nav2m__list { width: 100%; padding: 0 0.625rem; }
+
+  /* top-level row */
+  .nav2m__item { border-bottom: 1px solid var(--nav-sheet-line); }
+  .nav2m__toprow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.75rem 0.75rem 1rem;   /* 10 / 12 / 12 / 16 */
+    background: none; border: none; color: inherit; font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    max-width: none;
+  }
+  .nav2m__subrow-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+  .nav2m__toprow-label {
+    position: relative;
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 1.5rem;               /* 24 */
+    font-weight: 600;
+    letter-spacing: 0em;
+    line-height: 1;
+  }
+  .nav2m__topdot {
+    position: absolute;
+    left: -0.625rem; top: 50%;
+    translate: 0 -50%;
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__item.is-active .nav2m__topdot { opacity: 1; }
+  /* collapsed: chevron points right; expanded: down */
+  .nav2m__chev { width: 0.875rem; height: 0.875rem; transform: rotate(-90deg); transition: transform 250ms ease; flex: none; }
+  .nav2m__toprow[aria-expanded="true"] .nav2m__chev { transform: rotate(0deg); }
+
+  /* collapsible submenu: grid-rows trick animates height */
+  .nav2m__sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    grid-template-columns: 1fr;
+    transition: grid-template-rows 280ms ease;
+  }
+  .nav2m__item.is-expanded .nav2m__sub { grid-template-rows: 1fr; }
+  .nav2m__sub-inner { overflow: hidden; min-height: 0; }
+  .nav2m__sub-list { padding-bottom: 0.75rem; }
+  .nav2m__subrows { display: flex; flex-direction: column; }
+
+  .nav2m__subrow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;            /* 8 / 16 */
+    border-radius: 0.75rem;
+  }
+  .nav2m__subrow:active { background: var(--nav-sheet-row-hover); }
+  .nav2m__subrow:active .nav2m__subrow-desc { opacity: 1; }
+  .nav2m__subrow.is-static { cursor: default; }
+  .nav2m__subrow.is-static:active { background: none; }
+  .nav2m__subrow-title {
+    display: flex; align-items: baseline; gap: 0.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;    /* 16px tier */
+    line-height: 1;
+  }
+  .nav2m__subrow-desc {
+    font-size: 0.75rem;              /* 12 */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    opacity: 0.5;
+  }
+  .nav2m__subdot {
+    position: absolute;
+    left: 0.4375rem; top: 0.75rem;   /* 7 / 12 */
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__subrow.is-active .nav2m__subdot { opacity: 1; }
+
+  /* bottom CTA block: 8px between buttons, 12px to card edges */
+  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem; flex: none; }
+  .nav2m__cta-row { display: flex; gap: 0.5rem; }
+  .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
+  .nav2m__cta-btn, .nav2m a.nav2m__cta-btn,
+  .nav2m__cta-main, .nav2m a.nav2m__cta-main {
+    display: flex; align-items: center; justify-content: center;
+    height: 3.5rem;                  /* 56 */
+    border-radius: 1.75rem;
+    background: var(--nav-sheet-cta-bg);
+    color: var(--nav-sheet-cta-text);
+    font-size: 1.5rem;               /* 24, same as top-level items */
+    font-weight: 600;
+    letter-spacing: 0em;
+    /* optical: cap-height band centered in the pill */
+    padding-bottom: 0.0625rem;
+    max-width: none;
+  }
+  /* the yellow Get started (own class instead of a combo) */
+  .nav2m__cta-main, .nav2m a.nav2m__cta-main { background: var(--nav-yellow); color: #000000; }
+}
+
+/* burger goes neutral while the menu is open */
+.nav-v3 .nav2m__burger { transition: background-color 300ms ease; }
+.nav-v3 .nav2m.is-open .nav2m__burger { background: #ffffff; }
+.nav-v3.is-light .nav2m.is-open .nav2m__burger,
+.inverted-bg .nav-v3 .nav2m.is-open .nav2m__burger,
+.white .nav-v3 .nav2m.is-open .nav2m__burger,
+.blog .nav-v3 .nav2m.is-open .nav2m__burger { background: #DBDAE2; }
+
+/* reduced motion: no movement, opacity only */
+@media (prefers-reduced-motion: reduce) {
+  .nav2__hoverplate { transition: opacity 150ms ease; }
+  .nav2__searchbar { transition: none; }
+  .nav2__panel-wrap .nav2__panel { translate: 0 0; transition-property: opacity; }
+  .nav2m__sheet {
+    translate: 0 0; border-radius: 0;
+    opacity: 0;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__sheet { opacity: 1; transition: opacity 200ms ease; }
+  .nav2m__sub { transition: none; }
+  .nav2__chev, .nav2m__chev, .nav2m__burger svg { transition: none; }
+}
+</style></div><div class="nav2"><div class="nav2__pill"><a href="/" aria-label="Home" aria-current="page" class="nav2__logo w--current"><div class="w-embed"><svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/><path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/><path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/><path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/><path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/><path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/></svg></div></a><div class="nav2__menu"><a role="button" aria-haspopup="true" aria-expanded="false" data-panel="product" tabindex="0" href="#" class="nav2__link"><span class="nav2__word">Product<span class="nav2__dot"></span></span><div class="w-embed"><svg class="nav2__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><a role="button" aria-haspopup="true" aria-expanded="false" data-panel="ai" tabindex="0" href="#" class="nav2__link"><span class="nav2__word">AI<span class="nav2__dot"></span></span><div class="w-embed"><svg class="nav2__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><a href="/case-studies" data-match-prefix="/case-studies" class="nav2__link"><span class="nav2__word">Cases<span class="nav2__dot"></span></span></a><a href="/blog" data-match-prefix="/blog" class="nav2__link"><span class="nav2__word">Blog<span class="nav2__dot"></span></span></a><a href="/pricing" class="nav2__link"><span class="nav2__word">Pricing<span class="nav2__dot"></span></span></a></div><div class="nav2__right"><a href="/demo" data-cta-type="nav-book-demo" class="nav2__txtbtn cta-track">Book demo</a><a href="https://app.bir.ch/login" class="nav2__txtbtn">Log in</a><a href="https://app.bir.ch/signup" data-cta-type="nav-sign-up" class="nav2__cta cta-track">Get started</a></div></div><div data-panel-for="product" class="nav2__panel-wrap"><div class="nav2__panel"><span class="nav2__hoverplate"></span><div class="nav2__rows"><a href="/manage" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Rules</div></div><div class="nav2__row-desc">Manage ads at scale with condition-based rules</div></a><a href="/stage" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Stage</div></div><div class="nav2__row-desc">Create ads from Drive media by duplicating your setups</div></a><a href="/explorer" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Explorer</div></div><div class="nav2__row-desc">Track ad performance, spot fatigue, find top assets</div></a><a href="/hub" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Hub</div></div><div class="nav2__row-desc">Set up server-side tracking for Meta</div></a><a href="/features" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">All features</div></div><div class="nav2__row-desc">Learn about full product functionality</div></a></div></div></div><div data-panel-for="ai" class="nav2__panel-wrap"><div class="nav2__panel"><span class="nav2__hoverplate"></span><div class="nav2__rows"><a href="/ai" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Bïrch AI</div></div><div class="nav2__row-desc">Scale your ad ops with an AI layer across your workflows</div></a><a href="/mcp" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Bïrch MCP</div><div class="nav2__new">New</div></div><div class="nav2__row-desc">Connect Birch to your AI tool</div></a><a href="/how-to-choose-birch-ai-tools" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Prompting guide</div></div><div class="nav2__row-desc">Learn to use Birch AI, Meta MCP and Birch MCP</div></a><a data-cta-type="nav-submenu" href="#" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Routines</div><div class="nav2__soon">Soon</div></div><div class="nav2__row-desc">Schedule repeated workflows</div></a></div></div></div></div><div class="nav2m"><div data-nav2m-close="1" class="nav2m__blur"></div><div class="nav2m__pill"><a href="/" aria-label="Home" aria-current="page" class="nav2m__logo w--current"><div class="w-embed"><svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/><path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/><path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/><path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/><path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/><path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/></svg></div></a><button aria-label="Menu" aria-expanded="false" class="nav2m__burger"><div class="w-embed"><svg viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/><circle cx="11" cy="4" r="3"/><circle cx="4" cy="11" r="3"/><circle cx="11" cy="11" r="3"/></svg></div></button><p class="nav2m__pagetitle"></p></div><div class="nav2m__sheet"><div class="nav2m__list"><div data-group="product" class="nav2m__item"><a role="button" aria-expanded="false" tabindex="0" href="#" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Product</span><div class="w-embed"><svg class="nav2m__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><div class="nav2m__sub"><div class="nav2m__sub-inner"><div class="nav2m__sub-list"><div class="nav2m__subrows"><a href="/manage" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Rules</div></div><div class="nav2m__subrow-desc">Manage ads at scale with condition-based rules</div></a><a href="/stage" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Stage</div></div><div class="nav2m__subrow-desc">Create ads from Drive media by duplicating your setups</div></a><a href="/explorer" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Explorer</div></div><div class="nav2m__subrow-desc">Track ad performance, spot fatigue, find top assets</div></a><a href="/hub" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Hub</div></div><div class="nav2m__subrow-desc">Set up server-side tracking for Meta</div></a><a href="/features" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">All features</div></div><div class="nav2m__subrow-desc">Learn about full product functionality</div></a></div></div></div></div></div><div data-group="ai" class="nav2m__item"><a role="button" aria-expanded="false" tabindex="0" href="#" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>AI</span><div class="w-embed"><svg class="nav2m__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><div class="nav2m__sub"><div class="nav2m__sub-inner"><div class="nav2m__sub-list"><div class="nav2m__subrows"><a href="/ai" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Bïrch AI</div></div><div class="nav2m__subrow-desc">Scale your ad ops with an AI layer across your workflows</div></a><a href="/mcp" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Bïrch MCP</div><div class="nav2__new">New</div></div><div class="nav2m__subrow-desc">Connect Birch to your AI tool</div></a><a href="/how-to-choose-birch-ai-tools" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Prompting guide</div></div><div class="nav2m__subrow-desc">Learn to use Birch AI, Meta MCP and Birch MCP</div></a><a data-cta-type="nav-submenu-mobile" href="#" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Routines</div><div class="nav2__soon">Soon</div></div><div class="nav2m__subrow-desc">Schedule repeated workflows</div></a></div></div></div></div></div><div class="nav2m__item"><a href="/case-studies" data-match-prefix="/case-studies" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Cases</span></a></div><div class="nav2m__item"><a href="/blog" data-match-prefix="/blog" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Blog</span></a></div><div class="nav2m__item"><a href="/pricing" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Pricing</span></a></div></div><div class="nav2m__cta-block"><div class="nav2m__cta-row"><a data-cta-type="nav-book-demo-mobile" href="/demo" class="nav2m__cta-btn cta-track">Book demo</a><a href="https://app.bir.ch/login" class="nav2m__cta-btn">Log in</a></div><a href="https://app.bir.ch/signup" data-cta-type="nav-sign-up-mobile" class="nav2m__cta-main cta-track">Get started</a></div></div></div><div class="w-embed w-script"><script>
+/* NAVIGATION V3 - behavior, ported from the dev prototype menu.html.
+   Wires: hover-intent panels, sliding hover plate, mobile sheet with
+   accordion, Soon-row disabling and active-page matching.
+   The blog-search hero collapse lives in its own embed right after this
+   one - it has to be delegated on document, because this script runs
+   while the page body is still being parsed.
+   NOTE: Webflow renders links without a URL as href="#", so group
+   triggers are detected by role="button", not by a missing href.
+   Dev params: ?nav3theme=light forces the light theme,
+   ?nav3active=/features simulates the active page for review. */
+(function () {
+  var root = document.querySelector('.nav-v3');
+  if (!root || root.hasAttribute('data-nav3-ready')) return;
+  root.setAttribute('data-nav3-ready', '');
+
+  function norm(u) {
+    if (!u || u === '#') return '';
+    u = u.split('?')[0].split('#')[0];
+    return u.replace(/\/+$/, '') || '/';
+  }
+  function rowUrl(row) { return norm(row.getAttribute('href')); }
+  function isTrigger(a) { return a && a.getAttribute('role') === 'button'; }
+
+  var PATH = location.pathname.replace(/\/+$/, '') || '/';
+  /* dev helpers: theme + simulated active page */
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('nav3theme') === 'light') root.classList.add('is-light');
+    var fake = norm(q.get('nav3active'));
+    if (fake) PATH = fake;
+  } catch (e) {}
+
+  /* Soon rows: a visible Soon chip means the row is disabled */
+  root.querySelectorAll('.nav2__row, .nav2m__subrow').forEach(function (row) {
+    if (row.querySelector('.nav2__soon')) {
+      row.classList.add('is-static', 'is-disabled');
+      row.removeAttribute('href');
+      row.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  /* ---------- active state ---------- */
+  root.querySelectorAll('.nav2__row, .nav2m__subrow').forEach(function (row) {
+    var u = rowUrl(row);
+    if (u && u === PATH) {
+      row.classList.add('is-active');
+      row.setAttribute('aria-current', 'page');
+    }
+  });
+  root.querySelectorAll('.nav2__link').forEach(function (link) {
+    var active = false;
+    var key = link.getAttribute('data-panel');
+    if (key) {
+      var wrap = root.querySelector('.nav2__panel-wrap[data-panel-for="' + key + '"]');
+      if (wrap) wrap.querySelectorAll('.nav2__row').forEach(function (row) {
+        var u = rowUrl(row);
+        if (u && u === PATH) active = true;
+      });
+    } else {
+      var prefix = link.getAttribute('data-match-prefix');
+      if (prefix) active = PATH.indexOf(prefix) === 0;
+      else active = norm(link.getAttribute('href')) === PATH;
+      if (active) link.setAttribute('aria-current', 'page');
+    }
+    link.classList.toggle('is-active', active);
+  });
+  root.querySelectorAll('.nav2m__item').forEach(function (item) {
+    var active = false;
+    var a = item.querySelector('.nav2m__toprow');
+    if (item.getAttribute('data-group')) {
+      item.querySelectorAll('.nav2m__subrow').forEach(function (row) {
+        var u = rowUrl(row);
+        if (u && u === PATH) active = true;
+      });
+    } else if (a) {
+      var prefix = a.getAttribute('data-match-prefix');
+      if (prefix) active = PATH.indexOf(prefix) === 0;
+      else active = norm(a.getAttribute('href')) === PATH;
+      if (active) a.setAttribute('aria-current', 'page');
+    }
+    item.classList.toggle('is-active', active);
+  });
+
+  /* ---------- desktop panels ---------- */
+  (function () {
+    var pill = root.querySelector('.nav2__pill');
+    if (!pill) return;
+    var openKey = null, closeTimer = null, openTimer = null;
+
+    function wrapFor(key) { return root.querySelector('.nav2__panel-wrap[data-panel-for="' + key + '"]'); }
+    function trigFor(key) { return root.querySelector('.nav2__link[data-panel="' + key + '"]'); }
+
+    function positionPanel(key) {
+      var t = trigFor(key), w = wrapFor(key);
+      if (!t || !w) return;
+      var panel = w.querySelector('.nav2__panel');
+      var row = panel.querySelector('.nav2__row');
+      var pr = pill.getBoundingClientRect();
+      var tr = t.getBoundingClientRect();
+      /* align the panel row titles with the trigger text left edge */
+      var inset = parseFloat(getComputedStyle(panel).paddingLeft) + (row ? parseFloat(getComputedStyle(row).paddingLeft) : 0);
+      var left = tr.left - inset;
+      left = Math.max(pr.left + 8, Math.min(left, pr.right - panel.offsetWidth - 8));
+      w.style.left = left + 'px';
+    }
+    function openPanel(key) {
+      if (openKey && openKey !== key) closeNow();
+      openKey = key;
+      positionPanel(key);
+      wrapFor(key).classList.add('is-open');
+      trigFor(key).setAttribute('aria-expanded', 'true');
+    }
+    function closeNow() {
+      if (!openKey) return;
+      wrapFor(openKey).classList.remove('is-open');
+      trigFor(openKey).setAttribute('aria-expanded', 'false');
+      openKey = null;
+    }
+    function scheduleClose() {
+      clearTimeout(openTimer); clearTimeout(closeTimer);
+      closeTimer = setTimeout(closeNow, 250);      /* grace period */
+    }
+    function scheduleOpen(key) {
+      clearTimeout(closeTimer); clearTimeout(openTimer);
+      if (openKey) { openPanel(key); return; }     /* already open: switch */
+      openTimer = setTimeout(function () { openPanel(key); }, 100); /* hover intent */
+    }
+
+    root.querySelectorAll('.nav2__link[data-panel]').forEach(function (t) {
+      var key = t.getAttribute('data-panel');
+      var w = wrapFor(key);
+      if (!w) return;
+      t.addEventListener('mouseenter', function () { scheduleOpen(key); });
+      t.addEventListener('mouseleave', scheduleClose);
+      w.addEventListener('mouseenter', function () { clearTimeout(closeTimer); });
+      w.addEventListener('mouseleave', scheduleClose);
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (openKey === key) closeNow(); else openPanel(key);
+      });
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        if (openKey === key) closeNow(); else openPanel(key);
+      });
+    });
+
+    /* sliding hover plate: jumps into place when appearing, glides between rows */
+    root.querySelectorAll('.nav2__panel').forEach(function (panel) {
+      var plate = panel.querySelector('.nav2__hoverplate');
+      if (!plate) return;
+      panel.addEventListener('mouseover', function (e) {
+        var row = e.target.closest('.nav2__row');
+        if (!row) return;
+        if (row.classList.contains('is-static')) { plate.style.opacity = '0'; return; }
+        var hidden = getComputedStyle(plate).opacity === '0';
+        plate.classList.toggle('is-jump', hidden);
+        plate.style.top = row.offsetTop + 'px';
+        plate.style.height = row.offsetHeight + 'px';
+        plate.style.opacity = '1';
+      });
+      panel.addEventListener('mouseleave', function () { plate.style.opacity = '0'; });
+    });
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNow(); });
+    document.addEventListener('click', function (e) {
+      if (openKey && !e.target.closest('.nav2__pill') && !e.target.closest('.nav2__panel-wrap')) closeNow();
+    });
+    window.addEventListener('resize', function () { if (openKey) positionPanel(openKey); });
+  })();
+
+  /* ---------- mobile sheet + accordion ---------- */
+  (function () {
+    var m = root.querySelector('.nav2m');
+    if (!m) return;
+    var burger = m.querySelector('.nav2m__burger');
+    var list = m.querySelector('.nav2m__list');
+    if (!burger || !list) return;
+
+    function expandItem(item, expand) {
+      item.classList.toggle('is-expanded', expand);
+      var btn = item.querySelector('.nav2m__toprow');
+      if (btn && btn.hasAttribute('aria-expanded')) btn.setAttribute('aria-expanded', expand ? 'true' : 'false');
+    }
+
+    /* one open section at a time; group triggers carry role=button */
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest('.nav2m__toprow');
+      if (!isTrigger(btn)) return;
+      e.preventDefault();
+      var item = btn.closest('.nav2m__item');
+      var wasOpen = item.classList.contains('is-expanded');
+      list.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+      if (!wasOpen) expandItem(item, true);
+    });
+    list.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var btn = e.target.closest('.nav2m__toprow');
+      if (!isTrigger(btn)) return;
+      e.preventDefault();
+      btn.click();
+    });
+
+    function openSheet() {
+      m.classList.add('is-open');
+      burger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      /* auto-expand the active page group, active row into view */
+      list.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+      var activeSub = list.querySelector('.nav2m__subrow.is-active');
+      if (activeSub) {
+        var item = activeSub.closest('.nav2m__item');
+        var sub = item.querySelector('.nav2m__sub');
+        if (sub) {
+          var prev = sub.style.transition;
+          sub.style.transition = 'none';           /* snap open on entry */
+          expandItem(item, true);
+          void sub.offsetWidth;
+          sub.style.transition = prev;
+        }
+        activeSub.scrollIntoView({ block: 'center' });
+      }
+    }
+    function closeSheet() {
+      m.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    burger.addEventListener('click', function () {
+      if (m.classList.contains('is-open')) closeSheet(); else openSheet();
+    });
+    var scrim = m.querySelector('[data-nav2m-close]');
+    if (scrim) scrim.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+    /* close only on real navigation links, not on href="#" triggers */
+    m.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (a && a.getAttribute('href') !== '#') closeSheet();
+    });
+  })();
+})();
+</script></div><div class="w-embed w-script"><!-- blog-search script omitted: dev pages have no blog DOM --></div></div></div></nav>

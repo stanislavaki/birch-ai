@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home slides — slide 01 (height corridor skeleton)</title>
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+<link rel="stylesheet" href="design-system/components/button.css" />
+<link rel="stylesheet" href="design-system/components/chat-card.css" />
+<style>
+/* ═══════════════════════════════════════════════════════════
+   HOME SLIDES — slide 01 skeleton
+
+   Placeholders at the exact Figma geometry of three authored
+   keyframes in the "for test" section:
+
+     h364         18446:68189   reference — also the floor
+     h550+scale   18446:71454   full air, decor scaled 1.5x
+
+   Below the floor nothing is recomposed, cropped or scaled: the canvas
+   stays at 364 units and the card simply runs past the fold on short
+   wide windows (a few tens of pixels on 1920×650-class windows). An
+   h300 frame existed for slide 01 (18446:74772) and was dropped so no
+   slide ever needs a third frame.
+
+   COORDINATE SYSTEM
+   The scene is authored on a 1232-wide canvas. `--u` is one design
+   unit in real pixels, so every value is <figma number> * var(--u).
+
+     --u = 1cqw / 12.32
+
+   Width alone drives it — never height. Earlier versions fitted short
+   windows by scaling (left empty background down both sides) and then
+   by an authored 300-unit frame (cost a third frame per slide). Both
+   were dropped in favour of a plain minimum height.
+
+   INTERPOLATION
+   Each fragment carries its h364 geometry (--x/--y/--w) plus deltas
+   --dx/--dy/--dw toward h550+scale, applied in proportion to how far
+   the canvas has grown past 364:
+
+     --up = clamp(0, canvas - 364u, 186u)
+
+   At canvas = 364u it is zero and the frame renders exactly as the
+   reference. Width interpolates the same way as position, which is
+   what lets decor grow 1.5x while the interface stays 1:1 — non-zero
+   --dw on the decor fragments only.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Authored keyframes, in design units */
+  --scene-min:  364;   /* floor — the reference frame itself */
+  --scene-base: 364;
+  --scene-max:  550;
+
+  /* Tallest top bar across the slides, measured after fonts.ready */
+  --bar-h: 6.8125rem;
+
+  /* Air under the card so it does not sit on the viewport edge. The block
+     script clamps it between 0 and --slide-gap-max from the room actually
+     left, so it never pushes the card past the fold on the floor. */
+  --slide-gap-max: 2rem;
+  --slide-gap-bottom: 2rem;
+
+  /* Debug override */
+  --canvas-force: 364;
+}
+
+/* ── Track and sticky viewport ─────────────────────────────────
+   The track is the scroll budget: --slides * --track-per-slide screens
+   tall, with the card pinned inside while the page scrolls past it.
+   --track-per-slide is the number worth arguing about, so it is tuned
+   in the debug panel rather than decided here. */
+.hs {
+  /* --steps is written by the block script from the keyframe table, so
+     the scroll budget grows with the content instead of with a guess. */
+  --steps: 2;
+  --track-per-step: 1;
+  height: calc(var(--steps) * var(--track-per-step) * 100dvh);
+  /* .section brings 5rem top and bottom from the Webflow environment. On a
+     scroll track that padding is not spacing, it is 160px of scroll the
+     sticky does not cover — the card unpins early and slides under the nav.
+     The air around the card comes from centring inside the sticky instead. */
+  padding-block: 0;
+}
+
+/* The card stops growing at the 550 ceiling, so on a tall window there
+   is height left over. Splitting it above and below reads as section
+   padding; letting it pile up under the card reads as the block failing
+   to reach the bottom. `safe center` keeps the top edge reachable on
+   short windows, where the card is taller than the space and ordinary
+   centring would push its head under the nav. */
+.hs__sticky {
+  position: sticky;
+  top: var(--nav-height);
+  height: calc(100dvh - var(--nav-height));
+  padding-bottom: var(--slide-gap-bottom);
+  box-sizing: border-box;
+  display: flex;
+  align-items: safe center;
+}
+.hs__sticky > .container { width: 100%; }
+
+/* Only the top bars are stacked — one card, one scene underneath. The
+   bars are all absolute over a wrapper whose height is the locked
+   --bar-h, so a slide change cannot move the canvas. */
+.hs__bars { position: relative; min-height: var(--bar-h); }
+.hs__bar {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  pointer-events: none;
+}
+.hs__bar.is-active { pointer-events: auto; }
+/* Each column of the bar rises into place on its own, 80 ms apart; the
+   outgoing bar's columns lift away a little faster and in the same order. */
+.hs__bar > * {
+  opacity: 0;
+  translate: 0 0.75rem;
+  transition: opacity 0.4s ease, translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hs__bar > :nth-child(2) { transition-delay: 0.08s; }
+.hs__bar > :nth-child(3) { transition-delay: 0.16s; }
+.hs__bar.is-active > * { opacity: 1; translate: 0 0; }
+.hs__bar.is-active > :nth-child(1) { transition-delay: 0.18s; }
+.hs__bar.is-active > :nth-child(2) { transition-delay: 0.26s; }
+.hs__bar.is-active > :nth-child(3) { transition-delay: 0.34s; }
+.hs__bar:not(.is-active) > * { translate: 0 -0.5rem; transition-duration: 0.25s, 0.3s; }
+
+/* ── Pager — vertical dots in the top-left corner of the text block: the
+   active dot stretched into a capsule that fills top-down with the
+   slide's own scroll progress. Dots are buttons and scroll to their slide. ── */
+.hs__pager {
+  position: absolute;
+  left: var(--pad-card);
+  top: 0.125rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hs__dot {
+  --fill: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.35s ease;
+}
+.hs__dot:hover { background: rgba(255, 255, 255, 0.8); }
+.hs__dot.is-active {
+  height: 2.25rem;
+  background: linear-gradient(180deg, #fff calc(var(--fill) * 100%), rgba(255, 255, 255, 0.3) 0);
+}
+.hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
+
+
+/* ── Card ─────────────────────────────────────────────────── */
+.hs__card {
+  /* step blend, written by the block script and inherited by the scene */
+  --t: 0;
+  transition: background-color 0.5s ease;
+  container-type: inline-size;
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: var(--color-accent-blue);
+  padding-top: var(--pad-card);
+  overflow: hidden;
+}
+
+/* ── Top bar — three equal columns, as in the Figma frame ──── */
+.hs__bar {
+  min-height: var(--bar-h);
+  display: grid;
+  /* minmax(0,…) — plain 1fr lets the button column's min-content win */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap-md);
+  /* left column starts after the vertical pager */
+  padding-inline: calc(var(--pad-card) + 1.5rem) var(--pad-card);
+}
+
+.hs__pills { display: flex; gap: var(--gap-sm); margin-bottom: var(--space-xs); }
+
+.hs__pill {
+  display: inline-block;
+  background: var(--color-accent-indigo);
+  color: var(--color-text);
+  border-radius: var(--radius-xs);
+  padding: 0.058em 0.462em 0.154em;
+}
+
+.hs__title { color: var(--color-text); text-wrap: balance; margin: 0; }
+.hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
+
+.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; }
+
+.hs__buttons .btn { flex: 1; }
+
+/* ── Canvas — the window into the scene ───────────────────── */
+.hs__canvas {
+  /* width-driven design unit, resolved against the card */
+  --u-w: calc(1cqw / 12.32);
+
+  /* Horizontal anchor of the composition, in design units: the centre
+     of the Rule card, which sits at 616.5 in all three keyframes. The
+     scene is only ever wider than 1232 units when it has been scaled
+     down to fit a short window; this keeps that surplus split evenly
+     instead of piling up on the right. */
+  --cx: 616.5;
+
+  position: relative;
+  container-type: size;
+  margin-top: var(--gap-md);
+  overflow: hidden;
+
+  height: clamp(
+    calc(var(--scene-min) * var(--u-w)),
+    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md) - var(--slide-gap-bottom)),
+    calc(var(--scene-max) * var(--u-w))
+  );
+}
+
+/* Debug override — pin the canvas to a fixed design height */
+.is-forced .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
+
+/* ── Scene fragments ──────────────────────────────────────────
+   Two layers of interpolation, applied in this order:
+
+   1. height — each step's geometry is resolved for the current canvas
+      height from its two authored frames (--up above);
+   2. step   — the two resolved geometries are blended by --t, which
+      the block script drives from scroll position inside the slide.
+
+   Step 2 of slide 01 exists only at h364, so it borrows step 1's
+   height deltas. That is safe here because the scatter puts almost
+   everything off-canvas — the only fragments still visible are the
+   three stacked cards, and they follow the core's behaviour.
+─────────────────────────────────────────────────────────────── */
+.hs__frag {
+  --u:  calc(1cqw / 12.32);
+  --up: clamp(0px, (100cqh - 364 * var(--u)), 186 * var(--u));
+
+  --dx: 0; --dy: 0; --dw: 0; --dh: 0;
+  --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw); --dh2: var(--dh);
+  --r: 0; --r2: 0;
+  --o1: 1; --o2: 1;
+
+  --px1: calc(var(--x)  * var(--u) + var(--up) * var(--dx)  / 186);
+  --px2: calc(var(--x2) * var(--u) + var(--up) * var(--dx2) / 186);
+  --py1: calc(var(--y)  * var(--u) + var(--up) * var(--dy)  / 186);
+  --py2: calc(var(--y2) * var(--u) + var(--up) * var(--dy2) / 186);
+  --pw1: calc(var(--w)  * var(--u) + var(--up) * var(--dw)  / 186);
+  --pw2: calc(var(--w2) * var(--u) + var(--up) * var(--dw2) / 186);
+
+  /* Zero for fragments nested inside another one — their left is already
+     measured from a parent that has been centred. */
+  --centre: calc(50cqw - var(--cx) * var(--u));
+
+  position: absolute;
+  display: block;
+  left:    calc((1 - var(--t)) * var(--px1) + var(--t) * var(--px2) + var(--centre));
+  top:     calc((1 - var(--t)) * var(--py1) + var(--t) * var(--py2));
+  width:   calc((1 - var(--t)) * var(--pw1) + var(--t) * var(--pw2));
+  height:  auto;
+  rotate:  calc(((1 - var(--t)) * var(--r) + var(--t) * var(--r2)) * 1deg);
+  transform-origin: center;
+  /* --lit is the chat's own gate: the entities it consults appear as it
+     names them, which is a beat of the dialogue, not a step of the scene. */
+  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1));
+  /* webflow-env.css rounds every img; these carry their own corners */
+  border-radius: 0;
+}
+
+/* Fragments whose height is authored rather than inherited from an
+   image's own ratio — the clip frame and the chat. */
+.hs__frag--sized {
+  --ph1: calc(var(--h)  * var(--u) + var(--up) * var(--dh)  / 186);
+  --ph2: calc(var(--h2) * var(--u) + var(--up) * var(--dh2) / 186);
+  height: calc((1 - var(--t)) * var(--ph1) + var(--t) * var(--ph2));
+}
+
+/* The rules frame is a closing window, not a picture laid on top: at the
+   first steps it is larger than the canvas and clips nothing, and by the
+   time it reaches 276x275 it has cropped the three cards exactly as the
+   Figma card does. Switching overflow on at the end would have shown as
+   a snap; closing the window is continuous the whole way. */
+.hs__frag--clip { overflow: hidden; border-radius: calc(16 * var(--u)); }
+.hs__frag--nested { --centre: 0px; max-width: none; }   /* img { max-width:100% } would pin them to the frame */
+/* Once the stack has fanned out, a soft shadow separates the cards; it
+   fades in with the fan (class from the block script) and stays. */
+.hs__frag--nested { transition: filter 0.5s ease; filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+.hs__frag--clip.is-stacked .hs__frag--nested {
+  filter: drop-shadow(0 calc(6 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.22));
+}
+
+.hs__rules-face {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent-blue);
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
+}
+.hs__frag--clip.is-closed .hs__rules-title { opacity: 1; translate: 0 0; scale: 1; }
+.hs__rules-title {
+  /* snaps in the moment the frame has closed — 120 ms, reference rhythm */
+  opacity: 0;
+  translate: 0 calc(8 * var(--u));
+  scale: 0.96;
+  transform-origin: left top;
+  transition: opacity 0.12s steps(3, end), translate 0.12s cubic-bezier(0.2, 0, 0, 1), scale 0.12s cubic-bezier(0.2, 0, 0, 1);
+  position: absolute;
+  left: calc(21 * var(--u));
+  top: calc(18 * var(--u));
+  color: var(--color-text);
+  font-size: calc(19.2 * var(--u));
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ── Chat ──────────────────────────────────────────────────────
+   design-system/components/chat-card.css drives every inner size from
+   one font-size in em, so pointing that font-size at the scene's design
+   unit is the whole integration — no fork, no copied values. */
+.hs__chat { opacity: 1; }
+.hs__chat .chat-card-wrap {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.hs__chat .chat-card {
+  /* Not var(--u): .chat-card-wrap declares its own inline-size container,
+     so inside the chat 1cqw measures the chat, not the canvas. Which is
+     exactly the component's own idiom — 14.4 design units of a 300-wide
+     card is 4.8% of its width. */
+  font-size: 4.8cqi;
+  border-radius: 6.67cqi;
+}
+
+/* The app icon sits just outside the chat, to its left, and travels with
+   it. It is a sibling of .chat-card-wrap, so --u here still measures the
+   canvas rather than the chat. */
+.hs__chat-icon {
+  position: absolute;
+  left: calc(-67 * var(--u));
+  top: 0;
+  width: calc(64 * var(--u));
+  height: auto;
+  border-radius: 0;
+}
+
+/* Tool lines — what Birch is doing right now, one per source it reads.
+   They collapse into the "Used:" row once the answer starts. */
+.hs__tools {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.4s ease, opacity 0.3s ease;
+}
+.hs__tools.is-done { grid-template-rows: 0fr; opacity: 0; }
+.hs__tools > div { overflow: hidden; }
+
+.hs__tool {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.15em 0;
+  color: #6b6b76;
+  opacity: 0;
+  transform: scale(0.94);
+  transform-origin: left center;
+  /* reference rhythm: a hard 120 ms step-in, no drift */
+  transition: opacity 0.12s steps(3, end), transform 0.12s cubic-bezier(0.2, 0, 0, 1);
+}
+.hs__tool.is-on { opacity: 1; transform: none; }
+.hs__tool::before {
+  content: "";
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+/* the line being worked on right now blinks its dot */
+.hs__tool.is-live::before { animation: hs-blink 0.9s ease-in-out infinite; }
+@keyframes hs-blink { 50% { opacity: 0.15; } }
+
+/* Image fragments that need a pseudo-element (for the ring) are divs with
+   a background rather than <img>. */
+.hs__pic { background-size: 100% 100%; background-repeat: no-repeat; border-radius: calc(var(--ring-r, 16) * var(--u)); }
+
+/* AI highlight — a gradient that travels around the active card. One
+   animated angle drives a conic gradient in a ring-shaped pseudo-element,
+   masked to the border so the card itself stays untouched. The ring's
+   corner radius is the element's own (--ring-r) plus the offset. */
+@property --ring-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.hs__frag--ring { --ring-r: 16; }
+.hs__frag--ring::before {
+  content: "";
+  position: absolute;
+  inset: calc(-3 * var(--u));
+  padding: calc(3 * var(--u));
+  border-radius: calc((var(--ring-r) + 3) * var(--u));
+  background: conic-gradient(from var(--ring-angle),
+    var(--color-primary) 0deg, var(--color-accent-light-blue) 90deg,
+    var(--color-accent-pink) 180deg, var(--color-primary) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.hs__frag--ring.is-lit::before { opacity: 1; animation: hs-ring 2.6s linear infinite; }
+@keyframes hs-ring { to { --ring-angle: 360deg; } }
+
+.hs__frag--fade { transition: opacity 0.35s ease; }
+/* Lit by the chat (--lit 0→1): parked just under the canvas edge, they ride
+   up into place over the rules card — a real entrance, no fade needed. */
+.hs__frag--rise {
+  /* opacity without the --lit gate: the card is simply parked under the
+     canvas edge (clipped) until it is called, then flies up */
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
+  translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
+  transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.hs__frag--ring.is-lit {
+  box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
+}
+
+/* The integrations bar ships without its shadow (an earlier export baked
+   it in, which put 5 units of transparent film under the bar and pushed
+   it off its box). Reproduced here from the alpha profile of that old
+   export — 2.3 units above, 5 below, i.e. dy 1.35 / blur 3.65 — so it
+   scales with the scene instead of blurring with the bitmap. */
+.hs__frag--shadow {
+  filter: drop-shadow(0 calc(1.35 * var(--u)) calc(3.65 * var(--u)) rgba(0, 0, 0, 0.42));
+}
+
+/* ── Guides ───────────────────────────────────────────────── */
+.hs__guide {
+  --u: calc(1cqw / 12.32);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--scene-base) * var(--u));
+  /* --u here matches the fragments' */
+  height: 0;
+  border-top: 0.0625rem dashed var(--color-primary);
+  pointer-events: none;
+  display: none;
+}
+.hs__guide::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 0.5rem;
+  top: 0.25rem;
+  color: var(--color-primary);
+  font-size: 0.6875rem;
+}
+.is-guides .hs__guide { display: block; }
+
+.hs__core-box {
+  position: absolute;
+  border: 0.125rem solid var(--color-accent-green);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  display: none;
+}
+.is-core .hs__core-box { display: block; }
+</style>
+</head>
+<body>
+<!-- ── Live navigation v3 (design-system/webflow-env-nav-v3.html) ── -->
+<!--
+  WEBFLOW DEV ENVIRONMENT — NAVIGATION V3 (live copy)
+  Captured from https://bir.ch/ on 2026-09-02: the <nav class="nav-v3-root">
+  block verbatim (its own <style> and behaviour <script> included), plus the
+  44 skeleton rules the site stylesheet contributes and the Webflow runtime
+  classes it relies on. Two of the three embedded scripts are dropped: the
+  skip-to-main link (no <main> on dev pages) and blog search (no blog DOM).
+  Paste right after <body>. Pair with design-system/webflow-env.css, which
+  already sets --nav-height: 6.5em to match .nav-v3-root's 6.5rem.
+  Re-capture rather than edit: the source of truth is the Webflow component.
+-->
+<style>
+/* site variables the nav references, mapped onto the design-system tokens */
+:root {
+  --colors--text: var(--color-text);
+  --_color---secondary--neutral--mid-gray: var(--color-text-grey);
+  --_responsive---font-size--body: var(--text-body-size);
+}
+/* Webflow runtime classes used by the markup */
+.w-inline-block { max-width: 100%; display: inline-block; }
+.w-form { margin: 0; }
+.w-container, .w-layout-blockcontainer { max-width: 940px; margin-left: auto; margin-right: auto; }
+.w-layout-blockcontainer { display: block; }
+.w-embed { display: block; }
+/* skip link is visually hidden until focused, as on the live site */
+.nav-skip-link{z-index:9998;opacity:0;color:#fff;letter-spacing:.05em;text-transform:uppercase;background-color:#ffe243;border-radius:.5rem;height:3em;margin-top:-8em;padding:.8em 1.5em;font-size:.75rem;font-weight:500;line-height:1;text-decoration:none;transition:opacity .3s cubic-bezier(.165,.84,.44,1),margin .3s cubic-bezier(.165,.84,.44,1);position:absolute;inset:0% auto auto 50%;transform:translate(-50%)}
+/* skeleton rules from birch-testing.shared.*.min.css (selectors matching nav-v3|nav2|search-bl|cta-track) */
+.search-blog{width:100%;height:100%;color:var(--colors--text);font-family:Tt Commons Pro Variable,Arial,sans-serif;font-size:var(--_responsive---font-size--body);font-variation-settings:"wght" 600,"wdth" 100,"slnt" 0;background-color:#0000;border:0 solid #000;margin-bottom:0;padding:0;font-weight:600}
+.search-blog::placeholder{color:var(--_color---secondary--neutral--mid-gray);font-family:Tt Commons Pro Variable,Arial,sans-serif;font-size:var(--_responsive---font-size--body);font-weight:600}
+.nav2{z-index:1000}
+.nav2__pill{justify-content:space-between;align-items:center;display:flex;position:relative}
+.nav2__logo,.nav2__menu{align-items:center;display:flex}
+.nav2__link{cursor:pointer;align-items:center;display:flex;position:relative}
+.nav2__word{display:inline-block;position:relative}
+.nav2__dot{position:absolute}
+.nav2__right,.nav2__txtbtn{align-items:center;display:flex}
+.nav2__cta{justify-content:center;align-items:center;display:flex}
+.nav2__panel-wrap{position:absolute}
+.nav2__panel{flex-direction:column;display:flex;position:relative}
+.nav2__hoverplate{position:absolute}
+.nav2m{z-index:1000}
+.nav2m__blur{position:fixed}
+.nav2m__pill{justify-content:space-between;align-items:center;display:flex;position:relative}
+.nav2m__logo{align-items:center;display:flex}
+.nav2m__sheet{flex-direction:column;justify-content:space-between;display:flex;position:fixed}
+.nav2m__list{flex-grow:1;width:100%}
+.nav2m__item{position:relative}
+.nav2m__toprow{cursor:pointer;justify-content:space-between;align-items:center;display:flex}
+.nav2m__toprow-label{align-items:center;display:flex;position:relative}
+.nav2m__topdot{position:absolute}
+.nav2m__sub{position:relative}
+.nav2m__sub-inner{min-height:0;overflow:hidden}
+.nav2m__sub-list{position:relative}
+.nav2m__cta-block{flex-direction:column;display:flex}
+.nav2m__cta-row{display:flex}
+.nav2m__cta-btn,.nav2m__cta-main{justify-content:center;align-items:center;display:flex}
+.nav2__row{align-items:flex-start;display:flex;position:relative}
+.nav2__row-dot{position:absolute}
+.nav2__row-title{align-items:baseline;display:flex}
+.nav2__row-name{display:block}
+.nav2__new,.nav2__soon{display:inline-block}
+.nav2__row-desc{display:block}
+.nav2m__subrow{flex-direction:column;display:flex;position:relative}
+.nav2m__subdot{position:absolute}
+.nav2m__subrow-title{align-items:baseline;display:flex}
+.nav2m__subrow-name,.nav2m__subrow-desc{display:block}
+.nav2__customlogo,.nav2m__customlogo,.nav2m__pagetitle{display:none}
+.nav2__rows,.nav2m__subrows{flex-direction:column;display:flex}
+.nav-v3-root{width:100%;height:6.5rem}
+.nav2m__search{width:100%;padding-bottom:.75rem;padding-left:.625rem;padding-right:.625rem}
+@media screen and (max-width:767px){.search-blog{width:80%;display:none}.nav-v3-root{height:5.5rem}}
+</style>
+<nav aria-label="Main" data-cta-type="nav" class="nav-v3-root"><div class="nav-custom-js w-embed w-script"><!-- skip-to-main script omitted: dev pages have no <main> --></div><a id="skip-link" href="#main" class="nav-skip-link">Skip to Main Content</a><div class="nav-inner"><div data-nav-v3="1" class="nav-v3"><div class="w-embed"><style>
+/* ============================================================
+   NAVIGATION V3 - ported 1:1 from the dev prototype menu.html.
+   All nav styling lives HERE (single source of truth); the
+   nav2/nav2m classes on elements are hooks.
+   States toggled by JS: .is-open on .nav2__panel-wrap and
+   .nav2m, .is-searching on .nav2 / .nav2m, .is-expanded on
+   .nav2m__item, .is-active on links and rows,
+   .is-static/.is-disabled on Soon rows. Add these combo
+   classes by hand on the canvas to preview states.
+   ============================================================ */
+
+/* Site-wide nav height: desktop keeps the legacy 6.5em; mobile
+   scopes to 5.5em so sticky pins sit 12px below the pill. */
+:root { --nav-height: 6.5em; }
+@media (max-width: 767px) {
+  :root { --nav-height: 5.5em; }
+}
+
+.nav-v3 {
+  /* -- menu-local scale (Figma px / 16) -- */
+  --nav-pill-h: 5.75rem;           /* air 6 + pill 92 + air 6 = 6.5em */
+  --nav-pill-radius: 4.0625rem;
+  --nav-pill-top: 0.375rem;        /* top + pill = 6.5rem = --nav-height */
+  --nav-pill-inset: calc((var(--nav-pill-h) - var(--nav-cta-h)) / 2);
+  --nav-link-size: 0.9rem;         /* 14.4, matches the live nav links */
+  --nav-link-gap: 1.75rem;         /* 28, equals the Book demo/Log in gap */
+  --nav-dot: 0.375rem;
+  --nav-cta-h: 4.5rem;
+  --nav-panel-w: 30.75rem;
+  --nav-panel-pad: 0.5rem;
+  --nav-panel-radius: 1.25rem;     /* concentric: row 12 + pad 8 */
+  --nav-panel-gap: 0.5rem;
+  --nav-row-px: 1.5rem;
+  --nav-row-py: 1rem;
+  --nav-row-radius: 0.75rem;
+  --nav-row-title-w: 10.5rem;
+  /* Glass blur is pinned in px on purpose: the site's root font is
+     fluid (17.6px at 1440), so 1.875rem rendered as 33px here versus
+     30px in the prototype - a visibly softer, more diluted backdrop. */
+  --nav-blur: 30px;
+
+  /* -- themed colors (dark defaults) -- */
+  --nav-surface: rgba(63, 63, 63, 0.6);
+  --nav-text: #ffffff;
+  --nav-text-cta: #ffffff;
+  /* one hover token: submenu plate and Book demo/Log in share it */
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-yellow: #FFE243;
+  --nav-yellow-text: #1F1F1F;
+  --nav-indigo: #4450F2;
+  --nav-soon-bg: rgba(255, 255, 255, 0.14);
+  --nav-soon-text: rgba(255, 255, 255, 0.75);
+  /* dark pages: brightness lifts the glass off a dark backdrop */
+  --nav-glass: blur(var(--nav-blur)) saturate(0.8) brightness(1.15);
+
+  /* -- mobile sheet -- */
+  --nav-sheet-text: #ffffff;
+  --nav-sheet-line: rgba(255, 255, 255, 0.2);
+  --nav-sheet-row-hover: rgba(255, 255, 255, 0.1);
+  --nav-sheet-cta-bg: #3F3F3F;
+  --nav-sheet-cta-text: #ffffff;
+  --nav-card: #292929;
+  --nav-scrim: rgba(13, 13, 18, 0.6);
+}
+/* LIGHT PAGES. The color-mode prop writes its value into the class
+   attribute of the .nav-inner wrapper that holds this nav:
+     "inverted-bg" = light theme (site default, ~270 pages)
+     ""            = dark (12 product pages incl. home)
+     "white"/"blog" = legacy light values
+   so the theme arrives as an ANCESTOR class, not on .nav-v3 itself.
+   .nav-v3.is-light stays as the manual/dev toggle (?nav3theme=light).
+
+   NO brightness() in the light theme. It lightens the backdrop toward
+   white, and 0.4 lavender over white lands on ~#EDEDF3 - which is the
+   exact tone of the site's own light cards, so the pill and the panel
+   dissolve into the page (and on iOS the tint washed out entirely).
+   Without it the glass composites ~10 units darker than those cards and
+   reads as a separate surface, with the blur fully intact. */
+.nav-v3.is-light,
+.inverted-bg .nav-v3,
+.white .nav-v3,
+.blog .nav-v3 {
+  --nav-surface: rgba(211, 209, 224, 0.4);
+  --nav-glass: blur(var(--nav-blur)) saturate(0.8);
+  --nav-hover: rgba(255, 255, 255, 0.7);
+  --nav-soon-bg: rgba(0, 0, 0, 0.08);
+  --nav-soon-text: rgba(0, 0, 0, 0.55);
+  --nav-text: #000000;
+  --nav-text-cta: #000000;
+  --nav-sheet-text: #000000;
+  --nav-sheet-line: rgba(0, 0, 0, 0.15);
+  --nav-sheet-row-hover: rgba(0, 0, 0, 0.08);
+  --nav-sheet-cta-bg: #DBDAE2;
+  --nav-sheet-cta-text: #0D0D12;
+  --nav-card: #ffffff;
+  --nav-scrim: rgba(13, 13, 18, 0.3);
+}
+
+/* ============ DESKTOP PILL HEADER ============ */
+.nav2 {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  color: var(--nav-text);
+}
+.nav2 * { box-sizing: border-box; }
+.nav2 a { text-decoration: none; color: inherit; }
+
+.nav2__pill {
+  position: relative;
+  margin: var(--nav-pill-top) auto 0;
+  /* container content width (min(100vw, 80rem) - gutters) + inset frame */
+  width: calc(min(100vw, 80rem) - 3rem + 2 * var(--nav-pill-inset));
+  height: var(--nav-pill-h);
+  border-radius: var(--nav-pill-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: var(--nav-glass);
+  backdrop-filter: var(--nav-glass);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* logo and CTA land exactly on the container grid */
+  padding: 0 var(--nav-pill-inset);
+}
+
+.nav2__logo {
+  display: flex; align-items: center;
+  height: 2.25rem;
+  margin-top: -0.1875rem;
+  margin-left: calc((var(--nav-pill-h) - 2.25rem) / 2 - var(--nav-pill-inset));
+  color: var(--nav-text);
+  flex: none;
+}
+/* Webflow wraps embeds in .w-embed; keep the height chain intact */
+.nav2__logo .w-embed, .nav2m__logo .w-embed { height: 100%; display: flex; align-items: center; }
+.nav2__logo svg { height: 100%; width: auto; display: block; }
+
+/* ---- blog search, desktop (Figma blog-layout 525-1043 / 525-1309):
+   a compact field always sits next to the logo; focusing it expands the
+   field across the pill and steps the centered menu and the CTA group
+   aside. Bound to the "Search field" prop, so it exists only on the blog.
+   The bar is the ONLY visual container - the legacy field chrome inside
+   (its own white box and stroke) is flattened, so there is one wrapper,
+   not three.
+   TRANSITION notes, both learned the hard way:
+   - every property that changes is in the transition list, and both
+     states are explicit interpolatable lengths. Animating width to
+     `auto` while the height animated made the field visibly jump.
+   - shrink stays enabled (flex 0 1 auto) because the expanded width is
+     100% of the pill's content box, which overflows by the logo width;
+     flexbox shrinks it back to the free space, so the animation reaches
+     its visual end slightly before the timeline does.
+   - margin-right:auto stays in BOTH states: it keeps the compact field
+     hugging the logo, and during the expansion it soaks up the shrinking
+     free space. Dropping it mid-transition hands that space to
+     space-between, which shoves the growing field to the right. */
+.nav2__searchbar {
+  display: flex;
+  flex: 0 1 auto;
+  width: 15.625rem;                /* 250 per mock */
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;                 /* 44 per mock */
+  margin-left: 1.5rem;
+  margin-right: auto;
+  padding: 0 0.75rem 0 1rem;
+  border-radius: 0.75rem;
+  background: var(--nav-card);
+  transition: width 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              height 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              padding 260ms cubic-bezier(0.22, 0.9, 0.24, 1),
+              border-radius 260ms ease;
+}
+.nav2.is-searching .nav2__searchbar {
+  width: 100%;
+  height: var(--nav-cta-h);
+  /* the close button keeps the same inset all around it:
+     (bar height - button height) / 2 */
+  padding: 0 calc((var(--nav-cta-h) - 2.5rem) / 2) 0 1.5rem;
+  border-radius: calc(var(--nav-cta-h) / 2);
+}
+.nav2.is-searching .nav2__menu,
+.nav2.is-searching .nav2__right { display: none; }
+/* flatten the legacy field chrome so the bar is the only visible box */
+.nav2__searchbar .search-form-block,
+.nav2__searchbar .search-form,
+.nav2__searchbar .search-flex,
+.nav2__searchbar .search-blog {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+}
+.nav2__searchbar .search-form-block { flex: 1; min-width: 0; max-width: none; }
+.nav2__searchbar .w-form, .nav2__searchbar .search-form, .nav2__searchbar .search-flex { width: 100%; }
+.nav2__searchbar .search-blog {
+  display: block;
+  width: 100%; max-width: none;
+  height: 2.5rem;
+  font-size: 1rem; color: var(--nav-sheet-text);
+}
+.nav2__searchbar .search-blog::placeholder { color: var(--nav-sheet-text); opacity: 0.45; }
+/* the legacy magnifier/cross images are replaced by our own close button */
+.nav2__searchbar .search-icon, .nav2__searchbar .search-close { display: none; }
+.nav2__searchclose {
+  display: none;
+  flex: none;
+  width: 2.5rem; height: 2.5rem;
+  border: none; border-radius: 0.625rem;
+  padding: 0;
+  background: var(--nav-sheet-cta-bg);
+  color: var(--nav-sheet-cta-text);
+  align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.nav2.is-searching .nav2__searchclose { display: flex; }
+.nav2__searchclose .w-embed { display: flex; }
+.nav2__searchclose svg { width: 1rem; height: 1rem; display: block; }
+
+/* -- center links -- */
+.nav2__menu {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: var(--nav-link-gap);
+}
+.nav2__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  background: none; border: none; color: inherit; font-family: inherit;
+  max-width: none;
+}
+.nav2__word { position: relative; display: inline-block; }
+.nav2__dot {
+  /* below the word itself, not the link box */
+  position: absolute;
+  left: 50%; top: calc(100% + 0.375rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.5);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.nav2__link:hover .nav2__dot,
+.nav2__link.is-active .nav2__dot { opacity: 1; transform: translateX(-50%) scale(1); }
+
+.nav2__chev { display: block; width: 0.625rem; height: 0.625rem; transition: transform 200ms ease; }
+.nav2__link[aria-expanded="true"] .nav2__chev { transform: rotate(180deg); }
+
+/* "New" badge - submenu rows only */
+.nav2__new {
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.08rem 0.2rem 0.13rem;
+  border-radius: 0.2rem;
+  background: var(--nav-yellow);
+  color: #0D0D12;
+  rotate: -18deg;
+}
+.nav2__row-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+/* "Soon" chip: New tag twin in muted colors */
+.nav2__soon {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.1rem 0.25rem 0.16rem;
+  border-radius: 0.25rem;
+  background: var(--nav-soon-bg);
+  color: var(--nav-soon-text);
+  rotate: -18deg;
+  translate: 0.125rem -0.35em;
+  white-space: nowrap;
+}
+/* cancel the tags' baseline overhang so tagged rows equal plain rows */
+.nav2__row-title .nav2__new, .nav2__row-title .nav2__soon,
+.nav2m__subrow-title .nav2__new, .nav2m__subrow-title .nav2__soon { margin-bottom: -0.35em; }
+
+/* disabled (Soon) row: dimmed, inert */
+.nav2__row.is-disabled, .nav2m__subrow.is-disabled { pointer-events: none; }
+.nav2__row.is-disabled .nav2__row-title { opacity: 0.45; }
+.nav2__row.is-disabled .nav2__row-desc { opacity: 0.3; }
+.nav2m__subrow.is-disabled .nav2m__subrow-title { opacity: 0.45; }
+.nav2m__subrow.is-disabled .nav2m__subrow-desc { opacity: 0.3; }
+
+/* -- right CTA group -- */
+.nav2__right { display: flex; align-items: center; gap: 0; flex: none; }
+.nav2__right .nav2__cta { margin-left: 0.5rem; }
+.nav2__txtbtn {
+  display: flex; align-items: center;
+  height: var(--nav-cta-h);
+  padding: 0 0.875rem;             /* plates flush: text gap 28, like menu */
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--nav-text-cta);
+  border-radius: 1rem;
+  transition: background-color 150ms ease;
+  white-space: nowrap;
+}
+.nav2__txtbtn:hover { background: var(--nav-hover); }
+.nav2__cta {
+  display: flex; align-items: center; justify-content: center;
+  height: var(--nav-cta-h);
+  padding: 0 2rem;
+  border-radius: calc(var(--nav-cta-h) / 2);
+  background: var(--nav-yellow);
+  color: #000000;
+  font-size: var(--nav-link-size);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.nav2 a.nav2__cta { color: #000000; }  /* outweigh .nav2 a inherit */
+.nav2 a.nav2__cta:hover { background: var(--nav-indigo); color: #ffffff; }
+.nav2__cta:hover { background: var(--nav-indigo); }
+
+@media (max-width: 1099px) {
+  .nav2__menu { gap: 1rem; }
+  .nav2__searchbar { width: 11rem; margin-left: 1rem; }
+}
+/* tablet: tighten so the centered menu and CTAs never collide */
+@media (max-width: 991px) {
+  .nav2__right { gap: 0.25rem; }
+  .nav2__txtbtn { padding: 0 0.625rem; }
+  .nav2__cta { padding: 0 1.25rem; }
+  .nav2__menu { gap: 0.75rem; }
+  .nav2__searchbar { width: 8.5rem; margin-left: 0.75rem; }
+}
+
+/* ============ desktop dropdown panel ============
+   The wrap lives OUTSIDE the pill: an ancestor with
+   backdrop-filter would become the backdrop root and the
+   panel's own blur would stop seeing the page (Chrome). */
+.nav2__panel-wrap {
+  position: absolute;
+  top: calc(var(--nav-pill-top) + var(--nav-pill-h));
+  left: 0;
+  /* hover bridge over the pill-panel gap */
+  padding-top: var(--nav-panel-gap);
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 180ms;
+}
+.nav2__panel-wrap.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transition: none;
+}
+.nav2__panel-wrap .nav2__panel {
+  opacity: 0;
+  translate: 0 -0.5rem;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+.nav2__panel-wrap.is-open .nav2__panel {
+  opacity: 1;
+  translate: 0 0;
+}
+.nav2__panel {
+  position: relative;
+  width: var(--nav-panel-w);
+  padding: var(--nav-panel-pad);
+  border-radius: var(--nav-panel-radius);
+  background: var(--nav-surface);
+  -webkit-backdrop-filter: var(--nav-glass);
+  backdrop-filter: var(--nav-glass);
+  display: flex;
+  flex-direction: column;
+}
+.nav2__rows { display: flex; flex-direction: column; }
+.nav2__row {
+  position: relative;
+  display: flex;
+  gap: 1.1875rem;
+  align-items: flex-start;
+  padding: var(--nav-row-py) var(--nav-row-px);
+  border-radius: var(--nav-row-radius);
+}
+/* hover plate: one element sliding between rows */
+.nav2__hoverplate {
+  position: absolute;
+  left: var(--nav-panel-pad);
+  right: var(--nav-panel-pad);
+  top: 0; height: 0;
+  border-radius: var(--nav-row-radius);
+  background: var(--nav-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: top 320ms cubic-bezier(0.22, 0.9, 0.24, 1), height 320ms cubic-bezier(0.22, 0.9, 0.24, 1), opacity 200ms ease;
+  z-index: 0;
+}
+.nav2__hoverplate.is-jump { transition: opacity 150ms ease; }
+.nav2__row:hover .nav2__row-desc { opacity: 1; }
+.nav2__row.is-static { cursor: default; }
+.nav2__row.is-static:hover { background: none; }
+.nav2__row.is-static:hover .nav2__row-desc { opacity: 0.5; }
+.nav2__row-title {
+  flex: none;
+  width: var(--nav-row-title-w);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  display: flex; align-items: baseline; gap: 0.2rem;
+}
+.nav2__row-desc {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  opacity: 0.5;
+  transition: opacity 250ms ease;
+}
+.nav2__row-dot {
+  position: absolute;
+  left: 0.8125rem;
+  top: calc(var(--nav-row-py) + 0.3125rem);
+  width: var(--nav-dot); height: var(--nav-dot);
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+.nav2__row.is-active .nav2__row-dot { opacity: 1; }
+
+/* ============ MOBILE (max 767): pill header + sheet ============ */
+.nav2m { display: none; }
+
+@media (max-width: 767px) {
+  .nav2 { display: none; }
+  .nav2m {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+  }
+  .nav2m * { box-sizing: border-box; }
+  .nav2m a { text-decoration: none; color: inherit; }
+
+  .nav2m__pill {
+    position: relative;
+    z-index: 20;
+    margin: 0.75rem;                 /* 12 all around */
+    height: 4rem;                    /* 64 */
+    border-radius: 4.0625rem;
+    background: var(--nav-surface);
+    -webkit-backdrop-filter: var(--nav-glass);
+    backdrop-filter: var(--nav-glass);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.6875rem 0 1.3125rem;  /* 11 / 21 per mock */
+    color: var(--nav-text);
+    transition: background-color 300ms ease;
+  }
+  .nav2m__logo { display: flex; align-items: center; height: 1.625rem; margin-top: -0.125rem; color: var(--nav-text); flex: none; }
+  .nav2m__logo svg { height: 100%; width: auto; display: block; }
+
+  /* open: adopt the card color (edges already aligned) */
+  .nav2m.is-open .nav2m__pill { background: var(--nav-card); }
+
+  .nav2m__burger {
+    width: 2.625rem; height: 2.625rem;   /* 42 */
+    border: none; border-radius: 50%;
+    background: var(--nav-yellow);
+    color: var(--nav-yellow-text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+  }
+  .nav2m__burger .w-embed { display: flex; align-items: center; justify-content: center; }
+  .nav2m__burger svg { width: 0.9375rem; height: 0.9375rem; display: block; }
+  /* closed: vertical pairs collapse into one middle row = 2 dots */
+  .nav2m__burger circle { transition: transform 250ms ease; }
+  .nav2m__burger circle:nth-of-type(1), .nav2m__burger circle:nth-of-type(2) { transform: translateY(3.5px); }
+  .nav2m__burger circle:nth-of-type(3), .nav2m__burger circle:nth-of-type(4) { transform: translateY(-3.5px); }
+  .nav2m__burger[aria-expanded="true"] circle { transform: translateY(0); }
+
+  /* ---- blog search in the mobile pill: magnifier that expands a field
+     over the pill, per Figma blog-layout 541-3465 / 541-3752 ---- */
+  .nav2m__searchbtn {
+    width: 2.625rem; height: 2.625rem;
+    margin-left: auto; margin-right: 0.5rem;
+    border: none; border-radius: 50%;
+    background: transparent;
+    color: var(--nav-text);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; cursor: pointer;
+    flex: none;
+  }
+  .nav2m__searchbtn .w-embed { display: flex; }
+  .nav2m__searchbtn svg { width: 1.25rem; height: 1.25rem; display: block; }
+
+  .nav2m__searchbar {
+    position: absolute;
+    left: 0.625rem;
+    right: 3.5rem;                   /* burger stays visible to the right */
+    top: 0.5rem; bottom: 0.5rem;
+    display: none;
+    flex: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+    align-items: center;
+    gap: 0.25rem;
+    /* same inset all around the close button: (bar height - button) / 2 */
+    padding: 0 0.5rem 0 1rem;
+    border-radius: 4.0625rem;
+    background: var(--nav-card);
+    transition: none;
+  }
+  .nav2m.is-searching .nav2m__searchbar { display: flex; }
+  .nav2m.is-searching .nav2m__searchbtn { visibility: hidden; }
+  .nav2m__searchbar .search-blog {
+    display: block;
+    flex: 1; min-width: 0;
+    width: auto; max-width: none; margin: 0;
+    height: 2.25rem; padding: 0;
+    border: none; background: transparent; box-shadow: none;
+    font-size: 1rem; color: var(--nav-sheet-text);
+  }
+  .nav2m__searchbar .search-blog::placeholder { color: var(--nav-sheet-text); opacity: 0.45; }
+  .nav2m__searchclose {
+    display: flex;
+    flex: none;
+    width: 2rem; height: 2rem;
+    border: none; border-radius: 50%; padding: 0;
+    background: var(--nav-sheet-cta-bg);
+    color: var(--nav-sheet-cta-text);
+    align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .nav2m__searchclose .w-embed { display: flex; }
+  .nav2m__searchclose svg { width: 0.875rem; height: 0.875rem; display: block; }
+
+  /* full-page scrim behind the sheet */
+  .nav2m__blur {
+    position: fixed; inset: 0;
+    z-index: 5;
+    background: var(--nav-scrim);
+    -webkit-backdrop-filter: blur(0.75rem);
+    backdrop-filter: blur(0.75rem);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__blur {
+    opacity: 1; visibility: visible;
+    transition: opacity 200ms ease;
+  }
+
+  /* the open menu: opaque card, flies in from the bottom */
+  .nav2m__sheet {
+    position: fixed;
+    top: 5.25rem;                    /* pill (12+64) + 8 gap */
+    left: 0.75rem; right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 10;
+    border-radius: 2.25rem;          /* 36 */
+    background: var(--nav-card);
+    color: var(--nav-sheet-text);
+    padding: 1rem 0.75rem 0.75rem;   /* 16 / 12 / 12 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    translate: 0 110%;
+    visibility: hidden;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1),
+                visibility 0s linear 400ms;
+  }
+  .nav2m.is-open .nav2m__sheet {
+    translate: 0 0;
+    visibility: visible;
+    transition: translate 380ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .nav2m__list { width: 100%; padding: 0 0.625rem; }
+
+  /* top-level row */
+  .nav2m__item { border-bottom: 1px solid var(--nav-sheet-line); }
+  .nav2m__toprow {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0.75rem 0.75rem 1rem;   /* 10 / 12 / 12 / 16 */
+    background: none; border: none; color: inherit; font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+    max-width: none;
+  }
+  .nav2m__subrow-title .nav2__new { display: inline-block; translate: 0.125rem -0.55em; }
+  .nav2m__toprow-label {
+    position: relative;
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 1.5rem;               /* 24 */
+    font-weight: 600;
+    letter-spacing: 0em;
+    line-height: 1;
+  }
+  .nav2m__topdot {
+    position: absolute;
+    left: -0.625rem; top: 50%;
+    translate: 0 -50%;
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__item.is-active .nav2m__topdot { opacity: 1; }
+  /* collapsed: chevron points right; expanded: down */
+  .nav2m__chev { width: 0.875rem; height: 0.875rem; transform: rotate(-90deg); transition: transform 250ms ease; flex: none; }
+  .nav2m__toprow[aria-expanded="true"] .nav2m__chev { transform: rotate(0deg); }
+
+  /* collapsible submenu: grid-rows trick animates height */
+  .nav2m__sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    grid-template-columns: 1fr;
+    transition: grid-template-rows 280ms ease;
+  }
+  .nav2m__item.is-expanded .nav2m__sub { grid-template-rows: 1fr; }
+  .nav2m__sub-inner { overflow: hidden; min-height: 0; }
+  .nav2m__sub-list { padding-bottom: 0.75rem; }
+  .nav2m__subrows { display: flex; flex-direction: column; }
+
+  .nav2m__subrow {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.5rem 1rem;            /* 8 / 16 */
+    border-radius: 0.75rem;
+  }
+  .nav2m__subrow:active { background: var(--nav-sheet-row-hover); }
+  .nav2m__subrow:active .nav2m__subrow-desc { opacity: 1; }
+  .nav2m__subrow.is-static { cursor: default; }
+  .nav2m__subrow.is-static:active { background: none; }
+  .nav2m__subrow-title {
+    display: flex; align-items: baseline; gap: 0.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;    /* 16px tier */
+    line-height: 1;
+  }
+  .nav2m__subrow-desc {
+    font-size: 0.75rem;              /* 12 */
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    opacity: 0.5;
+  }
+  .nav2m__subdot {
+    position: absolute;
+    left: 0.4375rem; top: 0.75rem;   /* 7 / 12 */
+    width: var(--nav-dot); height: var(--nav-dot);
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+  }
+  .nav2m__subrow.is-active .nav2m__subdot { opacity: 1; }
+
+  /* bottom CTA block: 8px between buttons, 12px to card edges */
+  .nav2m__cta-block { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem; flex: none; }
+  .nav2m__cta-row { display: flex; gap: 0.5rem; }
+  .nav2m__cta-row .nav2m__cta-btn { flex: 1; }
+  .nav2m__cta-btn, .nav2m a.nav2m__cta-btn,
+  .nav2m__cta-main, .nav2m a.nav2m__cta-main {
+    display: flex; align-items: center; justify-content: center;
+    height: 3.5rem;                  /* 56 */
+    border-radius: 1.75rem;
+    background: var(--nav-sheet-cta-bg);
+    color: var(--nav-sheet-cta-text);
+    font-size: 1.5rem;               /* 24, same as top-level items */
+    font-weight: 600;
+    letter-spacing: 0em;
+    /* optical: cap-height band centered in the pill */
+    padding-bottom: 0.0625rem;
+    max-width: none;
+  }
+  /* the yellow Get started (own class instead of a combo) */
+  .nav2m__cta-main, .nav2m a.nav2m__cta-main { background: var(--nav-yellow); color: #000000; }
+}
+
+/* burger goes neutral while the menu is open */
+.nav-v3 .nav2m__burger { transition: background-color 300ms ease; }
+.nav-v3 .nav2m.is-open .nav2m__burger { background: #ffffff; }
+.nav-v3.is-light .nav2m.is-open .nav2m__burger,
+.inverted-bg .nav-v3 .nav2m.is-open .nav2m__burger,
+.white .nav-v3 .nav2m.is-open .nav2m__burger,
+.blog .nav-v3 .nav2m.is-open .nav2m__burger { background: #DBDAE2; }
+
+/* reduced motion: no movement, opacity only */
+@media (prefers-reduced-motion: reduce) {
+  .nav2__hoverplate { transition: opacity 150ms ease; }
+  .nav2__searchbar { transition: none; }
+  .nav2__panel-wrap .nav2__panel { translate: 0 0; transition-property: opacity; }
+  .nav2m__sheet {
+    translate: 0 0; border-radius: 0;
+    opacity: 0;
+    transition: opacity 200ms ease, visibility 0s linear 200ms;
+  }
+  .nav2m.is-open .nav2m__sheet { opacity: 1; transition: opacity 200ms ease; }
+  .nav2m__sub { transition: none; }
+  .nav2__chev, .nav2m__chev, .nav2m__burger svg { transition: none; }
+}
+</style></div><div class="nav2"><div class="nav2__pill"><a href="/" aria-label="Home" aria-current="page" class="nav2__logo w--current"><div class="w-embed"><svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/><path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/><path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/><path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/><path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/><path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/></svg></div></a><div class="nav2__menu"><a role="button" aria-haspopup="true" aria-expanded="false" data-panel="product" tabindex="0" href="#" class="nav2__link"><span class="nav2__word">Product<span class="nav2__dot"></span></span><div class="w-embed"><svg class="nav2__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><a role="button" aria-haspopup="true" aria-expanded="false" data-panel="ai" tabindex="0" href="#" class="nav2__link"><span class="nav2__word">AI<span class="nav2__dot"></span></span><div class="w-embed"><svg class="nav2__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><a href="/case-studies" data-match-prefix="/case-studies" class="nav2__link"><span class="nav2__word">Cases<span class="nav2__dot"></span></span></a><a href="/blog" data-match-prefix="/blog" class="nav2__link"><span class="nav2__word">Blog<span class="nav2__dot"></span></span></a><a href="/pricing" class="nav2__link"><span class="nav2__word">Pricing<span class="nav2__dot"></span></span></a></div><div class="nav2__right"><a href="/demo" data-cta-type="nav-book-demo" class="nav2__txtbtn cta-track">Book demo</a><a href="https://app.bir.ch/login" class="nav2__txtbtn">Log in</a><a href="https://app.bir.ch/signup" data-cta-type="nav-sign-up" class="nav2__cta cta-track">Get started</a></div></div><div data-panel-for="product" class="nav2__panel-wrap"><div class="nav2__panel"><span class="nav2__hoverplate"></span><div class="nav2__rows"><a href="/manage" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Rules</div></div><div class="nav2__row-desc">Manage ads at scale with condition-based rules</div></a><a href="/stage" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Stage</div></div><div class="nav2__row-desc">Create ads from Drive media by duplicating your setups</div></a><a href="/explorer" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Explorer</div></div><div class="nav2__row-desc">Track ad performance, spot fatigue, find top assets</div></a><a href="/hub" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Hub</div></div><div class="nav2__row-desc">Set up server-side tracking for Meta</div></a><a href="/features" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">All features</div></div><div class="nav2__row-desc">Learn about full product functionality</div></a></div></div></div><div data-panel-for="ai" class="nav2__panel-wrap"><div class="nav2__panel"><span class="nav2__hoverplate"></span><div class="nav2__rows"><a href="/ai" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Bïrch AI</div></div><div class="nav2__row-desc">Scale your ad ops with an AI layer across your workflows</div></a><a href="/mcp" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Bïrch MCP</div><div class="nav2__new">New</div></div><div class="nav2__row-desc">Connect Birch to your AI tool</div></a><a href="/how-to-choose-birch-ai-tools" data-cta-type="nav-submenu" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Prompting guide</div></div><div class="nav2__row-desc">Learn to use Birch AI, Meta MCP and Birch MCP</div></a><a data-cta-type="nav-submenu" href="#" class="nav2__row cta-track w-inline-block"><div class="nav2__row-dot"></div><div class="nav2__row-title"><div class="nav2__row-name">Routines</div><div class="nav2__soon">Soon</div></div><div class="nav2__row-desc">Schedule repeated workflows</div></a></div></div></div></div><div class="nav2m"><div data-nav2m-close="1" class="nav2m__blur"></div><div class="nav2m__pill"><a href="/" aria-label="Home" aria-current="page" class="nav2m__logo w--current"><div class="w-embed"><svg viewBox="0 0 133 45" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M42.634 7.892C44.507 7.892 46.0254 6.34615 46.0254 4.43925C46.0254 2.53235 44.507 0.9865 42.634 0.9865C40.761 0.9865 39.2426 2.53235 39.2426 4.43925C39.2426 6.34615 40.761 7.892 42.634 7.892ZM33.9135 10.8515C35.7865 10.8515 37.3049 9.30565 37.3049 7.39875C37.3049 5.49185 35.7865 3.946 33.9135 3.946C32.0405 3.946 30.5221 5.49185 30.5221 7.39875C30.5221 9.30565 32.0405 10.8515 33.9135 10.8515Z" fill="currentColor"/><path d="M117.535 43.7414V42.972C120.384 42.972 122.419 41.8473 121.896 37.8224L120.093 24.2679C119.454 19.5919 117.593 16.6916 114.047 16.6916C111.024 16.6916 108.698 19.6511 108.349 23.1433V37.7632C108.349 41.8473 110.035 42.972 112.419 42.972V43.7414H98.0007V42.972C100.326 42.972 102.07 41.8473 102.07 37.7632V6.98442C102.07 4.08411 100.908 3.07788 98.2332 3.07788V2.30841C101.315 2.07165 104.803 1.42056 107.826 0L108.349 0.295951V20.5981C109.396 16.514 112.652 13.1402 117.128 13.1402C122.012 13.1402 125.384 16.514 126.43 24.0903L128.407 37.8224C128.93 41.8473 130.616 42.972 133 42.972V43.7414H117.535Z" fill="currentColor"/><path d="M85.5183 44.3333C77.9021 44.3333 71.7976 37.8816 71.7976 29.1215C71.7976 20.1838 78.4254 13.1402 86.4485 13.1402C92.6112 13.1402 96.6808 17.4611 96.6808 21.7819C96.6808 24.2087 95.1693 25.5701 93.367 25.5701C91.5065 25.5701 90.4019 24.1495 90.4019 22.433C90.4019 20.7757 91.4484 19.947 91.4484 18.2897C91.4484 16.0997 89.5298 14.0872 86.6229 14.0872C81.5649 14.0872 77.4952 19.4143 77.4952 26.6947C77.4952 34.6262 82.6695 39.4798 88.3671 39.4798C93.1925 39.4798 96.7971 36.2243 97.6111 31.7851L98.3669 31.9034C97.3204 38.8879 92.7274 44.3333 85.5183 44.3333Z" fill="currentColor"/><path d="M52.0686 21.4268C52.8244 17.9346 51.9523 16.8692 49.3942 16.81V16.0405C52.8244 15.8037 55.8476 15.3894 59.4521 13.081L59.9754 13.4953L55.9638 32.7913C59.2777 21.4268 62.5916 13.9097 67.0683 13.1994C69.2775 12.8442 71.138 14.2648 71.4287 16.2181C71.6612 18.053 70.731 20.3022 68.4636 20.7165C66.7195 21.0125 65.4404 19.7695 65.0334 18.704C64.6846 17.8754 64.1614 17.2835 63.1149 17.9938C61.4289 19 57.4754 27.8193 53.6383 43.7414H47.3012L52.0686 21.4268Z" fill="currentColor"/><path d="M31.2891 43.7414V42.972C33.6146 42.972 35.3588 41.8473 35.3588 37.7632V20.1838C35.3588 17.2835 34.196 16.3364 31.5216 16.2773V15.5078C34.603 15.271 38.0913 14.6199 41.1145 13.1994L41.6377 13.4953V37.7632C41.6377 41.8473 43.3237 42.972 45.7074 42.972V43.7414H31.2891Z" fill="currentColor"/><path d="M16.395 44.3333C11.4533 44.3333 7.03475 42.5576 3.83714 40.4268V6.98442C3.83714 4.08411 2.67437 3.07788 0 3.07788V2.30841C3.13948 2.07165 6.62778 1.42056 9.59284 0L10.1161 0.295951V20.3614C11.1044 16.9875 14.4765 13.2586 19.302 13.2586C26.3949 13.2586 30.9878 20.5389 30.9878 28.4704C30.9878 37.8224 24.6507 44.3333 16.395 44.3333ZM10.1161 31.1339C10.1161 39.7165 12.4416 43.4455 16.7439 43.4455C21.5112 43.4455 24.4763 38.0592 24.4763 30.4829C24.4763 21.6635 20.9298 16.6324 16.2206 16.6324C13.2556 16.6324 10.8138 19.0592 10.1161 22.3738V31.1339Z" fill="currentColor"/></svg></div></a><button aria-label="Menu" aria-expanded="false" class="nav2m__burger"><div class="w-embed"><svg viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/><circle cx="11" cy="4" r="3"/><circle cx="4" cy="11" r="3"/><circle cx="11" cy="11" r="3"/></svg></div></button><p class="nav2m__pagetitle"></p></div><div class="nav2m__sheet"><div class="nav2m__list"><div data-group="product" class="nav2m__item"><a role="button" aria-expanded="false" tabindex="0" href="#" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Product</span><div class="w-embed"><svg class="nav2m__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><div class="nav2m__sub"><div class="nav2m__sub-inner"><div class="nav2m__sub-list"><div class="nav2m__subrows"><a href="/manage" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Rules</div></div><div class="nav2m__subrow-desc">Manage ads at scale with condition-based rules</div></a><a href="/stage" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Stage</div></div><div class="nav2m__subrow-desc">Create ads from Drive media by duplicating your setups</div></a><a href="/explorer" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Explorer</div></div><div class="nav2m__subrow-desc">Track ad performance, spot fatigue, find top assets</div></a><a href="/hub" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Hub</div></div><div class="nav2m__subrow-desc">Set up server-side tracking for Meta</div></a><a href="/features" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">All features</div></div><div class="nav2m__subrow-desc">Learn about full product functionality</div></a></div></div></div></div></div><div data-group="ai" class="nav2m__item"><a role="button" aria-expanded="false" tabindex="0" href="#" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>AI</span><div class="w-embed"><svg class="nav2m__chev" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1.5 3L5 6.5L8.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></a><div class="nav2m__sub"><div class="nav2m__sub-inner"><div class="nav2m__sub-list"><div class="nav2m__subrows"><a href="/ai" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Bïrch AI</div></div><div class="nav2m__subrow-desc">Scale your ad ops with an AI layer across your workflows</div></a><a href="/mcp" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Bïrch MCP</div><div class="nav2__new">New</div></div><div class="nav2m__subrow-desc">Connect Birch to your AI tool</div></a><a href="/how-to-choose-birch-ai-tools" data-cta-type="nav-submenu-mobile" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Prompting guide</div></div><div class="nav2m__subrow-desc">Learn to use Birch AI, Meta MCP and Birch MCP</div></a><a data-cta-type="nav-submenu-mobile" href="#" class="nav2m__subrow cta-track w-inline-block"><div class="nav2m__subdot"></div><div class="nav2m__subrow-title"><div class="nav2m__subrow-name">Routines</div><div class="nav2__soon">Soon</div></div><div class="nav2m__subrow-desc">Schedule repeated workflows</div></a></div></div></div></div></div><div class="nav2m__item"><a href="/case-studies" data-match-prefix="/case-studies" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Cases</span></a></div><div class="nav2m__item"><a href="/blog" data-match-prefix="/blog" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Blog</span></a></div><div class="nav2m__item"><a href="/pricing" class="nav2m__toprow"><span class="nav2m__toprow-label"><span class="nav2m__topdot"></span>Pricing</span></a></div></div><div class="nav2m__cta-block"><div class="nav2m__cta-row"><a data-cta-type="nav-book-demo-mobile" href="/demo" class="nav2m__cta-btn cta-track">Book demo</a><a href="https://app.bir.ch/login" class="nav2m__cta-btn">Log in</a></div><a href="https://app.bir.ch/signup" data-cta-type="nav-sign-up-mobile" class="nav2m__cta-main cta-track">Get started</a></div></div></div><div class="w-embed w-script"><script>
+/* NAVIGATION V3 - behavior, ported from the dev prototype menu.html.
+   Wires: hover-intent panels, sliding hover plate, mobile sheet with
+   accordion, Soon-row disabling and active-page matching.
+   The blog-search hero collapse lives in its own embed right after this
+   one - it has to be delegated on document, because this script runs
+   while the page body is still being parsed.
+   NOTE: Webflow renders links without a URL as href="#", so group
+   triggers are detected by role="button", not by a missing href.
+   Dev params: ?nav3theme=light forces the light theme,
+   ?nav3active=/features simulates the active page for review. */
+(function () {
+  var root = document.querySelector('.nav-v3');
+  if (!root || root.hasAttribute('data-nav3-ready')) return;
+  root.setAttribute('data-nav3-ready', '');
+
+  function norm(u) {
+    if (!u || u === '#') return '';
+    u = u.split('?')[0].split('#')[0];
+    return u.replace(/\/+$/, '') || '/';
+  }
+  function rowUrl(row) { return norm(row.getAttribute('href')); }
+  function isTrigger(a) { return a && a.getAttribute('role') === 'button'; }
+
+  var PATH = location.pathname.replace(/\/+$/, '') || '/';
+  /* dev helpers: theme + simulated active page */
+  try {
+    var q = new URLSearchParams(location.search);
+    if (q.get('nav3theme') === 'light') root.classList.add('is-light');
+    var fake = norm(q.get('nav3active'));
+    if (fake) PATH = fake;
+  } catch (e) {}
+
+  /* Soon rows: a visible Soon chip means the row is disabled */
+  root.querySelectorAll('.nav2__row, .nav2m__subrow').forEach(function (row) {
+    if (row.querySelector('.nav2__soon')) {
+      row.classList.add('is-static', 'is-disabled');
+      row.removeAttribute('href');
+      row.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  /* ---------- active state ---------- */
+  root.querySelectorAll('.nav2__row, .nav2m__subrow').forEach(function (row) {
+    var u = rowUrl(row);
+    if (u && u === PATH) {
+      row.classList.add('is-active');
+      row.setAttribute('aria-current', 'page');
+    }
+  });
+  root.querySelectorAll('.nav2__link').forEach(function (link) {
+    var active = false;
+    var key = link.getAttribute('data-panel');
+    if (key) {
+      var wrap = root.querySelector('.nav2__panel-wrap[data-panel-for="' + key + '"]');
+      if (wrap) wrap.querySelectorAll('.nav2__row').forEach(function (row) {
+        var u = rowUrl(row);
+        if (u && u === PATH) active = true;
+      });
+    } else {
+      var prefix = link.getAttribute('data-match-prefix');
+      if (prefix) active = PATH.indexOf(prefix) === 0;
+      else active = norm(link.getAttribute('href')) === PATH;
+      if (active) link.setAttribute('aria-current', 'page');
+    }
+    link.classList.toggle('is-active', active);
+  });
+  root.querySelectorAll('.nav2m__item').forEach(function (item) {
+    var active = false;
+    var a = item.querySelector('.nav2m__toprow');
+    if (item.getAttribute('data-group')) {
+      item.querySelectorAll('.nav2m__subrow').forEach(function (row) {
+        var u = rowUrl(row);
+        if (u && u === PATH) active = true;
+      });
+    } else if (a) {
+      var prefix = a.getAttribute('data-match-prefix');
+      if (prefix) active = PATH.indexOf(prefix) === 0;
+      else active = norm(a.getAttribute('href')) === PATH;
+      if (active) a.setAttribute('aria-current', 'page');
+    }
+    item.classList.toggle('is-active', active);
+  });
+
+  /* ---------- desktop panels ---------- */
+  (function () {
+    var pill = root.querySelector('.nav2__pill');
+    if (!pill) return;
+    var openKey = null, closeTimer = null, openTimer = null;
+
+    function wrapFor(key) { return root.querySelector('.nav2__panel-wrap[data-panel-for="' + key + '"]'); }
+    function trigFor(key) { return root.querySelector('.nav2__link[data-panel="' + key + '"]'); }
+
+    function positionPanel(key) {
+      var t = trigFor(key), w = wrapFor(key);
+      if (!t || !w) return;
+      var panel = w.querySelector('.nav2__panel');
+      var row = panel.querySelector('.nav2__row');
+      var pr = pill.getBoundingClientRect();
+      var tr = t.getBoundingClientRect();
+      /* align the panel row titles with the trigger text left edge */
+      var inset = parseFloat(getComputedStyle(panel).paddingLeft) + (row ? parseFloat(getComputedStyle(row).paddingLeft) : 0);
+      var left = tr.left - inset;
+      left = Math.max(pr.left + 8, Math.min(left, pr.right - panel.offsetWidth - 8));
+      w.style.left = left + 'px';
+    }
+    function openPanel(key) {
+      if (openKey && openKey !== key) closeNow();
+      openKey = key;
+      positionPanel(key);
+      wrapFor(key).classList.add('is-open');
+      trigFor(key).setAttribute('aria-expanded', 'true');
+    }
+    function closeNow() {
+      if (!openKey) return;
+      wrapFor(openKey).classList.remove('is-open');
+      trigFor(openKey).setAttribute('aria-expanded', 'false');
+      openKey = null;
+    }
+    function scheduleClose() {
+      clearTimeout(openTimer); clearTimeout(closeTimer);
+      closeTimer = setTimeout(closeNow, 250);      /* grace period */
+    }
+    function scheduleOpen(key) {
+      clearTimeout(closeTimer); clearTimeout(openTimer);
+      if (openKey) { openPanel(key); return; }     /* already open: switch */
+      openTimer = setTimeout(function () { openPanel(key); }, 100); /* hover intent */
+    }
+
+    root.querySelectorAll('.nav2__link[data-panel]').forEach(function (t) {
+      var key = t.getAttribute('data-panel');
+      var w = wrapFor(key);
+      if (!w) return;
+      t.addEventListener('mouseenter', function () { scheduleOpen(key); });
+      t.addEventListener('mouseleave', scheduleClose);
+      w.addEventListener('mouseenter', function () { clearTimeout(closeTimer); });
+      w.addEventListener('mouseleave', scheduleClose);
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (openKey === key) closeNow(); else openPanel(key);
+      });
+      t.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        if (openKey === key) closeNow(); else openPanel(key);
+      });
+    });
+
+    /* sliding hover plate: jumps into place when appearing, glides between rows */
+    root.querySelectorAll('.nav2__panel').forEach(function (panel) {
+      var plate = panel.querySelector('.nav2__hoverplate');
+      if (!plate) return;
+      panel.addEventListener('mouseover', function (e) {
+        var row = e.target.closest('.nav2__row');
+        if (!row) return;
+        if (row.classList.contains('is-static')) { plate.style.opacity = '0'; return; }
+        var hidden = getComputedStyle(plate).opacity === '0';
+        plate.classList.toggle('is-jump', hidden);
+        plate.style.top = row.offsetTop + 'px';
+        plate.style.height = row.offsetHeight + 'px';
+        plate.style.opacity = '1';
+      });
+      panel.addEventListener('mouseleave', function () { plate.style.opacity = '0'; });
+    });
+
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNow(); });
+    document.addEventListener('click', function (e) {
+      if (openKey && !e.target.closest('.nav2__pill') && !e.target.closest('.nav2__panel-wrap')) closeNow();
+    });
+    window.addEventListener('resize', function () { if (openKey) positionPanel(openKey); });
+  })();
+
+  /* ---------- mobile sheet + accordion ---------- */
+  (function () {
+    var m = root.querySelector('.nav2m');
+    if (!m) return;
+    var burger = m.querySelector('.nav2m__burger');
+    var list = m.querySelector('.nav2m__list');
+    if (!burger || !list) return;
+
+    function expandItem(item, expand) {
+      item.classList.toggle('is-expanded', expand);
+      var btn = item.querySelector('.nav2m__toprow');
+      if (btn && btn.hasAttribute('aria-expanded')) btn.setAttribute('aria-expanded', expand ? 'true' : 'false');
+    }
+
+    /* one open section at a time; group triggers carry role=button */
+    list.addEventListener('click', function (e) {
+      var btn = e.target.closest('.nav2m__toprow');
+      if (!isTrigger(btn)) return;
+      e.preventDefault();
+      var item = btn.closest('.nav2m__item');
+      var wasOpen = item.classList.contains('is-expanded');
+      list.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+      if (!wasOpen) expandItem(item, true);
+    });
+    list.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var btn = e.target.closest('.nav2m__toprow');
+      if (!isTrigger(btn)) return;
+      e.preventDefault();
+      btn.click();
+    });
+
+    function openSheet() {
+      m.classList.add('is-open');
+      burger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      /* auto-expand the active page group, active row into view */
+      list.querySelectorAll('.nav2m__item.is-expanded').forEach(function (el) { expandItem(el, false); });
+      var activeSub = list.querySelector('.nav2m__subrow.is-active');
+      if (activeSub) {
+        var item = activeSub.closest('.nav2m__item');
+        var sub = item.querySelector('.nav2m__sub');
+        if (sub) {
+          var prev = sub.style.transition;
+          sub.style.transition = 'none';           /* snap open on entry */
+          expandItem(item, true);
+          void sub.offsetWidth;
+          sub.style.transition = prev;
+        }
+        activeSub.scrollIntoView({ block: 'center' });
+      }
+    }
+    function closeSheet() {
+      m.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    burger.addEventListener('click', function () {
+      if (m.classList.contains('is-open')) closeSheet(); else openSheet();
+    });
+    var scrim = m.querySelector('[data-nav2m-close]');
+    if (scrim) scrim.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+    /* close only on real navigation links, not on href="#" triggers */
+    m.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (a && a.getAttribute('href') !== '#') closeSheet();
+    });
+  })();
+})();
+</script></div><div class="w-embed w-script"><!-- blog-search script omitted: dev pages have no blog DOM --></div></div></div></nav>
+
+<section class="section hs" id="hs">
+  <div class="hs__sticky">
+    <div class="container">
+
+      <!-- One card, one scene. The slides are ranges of the scroll, not
+           separate cards: the scene runs through them without resetting,
+           which is what lets a fragment travel from one slide to the next.
+           Only the top bar and the card colour change at a boundary. -->
+      <article class="hs__card" id="card">
+
+        <div class="hs__bars">
+          <nav class="hs__pager" aria-label="Slides">
+            <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
+            <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
+            <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
+          </nav>
+        <header class="hs__bar is-active" data-slide="0" data-bg="#1877F2">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
+            <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+          </div>
+          <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+            <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+          </div>
+        </header>
+        <header class="hs__bar" data-slide="1" data-bg="#4450F2">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
+            <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
+          </div>
+          <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
+            <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
+          </div>
+        </header>
+        <header class="hs__bar" data-slide="2" data-bg="#5B45CD">
+          <div>
+            <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
+            <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
+          </div>
+          <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
+          <div class="hs__buttons">
+            <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
+            <a class="btn btn-default btn-xs" href="#">More about MCP</a>
+          </div>
+        </header>
+        </div>
+
+        <div class="hs__canvas" id="canvas">
+          <img data-frag="schedule-cal" class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+               width="875" height="1271" loading="lazy" decoding="async"
+               style="--x:37; --y:15; --w:364.5; --dy:37; z-index:1">
+          <img data-frag="actions" class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+               width="420" height="905" loading="lazy" decoding="async"
+               style="--x:56; --y:169; --w:175.02; --dy:37; z-index:2">
+          <img data-frag="platform-google-ads" class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:3">
+          <img data-frag="integrations" class="hs__frag" src="images/slides/01/integrations.webp" alt="Integrations"
+               width="1339" height="227" loading="lazy" decoding="async"
+               style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; z-index:4">
+          <img data-frag="ad-account" class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+               width="625" height="252" loading="lazy" decoding="async"
+               style="--x:155; --y:226; --w:260.25; --dy:172; z-index:5">
+          <img data-frag="schedule-section" class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+               width="810" height="421" loading="lazy" decoding="async"
+               style="--x:999; --y:0; --w:337.5; --dy:58; z-index:6">
+          <img data-frag="frequency-popover" class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+               width="432" height="445" loading="lazy" decoding="async"
+               style="--x:1089; --y:89; --w:180; --dy:58; z-index:7">
+          <img data-frag="filter" class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+               width="1474" height="252" loading="lazy" decoding="async"
+               style="--x:921; --y:240; --w:614.25; --dy:111; z-index:11">
+          <img data-frag="platform-tiktok" class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; z-index:12">
+          <img data-frag="platform-meta" class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; z-index:13">
+          <img data-frag="platform-snapchat" class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+               width="225" height="225" loading="lazy" decoding="async"
+               style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; z-index:14">
+
+          <!-- Closing window: holds the three rule cards and becomes the
+               "Your automation rules" card by shrinking around them. -->
+          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip hs__frag--ring"
+               style="--ring-r:16; --x:-200; --y:-100; --w:1632; --h:800; z-index:10">
+            <div data-frag="rules-face" class="hs__rules-face">
+              <span class="hs__rules-title">Your automation rules</span>
+            </div>
+            <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+                 width="1381" height="461" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:8">
+            <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+                 width="1552" height="518" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:9">
+            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
+                 width="1793" height="595" loading="lazy" decoding="async"
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
+          </div>
+
+          <div data-frag="business-context" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
+               role="img" aria-label="Your business context"
+               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"></div>
+          <div data-frag="meta-ads-library" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
+               role="img" aria-label="Meta ads library"
+               style="--ring-r:16; --x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
+          <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
+               style="--x:452; --y:19; --w:300; --h:352; z-index:17">
+            <img class="hs__chat-icon" src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
+            <div class="chat-card-wrap">
+              <div class="chat-card">
+                <div class="chat-card__body">
+                  <div class="chat-card__feed">
+                    <div class="chat-card__messages">
+                      <div class="chat-card__bubble" id="hsBubble">How healthy is my setup?</div>
+                    </div>
+                    <div class="chat-card__response" id="hsResponse">
+                      <div class="chat-card__response-content">
+                        <div class="hs__tools" id="hsTools"><div>
+                          <div class="hs__tool" data-lights="rules">Scanning your rule automations</div>
+                          <div class="hs__tool" data-lights="business-context">Reading your business context</div>
+                          <div class="hs__tool" data-lights="meta-ads-library">Checking Meta Ads Library</div>
+                        </div></div>
+                        <div class="chat-card__used" id="hsUsed" style="display:none">Used:</div>
+                        <div class="chat-card__used-row" id="hsUsedRow" style="display:none">
+                          <span class="chat-card__used-names">Rules · Business context · Meta Ads Library</span>
+                        </div>
+                        <p id="hsAnswerA"></p>
+                        <p id="hsAnswerB"></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="chat-card__input-area">
+                  <div class="chat-card__input-wrap">
+                    <div class="chat-card__text-flow">
+                      <span class="chat-card__placeholder" id="hsPlaceholder">Ask anything</span><span class="chat-card__typed" id="hsTyped"></span><span class="chat-card__cursor" id="hsCursor"></span>
+                    </div>
+                    <button class="chat-card__send" id="hsSend" disabled aria-label="Send">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
+          <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
+          <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
+               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:192.2; --w:209.24; z-index:7; border-radius: calc(12 * var(--u))">
+          <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
+               width="573" height="741" loading="lazy" decoding="async" style="--x:829.5; --y:56.4; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
+          <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
+               width="643" height="643" loading="lazy" decoding="async" style="--x:991; --y:36; --w:199.94; z-index:8; border-radius: calc(24 * var(--u))">
+          <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
+               alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
+               style="--x:434; --y:95; --w:371; z-index:18">
+          <img data-frag="routine" class="hs__frag hs__frag--fade" src="images/slides/01/routine.webp"
+               alt="Routine" width="650" height="338" loading="lazy" decoding="async"
+               style="--x:881; --y:108; --w:271; z-index:18">
+          <img data-frag="folder" class="hs__frag hs__frag--fade" src="images/slides/01/folder.webp"
+               alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
+               style="--x:997; --y:277; --w:137; z-index:12">
+
+          <div class="hs__guide" data-label="364 — эталон"></div>
+          <div class="hs__core-box" id="coreBox"></div>
+        </div>
+
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   Block logic — the part that ships. The debug panel only reads
+   from here and writes --track-per-step.
+
+   The scene is continuous: STEPS is one list running through every
+   slide, and a fragment simply has a keyframe in each. Slides are
+   ranges of that list — crossing a boundary swaps the top bar and
+   the card colour, nothing else.
+
+   CSS blends exactly two keyframes at a time (--x/--y/--w against
+   --x2/--y2/--w2, mixed by --t). This script decides which two, and
+   writes them. Keeping the table here rather than in 12 custom
+   properties per tag is what makes adding a step cheap; step 0 stays
+   inline in the markup so the scene is still correct without JS.
+   ══════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  var track  = document.getElementById('hs');
+  var sticky = track.querySelector('.hs__sticky');
+  var card   = document.getElementById('card');
+  var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
+  var root   = document.documentElement;
+
+  /* Which slide each step belongs to. */
+  var STEPS = [
+    { slide: 0 },   /* 0 — the collage */
+    { slide: 0 },   /* 1 — scatter, the rules stack out */
+    { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
+    { slide: 1, len: 1.8 },   /* 3 — geometry holds still; the chat story plays here on its own clock */
+    { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
+  ];
+
+  /* Keyframes per fragment, one entry per step. Anything omitted is
+     inherited from that fragment's previous step, so a step only
+     records what actually changes.
+       x, y, w — design units of the 1232-wide frame
+       d       — [dx, dy, dw, dh] toward h550
+       o       — opacity */
+  var K = {
+    /* Background — scatters at step 1 and then stays put. Slide 02 does
+       not move it between h364 and h550, hence the zeroed deltas. */
+    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
+    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78},  {d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0]}],   /* leaves downward with the scatter */
+    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
+    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
+    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
+    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213}, {d:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205}, {d:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21},  {d:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210}, {d:[0,0,0]}],
+
+    /* The closing window. Wider than the canvas until step 2, so it is
+       invisible as a frame and clips nothing. */
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
+    'rules-face':         [{o:0}, {o:0}, {o:1}],
+
+    /* The three cards are children of the window, so their coordinates
+       are measured from it — hence the +200/+100 of the open window on
+       the first two steps. The step-2 numbers are Figma's own child
+       coordinates, which are already frame-relative: checked against the
+       exported card, where Pause starts at x≈91 / y≈62 inside 276×275. */
+    /* The stack cards start exactly behind the front card (same box, lower
+       z) and slide out — no fade, the front card is what hides them. */
+    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0]},
+                           {x:528.45, y:120.75, w:575.45},
+                           {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
+    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0]},
+                           {x:492.35, y:162.45, w:646.7},
+                           {x:55.844, y:103,    w:553.746, d:[0,0,0]}],
+    'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
+                           {x:461,  y:208.76, w:709.65},
+                           {x:29,   y:147,     w:607.65, d:[0,0,0]}],
+
+    /* Slide 02. They arrive together for now — lighting them one by one
+       is the chat's job, and the chat is not wired yet. */
+    'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, auto:{delay:150, dur:700}, after:'story', ease:'in'}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, auto:{delay:300, dur:700}, after:'story', ease:'in'}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
+
+    /* Step 4 — the routine. Everything arrives in place; the chat slides
+       left to make room for it. Both h550 frames move the whole group by
+       the same 69, the folder by 75. */
+    /* Entrances start 40 units low and rise into place while they fade. */
+    /* The creatives sit inside the folder (its box, scaled down) and fly
+       out one after another — staggered windows inside the same segment. */
+    /* Bounding boxes from the group's design context (metadata puts the
+       rotated ones 200+ units too far right); the cards themselves are
+       209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
+       each unrotated box is placed on its bbox centre and rotated there.
+       bboxes: juice 723/176, cherry 810/42, jar 957/2. */
+    /* A stack that fans out, as one continuous timed motion: armed when the
+       routine segment is half way, the pile rises from under the canvas onto
+       the juice card's spot (leg 1, dur), and the cards on top peel off it
+       while the rise is still settling (leg 2, delay counted from arming).
+       Juice is the bottom of the pile and arrives at its final angle. */
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, dur:800, rate:0.10}, auto:{delay:800, dur:10}, arm:0.5}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, dur:800, rate:0.10}, auto:{delay:1000, dur:750}, arm:0.5}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, dur:800, rate:0.10}, auto:{delay:750,  dur:750}, arm:0.5}],
+    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
+    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
+    'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, e:[0.45,0.85], ease:'out'}]
+  };
+
+  /* Flatten the inheritance once, so lookup during scroll is a plain read. */
+  var FRAGS = {};
+  Object.keys(K).forEach(function (id) {
+    var el = card.querySelector('[data-frag="' + id + '"]');
+    if (!el) return;
+    var out = [], prev = { x:0, y:0, w:0, d:[0,0,0], o:1 };
+    for (var i = 0; i < STEPS.length; i++) {
+      var raw = K[id][i] || {};
+      prev = {
+        /* window inside the arriving segment and the curve applied to it —
+           per keyframe, not inherited: a stagger belongs to one entrance */
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm,
+        x: raw.x !== undefined ? raw.x : prev.x,
+        h: raw.h !== undefined ? raw.h : prev.h,
+        r: raw.r !== undefined ? raw.r : prev.r,
+        y: raw.y !== undefined ? raw.y : prev.y,
+        w: raw.w !== undefined ? raw.w : prev.w,
+        d: raw.d || prev.d,
+        o: raw.o !== undefined ? raw.o : prev.o
+      };
+      out.push(prev);
+    }
+    FRAGS[id] = { el: el, k: out };
+  });
+
+  /* segment lengths in screens (default 1) — the track and the mapping
+     from progress to segment both follow them */
+  var LEN = STEPS.slice(1).map(function (st) { return st.len || 1; });
+  var TOTAL = LEN.reduce(function (a, b) { return a + b; }, 0);
+  var CUM = [0]; LEN.forEach(function (l) { CUM.push(CUM[CUM.length - 1] + l); });
+  track.style.setProperty('--steps', TOTAL);
+
+  /* All slides share one top-bar height, otherwise the canvas — and with
+     it the whole scene — would jump on every slide change. Measured
+     twice: once now and once the real font metrics are in, because the
+     fallback font wraps the paragraph differently (dev-pages.md). */
+  function lockBarHeight() {
+    var cs = getComputedStyle(root), rootPx = parseFloat(cs.fontSize);
+    root.style.setProperty('--bar-h', '0rem');
+    var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
+    root.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
+
+    /* Bottom gap: whatever room is left under the minimum card, capped. */
+    var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;
+    var pad   = parseFloat(cs.getPropertyValue('--pad-card')) * rootPx;
+    var gapMd = parseFloat(cs.getPropertyValue('--gap-md')) * rootPx;
+    var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
+    var u = card.getBoundingClientRect().width / 1232;
+    var minCard = pad + tallest + gapMd + 364 * u;
+    var room = innerHeight - navH - minCard;
+    root.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
+  }
+
+  /* 0 at the moment the card pins, 1 when the track runs out. */
+  function progress() {
+    var cs = getComputedStyle(root);
+    var navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);
+    var span = track.offsetHeight - sticky.offsetHeight;
+    if (span <= 0) return 0;
+    return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
+  }
+
+  /* Rest at both ends of every transition — otherwise a step would start
+     changing the instant the previous one arrived, and nothing would ever
+     read as a state. A keyframe may narrow or shift its own window (e:)
+     and pick a curve (ease:), which is how a group staggers. */
+  var EASE_FROM = 0.25, EASE_TO = 0.75;
+  var EASES = {
+    smooth: function (t) { return t * t * (3 - 2 * t); },
+    out:    function (t) { return 1 - Math.pow(1 - t, 3); },
+    in:     function (t) { return t * t * t; },
+    back:   function (t) { var c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }
+  };
+  function curve(k, local) {
+    var w = (k && k.e) || [EASE_FROM, EASE_TO];
+    var t = Math.min(1, Math.max(0, (local - w[0]) / (w[1] - w[0])));
+    return EASES[(k && k.ease) || 'smooth'](t);
+  }
+  function smoothstep(a, b, x) { return curve(null, a === EASE_FROM ? x : (x - a) / (b - a) * (EASE_TO - EASE_FROM) + EASE_FROM); }
+
+  /* Viscosity: the scene follows the scroll with a little lag, so a flick
+     of the wheel reads as motion rather than as a cut. Position stays the
+     source of truth — this only delays arriving at it. */
+  var shownP = null, targetP = 0, raf = null;
+  var LAG = 0.10;
+  var autoLive = false;
+  function follow() {
+    raf = null;
+    if (shownP === null) shownP = targetP;
+    var diff = targetP - shownP;
+    if (Math.abs(diff) < 0.00025) {
+      shownP = targetP; autoLive = false; render(shownP);
+      if (autoLive) raf = requestAnimationFrame(follow);   /* a timed piece is still playing */
+      return;
+    }
+    shownP += diff * LAG;
+    render(shownP);
+    raf = requestAnimationFrame(follow);
+  }
+
+  var wrote = -1;
+  function writePair(a) {
+    if (a === wrote) return;
+    wrote = a;
+    var b = Math.min(STEPS.length - 1, a + 1);
+    Object.keys(FRAGS).forEach(function (id) {
+      var f = FRAGS[id], ka = f.k[a], kb = f.k[b], st = f.el.style;
+      st.setProperty('--x',  ka.x);  st.setProperty('--y',  ka.y);  st.setProperty('--w',  ka.w);
+      st.setProperty('--x2', kb.x);  st.setProperty('--y2', kb.y);  st.setProperty('--w2', kb.w);
+      st.setProperty('--h',  ka.h);  st.setProperty('--h2', kb.h);
+      st.setProperty('--dh', ka.d[3] || 0); st.setProperty('--dh2', kb.d[3] || 0);
+      st.setProperty('--r',  ka.r || 0);    st.setProperty('--r2', kb.r || 0);
+      st.setProperty('--dx', ka.d[0]); st.setProperty('--dy', ka.d[1]); st.setProperty('--dw', ka.d[2]);
+      st.setProperty('--dx2', kb.d[0]); st.setProperty('--dy2', kb.d[1]); st.setProperty('--dw2', kb.d[2]);
+      st.setProperty('--o1', ka.o); st.setProperty('--o2', kb.o);
+    });
+  }
+
+  /* Where each slide starts and ends on the track, in screens. */
+  var SLIDE_RANGE = [];
+  (function () {
+    var first = {};
+    STEPS.forEach(function (st, i) { if (first[st.slide] === undefined) first[st.slide] = i; });
+    Object.keys(first).forEach(function (sl) {
+      var i0 = first[sl], i1 = STEPS.length - 1;
+      for (var j = i0 + 1; j < STEPS.length; j++) if (STEPS[j].slide !== +sl) { i1 = j; break; }
+      SLIDE_RANGE[+sl] = [CUM[i0], CUM[Math.min(i1, CUM.length - 1)]];
+    });
+  })();
+  var dots = [].slice.call(track.querySelectorAll('.hs__dot'));
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () {
+      /* a slide not built yet (no steps) scrolls to the end of the track */
+      var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
+      var cs = getComputedStyle(root), navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);
+      window.scrollTo({ top: track.offsetTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'smooth' });
+    });
+  });
+
+  var slide = -1;
+  function apply() {
+    targetP = progress();
+    if (!raf) raf = requestAnimationFrame(follow);
+  }
+  function render(p) {
+    /* progress → segment index + local progress, honouring segment lengths */
+    var pos = Math.min(TOTAL - 0.000001, p * TOTAL), a = 0;
+    while (a < LEN.length - 1 && pos >= CUM[a + 1]) a++;
+    var local = (pos - CUM[a]) / LEN[a];
+    var q = a + local;
+    var t    = curve(null, local);
+
+    writePair(a);
+    card.style.setProperty('--t', t.toFixed(4));
+    /* each fragment gets its own t: same segment, own window and curve */
+    autoLive = false;
+    var b = Math.min(STEPS.length - 1, a + 1);
+    Object.keys(FRAGS).forEach(function (id) {
+      var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
+      if (kb.auto && !kb.via) {
+        /* plays on its own clock from the moment the segment is entered —
+           and, when it names a gate, not before that gate opens */
+        var armed = local > 0.02 && (!kb.after || GATES[kb.after]);
+        if (!armed) { f.autoStart = null; tt = 0; }
+        else {
+          if (!f.autoStart) f.autoStart = performance.now();
+          var el2 = performance.now() - f.autoStart - kb.auto.delay;
+          tt = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, el2 / kb.auto.dur)));
+          if (el2 < kb.auto.dur) autoLive = true;
+        }
+      } else if (kb.via && kb.via.dur) {
+        /* Timed two-leg flight driven by a lerp: the target is the pile
+           (via) from the moment the segment is armed, and the final spot
+           once auto.delay has passed; x, y and rotation chase the current
+           target exponentially (rate per frame at 60 fps). Velocity never
+           drops to zero between the legs, so rise and peel read as one
+           motion. Scrolling back re-parks the card instantly. */
+        var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
+        if (!armedV) { f.autoStart = null; f.lerp = null; }
+        else {
+          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, r: ka.r || 0, t: performance.now() }; }
+          var elV = performance.now() - f.autoStart;
+          var tgt = elV >= kb.auto.delay ? kb : kb.via;
+          var rate = kb.via.rate || 0.12, dtV = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
+          var kV = 1 - Math.pow(1 - rate, dtV);
+          f.lerp.x += (tgt.x - f.lerp.x) * kV; f.lerp.y += (tgt.y - f.lerp.y) * kV; f.lerp.r += ((tgt.r || 0) - f.lerp.r) * kV;
+          if (Math.abs(tgt.x - f.lerp.x) + Math.abs(tgt.y - f.lerp.y) + Math.abs((tgt.r || 0) - f.lerp.r) > 0.3 || elV < kb.auto.delay) autoLive = true;
+        }
+        var cur = f.lerp || { x: ka.x, y: ka.y, r: ka.r || 0 };
+        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r);
+        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r);
+        tt = 0;
+      } else if (kb.via) {
+        /* leg 1: previous → via on the via's own window (the pile arrives
+           together); leg 2: via → final — on the keyframe's window, or on
+           its own clock when the keyframe says auto. */
+        var ka = f.k[a], t1 = curve(kb.via, local), leg1 = t1 < 1;
+        var from = leg1 ? ka : kb.via, to = leg1 ? kb.via : kb;
+        st.setProperty('--x',  from.x !== undefined ? from.x : ka.x); st.setProperty('--y',  from.y !== undefined ? from.y : ka.y);
+        st.setProperty('--r',  from.r || 0);
+        st.setProperty('--x2', to.x !== undefined ? to.x : kb.x);    st.setProperty('--y2', to.y !== undefined ? to.y : kb.y);
+        st.setProperty('--r2', to.r || 0);
+        if (leg1) { tt = t1; f.autoStart = null; }
+        else if (kb.auto) {
+          if (!f.autoStart) f.autoStart = performance.now();
+          var el = performance.now() - f.autoStart - kb.auto.delay;
+          tt = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, el / kb.auto.dur)));
+          if (el < kb.auto.dur) autoLive = true;
+        } else { tt = curve(kb, local); }
+      }
+      st.setProperty('--t', tt.toFixed(4));
+    });
+
+    driveChat(a, local);
+
+    /* the rules frame counts as closed from 90% of its closing leg onward */
+    var closing = FRAGS['rules-frame'];
+    if (closing) {
+      closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && curve(closing.k[2], local) >= 0.9));
+      closing.el.classList.toggle('is-stacked', a > 0 || local > 0.03);
+    }
+
+    var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
+    if (si !== slide) {
+      var forwardSlide = si > slide;
+      slide = si;
+      bars.forEach(function (b, n) {
+        b.classList.toggle('is-active', n === si);
+      });
+      card.style.backgroundColor = bars[si].dataset.bg;
+      dots.forEach(function (d, n) { d.classList.toggle('is-active', n === si); });
+    }
+    /* the active capsule fills with progress through its own slide;
+       slides already passed read full, slides ahead read empty */
+    var r = SLIDE_RANGE[si] || [0, TOTAL];
+    var fill = Math.min(1, Math.max(0, (pos - r[0]) / Math.max(0.0001, r[1] - r[0])));
+    dots.forEach(function (d, n) { d.style.setProperty('--fill', n < si ? 1 : n > si ? 0 : fill.toFixed(3)); });
+    window.__hs = { p: p, step: a, local: local, t: t, slide: si, steps: STEPS.length };
+  }
+
+  lockBarHeight();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockBarHeight);
+  new ResizeObserver(lockBarHeight).observe(document.body);
+
+  /* ── Chat ────────────────────────────────────────────────────
+     Hybrid, as agreed: scroll picks the beat, time types the letters.
+     Scrubbing forward or back lands on a state that is fully defined by
+     position, so a fast reader is never left mid-sentence and a reader
+     who goes back sees the same thing twice. */
+  var Q  = 'How healthy is my setup?';
+  var A1 = 'Gap found — a creative is about to hit fatigue.';
+  var A2 = 'UGC runs longest in your vertical — median 41 days.';
+  var BEATS = [0.05, 0.08, 0.30, 0.50, 0.70];   /* → six states */
+
+  var ch = {
+    bubble: document.getElementById('hsBubble'),
+    resp:   document.getElementById('hsResponse'),
+    tools:  document.getElementById('hsTools'),
+    tool:   [].slice.call(document.querySelectorAll('.hs__tool')),
+    used:   document.getElementById('hsUsed'),
+    usedRow:document.getElementById('hsUsedRow'),
+    a:      document.getElementById('hsAnswerA'),
+    b:      document.getElementById('hsAnswerB'),
+    typed:  document.getElementById('hsTyped'),
+    hint:   document.getElementById('hsPlaceholder'),
+    send:   document.getElementById('hsSend')
+  };
+  var LIT = { rules: card.querySelector('[data-frag="rules-frame"]') };
+  ['business-context', 'meta-ads-library'].forEach(function (id) {
+    LIT[id] = card.querySelector('[data-frag="' + id + '"]');
+  });
+
+  var timers = [];
+  function stopTyping() { timers.forEach(clearInterval); timers = []; }
+  function type(el, text, then) {
+    var i = 0;
+    el.textContent = '';
+    var t = setInterval(function () {
+      el.textContent = text.slice(0, ++i);
+      if (el === ch.typed) ch.hint.style.display = 'none';
+      if (i >= text.length) { clearInterval(t); if (then) then(); }
+    }, 14);
+    timers.push(t);
+  }
+
+  var state = -1;
+  var hurry = false;   /* set by driveChat for the current frame */
+  var GATES = { story: false };
+  var litAt = null;
+  function hurried() { return hurry; }
+  function setState(n) {
+    if (n === state) return;
+    var forward = n > state;
+    stopTyping();
+    state = n;
+    /* the gate the scene waits on opens 1.7 s after the last card was called,
+       so a hurried story still lets Meta Ads Library fly in before anything leaves */
+    if (n === 4) litAt = performance.now();
+    if (n < 4) { litAt = null; GATES.story = false; }
+
+    ch.bubble.classList.toggle('is-visible', n >= 1);
+    ch.resp.classList.toggle('is-visible', n >= 1);
+    ch.tool.forEach(function (el, i) {
+      el.classList.toggle('is-on', n >= 2 + i);
+      el.classList.toggle('is-live', n === 2 + i);
+    });
+    ch.tools.classList.toggle('is-done', n >= 5);
+    ch.used.style.display = ch.usedRow.style.display = n < 5 ? 'none' : '';
+    ch.send.disabled = n !== 0;
+
+    /* the ring sits on whichever source is being read; entities stay once risen */
+    LIT.rules.classList.toggle('is-lit', n === 2);
+    LIT['business-context'].style.setProperty('--lit', n >= 3 ? 1 : 0);
+    LIT['business-context'].classList.toggle('is-lit', n === 3);
+    LIT['meta-ads-library'].style.setProperty('--lit', n >= 4 ? 1 : 0);
+    LIT['meta-ads-library'].classList.toggle('is-lit', n === 4);
+
+    ch.hint.style.display = (n < 0 || (n === 0 && forward)) ? '' : 'none';
+    if (n === 0) {
+      /* only animate when the reader arrives here, not when scrubbing back
+         past it — going backwards should show the finished line, not replay */
+      if (forward && !hurried()) { type(ch.typed, Q); } else { ch.typed.textContent = Q; }
+    } else {
+      ch.typed.textContent = '';
+    }
+
+    if (n >= 5) {
+      if (forward && !hurried()) { type(ch.a, A1, function () { type(ch.b, A2); }); }
+      else { ch.a.textContent = A1; ch.b.textContent = A2; }
+    } else {
+      ch.a.textContent = ch.b.textContent = '';
+    }
+  }
+
+  /* The chat lives in the segment where the scene holds still. Once it is
+     on stage the story plays on its own clock — the same rule as the fan:
+     scroll starts it and may only hurry it, never hold it. Scrolling back
+     before the chat resets it. */
+  var CHAT_SEG = 2;
+  var STORY = [0, 600, 950, 1900, 2850, 3800];   /* ms at which each state begins — 350 ms breath, then a step */
+  var storyStart = null;
+  function driveChat(a, local) {
+    var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
+    if (cp < 0) { storyStart = null; setState(-1); return; }
+    if (storyStart === null) storyStart = performance.now();
+    var elapsed = performance.now() - storyStart;
+    /* reader already past the segment: finish now rather than make them wait */
+    hurry = cp >= 0.9;
+    if (hurry) elapsed = Infinity;
+    var n = 0;
+    while (n < STORY.length - 1 && elapsed >= STORY[n + 1]) n++;
+    if (n > state + 1) { for (var i = state + 1; i < n; i++) setState(i); }   /* never skip a beat's side effects */
+    setState(n);
+    GATES.story = state >= 5 && litAt !== null && performance.now() - litAt >= 1700;
+    if (elapsed < STORY[STORY.length - 1] + 2500) autoLive = true;         /* keep frames coming while it plays */
+    if (!GATES.story) autoLive = true;                                      /* something may be waiting on the story */
+  }
+
+  addEventListener('scroll', apply, { passive: true });
+  addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
+  apply();
+  window.__hsApply = apply;
+})();
+</script>
+<script src="debug/geo-panel.js"></script>
+</body>
+</html>
