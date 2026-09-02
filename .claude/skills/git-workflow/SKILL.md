@@ -50,12 +50,16 @@ Update the "Как это выглядело у нас" and "Что мы дел�
 
 End-of-task pull request, per `CLAUDE.md` ("один PR на задачу, в конце") and the merge-advice rule:
 
-1. Confirm the task is closed with the user if it is not obvious. Do not open a PR per commit.
+1. Only on the user's explicit request ("оформи PR", "слей в main", or `/git-workflow pr`). Never open a PR on your own at the end of a task. You may *propose* one when you think the task is closed, but only as a question ("задача выглядит закрытой — оформить PR? совет по merge — …") and then wait for the answer. Do not open a PR per commit.
 2. Show the facts first: `git log --oneline main..HEAD` and `git diff --stat main..HEAD`.
 3. Push the branch: `git push -u origin <branch>`.
 4. `gh pr create --base main` with a title in the repo's style (Russian, "Область: что сделано") and a body that lists what changed and why. End the body with the attribution line the harness asks for.
 5. Recommend a merge method tied to *these* commits, one sentence of why. Default **squash** (many small commits of one task → one line in `main`). **Merge commit** only when the per-commit history is worth keeping (a long multi-phase piece someone may want to revert step by step). **Rebase** practically never here.
 6. Do not press merge yourself unless the user says so explicitly. After merge, remind to delete the branch.
+
+## Commits and pushes (do them yourself)
+
+Commit after every closed step (a block renders, mobile is fine, a rule is written into a doc) with a one-line report: "закоммитил: …". Push only your own branch, also without asking — it is a backup, `main` is untouched. If the user says "не коммить пока", stop until told otherwise. The weight ladder: commit and push live in your branch and are reversible → do them; a PR touches shared `main` → only on the user's word.
 
 ## Hard rules (repeat them if the user asks to break one)
 
