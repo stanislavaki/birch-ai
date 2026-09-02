@@ -9,6 +9,18 @@ The reader is a designer. Answer in their language (Russian in chat), keep it sh
 
 Argument: `$ARGUMENTS` — one of `status` (default when empty), `guide`, `pr`.
 
+## Session start (always, before anything else)
+
+The session's branch is created from the *local* `main`, which nobody updates, so it usually starts behind `origin/main`. Fix it first, without being asked:
+
+```bash
+git fetch origin
+git log --oneline main..HEAD | wc -l          # 0 → fresh branch
+git merge --ff-only origin/main               # fresh branch: fast-forward onto the real trunk
+```
+
+If the branch already has commits and `git rev-list --count HEAD..origin/main` is > 0, use `git merge origin/main` (not rebase: the branch may be pushed). Tell the user in one line what came in (`git log --oneline HEAD@{1}..HEAD` after the merge). "Загрузи контекст" does not replace this step; it runs regardless.
+
 ## `status` (default)
 
 Show where the task is in the cycle and what the next step is. Gather, then report in one short block:
@@ -21,7 +33,7 @@ git log --oneline @{u}..HEAD 2>/dev/null   # unpushed commits; if no upstream, s
 gh pr list --head "$(git branch --show-current)" --state all --json number,state,url
 ```
 
-Report as: **ветка** → **незакоммичено** (N файлов) → **не запушено** (N коммитов) → **PR** (нет / #N открыт / #N влит). Then one line: what the next sensible action is, using the trigger table in `docs/git-workflow.md`. If the branch is `main`, say so first and offer to create `feature/<task>` — never commit on `main`.
+Also `git rev-list --count HEAD..origin/main` after a `git fetch`. Report as: **ветка** → **отстаёт от origin/main** (N коммитов) → **незакоммичено** (N файлов) → **не запушено** (N коммитов) → **PR** (нет / #N открыт / #N влит). Then one line: what the next sensible action is, using the trigger table in `docs/git-workflow.md`. If the branch is `main`, say so first and offer to create `feature/<task>` — never commit on `main`.
 
 ## `guide`
 
