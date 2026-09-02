@@ -253,7 +253,12 @@
   background: var(--color-accent-blue);
   opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
 }
+.hs__frag--clip.is-closed .hs__rules-title { opacity: 1; translate: 0 0; }
 .hs__rules-title {
+  /* snaps in the moment the frame has closed (class from the block script) */
+  opacity: 0;
+  translate: 0 calc(12 * var(--u));
+  transition: opacity 0.15s ease-out, translate 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
   position: absolute;
   left: calc(21 * var(--u));
   top: calc(18 * var(--u));
@@ -267,7 +272,7 @@
    design-system/components/chat-card.css drives every inner size from
    one font-size in em, so pointing that font-size at the scene's design
    unit is the whole integration — no fork, no copied values. */
-.hs__chat { opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)); }
+.hs__chat { opacity: 1; }
 .hs__chat .chat-card-wrap {
   width: 100%;
   height: 100%;
@@ -323,9 +328,37 @@
   background: currentColor;
   flex: none;
 }
+/* the line being worked on right now blinks its dot */
+.hs__tool.is-live::before { animation: hs-blink 0.9s ease-in-out infinite; }
+@keyframes hs-blink { 50% { opacity: 0.15; } }
 
-/* The rules card is already on stage when the chat names it, so it gets a
-   ring rather than a fade-in like the other two. */
+/* Image fragments that need a pseudo-element (for the ring) are divs with
+   a background rather than <img>. */
+.hs__pic { background-size: 100% 100%; background-repeat: no-repeat; border-radius: calc(16 * var(--u)); }
+
+/* AI highlight — a gradient that travels around the active card. One
+   animated angle drives a conic gradient in a ring-shaped pseudo-element;
+   the ring is masked to the border so the card itself stays untouched. */
+@property --ring-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.hs__frag--ring::before {
+  content: "";
+  position: absolute;
+  inset: calc(-3 * var(--u));
+  padding: calc(3 * var(--u));
+  border-radius: calc(19 * var(--u));
+  background: conic-gradient(from var(--ring-angle),
+    var(--color-primary) 0deg, var(--color-accent-light-blue) 90deg,
+    var(--color-accent-pink) 180deg, var(--color-primary) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.hs__frag--ring.is-lit::before { opacity: 1; animation: hs-ring 1.6s linear infinite; }
+@keyframes hs-ring { to { --ring-angle: 360deg; } }
+
 .hs__frag--fade { transition: opacity 0.35s ease; }
 /* Lit by the chat (--lit 0→1): parked just under the canvas edge, they ride
    up into place over the rules card — a real entrance, no fade needed. */
@@ -1525,12 +1558,12 @@
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
 
-          <img data-frag="business-context" class="hs__frag hs__frag--rise" src="images/slides/01/business-context.webp"
-               alt="Your business context" width="466" height="542" loading="lazy" decoding="async"
-               style="--x:226; --y:114; --w:194.25; --lit:0; z-index:15">
-          <img data-frag="meta-ads-library" class="hs__frag hs__frag--rise" src="images/slides/01/meta-ads-library.webp"
-               alt="Meta ads library" width="807" height="613" loading="lazy" decoding="async"
-               style="--x:48; --y:199; --w:336.44; --lit:0; z-index:16">
+          <div data-frag="business-context" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
+               role="img" aria-label="Your business context"
+               style="--x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"></div>
+          <div data-frag="meta-ads-library" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
+               role="img" aria-label="Meta ads library"
+               style="--x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
           <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
                style="--x:452; --y:19; --w:300; --h:352; z-index:17">
             <img class="hs__chat-icon" src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
@@ -1645,15 +1678,15 @@
        not move it between h364 and h550, hence the zeroed deltas. */
     'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
     'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
-    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-192, y:78},  {d:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:371, w:359.857}, {y:600, d:[0,0,0]}],   /* leaves downward */
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78},  {d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0]}],   /* leaves downward with the scatter */
     'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
     'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
     'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
     'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213}, {d:[0,0,0]}],
-    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1309, y:205}, {d:[0,0,0]}],
-    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1239, y:21},  {d:[0,0,0]}],
-    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-70, y:210}, {d:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205}, {d:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21},  {d:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210}, {d:[0,0,0]}],
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
@@ -1679,9 +1712,9 @@
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
-    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0]}, {}, {o:1}, {}, {x:-260}],
-    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0]}, {}, {o:1}, {}, {x:-420}],
-    'chat':               [{x:452, y:19+40, w:300, h:352, o:0, d:[0,56,0,48]}, {}, {y:19, o:1}, {}, {x:103}],
+    'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.35,0.85], ease:'out'}, {}, {x:103, e:[0.0,0.35], ease:'out'}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
@@ -1692,12 +1725,14 @@
     /* Figma reports the rotated bounding boxes; the cards themselves are
        209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
        each unrotated box is placed on its bbox centre and rotated there. */
-    'ad-1':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:739.3,  y:227.6, w:209.24, r:-9.74, o:1, d:[0,69,0], e:[0.30,0.75], ease:'back'}],
-    'ad-2':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:1068.4, y:88.6,  w:199.94, r:9.26,  o:1, d:[0,69,0], e:[0.42,0.87], ease:'back'}],
-    'ad-3':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:1079.9, y:36,    w:199.94, r:26.39, o:1, d:[0,69,0], e:[0.54,1.00], ease:'back'}],
-    'trigger':            [{x:434, y:95+40,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {y:95,     o:1, e:[0.15,0.60]}],
-    'routine':            [{x:881, y:108+40,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {y:108,    o:1, e:[0.25,0.70]}],
-    'folder':             [{x:986, y:287.32+40, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {y:287.32, o:1, e:[0.05,0.40]}]
+    /* A stack that fans out: the three arrive from the right as one pile
+       (via:), then spread to the Figma placement and freeze. */
+    'ad-1':               [{x:1350, y:120, w:209.24, r:-4, d:[0,69,0]}, {}, {}, {}, {x:739.3,  y:227.6, r:-9.74, via:{x:960, y:120, r:-4}, e:[0.10,0.80], ease:'out'}],
+    'ad-2':               [{x:1350, y:110, w:199.94, r:2,  d:[0,69,0]}, {}, {}, {}, {x:1068.4, y:88.6,  r:9.26,  via:{x:968, y:110, r:2},  e:[0.10,0.86], ease:'out'}],
+    'ad-3':               [{x:1350, y:100, w:199.94, r:6,  d:[0,69,0]}, {}, {}, {}, {x:1079.9, y:36,    r:26.39, via:{x:976, y:100, r:6},  e:[0.10,0.92], ease:'out'}],
+    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.40,0.80], ease:'out'}],
+    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.50,0.90], ease:'out'}],
+    'folder':             [{x:986+400, y:287.32, w:159.47, d:[0,75,0]}, {}, {}, {}, {x:986, e:[0.45,0.85], ease:'out'}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -1711,7 +1746,7 @@
       prev = {
         /* window inside the arriving segment and the curve applied to it —
            per keyframe, not inherited: a stagger belongs to one entrance */
-        e: raw.e || null, ease: raw.ease || null,
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         r: raw.r !== undefined ? raw.r : prev.r,
@@ -1825,11 +1860,24 @@
     /* each fragment gets its own t: same segment, own window and curve */
     var b = Math.min(STEPS.length - 1, a + 1);
     Object.keys(FRAGS).forEach(function (id) {
-      var f = FRAGS[id];
-      f.el.style.setProperty('--t', curve(f.k[b], local).toFixed(4));
+      var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
+      if (kb.via) {
+        /* first leg: previous → via (as a pile); second leg: via → final */
+        var ka = f.k[a], leg1 = tt < 0.5, from = leg1 ? ka : kb.via, to = leg1 ? kb.via : kb;
+        st.setProperty('--x',  from.x !== undefined ? from.x : ka.x); st.setProperty('--y',  from.y !== undefined ? from.y : ka.y);
+        st.setProperty('--r',  from.r || 0);
+        st.setProperty('--x2', to.x !== undefined ? to.x : kb.x);    st.setProperty('--y2', to.y !== undefined ? to.y : kb.y);
+        st.setProperty('--r2', to.r || 0);
+        tt = leg1 ? tt * 2 : (tt - 0.5) * 2;
+      }
+      st.setProperty('--t', tt.toFixed(4));
     });
 
     driveChat(a, local);
+
+    /* the rules frame counts as closed from 90% of its closing leg onward */
+    var closing = FRAGS['rules-frame'];
+    if (closing) closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && curve(closing.k[2], local) >= 0.9));
 
     var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
     if (si !== slide) {
@@ -1894,14 +1942,20 @@
 
     ch.bubble.classList.toggle('is-visible', n >= 1);
     ch.resp.classList.toggle('is-visible', n >= 1);
-    ch.tool.forEach(function (el, i) { el.classList.toggle('is-on', n >= 2 + i); });
+    ch.tool.forEach(function (el, i) {
+      el.classList.toggle('is-on', n >= 2 + i);
+      el.classList.toggle('is-live', n === 2 + i);
+    });
     ch.tools.classList.toggle('is-done', n >= 5);
     ch.used.style.display = ch.usedRow.style.display = n < 5 ? 'none' : '';
     ch.send.disabled = n !== 0;
 
-    LIT.rules.classList.toggle('is-lit', n >= 2 && n < 5);
+    /* the ring sits on whichever source is being read; entities stay once risen */
+    LIT.rules.classList.toggle('is-lit', n === 2);
     LIT['business-context'].style.setProperty('--lit', n >= 3 ? 1 : 0);
+    LIT['business-context'].classList.toggle('is-lit', n === 3);
     LIT['meta-ads-library'].style.setProperty('--lit', n >= 4 ? 1 : 0);
+    LIT['meta-ads-library'].classList.toggle('is-lit', n === 4);
 
     ch.hint.style.display = (n === 0 && !forward) ? 'none' : (n === 0 ? '' : 'none');
     if (n === 0) {
