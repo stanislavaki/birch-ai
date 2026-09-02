@@ -14,6 +14,7 @@
 | Перенос нового меню (v2) в Webflow — спеки, архитектура, порядок работ | `docs/menu-webflow-plan.md` |
 | План/статус переноса use-cases в Webflow (референс гибрид-порта) | `docs/use-cases-webflow-plan.md` |
 | Шрифты сайта, курсив, глобальные типографические правила | `docs/typography-fonts.md` |
+| Git-процесс: цикл ветка → коммит → push → PR → merge, когда что делать, выбор способа merge (скилл `/git-workflow`) | `docs/git-workflow.md` |
 
 Индекс для людей — `docs/README.md`.
 
