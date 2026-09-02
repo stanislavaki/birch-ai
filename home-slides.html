@@ -202,6 +202,7 @@
 
   --dx: 0; --dy: 0; --dw: 0; --dh: 0;
   --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw); --dh2: var(--dh);
+  --r: 0; --r2: 0;
   --o1: 1; --o2: 1;
 
   --px1: calc(var(--x)  * var(--u) + var(--up) * var(--dx)  / 186);
@@ -221,6 +222,8 @@
   top:     calc((1 - var(--t)) * var(--py1) + var(--t) * var(--py2));
   width:   calc((1 - var(--t)) * var(--pw1) + var(--t) * var(--pw2));
   height:  auto;
+  rotate:  calc(((1 - var(--t)) * var(--r) + var(--t) * var(--r2)) * 1deg);
+  transform-origin: center;
   /* --lit is the chat's own gate: the entities it consults appear as it
      names them, which is a beat of the dialogue, not a step of the scene. */
   opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1));
@@ -1572,11 +1575,11 @@
           <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
           <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
           <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
-               width="580" height="583" loading="lazy" decoding="async" style="--x:723; --y:211.4; --w:241.78; z-index:9">
+               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:227.6; --w:209.24; z-index:9; border-radius: calc(12 * var(--u))">
           <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
-               width="573" height="741" loading="lazy" decoding="async" style="--x:1048.94; --y:74.18; --w:238.94; z-index:9">
+               width="573" height="741" loading="lazy" decoding="async" style="--x:1068.4; --y:88.6; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
           <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
-               width="643" height="643" loading="lazy" decoding="async" style="--x:1045.87; --y:2; --w:267.98; z-index:8">
+               width="643" height="643" loading="lazy" decoding="async" style="--x:1079.9; --y:36; --w:199.94; z-index:8; border-radius: calc(24 * var(--u))">
           <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
                alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
                style="--x:434; --y:95; --w:371; z-index:18">
@@ -1686,9 +1689,12 @@
     /* Entrances start 40 units low and rise into place while they fade. */
     /* The creatives sit inside the folder (its box, scaled down) and fly
        out one after another — staggered windows inside the same segment. */
-    'ad-1':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:723,    y:211.4, w:241.78, o:1, d:[0,69,0], e:[0.30,0.75], ease:'back'}],
-    'ad-2':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:1048.94,y:74.18, w:238.94, o:1, d:[0,69,0], e:[0.42,0.87], ease:'back'}],
-    'ad-3':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:1045.87,y:2,     w:267.98, o:1, d:[0,69,0], e:[0.54,1.00], ease:'back'}],
+    /* Figma reports the rotated bounding boxes; the cards themselves are
+       209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
+       each unrotated box is placed on its bbox centre and rotated there. */
+    'ad-1':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:739.3,  y:227.6, w:209.24, r:-9.74, o:1, d:[0,69,0], e:[0.30,0.75], ease:'back'}],
+    'ad-2':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:1068.4, y:88.6,  w:199.94, r:9.26,  o:1, d:[0,69,0], e:[0.42,0.87], ease:'back'}],
+    'ad-3':               [{x:1010, y:320, w:110, o:0, r:0,  d:[0,75,0]}, {}, {}, {}, {x:1079.9, y:36,    w:199.94, r:26.39, o:1, d:[0,69,0], e:[0.54,1.00], ease:'back'}],
     'trigger':            [{x:434, y:95+40,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {y:95,     o:1, e:[0.15,0.60]}],
     'routine':            [{x:881, y:108+40,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {y:108,    o:1, e:[0.25,0.70]}],
     'folder':             [{x:986, y:287.32+40, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {y:287.32, o:1, e:[0.05,0.40]}]
@@ -1708,6 +1714,7 @@
         e: raw.e || null, ease: raw.ease || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
+        r: raw.r !== undefined ? raw.r : prev.r,
         y: raw.y !== undefined ? raw.y : prev.y,
         w: raw.w !== undefined ? raw.w : prev.w,
         d: raw.d || prev.d,
@@ -1794,6 +1801,7 @@
       st.setProperty('--x2', kb.x);  st.setProperty('--y2', kb.y);  st.setProperty('--w2', kb.w);
       st.setProperty('--h',  ka.h);  st.setProperty('--h2', kb.h);
       st.setProperty('--dh', ka.d[3] || 0); st.setProperty('--dh2', kb.d[3] || 0);
+      st.setProperty('--r',  ka.r || 0);    st.setProperty('--r2', kb.r || 0);
       st.setProperty('--dx', ka.d[0]); st.setProperty('--dy', ka.d[1]); st.setProperty('--dw', ka.d[2]);
       st.setProperty('--dx2', kb.d[0]); st.setProperty('--dy2', kb.d[1]); st.setProperty('--dw2', kb.d[2]);
       st.setProperty('--o1', ka.o); st.setProperty('--o2', kb.o);
