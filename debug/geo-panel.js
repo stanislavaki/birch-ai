@@ -16,11 +16,11 @@
   if (!canvas) return;
 
   var BASE = 364;
-var FLOOR = 300;
+var FLOOR = 364;
   /* Positions now come straight from the authored keyframes, so there
      are no coefficients left to tune — only checkpoints to inspect. */
   var GROUPS = [];
-  var CHECKPOINTS = [300, 364, 455, 550];
+  var CHECKPOINTS = [364, 455, 550];
 
   /* ── Panel chrome ──────────────────────────────────────── */
   var css = document.createElement('style');
@@ -148,7 +148,7 @@ var FLOOR = 300;
     var max = parseFloat(getComputedStyle(root).getPropertyValue('--scene-max'));
 
     var state = forced !== null      ? 'forced'
-              : hd <= 301            ? 'пол'
+              : hd <= 365            ? 'пол'
               : hd >= max - 0.5      ? 'потолок'
               :                        'свободно';
 

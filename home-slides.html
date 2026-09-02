@@ -15,12 +15,14 @@
    Placeholders at the exact Figma geometry of three authored
    keyframes in the "for test" section:
 
-     h300         18446:74772   floor — whole composition at 0.8667
-     h364         18446:68189   reference
+     h364         18446:68189   reference — also the floor
      h550+scale   18446:71454   full air, decor scaled 1.5x
 
-   (An earlier h300, 18446:69822, was produced by Figma constraints
-   rather than drawn, and is not used.)
+   Below the floor nothing is recomposed, cropped or scaled: the canvas
+   stays at 364 units and the card simply runs past the fold on short
+   wide windows (a few tens of pixels on 1920×650-class windows). An
+   h300 frame existed for slide 01 (18446:74772) and was dropped so no
+   slide ever needs a third frame.
 
    COORDINATE SYSTEM
    The scene is authored on a 1232-wide canvas. `--u` is one design
@@ -28,32 +30,27 @@
 
      --u = 1cqw / 12.32
 
-   Width alone drives it — never height. An earlier version also fitted
-   by height on short windows, which shrank the scene below the card's
-   width and left empty background down both sides. The block sits in
-   the page flow rather than pinned to the viewport, so a card that runs
-   a few dozen pixels past the fold on a short wide window just costs a
-   little scrolling; empty margins would have been visible immediately.
+   Width alone drives it — never height. Earlier versions fitted short
+   windows by scaling (left empty background down both sides) and then
+   by an authored 300-unit frame (cost a third frame per slide). Both
+   were dropped in favour of a plain minimum height.
 
    INTERPOLATION
-   Each fragment carries its h364 geometry (--x/--y/--w) plus two
-   sets of deltas: --dx/--dy/--dw toward h550+scale (186 units up)
-   and --bx/--by/--bw toward h300 (64 units down). Two clamped
-   lengths pick which segment is live:
+   Each fragment carries its h364 geometry (--x/--y/--w) plus deltas
+   --dx/--dy/--dw toward h550+scale, applied in proportion to how far
+   the canvas has grown past 364:
 
      --up = clamp(0, canvas - 364u, 186u)
-     --dn = clamp(0, 364u - canvas, 64u)
 
-   At canvas = 364u both are zero and the frame renders exactly as
-   the reference. Width interpolates the same way as position, which
-   is what lets decor grow 1.5x upward while the interface stays 1:1
-   (non-zero --dw on decor only), and what lets the whole composition
-   shrink to 0.8667 downward (non-zero --bw on everything).
+   At canvas = 364u it is zero and the frame renders exactly as the
+   reference. Width interpolates the same way as position, which is
+   what lets decor grow 1.5x while the interface stays 1:1 — non-zero
+   --dw on the decor fragments only.
    ═══════════════════════════════════════════════════════════ */
 
 :root {
   /* Authored keyframes, in design units */
-  --scene-min:  300;   /* floor — authored frame 18446:74772 */
+  --scene-min:  364;   /* floor — the reference frame itself */
   --scene-base: 364;
   --scene-max:  550;
 
@@ -182,7 +179,7 @@
    Two layers of interpolation, applied in this order:
 
    1. height — each step's geometry is resolved for the current canvas
-      height from its three authored frames (--up / --dn above);
+      height from its two authored frames (--up above);
    2. step   — the two resolved geometries are blended by --t, which
       the block script drives from scroll position inside the slide.
 
@@ -194,20 +191,17 @@
 .hs__frag {
   --u:  calc(1cqw / 12.32);
   --up: clamp(0px, (100cqh - 364 * var(--u)), 186 * var(--u));
-  --dn: clamp(0px, (364 * var(--u) - 100cqh), 64 * var(--u));
 
   --dx: 0; --dy: 0; --dw: 0; --dh: 0;
-  --bx: 0; --by: 0; --bw: 0;
   --dx2: var(--dx); --dy2: var(--dy); --dw2: var(--dw); --dh2: var(--dh);
-  --bx2: var(--bx); --by2: var(--by); --bw2: var(--bw);
   --o1: 1; --o2: 1;
 
-  --px1: calc(var(--x)  * var(--u) + var(--up) * var(--dx)  / 186 - var(--dn) * var(--bx)  / 64);
-  --px2: calc(var(--x2) * var(--u) + var(--up) * var(--dx2) / 186 - var(--dn) * var(--bx2) / 64);
-  --py1: calc(var(--y)  * var(--u) + var(--up) * var(--dy)  / 186 - var(--dn) * var(--by)  / 64);
-  --py2: calc(var(--y2) * var(--u) + var(--up) * var(--dy2) / 186 - var(--dn) * var(--by2) / 64);
-  --pw1: calc(var(--w)  * var(--u) + var(--up) * var(--dw)  / 186 - var(--dn) * var(--bw)  / 64);
-  --pw2: calc(var(--w2) * var(--u) + var(--up) * var(--dw2) / 186 - var(--dn) * var(--bw2) / 64);
+  --px1: calc(var(--x)  * var(--u) + var(--up) * var(--dx)  / 186);
+  --px2: calc(var(--x2) * var(--u) + var(--up) * var(--dx2) / 186);
+  --py1: calc(var(--y)  * var(--u) + var(--up) * var(--dy)  / 186);
+  --py2: calc(var(--y2) * var(--u) + var(--up) * var(--dy2) / 186);
+  --pw1: calc(var(--w)  * var(--u) + var(--up) * var(--dw)  / 186);
+  --pw2: calc(var(--w2) * var(--u) + var(--up) * var(--dw2) / 186);
 
   /* Zero for fragments nested inside another one — their left is already
      measured from a parent that has been centred. */
@@ -462,37 +456,37 @@
         <div class="hs__canvas" id="canvas">
           <img data-frag="schedule-cal" class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
                width="875" height="1271" loading="lazy" decoding="async"
-               style="--x:37; --y:15; --w:364.5; --dy:37; --bx:-6.533; --by:2; --bw:48.6; z-index:1">
+               style="--x:37; --y:15; --w:364.5; --dy:37; z-index:1">
           <img data-frag="actions" class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
                width="420" height="905" loading="lazy" decoding="async"
-               style="--x:56; --y:169; --w:175.02; --dy:37; --bx:-4; --by:22.533; --bw:23.335; z-index:2">
+               style="--x:56; --y:169; --w:175.02; --dy:37; z-index:2">
           <img data-frag="platform-google-ads" class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; --bx:-10; --by:10; --bw:8.333; z-index:3">
+               style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:3">
           <img data-frag="integrations" class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
                width="1339" height="227" loading="lazy" decoding="async"
-               style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; --bx:-7.466; --by:39.333; --bw:49.6; z-index:4">
+               style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; z-index:4">
           <img data-frag="ad-account" class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
                width="625" height="252" loading="lazy" decoding="async"
-               style="--x:155; --y:226; --w:260.25; --dy:172; --bx:3; --by:33; --bw:34.7; z-index:5">
+               style="--x:155; --y:226; --w:260.25; --dy:172; z-index:5">
           <img data-frag="schedule-section" class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
                width="810" height="421" loading="lazy" decoding="async"
-               style="--x:999; --y:0; --w:337.5; --dy:58; --bx:31.068; --bw:45; z-index:6">
+               style="--x:999; --y:0; --w:337.5; --dy:58; z-index:6">
           <img data-frag="frequency-popover" class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
                width="432" height="445" loading="lazy" decoding="async"
-               style="--x:1089; --y:89; --w:180; --dy:58; --bx:43.068; --by:11.867; --bw:24; z-index:7">
+               style="--x:1089; --y:89; --w:180; --dy:58; z-index:7">
           <img data-frag="filter" class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
                width="1474" height="252" loading="lazy" decoding="async"
-               style="--x:921; --y:240; --w:614.25; --dy:111; --bx:40.667; --by:44.133; --bw:81.9; z-index:11">
+               style="--x:921; --y:240; --w:614.25; --dy:111; z-index:11">
           <img data-frag="platform-tiktok" class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; --bx:52.933; --by:39.6; --bw:8.333; z-index:12">
+               style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; z-index:12">
           <img data-frag="platform-meta" class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; --bx:31.334; --by:2; --bw:8.333; z-index:13">
+               style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; z-index:13">
           <img data-frag="platform-snapchat" class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; --bx:-22.933; --by:47.467; --bw:8.333; z-index:14">
+               style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; z-index:14">
 
           <!-- Closing window: holds the three rule cards and becomes the
                "Your automation rules" card by shrinking around them. -->
@@ -503,13 +497,13 @@
             </div>
             <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
                  width="1381" height="461" loading="lazy" decoding="async"
-                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:8">
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:8">
             <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
                  width="1552" height="518" loading="lazy" decoding="async"
-                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:9">
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:9">
             <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
                  width="1793" height="595" loading="lazy" decoding="async"
-                 style="--x:243; --y:38; --w:747; --dy:93; --bx:-49.733; --by:5.6; --bw:99.6; z-index:10" data-core>
+                 style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
 
           <img data-frag="business-context" class="hs__frag hs__frag--fade" src="images/slides/01/business-context.webp"
@@ -621,28 +615,26 @@
      inherited from that fragment's previous step, so a step only
      records what actually changes.
        x, y, w — design units of the 1232-wide frame
-       d       — [dx, dy, dw] toward h550
-       b       — [bx, by, bw] toward h300
+       d       — [dx, dy, dw, dh] toward h550
        o       — opacity */
   var K = {
     /* Background — scatters at step 1 and then stays put. Slide 02 does
-       not move it between h364 and h550, hence the zeroed deltas; the
-       h300 end is extrapolated from those two, as agreed. */
-    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0],              b:[-6.533,2,48.6]},      {x:-395, y:146}, {d:[0,0,0], b:[0,0,0]}],
-    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0],              b:[-4,22.533,23.335]},   {x:-376, y:300, o:0}, {d:[0,0,0], b:[0,0,0]}],
-    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25],      b:[-10,10,8.333]},       {x:-192, y:78},  {d:[0,0,0], b:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186],       b:[-7.466,39.333,49.6]}, {x:881,  y:371, w:359.857}, {o:0, d:[0,0,0], b:[0,0,0]}],
-    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0],             b:[3,33,34.7]},          {x:-320, y:273}, {d:[0,0,0], b:[0,0,0]}],
-    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0],              b:[31.068,0,45]},        {x:1274, y:0},   {d:[0,0,0], b:[0,0,0]}],
-    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0],              b:[43.068,11.867,24]},   {x:1394, y:89},  {d:[0,0,0], b:[0,0,0]}],
-    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0],             b:[40.667,44.133,81.9]}, {x:1429, y:213}, {d:[0,0,0], b:[0,0,0]}],
-    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25], b:[52.933,39.6,8.333]},  {x:1309, y:205}, {d:[0,0,0], b:[0,0,0]}],
-    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25],b:[31.334,2,8.333]},     {x:1239, y:21},  {d:[0,0,0], b:[0,0,0]}],
-    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25],b:[-22.933,47.467,8.333]}, {x:-70, y:210}, {d:[0,0,0], b:[0,0,0]}],
+       not move it between h364 and h550, hence the zeroed deltas. */
+    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
+    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-192, y:78},  {d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:371, w:359.857}, {o:0, d:[0,0,0]}],
+    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
+    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
+    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
+    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213}, {d:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1309, y:205}, {d:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1239, y:21},  {d:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-70, y:210}, {d:[0,0,0]}],
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0], b:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {o:0}],
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {o:0}],
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -650,29 +642,29 @@
        the first two steps. The step-2 numbers are Figma's own child
        coordinates, which are already frame-relative: checked against the
        exported card, where Pause starts at x≈91 / y≈62 inside 276×275. */
-    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6], o:0},
+    'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0], o:0},
                            {x:528.45, y:120.75, w:575.45, o:1},
-                           {x:86.756, y:62,     w:492.737, d:[0,0,0], b:[0,0,0]}],
-    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6], o:0},
+                           {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
+    'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0], o:0},
                            {x:492.35, y:162.45, w:646.7, o:1},
-                           {x:55.844, y:97.707, w:553.746, d:[0,0,0], b:[0,0,0]}],
-    'rule-card':          [{x:443, y:138, w:747, d:[0,93,0], b:[-49.733,5.6,99.6]},
+                           {x:55.844, y:97.707, w:553.746, d:[0,0,0]}],
+    'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
                            {x:461,  y:208.76, w:709.65},
-                           {x:29,   y:137.366, w:607.65, d:[0,0,0], b:[0,0,0]}],
+                           {x:29,   y:137.366, w:607.65, d:[0,0,0]}],
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
-    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0], b:[0,0,0]}, {}, {o:1}, {}, {o:0}],
-    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0], b:[0,0,0]}, {}, {o:1}, {}, {o:0}],
-    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0,48], b:[0,0,0]}, {}, {o:1}, {}, {x:103}],
+    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0]}, {}, {o:1}, {}, {o:0}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0]}, {}, {o:1}, {}, {o:0}],
+    'chat':               [{x:452, y:19,  w:300, h:352, o:0, d:[0,56,0,48]}, {}, {o:1}, {}, {x:103}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
        the same 69, the folder by 75. */
-    'ads-collage':        [{x:723, y:2,      w:501.98, o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
-    'trigger':            [{x:434, y:95,     w:371,    o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
-    'routine':            [{x:881, y:108,    w:271,    o:0, d:[0,69,0], b:[0,0,0]}, {}, {}, {}, {o:1}],
-    'folder':             [{x:986, y:287.32, w:159.47, o:0, d:[0,75,0], b:[0,0,0]}, {}, {}, {}, {o:1}]
+    'ads-collage':        [{x:723, y:2,      w:501.98, o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
+    'trigger':            [{x:434, y:95,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
+    'routine':            [{x:881, y:108,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {o:1}],
+    'folder':             [{x:986, y:287.32, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {o:1}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -680,7 +672,7 @@
   Object.keys(K).forEach(function (id) {
     var el = card.querySelector('[data-frag="' + id + '"]');
     if (!el) return;
-    var out = [], prev = { x:0, y:0, w:0, d:[0,0,0], b:[0,0,0], o:1 };
+    var out = [], prev = { x:0, y:0, w:0, d:[0,0,0], o:1 };
     for (var i = 0; i < STEPS.length; i++) {
       var raw = K[id][i] || {};
       prev = {
@@ -689,7 +681,6 @@
         y: raw.y !== undefined ? raw.y : prev.y,
         w: raw.w !== undefined ? raw.w : prev.w,
         d: raw.d || prev.d,
-        b: raw.b || prev.b,
         o: raw.o !== undefined ? raw.o : prev.o
       };
       out.push(prev);
@@ -740,9 +731,7 @@
       st.setProperty('--h',  ka.h);  st.setProperty('--h2', kb.h);
       st.setProperty('--dh', ka.d[3] || 0); st.setProperty('--dh2', kb.d[3] || 0);
       st.setProperty('--dx', ka.d[0]); st.setProperty('--dy', ka.d[1]); st.setProperty('--dw', ka.d[2]);
-      st.setProperty('--bx', ka.b[0]); st.setProperty('--by', ka.b[1]); st.setProperty('--bw', ka.b[2]);
       st.setProperty('--dx2', kb.d[0]); st.setProperty('--dy2', kb.d[1]); st.setProperty('--dw2', kb.d[2]);
-      st.setProperty('--bx2', kb.b[0]); st.setProperty('--by2', kb.b[1]); st.setProperty('--bw2', kb.b[2]);
       st.setProperty('--o1', ka.o); st.setProperty('--o2', kb.o);
     });
   }
