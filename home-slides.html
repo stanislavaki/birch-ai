@@ -340,42 +340,39 @@
 
 /* Image fragments that need a pseudo-element (for the ring) are divs with
    a background rather than <img>. */
-.hs__pic { background-size: 100% 100%; background-repeat: no-repeat; border-radius: calc(16 * var(--u)); }
+.hs__pic { background-size: 100% 100%; background-repeat: no-repeat; border-radius: calc(var(--ring-r, 16) * var(--u)); }
 
-/* AI highlight — a line that draws itself around the active card. An SVG
-   rect the size of the box (plus the ring offset), stroke dashed to its
-   own perimeter and animated from fully offset to zero: the outline
-   grows from the top edge clockwise, then breathes. Corner radius is
-   the element's own plus the offset, so the ring hugs the shape. */
-.hs__ring {
+/* AI highlight — a gradient that travels around the active card. One
+   animated angle drives a conic gradient in a ring-shaped pseudo-element,
+   masked to the border so the card itself stays untouched. The ring's
+   corner radius is the element's own (--ring-r) plus the offset. */
+@property --ring-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.hs__frag--ring { --ring-r: 16; }
+.hs__frag--ring::before {
+  content: "";
   position: absolute;
-  inset: calc(-4 * var(--u));
-  width: calc(100% + 8 * var(--u));
-  height: calc(100% + 8 * var(--u));
-  overflow: visible;
-  pointer-events: none;
+  inset: calc(-3 * var(--u));
+  padding: calc(3 * var(--u));
+  border-radius: calc((var(--ring-r) + 3) * var(--u));
+  background: conic-gradient(from var(--ring-angle),
+    var(--color-primary) 0deg, var(--color-accent-light-blue) 90deg,
+    var(--color-accent-pink) 180deg, var(--color-primary) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
-.hs__ring rect {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: calc(3 * var(--u));
-  stroke-linecap: round;
-  stroke-dasharray: 1;              /* pathLength="1" on the rect */
-  stroke-dashoffset: 1;
-}
-.is-lit > .hs__ring { opacity: 1; }
-.is-lit > .hs__ring rect { animation: hs-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards, hs-breathe 2.4s ease-in-out 1.8s infinite; }
-@keyframes hs-draw    { to { stroke-dashoffset: 0; } }
-@keyframes hs-breathe { 50% { opacity: 0.55; } }
+.hs__frag--ring.is-lit::before { opacity: 1; animation: hs-ring 2.6s linear infinite; }
+@keyframes hs-ring { to { --ring-angle: 360deg; } }
 
 .hs__frag--fade { transition: opacity 0.35s ease; }
 /* Lit by the chat (--lit 0→1): parked just under the canvas edge, they ride
    up into place over the rules card — a real entrance, no fade needed. */
 .hs__frag--rise {
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
-  transition: translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: translate 1.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .hs__frag--ring { transition: box-shadow 0.35s ease; }
 .hs__frag--ring.is-lit {
@@ -1553,9 +1550,8 @@
 
           <!-- Closing window: holds the three rule cards and becomes the
                "Your automation rules" card by shrinking around them. -->
-          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip hs__frag--ring" data-ring-radius="16"
-               style="--x:-200; --y:-100; --w:1632; --h:800; z-index:10">
-            <svg class="hs__ring" aria-hidden="true"><rect pathLength="1" x="0" y="0" width="100%" height="100%"/></svg>
+          <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip hs__frag--ring"
+               style="--ring-r:16; --x:-200; --y:-100; --w:1632; --h:800; z-index:10">
             <div data-frag="rules-face" class="hs__rules-face">
               <span class="hs__rules-title">Your automation rules</span>
             </div>
@@ -1571,11 +1567,11 @@
           </div>
 
           <div data-frag="business-context" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
-               role="img" aria-label="Your business context" data-ring-radius="16"
-               style="--x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"><svg class="hs__ring" aria-hidden="true"><rect pathLength="1" x="0" y="0" width="100%" height="100%"/></svg></div>
+               role="img" aria-label="Your business context"
+               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"></div>
           <div data-frag="meta-ads-library" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
-               role="img" aria-label="Meta ads library" data-ring-radius="16"
-               style="--x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"><svg class="hs__ring" aria-hidden="true"><rect pathLength="1" x="0" y="0" width="100%" height="100%"/></svg></div>
+               role="img" aria-label="Meta ads library"
+               style="--ring-r:16; --x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
           <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
                style="--x:452; --y:19; --w:300; --h:352; z-index:17">
             <img class="hs__chat-icon" src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
@@ -1620,11 +1616,11 @@
           <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
           <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
           <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
-               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:227.6; --w:209.24; z-index:9; border-radius: calc(12 * var(--u))">
+               width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:192.2; --w:209.24; z-index:9; border-radius: calc(12 * var(--u))">
           <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
-               width="573" height="741" loading="lazy" decoding="async" style="--x:1068.4; --y:88.6; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
+               width="573" height="741" loading="lazy" decoding="async" style="--x:829.5; --y:56.4; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
           <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
-               width="643" height="643" loading="lazy" decoding="async" style="--x:1079.9; --y:36; --w:199.94; z-index:8; border-radius: calc(24 * var(--u))">
+               width="643" height="643" loading="lazy" decoding="async" style="--x:991; --y:36; --w:199.94; z-index:8; border-radius: calc(24 * var(--u))">
           <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
                alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
                style="--x:434; --y:95; --w:371; z-index:18">
@@ -1717,10 +1713,10 @@
                            {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
     'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0]},
                            {x:492.35, y:162.45, w:646.7},
-                           {x:55.844, y:97.707, w:553.746, d:[0,0,0]}],
+                           {x:55.844, y:103,    w:553.746, d:[0,0,0]}],
     'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
                            {x:461,  y:208.76, w:709.65},
-                           {x:29,   y:137.366, w:607.65, d:[0,0,0]}],
+                           {x:29,   y:147,     w:607.65, d:[0,0,0]}],
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
@@ -1734,14 +1730,16 @@
     /* Entrances start 40 units low and rise into place while they fade. */
     /* The creatives sit inside the folder (its box, scaled down) and fly
        out one after another — staggered windows inside the same segment. */
-    /* Figma reports the rotated bounding boxes; the cards themselves are
+    /* Bounding boxes from the group's design context (metadata puts the
+       rotated ones 200+ units too far right); the cards themselves are
        209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
-       each unrotated box is placed on its bbox centre and rotated there. */
+       each unrotated box is placed on its bbox centre and rotated there.
+       bboxes: juice 723/176, cherry 810/42, jar 957/2. */
     /* A stack that fans out: the three arrive from the right as one pile
        (via:), then spread to the Figma placement and freeze. */
-    'ad-1':               [{x:1350, y:120, w:209.24, r:-4, d:[0,69,0]}, {}, {}, {}, {x:739.3,  y:227.6, r:-9.74, via:{x:960, y:120, r:-4, e:[0.66,0.82]}, e:[0.82,0.96], ease:'out'}],
-    'ad-2':               [{x:1350, y:110, w:199.94, r:2,  d:[0,69,0]}, {}, {}, {}, {x:1068.4, y:88.6,  r:9.26,  via:{x:968, y:110, r:2,  e:[0.66,0.82]}, e:[0.86,0.98], ease:'out'}],
-    'ad-3':               [{x:1350, y:100, w:199.94, r:6,  d:[0,69,0]}, {}, {}, {}, {x:1079.9, y:36,    r:26.39, via:{x:976, y:100, r:6,  e:[0.66,0.82]}, e:[0.90,1.00], ease:'out'}],
+    'ad-1':               [{x:1350, y:120, w:209.24, r:-4, d:[0,69,0]}, {}, {}, {}, {x:739.3,  y:192.2, r:-9.74, via:{x:900, y:100, r:-4, e:[0.66,0.82]}, e:[0.82,0.96], ease:'out'}],
+    'ad-2':               [{x:1350, y:110, w:199.94, r:2,  d:[0,69,0]}, {}, {}, {}, {x:829.5,  y:56.4,  r:9.26,  via:{x:908, y:90,  r:2,  e:[0.66,0.82]}, e:[0.86,0.98], ease:'out'}],
+    'ad-3':               [{x:1350, y:100, w:199.94, r:6,  d:[0,69,0]}, {}, {}, {}, {x:991,    y:36,    r:26.39, via:{x:916, y:80,  r:6,  e:[0.66,0.82]}, e:[0.90,1.00], ease:'out'}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
     'folder':             [{x:986+400, y:287.32, w:159.47, d:[0,75,0]}, {}, {}, {}, {x:986, e:[0.45,0.85], ease:'out'}]
@@ -1771,17 +1769,6 @@
     }
     FRAGS[id] = { el: el, k: out };
   });
-
-  /* SVG rx/ry do not accept calc(); size the ring corners from the scene unit */
-  function sizeRings() {
-    var u = card.getBoundingClientRect().width / 1232;
-    [].forEach.call(card.querySelectorAll('.hs__ring rect'), function (r) {
-      var rad = parseFloat(r.parentNode.parentNode.dataset.ringRadius || 16) + 4;
-      r.setAttribute('rx', rad * u); r.setAttribute('ry', rad * u);
-    });
-  }
-  sizeRings();
-  addEventListener('resize', sizeRings);
 
   /* segment lengths in screens (default 1) — the track and the mapping
      from progress to segment both follow them */
@@ -1842,7 +1829,7 @@
      of the wheel reads as motion rather than as a cut. Position stays the
      source of truth — this only delays arriving at it. */
   var shownP = null, targetP = 0, raf = null;
-  var LAG = 0.14;
+  var LAG = 0.10;
   function follow() {
     raf = null;
     if (shownP === null) shownP = targetP;
@@ -1911,7 +1898,7 @@
     var closing = FRAGS['rules-frame'];
     if (closing) {
       closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && curve(closing.k[2], local) >= 0.9));
-      closing.el.classList.toggle('is-stacked', a > 0 && !(a === 0 && local < 0.3));
+      closing.el.classList.toggle('is-stacked', a > 0 || local > 0.03);
     }
 
     var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;

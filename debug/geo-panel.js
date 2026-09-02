@@ -39,7 +39,13 @@ var FLOOR = 364;
     '#geo button{flex:1;min-width:3rem;background:#1c1c26;border:1px solid #2f2f3d;color:#c8c8d4;',
     'border-radius:.25rem;padding:.3rem .2rem;cursor:pointer;font:inherit}',
     '#geo button.on{background:#04DE00;border-color:#04DE00;color:#000}',
-    '#geo .toggles{display:flex;gap:.5rem;margin-top:.5rem}'
+    '#geo .toggles{display:flex;gap:.5rem;margin-top:.5rem}',
+    '#geo h4{cursor:pointer;user-select:none}',
+    '#geo h4::after{content:"▾";float:right;color:#8f8fa3}',
+    '#geo.is-collapsed{width:auto;padding:.5rem .75rem}',
+    '#geo.is-collapsed h4{margin:0}',
+    '#geo.is-collapsed h4::after{content:"▸"}',
+    '#geo.is-collapsed > :not(h4){display:none}'
   ].join('');
   document.head.appendChild(css);
 
@@ -71,6 +77,17 @@ var FLOOR = 364;
       '<button id="g-copy">copy</button>' +
     '</div>';
   document.body.appendChild(el);
+
+  /* collapsed by default — expand by clicking the title; remembered per browser */
+  var KEY = 'hs-geo-open';
+  var open = false;
+  try { open = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  el.classList.toggle('is-collapsed', !open);
+  el.querySelector('h4').addEventListener('click', function () {
+    open = !open;
+    el.classList.toggle('is-collapsed', !open);
+    try { localStorage.setItem(KEY, open ? '1' : '0'); } catch (e) {}
+  });
 
   var tps = document.getElementById('g-tps');
   tps.addEventListener('input', function () {
