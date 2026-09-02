@@ -457,19 +457,19 @@
 .hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
 .hs__phone > * { position: absolute; }
 /* everything inside the phone is measured in its own units off the screenshot */
-.hs__ph-msg { left: calc(14 * var(--u)); right: calc(14 * var(--u)); top: calc(70 * var(--u)); height: calc(180 * var(--u)); color: #1d1d1f; }
+.hs__ph-msg { left: calc(10 * var(--u)); right: calc(10 * var(--u)); top: calc(66 * var(--u)); height: calc(184 * var(--u)); color: #1d1d1f; }
 .hs__ph-greet { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(14 * var(--u)); transition: opacity 0.25s ease; }
 .hs__ph-greet.is-gone { opacity: 0; }
 .hs__ph-star { width: calc(28 * var(--u)); height: auto; border-radius: 0; }
-.hs__ph-title { font-family: "PP Pangaia", "Times New Roman", serif; font-size: calc(15 * var(--u)); letter-spacing: -0.01em; text-align: center; }
-.hs__ph-q, .hs__ph-a { position: absolute; left: 0; right: 0; font-size: calc(11.5 * var(--u)); line-height: 1.35; opacity: 0; transition: opacity 0.25s ease, translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); translate: 0 calc(10 * var(--u)); }
+.hs__ph-title { font-family: "PP Pangaia", "Times New Roman", serif; font-size: calc(14 * var(--u)); letter-spacing: -0.01em; text-align: center; }
+.hs__ph-q, .hs__ph-a { position: absolute; left: 0; right: 0; font-size: calc(10 * var(--u)); line-height: 1.3; letter-spacing: -0.01em; opacity: 0; transition: opacity 0.25s ease, translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); translate: 0 calc(10 * var(--u)); }
 .hs__ph-q { top: 0; text-align: right; }
-.hs__ph-q span { display: inline-block; background: #ececea; border-radius: calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); max-width: 80%; text-align: left; }
-.hs__ph-a { top: calc(46 * var(--u)); }
+.hs__ph-q span { display: inline-block; background: #ececea; border-radius: calc(11 * var(--u)); padding: calc(6 * var(--u)) calc(9 * var(--u)); max-width: 78%; text-align: left; }
+.hs__ph-a { top: calc(44 * var(--u)); padding-right: calc(4 * var(--u)); }
 .hs__ph-q.is-in, .hs__ph-a.is-in { opacity: 1; translate: 0 0; }
-.hs__ph-typed { left: calc(12 * var(--u)); top: calc(261 * var(--u)); width: calc(190 * var(--u)); height: calc(19 * var(--u)); font-size: calc(13 * var(--u)); line-height: calc(19 * var(--u)); color: #1d1d1f; white-space: nowrap; overflow: hidden; }
+.hs__ph-typed { left: calc(12 * var(--u)); top: calc(262 * var(--u)); width: calc(190 * var(--u)); height: calc(17 * var(--u)); font-size: calc(10 * var(--u)); line-height: calc(17 * var(--u)); color: #1d1d1f; white-space: nowrap; overflow: hidden; }
 .hs__ph-typed > span:first-child { display: inline-block; }
-.hs__ph-caret { display: inline-block; width: calc(1.5 * var(--u)); height: calc(15 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
+.hs__ph-caret { display: inline-block; width: calc(1.2 * var(--u)); height: calc(12 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
 @keyframes hs-caret { 50% { opacity: 0; } }
 .hs__ph-floor { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u)); background: #f9faf7; }
 /* keyboard layer: the same screenshot, clipped to the keys (below the strip), so it can leave */
@@ -1734,16 +1734,16 @@
 
           <!-- Slide 03 — MCP. Chips and logo are SVG; the phone is a screenshot
                with live regions laid over it (message area, input, keyboard). -->
-          <img data-frag="chip-duplicate" class="hs__frag" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
-               style="--x:-350; --y:46.7; --w:209; z-index:20">
-          <img data-frag="chip-set-budget" class="hs__frag" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
-               style="--x:-350; --y:317.1; --w:228; z-index:20">
-          <img data-frag="chip-notify" class="hs__frag" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
-               style="--x:-350; --y:265.9; --w:164; z-index:20">
-          <img data-frag="chip-scale" class="hs__frag" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
-               style="--x:-350; --y:182.3; --w:55; z-index:20">
-          <img data-frag="chip-time" class="hs__frag" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
-               style="--x:-350; --y:49.3; --w:55; z-index:20">
+          <img data-frag="chip-duplicate" class="hs__frag hs__pop" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
+               style="--x:114.2; --y:46.7; --w:209; z-index:20">
+          <img data-frag="chip-set-budget" class="hs__frag hs__pop" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
+               style="--x:148.2; --y:317.1; --w:228; z-index:20">
+          <img data-frag="chip-notify" class="hs__frag hs__pop" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
+               style="--x:65.8; --y:265.9; --w:164; z-index:20">
+          <img data-frag="chip-scale" class="hs__frag hs__pop" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
+               style="--x:53.7; --y:182.3; --w:55; z-index:20">
+          <img data-frag="chip-time" class="hs__frag hs__pop" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
+               style="--x:495.7; --y:49.3; --w:55; z-index:20">
           <img data-frag="birch-mcp" class="hs__frag hs__pop" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81"
                style="--x:383; --y:156; --w:293; z-index:21">
           <div data-frag="mcp-line" class="hs__frag hs__frag--sized hs__line" style="--x:684; --y:189; --w:134; --h:2; z-index:19"></div>
@@ -1879,11 +1879,11 @@
        Juice is the bottom of the pile and arrives at its final angle. */
     'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, delay:650, rate:0.10}, auto:{delay:1450, dur:10}, arm:0.5},
                            /* slide 03: same cards, smaller, regrouped on the left — angles untouched */
-                           {x:109.7, y:151.6, w:163.03, d:[0,71.5,0], e:[0.15,0.75]}],
+                           {x:109.7, y:151.6, w:163.03, d:[0,71.5,0], arm:0.05, auto:{delay:0,   rate:0.09}}],
     'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, delay:650, rate:0.10}, auto:{delay:1650, dur:750}, arm:0.5},
-                           {x:318.5, y:80.8,  w:155.78, d:[0,71.5,0], e:[0.20,0.80]}],
+                           {x:318.5, y:80.8,  w:155.78, d:[0,71.5,0], arm:0.05, auto:{delay:140, rate:0.09}}],
     'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, delay:650, rate:0.10}, auto:{delay:1400, dur:750}, arm:0.5},
-                           {x:222.5, y:96.7,  w:155.78, d:[0,71.5,0], e:[0.25,0.85]}],
+                           {x:222.5, y:96.7,  w:155.78, d:[0,71.5,0], arm:0.05, auto:{delay:280, rate:0.09}}],
     /* The routine arrives on a clock once the segment is half way (the chat
        has settled by then): trigger, then routine, then the folder — each
        a lerp toward its place — and the stack rises after them. */
@@ -1895,14 +1895,15 @@
     /* Slide 03 — MCP. Chips fly in from the left one after another, the
        phone from the right; the logo pops in the reference rhythm and the
        dotted line draws itself to the phone once it has landed. */
-    'chip-duplicate':     [{x:-350, y:46.7,  w:209, r:-18.6,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:114.2, arm:0.1, auto:{delay:0,   rate:0.10}}],
-    'chip-scale':         [{x:-350, y:182.3, w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:53.7,  arm:0.1, auto:{delay:120, rate:0.10}}],
-    'chip-notify':        [{x:-350, y:265.9, w:164, r:-0.19,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:65.8,  arm:0.1, auto:{delay:240, rate:0.10}}],
-    'chip-set-budget':    [{x:-350, y:317.1, w:228, r:-14.55, d:[0,71.5,0]}, {}, {}, {}, {}, {x:148.2, arm:0.1, auto:{delay:360, rate:0.10}}],
-    'chip-time':          [{x:-350, y:49.3,  w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:495.7, arm:0.1, auto:{delay:480, rate:0.10}}],
-    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:700}, arm:0.1}],
-    'phone':              [{x:1300, y:24,    w:242, h:526,    d:[0,71.5,0]}, {}, {}, {}, {}, {x:836, arm:0.1, auto:{delay:200, rate:0.09}}],
-    'mcp-line':           [{x:684,  y:189,   w:134, h:2,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1300}, arm:0.1}]
+    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:0},    arm:0.05}],
+    'phone':              [{x:1300, y:24,    w:242, h:526,    d:[0,71.5,0]}, {}, {}, {}, {}, {x:836, arm:0.05, auto:{delay:100, rate:0.09}}],
+    'mcp-line':           [{x:684,  y:189,   w:134, h:2,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1000}, arm:0.05}],
+    /* the action chips are in place from the start and light up one by one */
+    'chip-duplicate':     [{x:114.2, y:46.7,  w:209, r:-18.6,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1100}, arm:0.05}],
+    'chip-scale':         [{x:53.7,  y:182.3, w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1240}, arm:0.05}],
+    'chip-notify':        [{x:65.8,  y:265.9, w:164, r:-0.19,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1380}, arm:0.05}],
+    'chip-set-budget':    [{x:148.2, y:317.1, w:228, r:-14.55, d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1520}, arm:0.05}],
+    'chip-time':          [{x:495.7, y:49.3,  w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1660}, arm:0.05}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -2081,17 +2082,18 @@
         var ka0 = f.k[a], armedL = local >= (kb.arm !== undefined ? kb.arm : 0.02) && (!kb.after || GATES[kb.after]);
         if (!armedL) { f.autoStart = null; f.lerp = null; }
         else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, r: ka0.r || 0, t: performance.now() }; }
+          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, w: ka0.w, r: ka0.r || 0, t: performance.now() }; }
           var elL = performance.now() - f.autoStart;
           var tgtL = elL >= kb.auto.delay ? kb : ka0;
           var dtL = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
           var kL = 1 - Math.pow(1 - kb.auto.rate, dtL);
           f.lerp.x += (tgtL.x - f.lerp.x) * kL; f.lerp.y += (tgtL.y - f.lerp.y) * kL; f.lerp.r += ((tgtL.r || 0) - f.lerp.r) * kL;
+          f.lerp.w += ((tgtL.w !== undefined ? tgtL.w : ka0.w) - f.lerp.w) * kL;
           if (Math.abs(tgtL.x - f.lerp.x) + Math.abs(tgtL.y - f.lerp.y) + Math.abs((tgtL.r || 0) - f.lerp.r) > 0.3 || elL < kb.auto.delay) autoLive = true;
         }
-        var curL = f.lerp || { x: ka0.x, y: ka0.y, r: ka0.r || 0 };
-        st.setProperty('--x',  curL.x); st.setProperty('--y',  curL.y); st.setProperty('--r',  curL.r);
-        st.setProperty('--x2', curL.x); st.setProperty('--y2', curL.y); st.setProperty('--r2', curL.r);
+        var curL = f.lerp || { x: ka0.x, y: ka0.y, w: ka0.w, r: ka0.r || 0 };
+        st.setProperty('--x',  curL.x); st.setProperty('--y',  curL.y); st.setProperty('--r',  curL.r); st.setProperty('--w', curL.w);
+        st.setProperty('--x2', curL.x); st.setProperty('--y2', curL.y); st.setProperty('--r2', curL.r); st.setProperty('--w2', curL.w);
         tt = 0;
       } else if (kb.auto && !kb.via) {
         /* plays on its own clock from the moment the segment is entered —
@@ -2114,18 +2116,19 @@
         var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
         if (!armedV) { f.autoStart = null; f.lerp = null; }
         else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, r: ka.r || 0, t: performance.now() }; }
+          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0, t: performance.now() }; }
           var elV = performance.now() - f.autoStart;
           /* before via.delay the card stays parked; then it chases the pile, then the final spot */
           var tgt = elV < (kb.via.delay || 0) ? ka : (elV >= kb.auto.delay ? kb : kb.via);
           var rate = kb.via.rate || 0.12, dtV = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
           var kV = 1 - Math.pow(1 - rate, dtV);
           f.lerp.x += (tgt.x - f.lerp.x) * kV; f.lerp.y += (tgt.y - f.lerp.y) * kV; f.lerp.r += ((tgt.r || 0) - f.lerp.r) * kV;
+          f.lerp.w += ((tgt.w !== undefined ? tgt.w : ka.w) - f.lerp.w) * kV;
           if (Math.abs(tgt.x - f.lerp.x) + Math.abs(tgt.y - f.lerp.y) + Math.abs((tgt.r || 0) - f.lerp.r) > 0.3 || elV < kb.auto.delay) autoLive = true;
         }
-        var cur = f.lerp || { x: ka.x, y: ka.y, r: ka.r || 0 };
-        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r);
-        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r);
+        var cur = f.lerp || { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0 };
+        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r); st.setProperty('--w', cur.w);
+        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r); st.setProperty('--w2', cur.w);
         tt = 0;
       } else if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
