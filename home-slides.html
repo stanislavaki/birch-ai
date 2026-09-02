@@ -428,9 +428,6 @@
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
   transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
-.hs__frag--ring.is-lit {
-  box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
-}
 
 /* The integrations bar ships without its shadow (an earlier export baked
    it in, which put 5 units of transparent film under the bar and pushed
@@ -459,7 +456,7 @@
 .hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
 .hs__phone > * { position: absolute; }
 /* everything inside the phone is measured in its own units off the screenshot */
-.hs__ph-msg { left: calc(10 * var(--u)); right: calc(10 * var(--u)); top: calc(96 * var(--u)); height: calc(154 * var(--u)); color: #1d1d1f;
+.hs__ph-msg { left: calc(18 * var(--u)); right: calc(18 * var(--u)); top: calc(96 * var(--u)); height: calc(154 * var(--u)); color: #1d1d1f;
   display: flex; flex-direction: column; align-items: flex-start; gap: calc(12 * var(--u)); }
 .hs__ph-greet { position: absolute; inset: calc(-30 * var(--u)) 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(14 * var(--u)); transition: opacity 0.25s ease; }
 .hs__ph-greet.is-gone { opacity: 0; }
@@ -1902,7 +1899,7 @@
     /* Slide 03 — MCP. Chips fly in from the left one after another, the
        phone from the right; the logo pops in the reference rhythm and the
        dotted line draws itself to the phone once it has landed. */
-    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:0},    arm:0.05}],
+    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:420},  arm:0.05}],
     'phone':              [{x:1300, y:24,    w:242, h:526,    d:[0,71.5,0]}, {}, {}, {}, {}, {x:836, arm:0.05, auto:{delay:100, rate:0.09}}],
     'mcp-line':           [{x:684,  y:189,   w:134, h:2,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1000}, arm:0.05}],
     /* the action chips are in place from the start and light up one by one */
@@ -2052,6 +2049,45 @@
     });
   });
 
+  /* Continuity across steps. A timed motion (lerp) that has not settled
+     when the reader crosses into the next step is not cut: the lerp stays
+     on the fragment and keeps chasing whatever the scroll now says its
+     place is, at its own rate, until it is within 0.3 units. Only then
+     does the fragment go back to plain blending. Scrolling back works the
+     same way — the piece glides back instead of snapping. */
+  function chase(f, tgt, rate) {
+    var now = performance.now(), L = f.lerp;
+    var dt = Math.min(3, (now - L.t) / (1000 / 60)); L.t = now;
+    var k = 1 - Math.pow(1 - rate, dt);
+    L.x += (tgt.x - L.x) * k; L.y += (tgt.y - L.y) * k; L.r += ((tgt.r || 0) - L.r) * k;
+    if (tgt.w !== undefined) L.w += (tgt.w - L.w) * k;
+    if (tgt.h !== undefined && L.h !== undefined) L.h += (tgt.h - L.h) * k;
+    return Math.abs(tgt.x - L.x) + Math.abs(tgt.y - L.y) + Math.abs((tgt.r || 0) - L.r) + (tgt.w !== undefined ? Math.abs(tgt.w - L.w) : 0);
+  }
+  function startLerp(f, from, rate) {
+    if (!f.lerp) f.lerp = { x: from.x, y: from.y, w: from.w, h: from.h, r: from.r || 0, t: performance.now() };
+    f.rate = rate;
+  }
+  function writeLerp(st, L) {
+    st.setProperty('--x',  L.x); st.setProperty('--y',  L.y); st.setProperty('--r',  L.r); st.setProperty('--w', L.w);
+    st.setProperty('--x2', L.x); st.setProperty('--y2', L.y); st.setProperty('--r2', L.r); st.setProperty('--w2', L.w);
+    if (L.h !== undefined) { st.setProperty('--h', L.h); st.setProperty('--h2', L.h); }
+  }
+  /* a fragment with a leftover lerp glides to `tgt`; true while still gliding */
+  function settle(f, st, tgt) {
+    if (!f.lerp) return false;
+    var gap = chase(f, tgt, f.rate || 0.1);
+    writeLerp(st, f.lerp);
+    if (gap > 0.3) { autoLive = true; return true; }
+    f.lerp = null; wrote = -1;   /* back to the pair the scroll dictates */
+    return true;
+  }
+  function blendAt(ka, kb, tt) {
+    return { x: ka.x + (kb.x - ka.x) * tt, y: ka.y + (kb.y - ka.y) * tt, w: ka.w + (kb.w - ka.w) * tt,
+             h: ka.h !== undefined && kb.h !== undefined ? ka.h + (kb.h - ka.h) * tt : ka.h,
+             r: (ka.r || 0) + ((kb.r || 0) - (ka.r || 0)) * tt };
+  }
+
   var slide = -1;
   function apply() {
     targetP = progress();
@@ -2087,22 +2123,19 @@
         /* timed lerp toward the keyframe: armed at `arm` of the segment,
            parked until auto.delay, then chasing x / y / r exponentially */
         var ka0 = f.k[a], armedL = local >= (kb.arm !== undefined ? kb.arm : 0.02) && (!kb.after || GATES[kb.after]);
-        if (!armedL) { f.autoStart = null; f.lerp = null; }
-        else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0, t: performance.now() }; }
+        if (!armedL) {
+          /* not yet (or no longer) armed: a leftover lerp glides back to its resting spot */
+          f.autoStart = null;
+          if (!settle(f, st, ka0)) { writeLerp(st, { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0 }); }
+        } else {
+          if (!f.autoStart) f.autoStart = performance.now();
+          startLerp(f, ka0, kb.auto.rate);   /* no-op when a lerp is already in flight */
           var elL = performance.now() - f.autoStart;
           var tgtL = elL >= kb.auto.delay ? kb : ka0;
-          var dtL = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
-          var kL = 1 - Math.pow(1 - kb.auto.rate, dtL);
-          f.lerp.x += (tgtL.x - f.lerp.x) * kL; f.lerp.y += (tgtL.y - f.lerp.y) * kL; f.lerp.r += ((tgtL.r || 0) - f.lerp.r) * kL;
-          f.lerp.w += ((tgtL.w !== undefined ? tgtL.w : ka0.w) - f.lerp.w) * kL;
-          f.lerp.h += ((tgtL.h !== undefined ? tgtL.h : ka0.h) - f.lerp.h) * kL;
-          if (Math.abs(tgtL.x - f.lerp.x) + Math.abs(tgtL.y - f.lerp.y) + Math.abs((tgtL.r || 0) - f.lerp.r) > 0.3 || elL < kb.auto.delay) autoLive = true;
+          var gapL = chase(f, { x: tgtL.x, y: tgtL.y, r: tgtL.r, w: tgtL.w !== undefined ? tgtL.w : ka0.w, h: tgtL.h !== undefined ? tgtL.h : ka0.h }, kb.auto.rate);
+          if (gapL > 0.3 || elL < kb.auto.delay) autoLive = true;
+          writeLerp(st, f.lerp);
         }
-        var curL = f.lerp || { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0 };
-        st.setProperty('--x',  curL.x); st.setProperty('--y',  curL.y); st.setProperty('--r',  curL.r); st.setProperty('--w', curL.w);
-        st.setProperty('--x2', curL.x); st.setProperty('--y2', curL.y); st.setProperty('--r2', curL.r); st.setProperty('--w2', curL.w);
-        if (curL.h !== undefined) { st.setProperty('--h', curL.h); st.setProperty('--h2', curL.h); }
         tt = 0;
       } else if (kb.auto && !kb.via) {
         /* plays on its own clock from the moment the segment is entered —
@@ -2123,21 +2156,20 @@
            drops to zero between the legs, so rise and peel read as one
            motion. Scrolling back re-parks the card instantly. */
         var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
-        if (!armedV) { f.autoStart = null; f.lerp = null; }
-        else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0, t: performance.now() }; }
+        if (!armedV) {
+          f.autoStart = null;
+          if (!settle(f, st, ka)) { writeLerp(st, { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0 }); }
+        } else {
+          var rate = kb.via.rate || 0.12;
+          if (!f.autoStart) f.autoStart = performance.now();
+          startLerp(f, ka, rate);
           var elV = performance.now() - f.autoStart;
           /* before via.delay the card stays parked; then it chases the pile, then the final spot */
           var tgt = elV < (kb.via.delay || 0) ? ka : (elV >= kb.auto.delay ? kb : kb.via);
-          var rate = kb.via.rate || 0.12, dtV = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
-          var kV = 1 - Math.pow(1 - rate, dtV);
-          f.lerp.x += (tgt.x - f.lerp.x) * kV; f.lerp.y += (tgt.y - f.lerp.y) * kV; f.lerp.r += ((tgt.r || 0) - f.lerp.r) * kV;
-          f.lerp.w += ((tgt.w !== undefined ? tgt.w : ka.w) - f.lerp.w) * kV;
-          if (Math.abs(tgt.x - f.lerp.x) + Math.abs(tgt.y - f.lerp.y) + Math.abs((tgt.r || 0) - f.lerp.r) > 0.3 || elV < kb.auto.delay) autoLive = true;
+          var gapV = chase(f, { x: tgt.x, y: tgt.y, r: tgt.r, w: tgt.w !== undefined ? tgt.w : ka.w }, rate);
+          if (gapV > 0.3 || elV < kb.auto.delay) autoLive = true;
+          writeLerp(st, f.lerp);
         }
-        var cur = f.lerp || { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0 };
-        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r); st.setProperty('--w', cur.w);
-        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r); st.setProperty('--w2', cur.w);
         tt = 0;
       } else if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
@@ -2157,6 +2189,12 @@
           if (el < kb.auto.dur) autoLive = true;
         } else { tt = curve(kb, local); }
       }
+      /* any other branch: a lerp left over from a timed step glides to where
+         the blend puts the fragment now, then hands over to the blend */
+      if (!kb.auto && !kb.via) f.autoStart = null;   /* a timed step re-entered later starts its clock afresh */
+      if (f.lerp && !((kb.auto && !kb.via && kb.auto.rate) || (kb.via && kb.via.rate))) {
+        if (settle(f, st, blendAt(f.k[a], kb, tt))) tt = 0;
+      }
       st.setProperty('--t', tt.toFixed(4));
     });
 
@@ -2166,11 +2204,11 @@
     /* the rules frame counts as closed from 90% of its closing leg onward */
     var closing = FRAGS['rules-frame'];
     if (closing) {
-      closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && closing.lerp && closing.lerp.w < 420));
+      closing.el.classList.toggle('is-closed', closing.lerp ? (a >= 1 && closing.lerp.w < 420) : a > 1);
       /* the blue fill follows the frame's own closing, not the scroll: while
          the frame is lerping, its progress (1632 → 276 wide) is the fill's --t */
       var face = FRAGS['rules-face'];
-      if (face && a === 1) {
+      if (face && (a === 1 || (a === 2 && closing.lerp))) {
         var prog = closing.lerp ? Math.min(1, Math.max(0, (1632 - closing.lerp.w) / (1632 - 276))) : 0;
         face.el.style.setProperty('--t', prog.toFixed(4));
       }
