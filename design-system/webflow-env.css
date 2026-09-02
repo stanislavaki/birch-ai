@@ -49,6 +49,15 @@ em, i, cite, .u-italic {
   --slnt: 10;
 }
 
+/* Bare inline elements must follow the weight of the text they sit in.
+   The universal rule above forces 600 on everything without a class, so an
+   <em> inside a 500-weight paragraph rendered heavier than its own text.
+   Element selectors lose to any class rule, so classed links, buttons and
+   headings keep the weight their class gives them. */
+em, i, cite, a, span, sub, sup, small, mark, code, abbr, dfn, q {
+  font-weight: inherit;
+}
+
 body {
   margin: 0;
   font-family: "Tt Commons Pro Variable", Arial, sans-serif;
