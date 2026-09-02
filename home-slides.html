@@ -1743,8 +1743,11 @@
        then jar peel off it, turning while they travel — rotation and
        movement share one window. */
     'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, e:[0.62,0.80]}, e:[0.80,0.81]}],
-    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6,    e:[0.62,0.80]}, e:[0.88,1.00], ease:'out'}],
-    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3,    e:[0.62,0.80]}, e:[0.82,0.96], ease:'out'}],
+    /* auto: once the pile has landed (leg 1, by scroll), the fan plays on
+       its own clock — delay then duration in ms — so the rhythm is the
+       same at any scroll speed. Scrolling back resets it. */
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3,    e:[0.62,0.80]}, auto:{delay:250, dur:900}, ease:'out'}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6,    e:[0.62,0.80]}, auto:{delay:650, dur:900}, ease:'out'}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
     'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, e:[0.45,0.85], ease:'out'}]
@@ -1761,7 +1764,7 @@
       prev = {
         /* window inside the arriving segment and the curve applied to it —
            per keyframe, not inherited: a stagger belongs to one entrance */
-        e: raw.e || null, ease: raw.ease || null, via: raw.via || null,
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         r: raw.r !== undefined ? raw.r : prev.r,
@@ -1835,11 +1838,16 @@
      source of truth — this only delays arriving at it. */
   var shownP = null, targetP = 0, raf = null;
   var LAG = 0.10;
+  var autoLive = false;
   function follow() {
     raf = null;
     if (shownP === null) shownP = targetP;
     var diff = targetP - shownP;
-    if (Math.abs(diff) < 0.00025) { shownP = targetP; render(shownP); return; }
+    if (Math.abs(diff) < 0.00025) {
+      shownP = targetP; autoLive = false; render(shownP);
+      if (autoLive) raf = requestAnimationFrame(follow);   /* a timed piece is still playing */
+      return;
+    }
     shownP += diff * LAG;
     render(shownP);
     raf = requestAnimationFrame(follow);
@@ -1879,20 +1887,27 @@
     writePair(a);
     card.style.setProperty('--t', t.toFixed(4));
     /* each fragment gets its own t: same segment, own window and curve */
+    autoLive = false;
     var b = Math.min(STEPS.length - 1, a + 1);
     Object.keys(FRAGS).forEach(function (id) {
       var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
       if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
-           together); leg 2: via → final on the keyframe's window (the fan
-           is staggered). Between the two the pile simply holds. */
+           together); leg 2: via → final — on the keyframe's window, or on
+           its own clock when the keyframe says auto. */
         var ka = f.k[a], t1 = curve(kb.via, local), leg1 = t1 < 1;
         var from = leg1 ? ka : kb.via, to = leg1 ? kb.via : kb;
         st.setProperty('--x',  from.x !== undefined ? from.x : ka.x); st.setProperty('--y',  from.y !== undefined ? from.y : ka.y);
         st.setProperty('--r',  from.r || 0);
         st.setProperty('--x2', to.x !== undefined ? to.x : kb.x);    st.setProperty('--y2', to.y !== undefined ? to.y : kb.y);
         st.setProperty('--r2', to.r || 0);
-        tt = leg1 ? t1 : curve(kb, local);
+        if (leg1) { tt = t1; f.autoStart = null; }
+        else if (kb.auto) {
+          if (!f.autoStart) f.autoStart = performance.now();
+          var el = performance.now() - f.autoStart - kb.auto.delay;
+          tt = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, el / kb.auto.dur)));
+          if (el < kb.auto.dur) autoLive = true;
+        } else { tt = curve(kb, local); }
       }
       st.setProperty('--t', tt.toFixed(4));
     });
