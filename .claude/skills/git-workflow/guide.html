@@ -1,0 +1,973 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git как берёза</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* ---------- tokens: light is the base, dark redefines only tokens ---------- */
+  :root {
+    --bg: #F3F6F4;
+    --surface: #FFFFFF;
+    --surface-2: #E9EFEB;
+    --ink: #17211C;
+    --muted: #5E6B65;
+    --line: #D3DBD6;
+    --main: #1F7A5A;        /* trunk: main */
+    --main-soft: #D6EEE2;
+    --feat: #D99A1E;        /* working branch */
+    --feat-soft: #FBEFD2;
+    --other: #6F84A0;       /* colleagues / remote */
+    --other-soft: #E1E8F0;
+    --danger: #D3454F;
+    --danger-soft: #FBE1E3;
+    --shadow: 0 1px 2px rgba(23,33,28,.06), 0 8px 24px rgba(23,33,28,.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1411;
+      --surface: #172019;
+      --surface-2: #1F2A23;
+      --ink: #ECF2EE;
+      --muted: #97A69E;
+      --line: #2B3730;
+      --main: #4FC58E;
+      --main-soft: #1B3A2C;
+      --feat: #F2B84B;
+      --feat-soft: #3C3016;
+      --other: #93A7BF;
+      --other-soft: #253040;
+      --danger: #F06B73;
+      --danger-soft: #45222A;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1411;
+    --surface: #172019;
+    --surface-2: #1F2A23;
+    --ink: #ECF2EE;
+    --muted: #97A69E;
+    --line: #2B3730;
+    --main: #4FC58E;
+    --main-soft: #1B3A2C;
+    --feat: #F2B84B;
+    --feat-soft: #3C3016;
+    --other: #93A7BF;
+    --other-soft: #253040;
+    --danger: #F06B73;
+    --danger-soft: #45222A;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  /* ---------- base ---------- */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Manrope", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: "Bricolage Grotesque", "Manrope", "Helvetica Neue", Arial, sans-serif;
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+  }
+  h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); font-weight: 800; }
+  h2 { font-size: clamp(1.75rem, 3.4vw, 2.5rem); font-weight: 700; }
+  h3 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0; }
+  p { margin: 0; text-wrap: pretty; }
+  code, kbd, .mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.86em;
+  }
+  code {
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 0.3em;
+  }
+  pre {
+    margin: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  a { color: var(--main); }
+
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  /* ---------- eyebrow / chips ---------- */
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.4em;
+    font-size: 0.8rem; font-weight: 700;
+    padding: 0.35em 0.75em 0.3em;
+    border-radius: 999px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .chip-main { background: var(--main-soft); color: var(--main); }
+  .chip-feat { background: var(--feat-soft); color: var(--feat); }
+  .chip-other { background: var(--other-soft); color: var(--other); }
+  .chip-danger { background: var(--danger-soft); color: var(--danger); }
+  .chip-neutral { background: var(--surface-2); color: var(--muted); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 4.5rem 0 3rem;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  .hero .lede { margin-top: 1.25rem; font-size: 1.15rem; max-width: 30rem; color: var(--muted); }
+  .hero .legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  @media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; padding-top: 3rem; }
+  }
+
+  /* ---------- chapters ---------- */
+  .chapter {
+    padding: 3.5rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .chapter-head {
+    display: grid;
+    grid-template-columns: 4.5rem 1fr;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.75rem;
+  }
+  .step {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--main);
+    font-variant-numeric: tabular-nums;
+  }
+  .chapter-head .sub { margin-top: 0.6rem; color: var(--muted); max-width: 38rem; font-size: 1.05rem; }
+  @media (max-width: 560px) {
+    .chapter-head { grid-template-columns: 1fr; gap: 0.4rem; }
+    .step { font-size: 2rem; }
+  }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+  figure svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  figcaption {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    color: var(--muted);
+    max-width: 44rem;
+  }
+
+  .rule {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem 1rem;
+    align-items: start;
+    background: var(--main-soft);
+    border-radius: 0.8rem;
+    padding: 1rem 1.15rem;
+  }
+  .rule .tag {
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    color: var(--main);
+    letter-spacing: 0.02em;
+    padding-top: 0.15rem;
+  }
+  .rule p { max-width: 42rem; }
+  .rule.warn { background: var(--danger-soft); }
+  .rule.warn .tag { color: var(--danger); }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+  @media (max-width: 800px) { .three { grid-template-columns: 1fr; } }
+  @media (max-width: 640px) { .two { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.25rem 1.4rem;
+    display: flex; flex-direction: column; gap: 0.75rem;
+  }
+  .card svg { display: block; width: 100%; height: auto; }
+  .card h3 { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .card p { color: var(--muted); font-size: 0.95rem; }
+  .card .verdict { margin-top: auto; padding-top: 0.5rem; }
+
+  /* ---------- SVG semantic colours (applied by class, inherit theme) ---------- */
+  svg { color: var(--ink); font-family: "Manrope", sans-serif; }
+  svg text { fill: currentColor; font-size: 13px; font-weight: 600; }
+  svg text.small { font-size: 11px; font-weight: 600; fill: var(--muted); }
+  svg text.mono { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 500; }
+  svg .st-main   { stroke: var(--main); }
+  svg .st-feat   { stroke: var(--feat); }
+  svg .st-other  { stroke: var(--other); }
+  svg .st-danger { stroke: var(--danger); }
+  svg .st-line   { stroke: var(--line); }
+  svg .st-muted  { stroke: var(--muted); }
+  svg .fl-main   { fill: var(--main); }
+  svg .fl-feat   { fill: var(--feat); }
+  svg .fl-other  { fill: var(--other); }
+  svg .fl-danger { fill: var(--danger); }
+  svg .fl-surface { fill: var(--surface); }
+  svg .fl-surface2 { fill: var(--surface-2); }
+  svg .fl-main-soft { fill: var(--main-soft); }
+  svg .fl-feat-soft { fill: var(--feat-soft); }
+  svg .fl-other-soft { fill: var(--other-soft); }
+  svg .fl-danger-soft { fill: var(--danger-soft); }
+  svg .fl-bg { fill: var(--bg); }
+  svg .t-main { fill: var(--main); }
+  svg .t-feat { fill: var(--feat); }
+  svg .t-other { fill: var(--other); }
+  svg .t-danger { fill: var(--danger); }
+  svg .t-muted { fill: var(--muted); }
+  svg .node { stroke-width: 3; }
+  svg .path { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  svg .thin { fill: none; stroke-width: 2; stroke-linecap: round; }
+  svg .dash { stroke-dasharray: 6 6; }
+  svg .box { stroke-width: 1.5; rx: 10; }
+
+  /* ---------- loop stepper ---------- */
+  .loop {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+    counter-reset: step;
+  }
+  .loop-step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    padding: 1rem 0.9rem 1rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    position: relative;
+  }
+  .loop-step::before {
+    counter-increment: step;
+    content: counter(step);
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: var(--main);
+    line-height: 1;
+  }
+  .loop-step b { font-size: 0.95rem; display: block; }
+  .loop-step span { font-size: 0.85rem; color: var(--muted); }
+  .loop-step code { font-size: 0.72rem; display: inline-block; margin-top: 0.2rem; }
+  .loop-step.hl { border-color: var(--main); background: var(--main-soft); }
+  @media (max-width: 900px) { .loop { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .loop { grid-template-columns: 1fr 1fr; } }
+
+  /* ---------- glossary ---------- */
+  .glossary { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 700; }
+  td:first-child { white-space: nowrap; font-weight: 700; }
+  td .mono { font-size: 0.82rem; color: var(--muted); }
+
+  footer { padding: 3rem 0 4rem; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero svg .grow { animation: grow 1.4s ease-out both; }
+    @keyframes grow { from { stroke-dashoffset: 900; } to { stroke-dashoffset: 0; } }
+  }
+  :focus-visible { outline: 2px solid var(--main); outline-offset: 2px; }
+</style>
+
+<main class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Git для дизайнера · Birch AI</div>
+      <h1 style="margin-top:.6rem">Git — это берёза.</h1>
+      <p class="lede">
+        <b style="color:var(--ink)">main</b> — ствол, который растёт у всех один.
+        Каждая задача — <b style="color:var(--ink)">ветка</b>: отросла, поработала, вернулась в ствол.
+        Всё остальное на этой странице — про то, как ветка растёт и как возвращается.
+      </p>
+      <div class="legend">
+        <span class="chip chip-main">● main — общий ствол</span>
+        <span class="chip chip-feat">● feature/… — моя ветка</span>
+        <span class="chip chip-other">● коллеги</span>
+      </div>
+    </div>
+
+    <figure style="padding:1rem">
+      <svg viewBox="0 0 560 440" role="img" aria-label="Ствол main с двумя ветками, которые отрастают и возвращаются в ствол через merge">
+        <!-- trunk -->
+        <path class="path st-main grow" d="M280 420 L280 30" stroke-dasharray="900" stroke-dashoffset="900"/>
+        <!-- right branch: leaves at y=320, returns at y=150 -->
+        <path class="path st-feat grow" d="M280 320 C 280 290, 400 300, 400 260 L400 210 C 400 170, 280 190, 280 150" stroke-dasharray="900" stroke-dashoffset="900"/>
+        <!-- left branch: leaves at y=240, returns at y=70 -->
+        <path class="path st-feat grow" d="M280 240 C 280 210, 160 220, 160 180 L160 130 C 160 90, 280 110, 280 70" stroke-dasharray="900" stroke-dashoffset="900"/>
+
+        <!-- trunk nodes -->
+        <circle cx="280" cy="400" r="9" class="node fl-surface st-main"/>
+        <circle cx="280" cy="320" r="9" class="node fl-surface st-main"/>
+        <circle cx="280" cy="240" r="9" class="node fl-surface st-main"/>
+        <circle cx="280" cy="150" r="10" class="node fl-main st-main"/>
+        <circle cx="280" cy="70"  r="10" class="node fl-main st-main"/>
+
+        <!-- right branch nodes -->
+        <circle cx="400" cy="260" r="9" class="node fl-surface st-feat"/>
+        <circle cx="400" cy="210" r="9" class="node fl-surface st-feat"/>
+        <!-- left branch nodes -->
+        <circle cx="160" cy="180" r="9" class="node fl-surface st-feat"/>
+        <circle cx="160" cy="130" r="9" class="node fl-surface st-feat"/>
+
+        <!-- labels -->
+        <text x="300" y="404" class="small">откуда всё началось</text>
+        <text x="420" y="240" class="t-feat">коммиты</text>
+        <text x="420" y="256" class="small">ветки «баннер»</text>
+        <text x="300" y="155" class="t-main">merge через PR</text>
+        <text x="300" y="171" class="small">ветка вернулась в ствол</text>
+        <text x="40" y="160" class="t-feat">коммиты</text>
+        <text x="40" y="176" class="small">ветки «меню v3»</text>
+        <text x="300" y="75" class="t-main">merge через PR</text>
+        <text x="300" y="30" class="mono t-main">main</text>
+      </svg>
+    </figure>
+  </section>
+
+  <!-- ================= 1. COMMIT ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">1</div>
+      <div>
+        <h2>Коммит — сохранённая версия с подписью</h2>
+        <p class="sub">Как «Save to version history» в Figma, только подпись обязательна, и каждая версия знает свою предыдущую. Коммит живёт у тебя на компьютере, пока ты его не отправишь.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 200" role="img" aria-label="Лента из четырёх коммитов на одной ветке, у каждого подпись и короткий код">
+        <path class="path st-feat" d="M60 110 L700 110"/>
+        <circle cx="120" cy="110" r="10" class="node fl-surface st-feat"/>
+        <circle cx="300" cy="110" r="10" class="node fl-surface st-feat"/>
+        <circle cx="480" cy="110" r="10" class="node fl-surface st-feat"/>
+        <circle cx="660" cy="110" r="10" class="node fl-feat st-feat"/>
+
+        <text x="120" y="70" text-anchor="middle">Компонент баннера</text>
+        <text x="300" y="70" text-anchor="middle">Текст под кампанию</text>
+        <text x="480" y="70" text-anchor="middle">Кегль 13px</text>
+        <text x="660" y="70" text-anchor="middle">Фикс над меню</text>
+
+        <text x="120" y="150" text-anchor="middle" class="mono t-muted">a1f3c9</text>
+        <text x="300" y="150" text-anchor="middle" class="mono t-muted">7be204</text>
+        <text x="480" y="150" text-anchor="middle" class="mono t-muted">c0d551</text>
+        <text x="660" y="150" text-anchor="middle" class="mono t-feat">e92b7a  ← ты здесь</text>
+
+        <text x="380" y="185" text-anchor="middle" class="small">время →</text>
+      </svg>
+      <figcaption>Одна задача — несколько коммитов. Подпись отвечает на вопрос «что изменилось и зачем», а не «поправил». Шестизначный код — просто адрес версии, его не надо запоминать.</figcaption>
+    </figure>
+
+    <div class="rule">
+      <div class="tag">У нас</div>
+      <p>Коммит — маленький и про одно: «баннер: кегль 13px», а не «всякое». Claude пишет подпись по-русски, комментарии внутри кода — по-английски.</p>
+    </div>
+  </section>
+
+  <!-- ================= 2. BRANCH ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">2</div>
+      <div>
+        <h2>Ветка — своя копия под одну задачу</h2>
+        <p class="sub">Ветка отрастает от ствола. Всё, что ты в ней делаешь, не трогает main и не мешает коллегам. Ствол тем временем растёт дальше без тебя.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 240" role="img" aria-label="Ветка feature отрастает от main; пока она живёт, в main появляется коммит коллеги">
+        <!-- main -->
+        <path class="path st-main" d="M40 70 L720 70"/>
+        <circle cx="120" cy="70" r="10" class="node fl-surface st-main"/>
+        <circle cx="240" cy="70" r="10" class="node fl-surface st-main"/>
+        <circle cx="560" cy="70" r="10" class="node fl-surface st-other"/>
+        <text x="30" y="40" class="mono t-main">main</text>
+        <text x="560" y="40" text-anchor="middle" class="t-other">коммит коллеги</text>
+        <text x="560" y="115" text-anchor="middle" class="small">приехал в main, пока ты работала</text>
+
+        <!-- feature branch -->
+        <path class="path st-feat" d="M240 70 C 240 120, 320 120, 320 160 L720 160"/>
+        <circle cx="400" cy="160" r="10" class="node fl-surface st-feat"/>
+        <circle cx="500" cy="160" r="10" class="node fl-surface st-feat"/>
+        <circle cx="600" cy="160" r="10" class="node fl-feat st-feat"/>
+        <text x="300" y="215" class="mono t-feat">feature/webinar-banner</text>
+        <text x="230" y="115" class="small" text-anchor="end">git checkout -b</text>
+        <text x="620" y="205" class="small">твои коммиты живут только здесь</text>
+      </svg>
+      <figcaption>Ветка запоминает, от какой точки ствола она отросла. Поэтому git потом сможет сказать, что именно ты добавила, и где твои правки пересеклись с чужими.</figcaption>
+    </figure>
+
+    <div class="rule">
+      <div class="tag">У нас</div>
+      <p>Любая сессия начинается с новой ветки <code>feature/&lt;коротко-о-задаче&gt;</code>. На main напрямую не работаем никогда. У Claude каждая сессия ещё и живёт в своей папке-копии репозитория (worktree) — так две сессии не мешают друг другу. Ветка при этом отрастает от <em>локального</em> main, который никто не обновляет, поэтому первым делом Claude сам выравнивает её на свежий ствол с GitHub. Говорить про это не нужно.</p>
+    </div>
+  </section>
+
+  <!-- ================= 3. PUSH / PULL ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">3</div>
+      <div>
+        <h2>Push и pull — туда и обратно</h2>
+        <p class="sub">Репозиторий существует в двух местах: у тебя на Mac и на GitHub. Они не синхронизируются сами, как Figma. Ты отправляешь (push) и забираешь (pull) руками.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 330" role="img" aria-label="Мой Mac слева, GitHub в центре, коллега справа; push отправляет ветку в GitHub, pull забирает чужие изменения">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- my mac -->
+        <rect x="30" y="90" width="190" height="150" class="box fl-surface st-line"/>
+        <text x="125" y="120" text-anchor="middle">Мой Mac</text>
+        <text x="125" y="138" text-anchor="middle" class="small">локальный репозиторий</text>
+        <path class="path st-main" d="M60 175 L190 175"/>
+        <circle cx="90" cy="175" r="6" class="node fl-surface st-main"/>
+        <circle cx="130" cy="175" r="6" class="node fl-surface st-main"/>
+        <path class="path st-feat" d="M130 175 C 130 200, 150 205, 160 205 L190 205"/>
+        <circle cx="175" cy="205" r="6" class="node fl-feat st-feat"/>
+        <text x="60" y="228" class="mono small">feature/…  только у меня</text>
+
+        <!-- github -->
+        <rect x="285" y="60" width="190" height="210" class="box fl-main-soft st-main"/>
+        <text x="380" y="90" text-anchor="middle">GitHub</text>
+        <text x="380" y="108" text-anchor="middle" class="small">origin — общая копия</text>
+        <path class="path st-main" d="M315 160 L445 160"/>
+        <circle cx="345" cy="160" r="6" class="node fl-surface st-main"/>
+        <circle cx="385" cy="160" r="6" class="node fl-surface st-main"/>
+        <circle cx="425" cy="160" r="6" class="node fl-surface st-other"/>
+        <path class="path st-feat dash" d="M385 160 C 385 185, 405 190, 415 190 L445 190"/>
+        <text x="315" y="225" class="mono small">main видят все</text>
+        <text x="315" y="245" class="mono small">feature/… — после push</text>
+
+        <!-- colleague -->
+        <rect x="540" y="90" width="190" height="150" class="box fl-surface st-line"/>
+        <text x="635" y="120" text-anchor="middle">Mac коллеги</text>
+        <text x="635" y="138" text-anchor="middle" class="small">свой локальный репозиторий</text>
+        <path class="path st-main" d="M570 175 L700 175"/>
+        <circle cx="600" cy="175" r="6" class="node fl-surface st-main"/>
+        <circle cx="640" cy="175" r="6" class="node fl-surface st-main"/>
+        <circle cx="680" cy="175" r="6" class="node fl-other st-other"/>
+
+        <!-- push arrow (me -> github) -->
+        <path class="thin st-feat" d="M222 120 L282 120" marker-end="url(#arr)" style="color:var(--feat)"/>
+        <text x="252" y="112" text-anchor="middle" class="mono t-feat">push</text>
+        <!-- pull arrow (github -> me) -->
+        <path class="thin st-main" d="M282 250 L222 250" marker-end="url(#arr)" style="color:var(--main)"/>
+        <text x="252" y="272" text-anchor="middle" class="mono t-main">pull</text>
+
+        <!-- colleague push -->
+        <path class="thin st-other" d="M538 120 L478 120" marker-end="url(#arr)" style="color:var(--other)"/>
+        <text x="508" y="112" text-anchor="middle" class="mono t-other">push</text>
+        <path class="thin st-main" d="M478 250 L538 250" marker-end="url(#arr)" style="color:var(--main)"/>
+        <text x="508" y="272" text-anchor="middle" class="mono t-main">pull</text>
+
+        <text x="380" y="315" text-anchor="middle" class="small">push — «отправь мою ветку наверх» · pull — «принеси мне, что появилось у других»</text>
+      </svg>
+      <figcaption>Push никогда не идёт в чужой компьютер напрямую. Всё проходит через GitHub: ты отправляешь туда, коллега забирает оттуда. Поэтому pull перед началом задачи — как обновить библиотеку в Figma: чтобы работать с актуальным стволом.</figcaption>
+    </figure>
+
+    <div class="rule">
+      <div class="tag">У нас</div>
+      <p>Push — только своей ветки: <code>git push origin feature/…</code>. Push в main мимо PR запрещён. Свежий ствол в начале сессии Claude подтягивает сам; если коллега влил что-то нужное посреди работы — «подтяни main в ветку».</p>
+    </div>
+  </section>
+
+  <!-- ================= 4. PULL REQUEST ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">4</div>
+      <div>
+        <h2>Pull request — «посмотрите и примите мою ветку»</h2>
+        <p class="sub">PR — это не команда git, а страница на GitHub. На ней видно всё, что ветка меняет, можно оставить комментарии, и есть одна кнопка, которая вливает ветку в ствол.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 300" role="img" aria-label="Ветка feature слева, карточка pull request в центре с diff, ревью и кнопкой Merge, ствол main справа">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- branch on the left -->
+        <path class="path st-feat" d="M40 150 L180 150"/>
+        <circle cx="70" cy="150" r="8" class="node fl-surface st-feat"/>
+        <circle cx="110" cy="150" r="8" class="node fl-surface st-feat"/>
+        <circle cx="150" cy="150" r="8" class="node fl-feat st-feat"/>
+        <text x="40" y="120" class="mono t-feat">feature/…</text>
+        <text x="40" y="185" class="small">4 коммита</text>
+        <text x="40" y="201" class="small">после push</text>
+
+        <path class="thin st-feat" d="M190 150 L238 150" marker-end="url(#arr2)" style="color:var(--feat)"/>
+        <text x="214" y="140" text-anchor="middle" class="mono small">gh pr create</text>
+
+        <!-- PR card -->
+        <rect x="245" y="40" width="270" height="220" class="box fl-surface st-line"/>
+        <text x="265" y="70" class="eyebrow-svg" style="font-size:11px;letter-spacing:.12em;fill:var(--muted)">PULL REQUEST #29</text>
+        <text x="265" y="94">Баннер вебинара</text>
+        <!-- diff lines -->
+        <rect x="265" y="110" width="230" height="10" rx="3" class="fl-main-soft"/>
+        <rect x="265" y="126" width="180" height="10" rx="3" class="fl-main-soft"/>
+        <rect x="265" y="142" width="120" height="10" rx="3" class="fl-danger-soft"/>
+        <rect x="265" y="158" width="200" height="10" rx="3" class="fl-main-soft"/>
+        <text x="265" y="190" class="small">+ зелёное добавилось · − красное ушло</text>
+        <!-- review bubble -->
+        <rect x="265" y="200" width="120" height="22" rx="11" class="fl-other-soft"/>
+        <text x="325" y="215" text-anchor="middle" class="small" style="fill:var(--other)">ревью · коммент</text>
+        <!-- merge button -->
+        <rect x="395" y="200" width="100" height="22" rx="6" class="fl-main"/>
+        <text x="445" y="215" text-anchor="middle" style="fill:var(--surface);font-size:12px">Merge</text>
+
+        <path class="thin st-main" d="M522 150 L570 150" marker-end="url(#arr2)" style="color:var(--main)"/>
+
+        <!-- main on the right -->
+        <path class="path st-main" d="M580 150 L730 150"/>
+        <circle cx="610" cy="150" r="8" class="node fl-surface st-main"/>
+        <circle cx="655" cy="150" r="8" class="node fl-surface st-main"/>
+        <circle cx="700" cy="150" r="9" class="node fl-main st-main"/>
+        <text x="580" y="120" class="mono t-main">main</text>
+        <text x="700" y="185" text-anchor="middle" class="small">ветка</text>
+        <text x="700" y="201" text-anchor="middle" class="small">влилась</text>
+
+        <text x="380" y="290" text-anchor="middle" class="small">PR — единственная дверь в main</text>
+      </svg>
+      <figcaption>Пока PR открыт, в ветку можно докидывать коммиты — они появятся на той же странице. Кнопка Merge предлагает три способа влить ветку, о них следующий раздел.</figcaption>
+    </figure>
+
+    <div class="rule">
+      <div class="tag">У нас</div>
+      <p>Один PR на задачу, в конце, а не на каждый коммит. Коммиты копятся в ветке, пока задача идёт; когда закрыта — один PR. Если внутри задачи выросла отдельная неродственная фаза, у неё свой PR. Причина: PR ничего не «доставляет» на сайт (правки уже живут в Webflow), а ревью одного докового коммита — шум.</p>
+    </div>
+  </section>
+
+  <!-- ================= 5. MERGE TYPES ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">5</div>
+      <div>
+        <h2>Три способа влить ветку в ствол</h2>
+        <p class="sub">Результат в main один и тот же — файлы одинаковые. Разница только в том, как это будет выглядеть в истории потом. Вход везде один: ствол с коммитом коллеги и твоя ветка из трёх коммитов.</p>
+      </div>
+    </div>
+
+    <figure style="margin-bottom:1.25rem">
+      <svg viewBox="0 0 760 130" role="img" aria-label="Исходная ситуация: main с одним новым коммитом коллеги и ветка feature из трёх коммитов">
+        <text x="30" y="30" class="eyebrow-svg" style="font-size:11px;letter-spacing:.12em;fill:var(--muted)">ДО СЛИЯНИЯ</text>
+        <path class="path st-main" d="M60 60 L700 60"/>
+        <circle cx="120" cy="60" r="9" class="node fl-surface st-main"/>
+        <circle cx="220" cy="60" r="9" class="node fl-surface st-main"/>
+        <circle cx="520" cy="60" r="9" class="node fl-surface st-other"/>
+        <text x="520" y="40" text-anchor="middle" class="t-other">коллега</text>
+        <path class="path st-feat" d="M220 60 C 220 90, 260 100, 290 100 L620 100"/>
+        <circle cx="340" cy="100" r="9" class="node fl-surface st-feat"/>
+        <circle cx="440" cy="100" r="9" class="node fl-surface st-feat"/>
+        <circle cx="540" cy="100" r="9" class="node fl-surface st-feat"/>
+        <text x="640" y="104" class="mono t-feat">feature/…  3 коммита</text>
+        <text x="30" y="64" class="mono t-main">main</text>
+      </svg>
+    </figure>
+
+    <div class="three">
+      <!-- SQUASH -->
+      <div class="card" style="border-color:var(--main)">
+        <h3>Squash <span class="chip chip-main">наш дефолт</span></h3>
+        <svg viewBox="0 0 300 130" role="img" aria-label="После squash: main получает один новый коммит, в котором склеены три коммита ветки">
+          <path class="path st-main" d="M20 60 L280 60"/>
+          <circle cx="50" cy="60" r="8" class="node fl-surface st-main"/>
+          <circle cx="100" cy="60" r="8" class="node fl-surface st-main"/>
+          <circle cx="160" cy="60" r="8" class="node fl-surface st-other"/>
+          <!-- squashed commit: bigger, with 3 dots inside -->
+          <circle cx="240" cy="60" r="16" class="node fl-feat-soft st-feat"/>
+          <circle cx="232" cy="60" r="2.5" class="fl-feat"/>
+          <circle cx="240" cy="60" r="2.5" class="fl-feat"/>
+          <circle cx="248" cy="60" r="2.5" class="fl-feat"/>
+          <text x="240" y="100" text-anchor="middle" class="small">3 → 1</text>
+          <text x="240" y="116" text-anchor="middle" class="small">один коммит «#29»</text>
+        </svg>
+        <p>Три коммита склеиваются в один с названием PR. Ствол ровный, каждая точка на нём — одна закрытая задача. Мелкие «поправил опечатку» исчезают.</p>
+        <p class="verdict"><b style="color:var(--ink)">Когда:</b> фичи, доки, всё обычное. Именно так выглядит наш main: строчка = PR.</p>
+      </div>
+
+      <!-- MERGE COMMIT -->
+      <div class="card">
+        <h3>Merge commit <span class="chip chip-neutral">иногда</span></h3>
+        <svg viewBox="0 0 300 130" role="img" aria-label="После merge commit: три коммита ветки остаются как были, плюс отдельный коммит-узел слияния с двумя родителями">
+          <path class="path st-main" d="M20 45 L280 45"/>
+          <circle cx="50" cy="45" r="8" class="node fl-surface st-main"/>
+          <circle cx="90" cy="45" r="8" class="node fl-surface st-main"/>
+          <circle cx="190" cy="45" r="8" class="node fl-surface st-other"/>
+          <path class="path st-feat" d="M90 45 C 90 75, 110 85, 125 85 L215 85 C 235 85, 245 70, 250 55"/>
+          <circle cx="140" cy="85" r="8" class="node fl-surface st-feat"/>
+          <circle cx="175" cy="85" r="8" class="node fl-surface st-feat"/>
+          <circle cx="210" cy="85" r="8" class="node fl-surface st-feat"/>
+          <circle cx="252" cy="45" r="9" class="node fl-main st-main"/>
+          <text x="252" y="22" text-anchor="middle" class="small">узел слияния</text>
+          <text x="150" y="116" text-anchor="middle" class="small">все 3 коммита остались + петля</text>
+        </svg>
+        <p>Ветка вливается целиком, как есть, плюс отдельный коммит-узел «слил #29». В истории видна петля: где отросла, где вернулась.</p>
+        <p class="verdict"><b style="color:var(--ink)">Когда:</b> история по коммитам важна сама по себе — большая многофазная работа, где потом захочется откатить один шаг, а не всю задачу.</p>
+      </div>
+
+      <!-- REBASE -->
+      <div class="card">
+        <h3>Rebase <span class="chip chip-neutral">редко</span></h3>
+        <svg viewBox="0 0 300 130" role="img" aria-label="После rebase: три коммита ветки переставлены по одному поверх main, ствол остаётся прямой, коммиты получают новые адреса">
+          <path class="path st-main" d="M20 60 L280 60"/>
+          <circle cx="45" cy="60" r="8" class="node fl-surface st-main"/>
+          <circle cx="85" cy="60" r="8" class="node fl-surface st-main"/>
+          <circle cx="135" cy="60" r="8" class="node fl-surface st-other"/>
+          <circle cx="185" cy="60" r="8" class="node fl-surface st-feat"/>
+          <circle cx="225" cy="60" r="8" class="node fl-surface st-feat"/>
+          <circle cx="265" cy="60" r="8" class="node fl-surface st-feat"/>
+          <text x="185" y="40" text-anchor="middle" class="mono t-feat">a′</text>
+          <text x="225" y="40" text-anchor="middle" class="mono t-feat">b′</text>
+          <text x="265" y="40" text-anchor="middle" class="mono t-feat">c′</text>
+          <text x="150" y="100" text-anchor="middle" class="small">три коммита переставлены по одному</text>
+          <text x="150" y="116" text-anchor="middle" class="small">за коммитом коллеги · адреса новые</text>
+        </svg>
+        <p>Твои коммиты по одному «пересаживаются» на кончик ствола. Ни петли, ни склейки — прямая линия. Но это копии: у коммитов меняются адреса, история переписана.</p>
+        <p class="verdict"><b style="color:var(--ink)">Когда:</b> почти никогда у нас. Переписанную историю нельзя делать с тем, что уже увидели другие.</p>
+      </div>
+    </div>
+
+    <div class="rule" style="margin-top:1.25rem">
+      <div class="tag">У нас</div>
+      <p>Перед каждым PR Claude показывает список коммитов ветки и затронутые файлы и советует способ под них одной фразой. Дефолт — squash. Если советует другое, объясняет почему.</p>
+    </div>
+  </section>
+
+  <!-- ================= 6. THE LOOP ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">6</div>
+      <div>
+        <h2>Одна задача от начала до конца</h2>
+        <p class="sub">Цикл, который повторяется на каждую задачу. Шаги 2–3 крутятся столько раз, сколько нужно; шаг 4 — один раз.</p>
+      </div>
+    </div>
+
+    <div class="loop">
+      <div class="loop-step">
+        <b>Ветка на свежем стволе</b>
+        <span>Сессия создаёт ветку; Claude выравнивает её на GitHub.</span>
+        <code>git fetch origin<br>git merge --ff-only origin/main</code>
+      </div>
+      <div class="loop-step">
+        <b>Работа → коммиты</b>
+        <span>Маленькие, про одно. Claude коммитит сам.</span>
+        <code>git add -A<br>git commit -m "…"</code>
+      </div>
+      <div class="loop-step">
+        <b>Push ветки</b>
+        <span>Копия на GitHub. Claude пушит сам, только свою ветку.</span>
+        <code>git push -u origin feature/…</code>
+      </div>
+      <div class="loop-step hl">
+        <b>PR — один раз, в конце</b>
+        <span>Только по твоей команде. С советом по merge.</span>
+        <code>gh pr create --base main</code>
+      </div>
+      <div class="loop-step">
+        <b>Ревью → Merge</b>
+        <span>Кнопка на GitHub. Обычно squash.</span>
+        <code>Squash and merge</code>
+      </div>
+      <div class="loop-step">
+        <b>Ветку удалить</b>
+        <span>Она вернулась в ствол, отдельно ей делать нечего.</span>
+        <code>Delete branch</code>
+      </div>
+    </div>
+
+    <div class="rule" style="margin-top:1.25rem">
+      <div class="tag">Важно</div>
+      <p>Git и Webflow — две разные истории. В git живут код, embed-сниппеты и доки. Сайт живёт в Webflow, и правка там появляется в момент публикации, а не в момент merge. Поэтому PR у нас — про ревью и историю, а не про «выкатить».</p>
+    </div>
+  </section>
+
+  <!-- ================= 7. WHEN WHAT ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">7</div>
+      <div>
+        <h2>Когда что делать</h2>
+        <p class="sub">Собрано по 31 влитому PR и сессиям с Claude: что реально запускало каждое действие. Слева — момент, справа — что делать и что сказать Claude.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 300" role="img" aria-label="Одна сессия по времени: ветка в начале, несколько коммитов после каждого рабочего шага, push перед паузой, PR один раз в конце, merge и удаление ветки">
+        <defs>
+          <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <text x="30" y="30" style="font-size:11px;letter-spacing:.12em;fill:var(--muted)">ОДНА СЕССИЯ ПО ВРЕМЕНИ</text>
+        <!-- time axis -->
+        <path class="thin st-line" d="M40 240 L730 240" marker-end="url(#arr4)" style="color:var(--line)"/>
+        <text x="40" y="262" class="small">начало</text>
+        <text x="700" y="262" class="small" text-anchor="end">конец задачи</text>
+
+        <!-- branch line -->
+        <path class="path st-feat" d="M70 150 L560 150"/>
+        <!-- commits with triggers -->
+        <circle cx="70" cy="150" r="9" class="node fl-surface st-main"/>
+        <text x="70" y="120" text-anchor="middle" class="t-main">ветка</text>
+        <text x="70" y="104" text-anchor="middle" class="small">свежий main</text>
+
+        <circle cx="170" cy="150" r="9" class="node fl-surface st-feat"/>
+        <text x="170" y="120" text-anchor="middle">коммит</text>
+        <text x="170" y="104" text-anchor="middle" class="small">блок собрался</text>
+
+        <circle cx="260" cy="150" r="9" class="node fl-surface st-feat"/>
+        <text x="260" y="120" text-anchor="middle">коммит</text>
+        <text x="260" y="104" text-anchor="middle" class="small">мобилка ок</text>
+
+        <circle cx="350" cy="150" r="9" class="node fl-surface st-feat"/>
+        <text x="350" y="120" text-anchor="middle">коммит</text>
+        <text x="350" y="104" text-anchor="middle" class="small">правило в док</text>
+
+        <!-- push marker: before a pause -->
+        <path class="thin st-feat dash" d="M350 165 L350 205"/>
+        <text x="350" y="222" text-anchor="middle" class="mono t-feat">push</text>
+        <text x="350" y="60" text-anchor="middle" class="small">пауза / закрыть ноут</text>
+        <path class="thin st-muted dash" d="M350 66 L350 92"/>
+
+        <circle cx="450" cy="150" r="9" class="node fl-surface st-feat"/>
+        <text x="450" y="120" text-anchor="middle">коммит</text>
+        <text x="450" y="104" text-anchor="middle" class="small">правки по ревью</text>
+
+        <circle cx="560" cy="150" r="9" class="node fl-feat st-feat"/>
+        <text x="560" y="120" text-anchor="middle">коммит</text>
+        <text x="560" y="104" text-anchor="middle" class="small">задача закрыта</text>
+        <path class="thin st-feat dash" d="M560 165 L560 205"/>
+        <text x="560" y="222" text-anchor="middle" class="mono t-feat">push + PR</text>
+
+        <!-- merge into main -->
+        <path class="path st-main" d="M560 150 C 600 150, 610 190, 650 190 L720 190"/>
+        <circle cx="660" cy="190" r="10" class="node fl-main st-main"/>
+        <text x="660" y="170" text-anchor="middle" class="t-main">squash</text>
+        <text x="700" y="222" text-anchor="middle" class="small">ветку удалить</text>
+      </svg>
+      <figcaption>Коммит после каждого шага, который работает, и push ветки — Claude делает сам. PR — один, когда задача закрыта, и только по твоей команде. Ветка живёт одну задачу и умирает после merge.</figcaption>
+    </figure>
+
+    <div class="glossary" style="margin-top:1.25rem">
+      <table>
+        <thead><tr><th>Момент</th><th>Что делать</th><th>Что сказать Claude</th></tr></thead>
+        <tbody>
+          <tr><td>Новая задача / новая сессия</td><td>Ветку сессия создаёт сама (<span class="mono">feature/…</span> или <span class="mono">claude/…</span>), но от локального main, который отстаёт от GitHub. Claude первым делом выравнивает её на свежий ствол.</td><td>Ничего: это правило из CLAUDE.md, «загрузи контекст» его не заменяет. Проверка: «на какой мы ветке?»</td></tr>
+          <tr><td>Шаг работает</td><td>Коммит. Блок встал, мобилка ок, правило дописано в док — каждое такое «ок» = один коммит. Claude делает его сам и сообщает одной строкой.</td><td>Ничего. Остановить: «не коммить пока». Разбить: «закоммить это отдельно».</td></tr>
+          <tr><td>Пауза, конец дня, другой Mac</td><td>Push ветки. Это резервная копия и ссылка для коллеги. Ничего в main не меняет. Claude делает сам, только свою ветку.</td><td>Ничего. «запушь ветку», если нужно прямо сейчас.</td></tr>
+          <tr><td>Задача закрыта</td><td>Claude может спросить «задача выглядит закрытой — оформить PR?» и ждёт. По твоей команде: push, один PR, список коммитов и файлов, совет по merge одной фразой. Сам PR не открывает.</td><td>«оформи PR» · «слей в main» (значит то же самое). Без этой фразы PR не будет.</td></tr>
+          <tr><td>Внутри задачи выросла другая</td><td>Отдельный PR на неродственную фазу, когда она закрыта. Не мешать две темы в один diff.</td><td>«это отдельная фаза — свой PR»</td></tr>
+          <tr><td>PR открыт, но есть правки</td><td>Коммитить и пушить в ту же ветку: PR обновится сам. Новый PR не нужен.</td><td>«закоммить и запушь, PR тот же»</td></tr>
+          <tr><td>Пора нажимать Merge</td><td>Решение твоё: читаешь совет, нажимаешь кнопку на GitHub. Claude сам не мержит, если не сказано прямо.</td><td>«согласна, squash — мержи» · или кнопка на GitHub</td></tr>
+          <tr><td>Merge нажат</td><td>Удалить ветку кнопкой Delete branch. Сейчас на GitHub висят 19 уже влитых веток: не страшно, но шум.</td><td>«почисти ветку»</td></tr>
+          <tr><td>Коллега влил что-то нужное</td><td>Забрать свежий main в свою ветку, чтобы работать поверх его правок и не ловить конфликт в конце.</td><td>«подтяни main в ветку»</td></tr>
+          <tr><td>GitHub пишет «conflicts»</td><td>Подтянуть main, выбрать версии строк, закоммитить. Обычно это одна-две строки, см. раздел 9.</td><td>«разбери конфликт, спроси меня, если не очевидно»</td></tr>
+          <tr><td>Что-то сломалось и непонятно</td><td>Ничего не удалять. Всё, что закоммичено, восстановимо. Спросить, где мы и что произошло.</td><td>«покажи, где мы: ветка, незакоммиченное, незапушенное»</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="two" style="margin-top:1.25rem">
+      <div class="card">
+        <h3>Как это выглядело у нас</h3>
+        <p>31 PR влиты в main, все squash'ем: каждая строка истории main — одна задача. Размер веток разный: от одного коммита («правило в CLAUDE.md») до 85 («меню v2», длинная сессия из многих итераций). Squash одинаково хорошо сворачивает и то и другое.</p>
+      </div>
+      <div class="card">
+        <h3>Что мы делаем не так</h3>
+        <p>Ветки после merge не удаляем: 19 влитых веток всё ещё лежат на GitHub. Локальный main никто не обновляет, и ветки живых сессий стартовали на 2, 3, 5 и 64 коммита позади GitHub. Первое закрывается кнопкой после merge, второе теперь правило старта сессии в CLAUDE.md.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 8. DON'T ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step" style="color:var(--danger)">8</div>
+      <div>
+        <h2>Три вещи, которые нельзя</h2>
+        <p class="sub">Всё это git разрешает технически. Запрещаем себе сами, потому что ствол общий.</p>
+      </div>
+    </div>
+
+    <div class="three">
+      <div class="card">
+        <h3><span class="chip chip-danger">нельзя</span> Push прямо в main</h3>
+        <svg viewBox="0 0 300 110" role="img" aria-label="Ветка feature идёт напрямую в main мимо pull request, помечена крестом">
+          <defs>
+            <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <path class="path st-feat" d="M20 80 L120 80"/>
+          <circle cx="50" cy="80" r="7" class="node fl-surface st-feat"/>
+          <circle cx="90" cy="80" r="7" class="node fl-surface st-feat"/>
+          <path class="thin st-danger" d="M130 80 C 170 80, 180 40, 215 40" marker-end="url(#arr3)" style="color:var(--danger)"/>
+          <path class="path st-main" d="M225 40 L285 40"/>
+          <circle cx="255" cy="40" r="7" class="node fl-surface st-main"/>
+          <line x1="165" y1="52" x2="185" y2="72" class="thin st-danger" style="stroke-width:3"/>
+          <line x1="185" y1="52" x2="165" y2="72" class="thin st-danger" style="stroke-width:3"/>
+          <text x="175" y="100" text-anchor="middle" class="small">мимо PR</text>
+        </svg>
+        <p>Так однажды 40 коммитов уехали в main без ревью. Откатывать не стали: переписывать общую историю хуже, чем прожить с этим. «Слей в main» всегда значит «оформи PR».</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip chip-danger">нельзя</span> Коммитить на main</h3>
+        <svg viewBox="0 0 300 110" role="img" aria-label="Коммиты ставятся прямо на ствол main без ветки, помечены крестом">
+          <path class="path st-main" d="M20 55 L280 55"/>
+          <circle cx="60" cy="55" r="7" class="node fl-surface st-main"/>
+          <circle cx="110" cy="55" r="7" class="node fl-surface st-main"/>
+          <circle cx="180" cy="55" r="7" class="node fl-surface st-danger"/>
+          <circle cx="230" cy="55" r="7" class="node fl-surface st-danger"/>
+          <line x1="195" y1="20" x2="215" y2="40" class="thin st-danger" style="stroke-width:3"/>
+          <line x1="215" y1="20" x2="195" y2="40" class="thin st-danger" style="stroke-width:3"/>
+          <text x="205" y="90" text-anchor="middle" class="small">без ветки нет PR и нет ревью</text>
+        </svg>
+        <p>Если работа началась на main — не беда: ветку можно создать в любой момент, коммиты переедут с тобой. Главное заметить до push.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip chip-danger">нельзя</span> Переписывать общее</h3>
+        <svg viewBox="0 0 300 110" role="img" aria-label="Коммиты, которые уже в main и у коллег, заменяются новыми копиями; помечено крестом">
+          <path class="path st-main" d="M20 40 L280 40"/>
+          <circle cx="80" cy="40" r="7" class="node fl-surface st-main"/>
+          <circle cx="140" cy="40" r="7" class="node fl-surface st-main"/>
+          <circle cx="200" cy="40" r="7" class="node fl-surface st-other"/>
+          <text x="200" y="20" text-anchor="middle" class="small">уже у коллег</text>
+          <path class="path st-danger dash" d="M140 40 C 140 70, 160 80, 175 80 L280 80"/>
+          <circle cx="210" cy="80" r="7" class="node fl-surface st-danger"/>
+          <circle cx="250" cy="80" r="7" class="node fl-surface st-danger"/>
+          <line x1="90" y1="62" x2="110" y2="82" class="thin st-danger" style="stroke-width:3"/>
+          <line x1="110" y1="62" x2="90" y2="82" class="thin st-danger" style="stroke-width:3"/>
+          <text x="230" y="104" text-anchor="middle" class="small">force push, rebase main</text>
+        </svg>
+        <p>Rebase и force-push допустимы только для своей ветки, которую никто ещё не забрал. Всё, что дошло до main, — уже не твоё, а общее.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 9. CONFLICT ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step">9</div>
+      <div>
+        <h2>Конфликт — это вопрос, а не поломка</h2>
+        <p class="sub">Случается, когда ты и коллега поменяли одну и ту же строку в одном файле. Git не умеет выбирать за вас и просто спрашивает.</p>
+      </div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 760 230" role="img" aria-label="Ствол и ветка меняют одну и ту же строку 12 файла; при слиянии git показывает обе версии и просит выбрать">
+        <!-- main -->
+        <path class="path st-main" d="M40 60 L400 60"/>
+        <circle cx="120" cy="60" r="9" class="node fl-surface st-main"/>
+        <circle cx="300" cy="60" r="9" class="node fl-surface st-other"/>
+        <text x="300" y="35" text-anchor="middle" class="t-other">коллега: строка 12 → «кегль 14px»</text>
+        <!-- branch -->
+        <path class="path st-feat" d="M120 60 C 120 110, 170 130, 200 130 L400 130"/>
+        <circle cx="300" cy="130" r="9" class="node fl-surface st-feat"/>
+        <text x="300" y="165" text-anchor="middle" class="t-feat">ты: строка 12 → «кегль 13px»</text>
+        <!-- converge -->
+        <path class="thin st-muted dash" d="M400 60 L470 95"/>
+        <path class="thin st-muted dash" d="M400 130 L470 95"/>
+        <!-- conflict card -->
+        <rect x="480" y="45" width="250" height="110" class="box fl-surface st-danger"/>
+        <text x="500" y="72" class="mono t-danger">&lt;&lt;&lt;&lt;&lt;&lt;&lt; main</text>
+        <text x="500" y="92" class="mono">font-size: 14px;</text>
+        <text x="500" y="112" class="mono t-danger">=======</text>
+        <text x="500" y="132" class="mono">font-size: 13px;</text>
+        <text x="500" y="150" class="mono t-danger">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/…</text>
+        <text x="605" y="185" text-anchor="middle" class="small">git показывает обе версии, ты оставляешь одну</text>
+        <text x="605" y="205" text-anchor="middle" class="small">потом обычный коммит — и дальше как всегда</text>
+      </svg>
+      <figcaption>Конфликт почти всегда решается разговором, а не командой: спросить коллегу, какая версия правильная. Чем свежее ствол, от которого отросла ветка, и чем короче живёт ветка, тем реже это случается.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= GLOSSARY ================= -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="step" style="font-size:1.6rem;padding-top:.5rem">A–Z</div>
+      <div>
+        <h2>Словарь на одну строчку</h2>
+        <p class="sub">Чтобы понимать, о чём говорит Claude и что написано на кнопках GitHub.</p>
+      </div>
+    </div>
+    <div class="glossary">
+      <table>
+        <thead><tr><th>Слово</th><th>Что это</th><th>Как у нас</th></tr></thead>
+        <tbody>
+          <tr><td>repo</td><td>Папка с кодом и всей её историей версий.</td><td><span class="mono">birch-ai</span> на GitHub и копия на каждом Mac.</td></tr>
+          <tr><td>commit</td><td>Сохранённая версия с подписью.</td><td>Мелкий, про одно, подпись по-русски.</td></tr>
+          <tr><td>branch</td><td>Отдельная линия версий под задачу.</td><td><span class="mono">feature/&lt;задача&gt;</span>, на main не работаем.</td></tr>
+          <tr><td>main</td><td>Общий ствол. Единственная ветка, которой все доверяют.</td><td>Попасть в него можно только через PR.</td></tr>
+          <tr><td>origin</td><td>Имя копии репозитория на GitHub.</td><td>«Отправить на origin» = отправить на GitHub.</td></tr>
+          <tr><td>push</td><td>Отправить свои коммиты на GitHub.</td><td>Только свою ветку.</td></tr>
+          <tr><td>pull</td><td>Забрать с GitHub чужие коммиты к себе.</td><td>Перед созданием ветки. Внутри это fetch + merge.</td></tr>
+          <tr><td>fetch</td><td>Посмотреть, что нового на GitHub, ничего не меняя у себя.</td><td>Безопасная версия pull: «подсмотреть».</td></tr>
+          <tr><td>pull request</td><td>Страница «примите мою ветку»: diff, комментарии, кнопка Merge.</td><td>Один на задачу, в конце.</td></tr>
+          <tr><td>merge</td><td>Влить ветку в другую ветку.</td><td>Нажимает кнопку тот, кто ревьюит; способ — по совету.</td></tr>
+          <tr><td>squash</td><td>Слить, склеив все коммиты ветки в один.</td><td>Дефолт.</td></tr>
+          <tr><td>rebase</td><td>Пересадить коммиты по одному на кончик другой ветки; адреса меняются.</td><td>Почти никогда; только для своей неотправленной ветки.</td></tr>
+          <tr><td>fast-forward</td><td>Merge без узла: ствол просто «дотягивается» до ветки, когда в нём ничего нового.</td><td>Так и уехали 40 коммитов без ревью. Поэтому PR.</td></tr>
+          <tr><td>diff</td><td>Разница между двумя версиями: что добавилось, что ушло.</td><td>То, что показывает PR.</td></tr>
+          <tr><td>conflict</td><td>Одна строка изменена по-разному в двух ветках.</td><td>Выбрать версию, закоммитить, жить дальше.</td></tr>
+          <tr><td>worktree</td><td>Ещё одна папка того же репозитория со своей веткой.</td><td>У каждой сессии Claude своя, чтобы не мешать друг другу.</td></tr>
+          <tr><td>stash</td><td>Временно отложить незакоммиченные правки «в карман».</td><td>Карман общий на все worktree, поэтому Claude кладёт туда только с именем.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Схема под процесс Birch AI по состоянию на 2 сентября 2026: правила из <span class="mono">CLAUDE.md</span> (ветка на каждую сессию, main только через PR, один PR на задачу) и история merge-коммитов репозитория.
+  </footer>
+</main>
