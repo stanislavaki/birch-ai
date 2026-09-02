@@ -1700,7 +1700,7 @@
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340, e:[0.0,0.30], ease:'in'}],   /* leaves left, first */
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -1722,8 +1722,8 @@
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
-    'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, e:[0.05,0.32], ease:'in'}],
-    'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, e:[0.10,0.35], ease:'in'}],
+    'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, auto:{delay:150, dur:700}, after:'story', ease:'in'}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, auto:{delay:300, dur:700}, after:'story', ease:'in'}],
     'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
@@ -1737,17 +1737,14 @@
        209×210 / 200×258 / 200×200 turned −9.74° / +9.26° / +26.39°, so
        each unrotated box is placed on its bbox centre and rotated there.
        bboxes: juice 723/176, cherry 810/42, jar 957/2. */
-    /* A stack that fans out. The pile rises from under the canvas onto the
-       juice card's final spot: juice is the bottom of the pile, arrives
-       already at its final angle and never moves again. Cherry (top) and
-       then jar peel off it, turning while they travel — rotation and
-       movement share one window. */
-    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, e:[0.62,0.80]}, e:[0.80,0.81]}],
-    /* auto: once the pile has landed (leg 1, by scroll), the fan plays on
-       its own clock — delay then duration in ms — so the rhythm is the
-       same at any scroll speed. Scrolling back resets it. */
-    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3,    e:[0.62,0.80]}, auto:{delay:120, dur:600}, ease:'out'}],
-    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6,    e:[0.62,0.80]}, auto:{delay:380, dur:600}, ease:'out'}],
+    /* A stack that fans out, as one continuous timed motion: armed when the
+       routine segment is half way, the pile rises from under the canvas onto
+       the juice card's spot (leg 1, dur), and the cards on top peel off it
+       while the rise is still settling (leg 2, delay counted from arming).
+       Juice is the bottom of the pile and arrives at its final angle. */
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, dur:800}, auto:{delay:800, dur:10}, arm:0.5}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, dur:800}, auto:{delay:1150, dur:750}, arm:0.5, ease:'out'}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, dur:800}, auto:{delay:900,  dur:750}, arm:0.5, ease:'out'}],
     'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, e:[0.50,0.72], ease:'out'}],
     'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, e:[0.56,0.78], ease:'out'}],
     'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, e:[0.45,0.85], ease:'out'}]
@@ -1764,7 +1761,7 @@
       prev = {
         /* window inside the arriving segment and the curve applied to it —
            per keyframe, not inherited: a stagger belongs to one entrance */
-        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null,
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         r: raw.r !== undefined ? raw.r : prev.r,
@@ -1891,7 +1888,35 @@
     var b = Math.min(STEPS.length - 1, a + 1);
     Object.keys(FRAGS).forEach(function (id) {
       var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
-      if (kb.via) {
+      if (kb.auto && !kb.via) {
+        /* plays on its own clock from the moment the segment is entered —
+           and, when it names a gate, not before that gate opens */
+        var armed = local > 0.02 && (!kb.after || GATES[kb.after]);
+        if (!armed) { f.autoStart = null; tt = 0; }
+        else {
+          if (!f.autoStart) f.autoStart = performance.now();
+          var el2 = performance.now() - f.autoStart - kb.auto.delay;
+          tt = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, el2 / kb.auto.dur)));
+          if (el2 < kb.auto.dur) autoLive = true;
+        }
+      } else if (kb.via && kb.via.dur) {
+        /* fully timed two-leg motion: armed at `arm` of the segment, leg 1
+           runs for via.dur, leg 2 starts at auto.delay from arming — the
+           two overlap, so the pile is still settling as the cards peel */
+        var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
+        if (!armedV) f.autoStart = null; else if (!f.autoStart) f.autoStart = performance.now();
+        var elV = armedV ? performance.now() - f.autoStart : 0;
+        var t1v = EASES.smooth(Math.min(1, Math.max(0, elV / kb.via.dur)));
+        var t2v = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, (elV - kb.auto.delay) / kb.auto.dur)));
+        var leg1v = t2v <= 0;
+        var fromV = leg1v ? ka : kb.via, toV = leg1v ? kb.via : kb;
+        st.setProperty('--x',  fromV.x !== undefined ? fromV.x : ka.x); st.setProperty('--y',  fromV.y !== undefined ? fromV.y : ka.y);
+        st.setProperty('--r',  fromV.r || 0);
+        st.setProperty('--x2', toV.x !== undefined ? toV.x : kb.x);    st.setProperty('--y2', toV.y !== undefined ? toV.y : kb.y);
+        st.setProperty('--r2', toV.r || 0);
+        tt = leg1v ? t1v : t2v;
+        if (armedV && elV < kb.auto.delay + kb.auto.dur) autoLive = true;
+      } else if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
            together); leg 2: via → final — on the keyframe's window, or on
            its own clock when the keyframe says auto. */
@@ -1977,12 +2002,18 @@
 
   var state = -1;
   var hurry = false;   /* set by driveChat for the current frame */
+  var GATES = { story: false };
+  var litAt = null;
   function hurried() { return hurry; }
   function setState(n) {
     if (n === state) return;
     var forward = n > state;
     stopTyping();
     state = n;
+    /* the gate the scene waits on opens 1.7 s after the last card was called,
+       so a hurried story still lets Meta Ads Library fly in before anything leaves */
+    if (n === 4) litAt = performance.now();
+    if (n < 4) { litAt = null; GATES.story = false; }
 
     ch.bubble.classList.toggle('is-visible', n >= 1);
     ch.resp.classList.toggle('is-visible', n >= 1);
@@ -2023,7 +2054,7 @@
      scroll starts it and may only hurry it, never hold it. Scrolling back
      before the chat resets it. */
   var CHAT_SEG = 2;
-  var STORY = [0, 700, 1000, 2000, 3000, 4000];   /* ms at which each state begins */
+  var STORY = [0, 600, 900, 1800, 2700, 3500];   /* ms at which each state begins */
   var storyStart = null;
   function driveChat(a, local) {
     var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
@@ -2037,7 +2068,9 @@
     while (n < STORY.length - 1 && elapsed >= STORY[n + 1]) n++;
     if (n > state + 1) { for (var i = state + 1; i < n; i++) setState(i); }   /* never skip a beat's side effects */
     setState(n);
+    GATES.story = state >= 5 && litAt !== null && performance.now() - litAt >= 1700;
     if (elapsed < STORY[STORY.length - 1] + 2500) autoLive = true;         /* keep frames coming while it plays */
+    if (!GATES.story) autoLive = true;                                      /* something may be waiting on the story */
   }
 
   addEventListener('scroll', apply, { passive: true });
