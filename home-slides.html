@@ -439,6 +439,21 @@
   filter: drop-shadow(0 calc(1.35 * var(--u)) calc(3.65 * var(--u)) rgba(0, 0, 0, 0.42));
 }
 
+/* ── Slide 03 pieces ──────────────────────────────────────── */
+/* reference-rhythm reveal: a hard 120 ms step-in from a slight scale */
+.hs__pop { scale: 0.92; opacity: 0; transition: opacity 0.12s steps(3, end), scale 0.12s cubic-bezier(0.2, 0, 0, 1); }
+.hs__pop.is-in { scale: 1; opacity: 1; }
+/* the dotted connector draws itself toward the phone */
+.hs__line {
+  border-top: calc(3 * var(--u)) dotted var(--color-text);
+  height: 0 !important;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hs__line.is-in { clip-path: inset(0 0 0 0); }
+.hs__phone { overflow: hidden; border-radius: calc(32 * var(--u)); }
+.hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
+
 /* ── Guides ───────────────────────────────────────────────── */
 .hs__guide {
   --u: calc(1cqw / 12.32);
@@ -1687,6 +1702,25 @@
                alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
                style="--x:997; --y:277; --w:137; z-index:12">
 
+          <!-- Slide 03 — MCP. Chips and logo are SVG; the phone is a screenshot
+               with live regions laid over it (message area, input, keyboard). -->
+          <img data-frag="chip-duplicate" class="hs__frag" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
+               style="--x:-350; --y:46.7; --w:209; z-index:20">
+          <img data-frag="chip-set-budget" class="hs__frag" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
+               style="--x:-350; --y:317.1; --w:228; z-index:20">
+          <img data-frag="chip-notify" class="hs__frag" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
+               style="--x:-350; --y:265.9; --w:164; z-index:20">
+          <img data-frag="chip-scale" class="hs__frag" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
+               style="--x:-350; --y:182.3; --w:55; z-index:20">
+          <img data-frag="chip-time" class="hs__frag" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
+               style="--x:-350; --y:49.3; --w:55; z-index:20">
+          <img data-frag="birch-mcp" class="hs__frag hs__pop" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81"
+               style="--x:383; --y:156; --w:293; z-index:21">
+          <div data-frag="mcp-line" class="hs__frag hs__frag--sized hs__line" style="--x:684; --y:189; --w:134; --h:2; z-index:19"></div>
+          <div data-frag="phone" class="hs__frag hs__frag--sized hs__phone" style="--x:1300; --y:24; --w:242; --h:526; z-index:22">
+            <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy" decoding="async">
+          </div>
+
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
         </div>
@@ -1728,7 +1762,9 @@
     { slide: 0 },   /* 1 — scatter, the rules stack out */
     { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
     { slide: 1, len: 1.8 },   /* 3 — geometry holds still; the chat story plays here on its own clock */
-    { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
+    { slide: 1 },   /* 4 — the routine: chat moves aside, the rule takes shape */
+    { slide: 2 },   /* 5 — MCP: the creatives regroup on the left, the phone arrives */
+    { slide: 2, len: 1.8 }   /* 6 — geometry holds; the phone story plays here */
   ];
 
   /* Keyframes per fragment, one entry per step. Anything omitted is
@@ -1778,7 +1814,6 @@
        is the chat's job, and the chat is not wired yet. */
     'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, auto:{delay:150, dur:700}, after:'story', ease:'in'}],
     'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, auto:{delay:300, dur:700}, after:'story', ease:'in'}],
-    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
@@ -1796,15 +1831,32 @@
        the juice card's spot (leg 1, dur), and the cards on top peel off it
        while the rise is still settling (leg 2, delay counted from arming).
        Juice is the bottom of the pile and arrives at its final angle. */
-    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, delay:650, rate:0.10}, auto:{delay:1450, dur:10}, arm:0.5}],
-    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, delay:650, rate:0.10}, auto:{delay:1650, dur:750}, arm:0.5}],
-    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, delay:650, rate:0.10}, auto:{delay:1400, dur:750}, arm:0.5}],
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, delay:650, rate:0.10}, auto:{delay:1450, dur:10}, arm:0.5},
+                           /* slide 03: same cards, smaller, regrouped on the left — angles untouched */
+                           {x:109.7, y:151.6, w:163.03, d:[0,71.5,0], e:[0.15,0.75]}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, delay:650, rate:0.10}, auto:{delay:1650, dur:750}, arm:0.5},
+                           {x:318.5, y:80.8,  w:155.78, d:[0,71.5,0], e:[0.20,0.80]}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, delay:650, rate:0.10}, auto:{delay:1400, dur:750}, arm:0.5},
+                           {x:222.5, y:96.7,  w:155.78, d:[0,71.5,0], e:[0.25,0.85]}],
     /* The routine arrives on a clock once the segment is half way (the chat
        has settled by then): trigger, then routine, then the folder — each
        a lerp toward its place — and the stack rises after them. */
-    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, arm:0.5, auto:{delay:0,   rate:0.11}}],
-    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, arm:0.5, auto:{delay:220, rate:0.11}}],
-    'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, arm:0.5, auto:{delay:420, rate:0.11}}]
+    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, arm:0.5, auto:{delay:0,   rate:0.11}}, {x:1400, arm:0.02, auto:{delay:0,   rate:0.10}}],
+    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, arm:0.5, auto:{delay:220, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:120, rate:0.10}}],
+    'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, arm:0.5, auto:{delay:420, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:240, rate:0.10}}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}, {x:-520, arm:0.02, auto:{delay:0, rate:0.10}}],
+
+    /* Slide 03 — MCP. Chips fly in from the left one after another, the
+       phone from the right; the logo pops in the reference rhythm and the
+       dotted line draws itself to the phone once it has landed. */
+    'chip-duplicate':     [{x:-350, y:46.7,  w:209, r:-18.6,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:114.2, arm:0.1, auto:{delay:0,   rate:0.10}}],
+    'chip-scale':         [{x:-350, y:182.3, w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:53.7,  arm:0.1, auto:{delay:120, rate:0.10}}],
+    'chip-notify':        [{x:-350, y:265.9, w:164, r:-0.19,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:65.8,  arm:0.1, auto:{delay:240, rate:0.10}}],
+    'chip-set-budget':    [{x:-350, y:317.1, w:228, r:-14.55, d:[0,71.5,0]}, {}, {}, {}, {}, {x:148.2, arm:0.1, auto:{delay:360, rate:0.10}}],
+    'chip-time':          [{x:-350, y:49.3,  w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {x:495.7, arm:0.1, auto:{delay:480, rate:0.10}}],
+    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:700}, arm:0.1}],
+    'phone':              [{x:1300, y:24,    w:242, h:526,    d:[0,71.5,0]}, {}, {}, {}, {}, {x:836, arm:0.1, auto:{delay:200, rate:0.09}}],
+    'mcp-line':           [{x:684,  y:189,   w:134, h:2,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1300}, arm:0.1}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -1818,7 +1870,7 @@
       prev = {
         /* window inside the arriving segment and the curve applied to it —
            per keyframe, not inherited: a stagger belongs to one entrance */
-        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm,
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm, pop: raw.pop || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         r: raw.r !== undefined ? raw.r : prev.r,
@@ -1966,6 +2018,17 @@
     var b = Math.min(STEPS.length - 1, a + 1);
     Object.keys(FRAGS).forEach(function (id) {
       var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
+      if (kb.pop) {
+        /* a class, not a blend: armed at `arm`, the element steps in after pop.delay */
+        var armedP = local >= (kb.arm !== undefined ? kb.arm : 0.02);
+        if (!armedP) { f.popAt = null; f.el.classList.remove('is-in'); }
+        else {
+          if (!f.popAt) f.popAt = performance.now();
+          var on = performance.now() - f.popAt >= kb.pop.delay;
+          f.el.classList.toggle('is-in', on);
+          if (!on) autoLive = true;
+        }
+      }
       if (kb.auto && !kb.via && kb.auto.rate) {
         /* timed lerp toward the keyframe: armed at `arm` of the segment,
            parked until auto.delay, then chasing x / y / r exponentially */
