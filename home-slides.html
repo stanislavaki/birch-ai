@@ -1673,7 +1673,7 @@
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
     { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
-    { slide: 1, len: 2.6 },   /* 3 — geometry holds still; this segment is the chat, and it gets more scroll */
+    { slide: 1, len: 1.8 },   /* 3 — geometry holds still; the chat story plays here on its own clock */
     { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
   ];
 
@@ -1927,7 +1927,7 @@
       bars.forEach(function (b, n) { b.classList.toggle('is-active', n === si); });
       card.style.backgroundColor = bars[si].dataset.bg;
     }
-    window.__hs = { p: p, step: a, t: t, slide: si, steps: STEPS.length };
+    window.__hs = { p: p, step: a, local: local, t: t, slide: si, steps: STEPS.length };
   }
 
   lockBarHeight();
@@ -1976,6 +1976,8 @@
   }
 
   var state = -1;
+  var hurry = false;   /* set by driveChat for the current frame */
+  function hurried() { return hurry; }
   function setState(n) {
     if (n === state) return;
     var forward = n > state;
@@ -2003,34 +2005,39 @@
     if (n === 0) {
       /* only animate when the reader arrives here, not when scrubbing back
          past it — going backwards should show the finished line, not replay */
-      if (forward) { type(ch.typed, Q); } else { ch.typed.textContent = Q; }
+      if (forward && !hurried()) { type(ch.typed, Q); } else { ch.typed.textContent = Q; }
     } else {
       ch.typed.textContent = '';
     }
 
     if (n >= 5) {
-      if (forward) { type(ch.a, A1, function () { type(ch.b, A2); }); }
+      if (forward && !hurried()) { type(ch.a, A1, function () { type(ch.b, A2); }); }
       else { ch.a.textContent = A1; ch.b.textContent = A2; }
     } else {
       ch.a.textContent = ch.b.textContent = '';
     }
   }
 
-  /* The chat lives in the segment where the scene holds still. */
+  /* The chat lives in the segment where the scene holds still. Once it is
+     on stage the story plays on its own clock — the same rule as the fan:
+     scroll starts it and may only hurry it, never hold it. Scrolling back
+     before the chat resets it. */
   var CHAT_SEG = 2;
-  var DWELL = 1100, stateAt = 0, dwellTimer = null;
+  var STORY = [0, 700, 1000, 2000, 3000, 4000];   /* ms at which each state begins */
+  var storyStart = null;
   function driveChat(a, local) {
     var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
-    var n = -1;
-    if (cp >= 0) { n = 0; while (n < BEATS.length && cp >= BEATS[n]) n++; }
-    clearTimeout(dwellTimer);
-    if (n <= state) { setState(n); stateAt = performance.now(); return; }   /* backwards: immediate */
-    /* forwards: one state at a time, each held for at least DWELL */
-    /* typing and sending need no hold; the three scan states do */
-    var need = (state >= 1 && state <= 3) ? DWELL : 250;
-    var wait = Math.max(0, need - (performance.now() - stateAt));
-    if (wait === 0) { setState(state + 1); stateAt = performance.now(); }
-    if (state < n) dwellTimer = setTimeout(function () { driveChat(a, local); }, wait || need);
+    if (cp < 0) { storyStart = null; setState(-1); return; }
+    if (storyStart === null) storyStart = performance.now();
+    var elapsed = performance.now() - storyStart;
+    /* reader already past the segment: finish now rather than make them wait */
+    hurry = cp >= 0.9;
+    if (hurry) elapsed = Infinity;
+    var n = 0;
+    while (n < STORY.length - 1 && elapsed >= STORY[n + 1]) n++;
+    if (n > state + 1) { for (var i = state + 1; i < n; i++) setState(i); }   /* never skip a beat's side effects */
+    setState(n);
+    if (elapsed < STORY[STORY.length - 1] + 2500) autoLive = true;         /* keep frames coming while it plays */
   }
 
   addEventListener('scroll', apply, { passive: true });
