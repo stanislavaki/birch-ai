@@ -188,7 +188,9 @@
 
 .hs__pill {
   display: inline-block;
-  background: var(--color-accent-indigo);
+  /* one badge for all three slides: black at 20% over whatever the card's
+     colour is (no fill token for this yet — literal on purpose) */
+  background: rgba(0, 0, 0, 0.2);
   color: var(--color-text);
   border-radius: var(--radius-xs);
   padding: 0.058em 0.462em 0.154em;
@@ -197,7 +199,7 @@
 .hs__title { color: var(--color-text); text-wrap: balance; margin: 0; }
 .hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
 
-.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; }
+.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
 
