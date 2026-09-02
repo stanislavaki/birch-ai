@@ -474,11 +474,9 @@
 .hs__ph-floor { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u)); background: #f9faf7; }
 /* keyboard layer: the same screenshot, clipped to the keys (below the strip), so it can leave */
 .hs__ph-kb {
-  left: 0; right: 0; top: calc(330 * var(--u)); height: calc(180 * var(--u));
+  left: 0; right: 0; top: calc(302 * var(--u)); height: calc(208 * var(--u));
   background: #e0e2e4 url(images/slides/03/phone.webp) 0 calc(-330 * var(--u)) / 100% auto no-repeat;
-  transition: translate 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hs__ph-kb.is-down { translate: 0 calc(185 * var(--u)); }
 .hs__ph-keys { position: absolute; inset: 0; }
 .hs__ph-key { position: absolute; border-radius: calc(4 * var(--u)); background: rgba(0, 0, 0, 0); transition: background-color 0.09s ease, scale 0.09s ease; }
 .hs__ph-key.is-down { background: rgba(0, 0, 0, 0.14); scale: 0.94; }
@@ -1765,7 +1763,7 @@
             <!-- screen-coloured floor: covers the strip and the keyboard baked into the
                  screenshot, so the keyboard layer above has somewhere to leave to -->
             <div class="hs__ph-floor"></div>
-            <!-- keyboard: a clipped copy of the screenshot that can slide away, with tap plates on top -->
+            <!-- keyboard: a clipped copy of the screenshot pulled up under the input, with tap plates on top -->
             <div class="hs__ph-kb" id="phKb"><div class="hs__ph-keys" id="phKeys"></div></div>
           </div>
 
@@ -2336,7 +2334,7 @@
   function phReset() {
     phStop(); phState = -1;
     ph.greet.classList.remove('is-gone'); ph.q.classList.remove('is-in'); ph.a.classList.remove('is-in');
-    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.typed.style.translate = ''; ph.kb.classList.remove('is-down');
+    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.typed.style.translate = '';
   }
   function phPlay() {
     if (phState === 1) return;
@@ -2359,7 +2357,7 @@
       tap('send', 140);
       ph.greet.classList.add('is-gone');
       ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
-      ph.typed.textContent = ''; ph.typed.style.translate = ''; ph.kb.classList.add('is-down');
+      ph.typed.textContent = ''; ph.typed.style.translate = '';   /* the keyboard stays, as in the app */
     });
     t += 700;
     var words = PHA.split(' ');
