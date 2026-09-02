@@ -414,6 +414,8 @@
   pointer-events: none;
 }
 .hs__frag--ring.is-lit::before { opacity: 1; animation: hs-ring 2.6s linear infinite; }
+/* a clipped fragment cannot show a ring outside its box — draw it just inside */
+.hs__frag--clip.hs__frag--ring::before { inset: 0; border-radius: calc(var(--ring-r) * var(--u)); z-index: 5; }
 @keyframes hs-ring { to { --ring-angle: 360deg; } }
 
 .hs__frag--fade { transition: opacity 0.35s ease; }
@@ -465,17 +467,18 @@
 .hs__ph-q span { display: inline-block; background: #ececea; border-radius: calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(10 * var(--u)); max-width: 80%; text-align: left; }
 .hs__ph-a { top: calc(46 * var(--u)); }
 .hs__ph-q.is-in, .hs__ph-a.is-in { opacity: 1; translate: 0 0; }
-.hs__ph-typed { left: calc(12 * var(--u)); top: calc(261 * var(--u)); height: calc(19 * var(--u)); font-size: calc(13 * var(--u)); line-height: calc(19 * var(--u)); color: #1d1d1f; white-space: nowrap; }
+.hs__ph-typed { left: calc(12 * var(--u)); top: calc(261 * var(--u)); width: calc(190 * var(--u)); height: calc(19 * var(--u)); font-size: calc(13 * var(--u)); line-height: calc(19 * var(--u)); color: #1d1d1f; white-space: nowrap; overflow: hidden; }
+.hs__ph-typed > span:first-child { display: inline-block; }
 .hs__ph-caret { display: inline-block; width: calc(1.5 * var(--u)); height: calc(15 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
 @keyframes hs-caret { 50% { opacity: 0; } }
-.hs__ph-strip { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(32 * var(--u)); background: #e0e2e4; }
-/* keyboard layer: the same screenshot, clipped to the keyboard, so it can leave */
+.hs__ph-floor { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u)); background: #f9faf7; }
+/* keyboard layer: the same screenshot, clipped to the keys (below the strip), so it can leave */
 .hs__ph-kb {
-  left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u));
-  background: url(images/slides/03/phone.webp) 0 calc(-300 * var(--u)) / 100% auto no-repeat;
+  left: 0; right: 0; top: calc(330 * var(--u)); height: calc(180 * var(--u));
+  background: #e0e2e4 url(images/slides/03/phone.webp) 0 calc(-330 * var(--u)) / 100% auto no-repeat;
   transition: translate 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hs__ph-kb.is-down { translate: 0 calc(215 * var(--u)); }
+.hs__ph-kb.is-down { translate: 0 calc(185 * var(--u)); }
 .hs__ph-keys { position: absolute; inset: 0; }
 .hs__ph-key { position: absolute; border-radius: calc(4 * var(--u)); background: rgba(0, 0, 0, 0); transition: background-color 0.09s ease, scale 0.09s ease; }
 .hs__ph-key.is-down { background: rgba(0, 0, 0, 0.14); scale: 0.94; }
@@ -1759,8 +1762,9 @@
             </div>
             <!-- typed text in the input, with a caret -->
             <div class="hs__ph-typed" id="phTyped"><span id="phTypedText"></span><span class="hs__ph-caret"></span></div>
-            <!-- the predictive strip is not part of this story -->
-            <div class="hs__ph-strip"></div>
+            <!-- screen-coloured floor: covers the strip and the keyboard baked into the
+                 screenshot, so the keyboard layer above has somewhere to leave to -->
+            <div class="hs__ph-floor"></div>
             <!-- keyboard: a clipped copy of the screenshot that can slide away, with tap plates on top -->
             <div class="hs__ph-kb" id="phKb"><div class="hs__ph-keys" id="phKeys"></div></div>
           </div>
@@ -2305,9 +2309,9 @@
   (function buildKeys() {
     if (!ph.keys) return;
     var rows = [
-      { y: 35,  h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
-      { y: 66,  h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
-      { y: 98,  h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
+      { y: 5,   h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
+      { y: 36,  h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
+      { y: 68,  h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
     ];
     function add(ch, x, y, w, h) {
       var k = document.createElement('div'); k.className = 'hs__ph-key';
@@ -2316,8 +2320,8 @@
       ph.keys.appendChild(k); KEYMAP[ch] = k;
     }
     rows.forEach(function (r) { r.keys.split('').forEach(function (ch, i) { add(ch, r.x0 + i * r.pitch, r.y, r.w, r.h); }); });
-    add('shift', 12.1, 98, 25, 25); add('del', 204.9, 98, 25, 25);
-    add('123', 12.5, 129, 23.3, 25); add(' ', 67.5, 129, 107, 25); add('ret', 178.7, 129, 51, 25);
+    add('shift', 12.1, 68, 25, 25); add('del', 204.9, 68, 25, 25);
+    add('123', 12.5, 99, 23.3, 25); add(' ', 67.5, 99, 107, 25); add('ret', 178.7, 99, 51, 25);
     var send = document.createElement('div'); send.className = 'hs__ph-send'; ph.frag.appendChild(send); KEYMAP.send = send;
   })();
   function tap(ch, ms) {
@@ -2332,7 +2336,7 @@
   function phReset() {
     phStop(); phState = -1;
     ph.greet.classList.remove('is-gone'); ph.q.classList.remove('is-in'); ph.a.classList.remove('is-in');
-    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.kb.classList.remove('is-down');
+    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.typed.style.translate = ''; ph.kb.classList.remove('is-down');
   }
   function phPlay() {
     if (phState === 1) return;
@@ -2342,7 +2346,12 @@
       var lower = ch.toLowerCase(), upper = ch !== lower;
       if (upper) phAt(t, function () { tap('shift', 110); });
       if (ch === '?') phAt(t, function () { tap('123', 110); });
-      phAt(t + (upper ? 60 : 0), function () { tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1); });
+      phAt(t + (upper ? 60 : 0), function () {
+        tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1);
+        /* keep the caret in view: shift the text left once it outgrows the field */
+        var box = ph.typed.parentNode, over = ph.typed.offsetWidth + 6 - box.clientWidth;
+        ph.typed.style.translate = (over > 0 ? -over : 0) + 'px 0';
+      });
       t += PER + (ch === ' ' ? 40 : 0);
     });
     t += 350;
@@ -2350,7 +2359,7 @@
       tap('send', 140);
       ph.greet.classList.add('is-gone');
       ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
-      ph.typed.textContent = ''; ph.kb.classList.add('is-down');
+      ph.typed.textContent = ''; ph.typed.style.translate = ''; ph.kb.classList.add('is-down');
     });
     t += 700;
     var words = PHA.split(' ');
