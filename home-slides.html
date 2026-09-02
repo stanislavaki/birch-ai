@@ -188,7 +188,9 @@
 
 .hs__pill {
   display: inline-block;
-  background: var(--color-accent-indigo);
+  /* one badge for all three slides: black at 20% over whatever the card's
+     colour is (no fill token for this yet — literal on purpose) */
+  background: rgba(0, 0, 0, 0.2);
   color: var(--color-text);
   border-radius: var(--radius-xs);
   padding: 0.058em 0.462em 0.154em;
@@ -197,7 +199,7 @@
 .hs__title { color: var(--color-text); text-wrap: balance; margin: 0; }
 .hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
 
-.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; }
+.hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
 
@@ -414,6 +416,8 @@
   pointer-events: none;
 }
 .hs__frag--ring.is-lit::before { opacity: 1; animation: hs-ring 2.6s linear infinite; }
+/* a clipped fragment cannot show a ring outside its box — draw it just inside */
+.hs__frag--clip.hs__frag--ring::before { inset: 0; border-radius: calc(var(--ring-r) * var(--u)); z-index: 5; }
 @keyframes hs-ring { to { --ring-angle: 360deg; } }
 
 .hs__frag--fade { transition: opacity 0.35s ease; }
@@ -426,9 +430,6 @@
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
   transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
-.hs__frag--ring.is-lit {
-  box-shadow: 0 0 0 calc(3 * var(--u)) var(--color-primary);
-}
 
 /* The integrations bar ships without its shadow (an earlier export baked
    it in, which put 5 units of transparent film under the bar and pushed
@@ -438,6 +439,54 @@
 .hs__frag--shadow {
   filter: drop-shadow(0 calc(1.35 * var(--u)) calc(3.65 * var(--u)) rgba(0, 0, 0, 0.42));
 }
+
+/* ── Slide 03 pieces ──────────────────────────────────────── */
+/* reference-rhythm reveal: a hard 120 ms step-in from a slight scale */
+.hs__pop { scale: 0.92; opacity: 0; transition: opacity 0.12s steps(3, end), scale 0.12s cubic-bezier(0.2, 0, 0, 1); }
+.hs__pop.is-in { scale: 1; opacity: 1; }
+/* the dotted connector draws itself toward the phone */
+.hs__line {
+  border-top: calc(3 * var(--u)) dotted var(--color-text);
+  height: 0 !important;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hs__line.is-in { clip-path: inset(0 0 0 0); }
+.hs__phone { overflow: hidden; border-radius: calc(32 * var(--u)); font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
+/* the dev environment sets font-weight 600 on every element; the app is regular */
+.hs__phone, .hs__phone * { font-weight: 400; }
+.hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
+.hs__phone > * { position: absolute; }
+/* everything inside the phone is measured in its own units off the screenshot */
+.hs__ph-msg { left: calc(18 * var(--u)); right: calc(18 * var(--u)); top: calc(96 * var(--u)); height: calc(154 * var(--u)); color: #1d1d1f;
+  display: flex; flex-direction: column; align-items: flex-start; gap: calc(12 * var(--u)); }
+.hs__ph-greet { position: absolute; inset: calc(-30 * var(--u)) 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(14 * var(--u)); transition: opacity 0.25s ease; }
+.hs__ph-greet.is-gone { opacity: 0; }
+.hs__ph-star { width: calc(28 * var(--u)); height: auto; border-radius: 0; }
+.hs__ph-title { font-family: "PP Pangaia", "Times New Roman", serif; font-size: calc(14 * var(--u)); letter-spacing: -0.01em; text-align: center; }
+.hs__ph-q, .hs__ph-a { font-size: calc(10 * var(--u)); line-height: 1.35; letter-spacing: -0.005em; opacity: 0; transition: opacity 0.25s ease, translate 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); translate: 0 calc(10 * var(--u)); }
+.hs__ph-q { align-self: flex-end; max-width: 78%; display: none; }
+.hs__ph-q.is-in { display: block; }
+.hs__ph-q span { display: block; background: #ececea; border-radius: calc(12 * var(--u)); padding: calc(6 * var(--u)) calc(9 * var(--u)); }
+.hs__ph-a { display: none; padding-right: calc(6 * var(--u)); }
+.hs__ph-a.is-in { display: block; }
+.hs__ph-q.is-in, .hs__ph-a.is-in { opacity: 1; translate: 0 0; }
+.hs__ph-typed { left: calc(18 * var(--u)); top: calc(251 * var(--u)); width: calc(188 * var(--u)); height: calc(17 * var(--u)); font-size: calc(10 * var(--u)); line-height: calc(17 * var(--u)); color: #1d1d1f; white-space: nowrap; overflow: hidden; }
+.hs__ph-scroll { display: inline-block; white-space: nowrap; }
+.hs__ph-caret { display: inline-block; width: calc(1.2 * var(--u)); height: calc(12 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
+@keyframes hs-caret { 50% { opacity: 0; } }
+.hs__ph-floor { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u)); background: #f9faf7; }
+/* keyboard layer: the same screenshot, clipped to the keys (below the strip), so it can leave */
+.hs__ph-kb {
+  left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u));
+  background: #e0e2e4 url(images/slides/03/phone.webp) 0 calc(-330 * var(--u)) / 100% auto no-repeat;
+}
+.hs__ph-keys { position: absolute; inset: 0; }
+.hs__ph-key { position: absolute; border-radius: calc(4 * var(--u)); background: rgba(0, 0, 0, 0); transition: background-color 0.09s ease, scale 0.09s ease; }
+.hs__ph-key.is-down { background: rgba(0, 0, 0, 0.14); scale: 0.94; }
+/* the send arrow lives on the base screenshot, at the input's right */
+.hs__ph-send { left: calc(214 * var(--u)); top: calc(282 * var(--u)); width: calc(16 * var(--u)); height: calc(16 * var(--u)); border-radius: 50%; background: rgba(255,255,255,0); transition: background-color 0.09s ease, scale 0.09s ease; }
+.hs__ph-send.is-down { background: rgba(255, 255, 255, 0.35); scale: 0.9; }
 
 /* ── Guides ───────────────────────────────────────────────── */
 .hs__guide {
@@ -1641,9 +1690,9 @@
                     <div class="chat-card__response" id="hsResponse">
                       <div class="chat-card__response-content">
                         <div class="hs__tools" id="hsTools"><div>
-                          <div class="hs__tool" data-lights="rules">Scanning your rule automations</div>
-                          <div class="hs__tool" data-lights="business-context">Reading your business context</div>
-                          <div class="hs__tool" data-lights="meta-ads-library">Checking Meta Ads Library</div>
+                          <div class="hs__tool" data-lights="rules">Analyzed performance trends</div>
+                          <div class="hs__tool" data-lights="business-context">Understood business context</div>
+                          <div class="hs__tool" data-lights="meta-ads-library">Searched Meta Ads Library</div>
                         </div></div>
                         <div class="chat-card__used" id="hsUsed" style="display:none">Used:</div>
                         <div class="chat-card__used-row" id="hsUsedRow" style="display:none">
@@ -1687,6 +1736,41 @@
                alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
                style="--x:997; --y:277; --w:137; z-index:12">
 
+          <!-- Slide 03 — MCP. Chips and logo are SVG; the phone is a screenshot
+               with live regions laid over it (message area, input, keyboard). -->
+          <img data-frag="chip-duplicate" class="hs__frag hs__pop" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
+               style="--x:114.2; --y:46.7; --w:209; z-index:20">
+          <img data-frag="chip-set-budget" class="hs__frag hs__pop" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
+               style="--x:148.2; --y:317.1; --w:228; z-index:20">
+          <img data-frag="chip-notify" class="hs__frag hs__pop" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
+               style="--x:65.8; --y:265.9; --w:164; z-index:20">
+          <img data-frag="chip-scale" class="hs__frag hs__pop" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
+               style="--x:53.7; --y:182.3; --w:55; z-index:20">
+          <img data-frag="chip-time" class="hs__frag hs__pop" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
+               style="--x:495.7; --y:49.3; --w:55; z-index:20">
+          <img data-frag="birch-mcp" class="hs__frag hs__pop" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81"
+               style="--x:383; --y:156; --w:293; z-index:21">
+          <div data-frag="mcp-line" class="hs__frag hs__frag--sized hs__line" style="--x:684; --y:189; --w:134; --h:2; z-index:19"></div>
+          <div data-frag="phone" class="hs__frag hs__frag--sized hs__phone" style="--x:1300; --y:24; --w:242; --h:526; z-index:22">
+            <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy" decoding="async">
+            <!-- message area: greeting first, then the exchange -->
+            <div class="hs__ph-msg" id="phMsg">
+              <div class="hs__ph-greet" id="phGreet">
+                <img class="hs__ph-star" src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
+                <div class="hs__ph-title">Where should we scale?</div>
+              </div>
+              <div class="hs__ph-q" id="phQ"></div>
+              <div class="hs__ph-a" id="phA"></div>
+            </div>
+            <!-- typed text in the input, with a caret -->
+            <div class="hs__ph-typed" id="phTyped"><span class="hs__ph-scroll" id="phScroll"><span id="phTypedText"></span><span class="hs__ph-caret"></span></span></div>
+            <!-- screen-coloured floor: covers the strip and the keyboard baked into the
+                 screenshot, so the keyboard layer above has somewhere to leave to -->
+            <div class="hs__ph-floor"></div>
+            <!-- keyboard: a clipped copy of the screenshot pulled up under the input, with tap plates on top -->
+            <div class="hs__ph-kb" id="phKb"><div class="hs__ph-keys" id="phKeys"></div></div>
+          </div>
+
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
         </div>
@@ -1726,9 +1810,11 @@
   var STEPS = [
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
-    { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
+    { slide: 1, slideAt: 0.22 },   /* 2 — the stack folds into "Your automation rules"; colour and bar switch as the fold starts */
     { slide: 1, len: 1.8 },   /* 3 — geometry holds still; the chat story plays here on its own clock */
-    { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
+    { slide: 1 },   /* 4 — the routine: chat moves aside, the rule takes shape */
+    { slide: 2 },   /* 5 — MCP: the creatives regroup on the left, the phone arrives */
+    { slide: 2, len: 1.8 }   /* 6 — geometry holds; the phone story plays here */
   ];
 
   /* Keyframes per fragment, one entry per step. Anything omitted is
@@ -1738,23 +1824,25 @@
        d       — [dx, dy, dw, dh] toward h550
        o       — opacity */
   var K = {
-    /* Background — scatters at step 1 and then stays put. Slide 02 does
+    /* Background — scatters at step 1, one fragment after another and late
+       into the segment, so the stack is already out while the surroundings
+       are still leaving and the bare screen never has to be waited through. Slide 02 does
        not move it between h364 and h550, hence the zeroed deltas. */
-    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
-    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
-    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78},  {d:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0]}],   /* leaves downward with the scatter */
-    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
-    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
-    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
-    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213}, {d:[0,0,0]}],
-    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205}, {d:[0,0,0]}],
-    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21},  {d:[0,0,0]}],
-    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210}, {d:[0,0,0]}],
+    'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146, e:[0.46,0.89]}, {d:[0,0,0]}],
+    'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0, e:[0.40,0.83]}, {d:[0,0,0]}],
+    'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-300, y:78, e:[0.52,0.95]},  {d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:620, w:359.857, d:[0,0,0], e:[0.64,1.00]}],   /* leaves downward with the scatter */
+    'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273, e:[0.34,0.78]}, {d:[0,0,0]}],
+    'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0, e:[0.37,0.80]},   {d:[0,0,0]}],
+    'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89, e:[0.43,0.86]},  {d:[0,0,0]}],
+    'filter':             [{x:921,  y:240, w:614.25, d:[0,111,0]}, {x:1429, y:213, e:[0.49,0.92]}, {d:[0,0,0]}],
+    'platform-tiktok':    [{x:1013, y:207, w:62.5,   d:[-5.625,75.375,31.25]},  {x:1400, y:205, e:[0.61,1.00]}, {d:[0,0,0]}],
+    'platform-meta':      [{x:851,  y:15,  w:62.5,   d:[-15.625,56.375,31.25]},     {x:1330, y:21, e:[0.55,0.97]},  {d:[0,0,0]}],
+    'platform-snapchat':  [{x:444,  y:281, w:62.5,   d:[-15.625,117.375,31.25]}, {x:-160, y:210, e:[0.58,1.00]}, {d:[0,0,0]}],
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0], arm:0.22, auto:{delay:0, rate:0.075}}, {}, {x:-340, auto:{delay:0,   dur:700}, after:'story', ease:'in'}],   /* leaves left, first, once the story is told */
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -1765,20 +1853,19 @@
     /* The stack cards start exactly behind the front card (same box, lower
        z) and slide out — no fade, the front card is what hides them. */
     'rule-card-pause':    [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:528.45, y:120.75, w:575.45},
-                           {x:86.756, y:62,     w:492.737, d:[0,0,0]}],
+                           {x:528.45, y:120.75, w:575.45, e:[0.10,0.52]},
+                           {x:86.756, y:62,     w:492.737, d:[0,0,0], arm:0.22, auto:{delay:120, rate:0.075}}],
     'rule-card-increase': [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:492.35, y:162.45, w:646.7},
-                           {x:55.844, y:103,    w:553.746, d:[0,0,0]}],
+                           {x:492.35, y:162.45, w:646.7, e:[0.14,0.56]},
+                           {x:55.844, y:103,    w:553.746, d:[0,0,0], arm:0.22, auto:{delay:60,  rate:0.075}}],
     'rule-card':          [{x:443, y:138, w:747, d:[0,93,0]},
-                           {x:461,  y:208.76, w:709.65},
-                           {x:29,   y:147,     w:607.65, d:[0,0,0]}],
+                           {x:461,  y:208.76, w:709.65, e:[0.18,0.60]},
+                           {x:29,   y:147,     w:607.65, d:[0,0,0], arm:0.22, auto:{delay:0,   rate:0.075}}],
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
     'business-context':   [{x:226, y:114, w:194.25, h:225.75, d:[0,66,0]}, {}, {}, {}, {x:-260, auto:{delay:150, dur:700}, after:'story', ease:'in'}],
     'meta-ads-library':   [{x:48,  y:199, w:336.44, h:255.53, d:[0,83,0]}, {}, {}, {}, {x:-420, auto:{delay:300, dur:700}, after:'story', ease:'in'}],
-    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, e:[0.30,0.62], ease:'out'}, {}, {x:103, e:[0.32,0.55], ease:'out'}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
@@ -1796,15 +1883,33 @@
        the juice card's spot (leg 1, dur), and the cards on top peel off it
        while the rise is still settling (leg 2, delay counted from arming).
        Juice is the bottom of the pile and arrives at its final angle. */
-    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, delay:650, rate:0.10}, auto:{delay:1450, dur:10}, arm:0.5}],
-    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, delay:650, rate:0.10}, auto:{delay:1650, dur:750}, arm:0.5}],
-    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, delay:650, rate:0.10}, auto:{delay:1400, dur:750}, arm:0.5}],
+    'ad-1':               [{x:723,  y:640, w:209.24, r:-9.74, d:[0,69,0]}, {}, {}, {}, {x:739.3, y:192.2, r:-9.74, via:{x:739.3, y:192.2, r:-9.74, delay:650, rate:0.10}, auto:{delay:1450, dur:10}, arm:0.5},
+                           /* slide 03: same cards, smaller, regrouped on the left — angles untouched */
+                           {x:109.7, y:151.6, w:163.03, d:[0,71.5,0], arm:0.05, auto:{delay:0,   rate:0.09}}],
+    'ad-3':               [{x:731,  y:640, w:199.94, r:-6,    d:[0,69,0]}, {}, {}, {}, {x:991,   y:36,    r:26.39, via:{x:745, y:186, r:-6, delay:650, rate:0.10}, auto:{delay:1650, dur:750}, arm:0.5},
+                           {x:318.5, y:80.8,  w:155.78, d:[0,71.5,0], arm:0.05, auto:{delay:140, rate:0.09}}],
+    'ad-2':               [{x:739,  y:640, w:199.94, r:-3,    d:[0,69,0]}, {}, {}, {}, {x:829.5, y:56.4,  r:9.26,  via:{x:751, y:180, r:-3, delay:650, rate:0.10}, auto:{delay:1400, dur:750}, arm:0.5},
+                           {x:222.5, y:96.7,  w:155.78, d:[0,71.5,0], arm:0.05, auto:{delay:280, rate:0.09}}],
     /* The routine arrives on a clock once the segment is half way (the chat
        has settled by then): trigger, then routine, then the folder — each
        a lerp toward its place — and the stack rises after them. */
-    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, arm:0.5, auto:{delay:0,   rate:0.11}}],
-    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, arm:0.5, auto:{delay:220, rate:0.11}}],
-    'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, arm:0.5, auto:{delay:420, rate:0.11}}]
+    'trigger':            [{x:434+800, y:95,   w:371,    d:[0,69,0]}, {}, {}, {}, {x:434, arm:0.5, auto:{delay:0,   rate:0.11}}, {x:1400, arm:0.02, auto:{delay:0,   rate:0.10}}],
+    'routine':            [{x:881+500, y:108,  w:271,    d:[0,69,0]}, {}, {}, {}, {x:881, arm:0.5, auto:{delay:220, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:120, rate:0.10}}],
+    'folder':             [{x:997+400, y:277, w:137, r:0, d:[0,75,0]}, {}, {}, {}, {x:997, r:-11.93, arm:0.5, auto:{delay:420, rate:0.11}}, {x:1500, arm:0.02, auto:{delay:240, rate:0.10}}],
+    'chat':               [{x:452, y:620, w:300, h:352, d:[0,56,0,48]}, {}, {y:19, arm:0.22, auto:{delay:700, rate:0.09}}, {}, {x:103, e:[0.32,0.55], ease:'out'}, {x:-520, arm:0.02, auto:{delay:0, rate:0.10}}],
+
+    /* Slide 03 — MCP. Chips fly in from the left one after another, the
+       phone from the right; the logo pops in the reference rhythm and the
+       dotted line draws itself to the phone once it has landed. */
+    'birch-mcp':          [{x:383,  y:156,   w:293, o:1,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:420},  arm:0.05}],
+    'phone':              [{x:1300, y:24,    w:242, h:526,    d:[0,71.5,0]}, {}, {}, {}, {}, {x:836, arm:0.05, auto:{delay:100, rate:0.09}}],
+    'mcp-line':           [{x:684,  y:189,   w:134, h:2,      d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1000}, arm:0.05}],
+    /* the action chips are in place from the start and light up one by one */
+    'chip-duplicate':     [{x:114.2, y:46.7,  w:209, r:-18.6,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1100}, arm:0.05}],
+    'chip-scale':         [{x:53.7,  y:182.3, w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1240}, arm:0.05}],
+    'chip-notify':        [{x:65.8,  y:265.9, w:164, r:-0.19,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1380}, arm:0.05}],
+    'chip-set-budget':    [{x:148.2, y:317.1, w:228, r:-14.55, d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1520}, arm:0.05}],
+    'chip-time':          [{x:495.7, y:49.3,  w:55,  r:10.78,  d:[0,71.5,0]}, {}, {}, {}, {}, {pop:{delay:1660}, arm:0.05}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -1818,7 +1923,7 @@
       prev = {
         /* window inside the arriving segment and the curve applied to it —
            per keyframe, not inherited: a stagger belongs to one entrance */
-        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm,
+        e: raw.e || null, ease: raw.ease || null, via: raw.via || null, auto: raw.auto || null, after: raw.after || null, arm: raw.arm, pop: raw.pop || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         r: raw.r !== undefined ? raw.r : prev.r,
@@ -1830,6 +1935,7 @@
       out.push(prev);
     }
     FRAGS[id] = { el: el, k: out };
+    out.forEach(function (kf, i) { if (kf.pop) FRAGS[id].popStep = i; });
   });
 
   /* segment lengths in screens (default 1) — the track and the mapping
@@ -1946,6 +2052,63 @@
     });
   });
 
+  /* Continuity across steps. A timed motion (lerp) that has not settled
+     when the reader crosses into the next step is not cut: the lerp stays
+     on the fragment and keeps chasing whatever the scroll now says its
+     place is, at its own rate, until it is within 0.3 units. Only then
+     does the fragment go back to plain blending. Scrolling back works the
+     same way — the piece glides back instead of snapping. */
+  function chase(f, tgt, rate) {
+    var now = performance.now(), L = f.lerp;
+    var dt = Math.min(3, (now - L.t) / (1000 / 60)); L.t = now;
+    var k = 1 - Math.pow(1 - rate, dt);
+    L.x += (tgt.x - L.x) * k; L.y += (tgt.y - L.y) * k; L.r += ((tgt.r || 0) - L.r) * k;
+    if (tgt.w !== undefined) L.w += (tgt.w - L.w) * k;
+    if (tgt.h !== undefined && L.h !== undefined) L.h += (tgt.h - L.h) * k;
+    /* the height-corridor deltas travel with the piece too: on a tall
+       viewport a step boundary otherwise moves it by the delta at once */
+    var d = tgt.d || [0, 0, 0];
+    L.dx += (d[0] - L.dx) * k; L.dy += (d[1] - L.dy) * k; L.dw += (d[2] - L.dw) * k; L.dh += ((d[3] || 0) - L.dh) * k;
+    return Math.abs(tgt.x - L.x) + Math.abs(tgt.y - L.y) + Math.abs((tgt.r || 0) - L.r) + (tgt.w !== undefined ? Math.abs(tgt.w - L.w) : 0)
+         + Math.abs(d[0] - L.dx) + Math.abs(d[1] - L.dy) + Math.abs(d[2] - L.dw);
+  }
+  function startLerp(f, from, rate) {
+    /* start from where the piece is on screen (its last written spot), so
+       re-entering a timed step from either side never teleports it */
+    var c = f.cur || from;
+    if (!f.lerp) f.lerp = { x: c.x, y: c.y, w: c.w, h: c.h !== undefined ? c.h : from.h, r: c.r || 0,
+                            dx: c.d[0], dy: c.d[1], dw: c.d[2], dh: c.d[3] || 0, t: performance.now() };
+    f.rate = rate;
+  }
+  /* the clock of a timed step: fresh when the reader arrives from before
+     it, already run out when they come back from after it */
+  function clockFor(f, a) { return f.lastA !== undefined && f.lastA > a ? -1e9 : performance.now(); }
+  function writeLerp(st, L) {
+    st.setProperty('--x',  L.x); st.setProperty('--y',  L.y); st.setProperty('--r',  L.r); st.setProperty('--w', L.w);
+    st.setProperty('--x2', L.x); st.setProperty('--y2', L.y); st.setProperty('--r2', L.r); st.setProperty('--w2', L.w);
+    if (L.h !== undefined) { st.setProperty('--h', L.h); st.setProperty('--h2', L.h); }
+    if (L.dx !== undefined) {
+      st.setProperty('--dx', L.dx); st.setProperty('--dy', L.dy); st.setProperty('--dw', L.dw); st.setProperty('--dh', L.dh);
+      st.setProperty('--dx2', L.dx); st.setProperty('--dy2', L.dy); st.setProperty('--dw2', L.dw); st.setProperty('--dh2', L.dh);
+    }
+  }
+  /* a fragment with a leftover lerp glides to `tgt`; true while still gliding */
+  function settle(f, st, tgt) {
+    if (!f.lerp) return false;
+    var gap = chase(f, tgt, f.rate || 0.1);
+    writeLerp(st, f.lerp);
+    if (gap > 0.3) { autoLive = true; return true; }
+    f.lerp = null; wrote = -1;   /* back to the pair the scroll dictates */
+    return true;
+  }
+  function blendAt(ka, kb, tt) {
+    var da = ka.d, db = kb.d;
+    return { x: ka.x + (kb.x - ka.x) * tt, y: ka.y + (kb.y - ka.y) * tt, w: ka.w + (kb.w - ka.w) * tt,
+             h: ka.h !== undefined && kb.h !== undefined ? ka.h + (kb.h - ka.h) * tt : ka.h,
+             r: (ka.r || 0) + ((kb.r || 0) - (ka.r || 0)) * tt,
+             d: [0, 1, 2, 3].map(function (i) { return (da[i] || 0) + ((db[i] || 0) - (da[i] || 0)) * tt; }) };
+  }
+
   var slide = -1;
   function apply() {
     targetP = progress();
@@ -1966,23 +2129,34 @@
     var b = Math.min(STEPS.length - 1, a + 1);
     Object.keys(FRAGS).forEach(function (id) {
       var f = FRAGS[id], kb = f.k[b], tt = curve(kb, local), st = f.el.style;
+      if (kb.pop) {
+        /* a class, not a blend: armed at `arm`, the element steps in after pop.delay */
+        var armedP = local >= (kb.arm !== undefined ? kb.arm : 0.02);
+        if (!armedP) { f.popAt = null; f.el.classList.remove('is-in'); }
+        else {
+          if (!f.popAt) f.popAt = performance.now();
+          var on = performance.now() - f.popAt >= kb.pop.delay;
+          f.el.classList.toggle('is-in', on);
+          if (!on) autoLive = true;
+        }
+      }
       if (kb.auto && !kb.via && kb.auto.rate) {
         /* timed lerp toward the keyframe: armed at `arm` of the segment,
            parked until auto.delay, then chasing x / y / r exponentially */
         var ka0 = f.k[a], armedL = local >= (kb.arm !== undefined ? kb.arm : 0.02) && (!kb.after || GATES[kb.after]);
-        if (!armedL) { f.autoStart = null; f.lerp = null; }
-        else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka0.x, y: ka0.y, r: ka0.r || 0, t: performance.now() }; }
+        if (!armedL) {
+          /* not yet (or no longer) armed: a leftover lerp glides back to its resting spot */
+          f.autoStart = null;
+          if (!settle(f, st, ka0)) { writeLerp(st, { x: ka0.x, y: ka0.y, w: ka0.w, h: ka0.h, r: ka0.r || 0, dx: ka0.d[0], dy: ka0.d[1], dw: ka0.d[2], dh: ka0.d[3] || 0 }); }
+        } else {
+          if (!f.autoStart) f.autoStart = clockFor(f, a);
+          startLerp(f, ka0, kb.auto.rate);   /* no-op when a lerp is already in flight */
           var elL = performance.now() - f.autoStart;
           var tgtL = elL >= kb.auto.delay ? kb : ka0;
-          var dtL = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
-          var kL = 1 - Math.pow(1 - kb.auto.rate, dtL);
-          f.lerp.x += (tgtL.x - f.lerp.x) * kL; f.lerp.y += (tgtL.y - f.lerp.y) * kL; f.lerp.r += ((tgtL.r || 0) - f.lerp.r) * kL;
-          if (Math.abs(tgtL.x - f.lerp.x) + Math.abs(tgtL.y - f.lerp.y) + Math.abs((tgtL.r || 0) - f.lerp.r) > 0.3 || elL < kb.auto.delay) autoLive = true;
+          var gapL = chase(f, { x: tgtL.x, y: tgtL.y, r: tgtL.r, w: tgtL.w !== undefined ? tgtL.w : ka0.w, h: tgtL.h !== undefined ? tgtL.h : ka0.h, d: tgtL.d }, kb.auto.rate);
+          if (gapL > 0.3 || elL < kb.auto.delay) autoLive = true;
+          writeLerp(st, f.lerp);
         }
-        var curL = f.lerp || { x: ka0.x, y: ka0.y, r: ka0.r || 0 };
-        st.setProperty('--x',  curL.x); st.setProperty('--y',  curL.y); st.setProperty('--r',  curL.r);
-        st.setProperty('--x2', curL.x); st.setProperty('--y2', curL.y); st.setProperty('--r2', curL.r);
         tt = 0;
       } else if (kb.auto && !kb.via) {
         /* plays on its own clock from the moment the segment is entered —
@@ -1990,7 +2164,7 @@
         var armed = local > 0.02 && (!kb.after || GATES[kb.after]);
         if (!armed) { f.autoStart = null; tt = 0; }
         else {
-          if (!f.autoStart) f.autoStart = performance.now();
+          if (!f.autoStart) f.autoStart = clockFor(f, a);
           var el2 = performance.now() - f.autoStart - kb.auto.delay;
           tt = EASES[kb.ease || 'out'](Math.min(1, Math.max(0, el2 / kb.auto.dur)));
           if (el2 < kb.auto.dur) autoLive = true;
@@ -2003,20 +2177,20 @@
            drops to zero between the legs, so rise and peel read as one
            motion. Scrolling back re-parks the card instantly. */
         var ka = f.k[a], armedV = local >= (kb.arm !== undefined ? kb.arm : 0.5);
-        if (!armedV) { f.autoStart = null; f.lerp = null; }
-        else {
-          if (!f.autoStart) { f.autoStart = performance.now(); f.lerp = { x: ka.x, y: ka.y, r: ka.r || 0, t: performance.now() }; }
+        if (!armedV) {
+          f.autoStart = null;
+          if (!settle(f, st, ka)) { writeLerp(st, { x: ka.x, y: ka.y, w: ka.w, r: ka.r || 0, dx: ka.d[0], dy: ka.d[1], dw: ka.d[2], dh: ka.d[3] || 0 }); }
+        } else {
+          var rate = kb.via.rate || 0.12;
+          if (!f.autoStart) f.autoStart = clockFor(f, a);
+          startLerp(f, ka, rate);
           var elV = performance.now() - f.autoStart;
           /* before via.delay the card stays parked; then it chases the pile, then the final spot */
           var tgt = elV < (kb.via.delay || 0) ? ka : (elV >= kb.auto.delay ? kb : kb.via);
-          var rate = kb.via.rate || 0.12, dtV = Math.min(3, (performance.now() - f.lerp.t) / (1000 / 60)); f.lerp.t = performance.now();
-          var kV = 1 - Math.pow(1 - rate, dtV);
-          f.lerp.x += (tgt.x - f.lerp.x) * kV; f.lerp.y += (tgt.y - f.lerp.y) * kV; f.lerp.r += ((tgt.r || 0) - f.lerp.r) * kV;
-          if (Math.abs(tgt.x - f.lerp.x) + Math.abs(tgt.y - f.lerp.y) + Math.abs((tgt.r || 0) - f.lerp.r) > 0.3 || elV < kb.auto.delay) autoLive = true;
+          var gapV = chase(f, { x: tgt.x, y: tgt.y, r: tgt.r, w: tgt.w !== undefined ? tgt.w : ka.w, d: tgt.d || kb.d }, rate);
+          if (gapV > 0.3 || elV < kb.auto.delay) autoLive = true;
+          writeLerp(st, f.lerp);
         }
-        var cur = f.lerp || { x: ka.x, y: ka.y, r: ka.r || 0 };
-        st.setProperty('--x',  cur.x); st.setProperty('--y',  cur.y); st.setProperty('--r',  cur.r);
-        st.setProperty('--x2', cur.x); st.setProperty('--y2', cur.y); st.setProperty('--r2', cur.r);
         tt = 0;
       } else if (kb.via) {
         /* leg 1: previous → via on the via's own window (the pile arrives
@@ -2036,19 +2210,52 @@
           if (el < kb.auto.dur) autoLive = true;
         } else { tt = curve(kb, local); }
       }
+      /* any other branch: a lerp left over from a timed step glides to where
+         the blend puts the fragment now, then hands over to the blend */
+      if (!kb.auto && !kb.via) f.autoStart = null;   /* a timed step re-entered later starts its clock afresh */
+      if (!((kb.auto && !kb.via && kb.auto.rate) || (kb.via && kb.via.rate))) {
+        /* crossing a step boundary must never teleport a piece: if where the
+           scroll now puts it is not where it was drawn, it glides there */
+        if (!f.lerp && f.cur && f.lastA !== undefined && f.lastA !== a) {
+          var want = blendAt(f.k[a], kb, tt);
+          if (Math.abs(want.x - f.cur.x) + Math.abs(want.y - f.cur.y) + Math.abs(want.w - f.cur.w) > 2) startLerp(f, want, 0.12);
+        }
+        if (f.lerp && settle(f, st, blendAt(f.k[a], kb, tt))) tt = 0;
+      }
+      /* a popped piece is a matter of position, not only of its timer: past
+         its step it is simply in (a reload deep in the track included) */
+      if (f.popStep !== undefined && !kb.pop) {
+        if (a >= f.popStep) f.el.classList.add('is-in');
+        else if (a < f.popStep - 1) { f.el.classList.remove('is-in'); f.popAt = null; }
+      }
       st.setProperty('--t', tt.toFixed(4));
+      f.cur = f.lerp ? { x: f.lerp.x, y: f.lerp.y, w: f.lerp.w, h: f.lerp.h, r: f.lerp.r, d: [f.lerp.dx, f.lerp.dy, f.lerp.dw, f.lerp.dh] }
+                     : blendAt(f.k[a], kb, tt);
+      f.lastA = a;
     });
 
     driveChat(a, local);
+    drivePhone(a, local);
 
     /* the rules frame counts as closed from 90% of its closing leg onward */
     var closing = FRAGS['rules-frame'];
     if (closing) {
-      closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && curve(closing.k[2], local) >= 0.9));
+      closing.el.classList.toggle('is-closed', closing.lerp ? (a >= 1 && closing.lerp.w < 420) : a > 1);
+      /* the blue fill follows the frame's own closing, not the scroll: while
+         the frame is lerping, its progress (1632 → 276 wide) is the fill's --t */
+      var face = FRAGS['rules-face'];
+      if (face && (a === 1 || (a === 2 && closing.lerp))) {
+        var prog = closing.lerp ? Math.min(1, Math.max(0, (1632 - closing.lerp.w) / (1632 - 276))) : 0;
+        face.el.style.setProperty('--t', prog.toFixed(4));
+      }
       closing.el.classList.toggle('is-stacked', a > 0 || local > 0.03);
     }
 
-    var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
+    /* the slide (card colour, bar, pager) normally switches mid-segment; a
+       step may pin it to a point of its own — e.g. the moment a timed
+       morph starts, so the new colour is there when its pieces form */
+    var nx = Math.min(STEPS.length - 1, a + 1), at = STEPS[nx].slideAt;
+    var si = STEPS[at !== undefined ? (local >= at ? nx : a) : (t < 0.5 ? a : nx)].slide;
     if (si !== slide) {
       var forwardSlide = si > slide;
       slide = si;
@@ -2182,6 +2389,84 @@
     GATES.story = state >= 5 && litAt !== null && performance.now() - litAt >= 1700;
     if (elapsed < STORY[STORY.length - 1] + 2500) autoLive = true;         /* keep frames coming while it plays */
     if (!GATES.story) autoLive = true;                                      /* something may be waiting on the story */
+  }
+
+  /* ── Phone (slide 03) ────────────────────────────────────────
+     The screenshot stays; the message area, the typed text and the tap
+     plates are DOM laid over it. Key rectangles are measured off the
+     screenshot in its own units (242 wide): four rows, pitch ~31. */
+  var ph = {
+    greet: document.getElementById('phGreet'), q: document.getElementById('phQ'), a: document.getElementById('phA'),
+    typed: document.getElementById('phTypedText'), scroll: document.getElementById('phScroll'), kb: document.getElementById('phKb'), keys: document.getElementById('phKeys'),
+    frag: card.querySelector('[data-frag="phone"]')
+  };
+  var KEYMAP = {};
+  (function buildKeys() {
+    if (!ph.keys) return;
+    var rows = [
+      { y: 5,   h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
+      { y: 36,  h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
+      { y: 68,  h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
+    ];
+    function add(ch, x, y, w, h) {
+      var k = document.createElement('div'); k.className = 'hs__ph-key';
+      k.style.left = 'calc(' + x + ' * var(--u))'; k.style.top = 'calc(' + y + ' * var(--u))';
+      k.style.width = 'calc(' + w + ' * var(--u))'; k.style.height = 'calc(' + h + ' * var(--u))';
+      ph.keys.appendChild(k); KEYMAP[ch] = k;
+    }
+    rows.forEach(function (r) { r.keys.split('').forEach(function (ch, i) { add(ch, r.x0 + i * r.pitch, r.y, r.w, r.h); }); });
+    add('shift', 12.1, 68, 25, 25); add('del', 204.9, 68, 25, 25);
+    add('123', 12.5, 99, 23.3, 25); add(' ', 67.5, 99, 107, 25); add('ret', 178.7, 99, 51, 25);
+    var send = document.createElement('div'); send.className = 'hs__ph-send'; ph.frag.appendChild(send); KEYMAP.send = send;
+  })();
+  function tap(ch, ms) {
+    var k = KEYMAP[ch]; if (!k) return;
+    k.classList.add('is-down'); setTimeout(function () { k.classList.remove('is-down'); }, ms || 90);
+  }
+  var PHQ = 'How did the weekly UGC launch go?';
+  var PHA = 'Weekly UGC launch — Q4. Ran Sunday 03:00 (your time). 6 ads live. No gaps found in your current setup.';
+  var phTimers = [], phState = -1;
+  function phStop() { phTimers.forEach(clearTimeout); phTimers = []; }
+  function phAt(ms, fn) { phTimers.push(setTimeout(fn, ms)); }
+  function phReset() {
+    phStop(); phState = -1;
+    ph.greet.classList.remove('is-gone'); ph.q.classList.remove('is-in'); ph.a.classList.remove('is-in');
+    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.scroll.style.translate = '';
+  }
+  function phPlay() {
+    if (phState === 1) return;
+    phReset(); phState = 1;
+    var t = 350, PER = 50;
+    PHQ.split('').forEach(function (ch, i) {
+      var lower = ch.toLowerCase(), upper = ch !== lower;
+      if (upper) phAt(t, function () { tap('shift', 110); });
+      if (ch === '?') phAt(t, function () { tap('123', 110); });
+      phAt(t + (upper ? 40 : 0), function () {
+        tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1);
+        /* the caret is always in view: text and caret scroll together, like a real field */
+        var sc = ph.scroll, over = sc.offsetWidth - sc.parentNode.clientWidth;
+        sc.style.translate = (over > 0 ? -over : 0) + 'px 0';
+      });
+      t += PER + (ch === ' ' ? 20 : 0);
+    });
+    t += 220;
+    phAt(t, function () {
+      tap('send', 140);
+      ph.greet.classList.add('is-gone');
+      ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
+      ph.typed.textContent = ''; ph.scroll.style.translate = '';   /* the keyboard stays, as in the app */
+    });
+    t += 450;
+    var words = PHA.split(' ');
+    words.forEach(function (w, i) {
+      phAt(t + i * 60, function () { ph.a.textContent = words.slice(0, i + 1).join(' '); ph.a.classList.add('is-in'); });
+    });
+  }
+  /* segment 5 is the phone's hold: play once it has arrived, reset when scrolled back before it */
+  var PHONE_SEG = 5;
+  function drivePhone(a, local) {
+    if (a < PHONE_SEG - 1 || (a === PHONE_SEG - 1 && local < 0.6)) { if (phState !== -1) phReset(); return; }
+    if (phState === -1) { phPlay(); }
   }
 
   addEventListener('scroll', apply, { passive: true });
