@@ -2162,6 +2162,13 @@
     var closing = FRAGS['rules-frame'];
     if (closing) {
       closing.el.classList.toggle('is-closed', a > 1 || (a === 1 && closing.lerp && closing.lerp.w < 420));
+      /* the blue fill follows the frame's own closing, not the scroll: while
+         the frame is lerping, its progress (1632 → 276 wide) is the fill's --t */
+      var face = FRAGS['rules-face'];
+      if (face && a === 1) {
+        var prog = closing.lerp ? Math.min(1, Math.max(0, (1632 - closing.lerp.w) / (1632 - 276))) : 0;
+        face.el.style.setProperty('--t', prog.toFixed(4));
+      }
       closing.el.classList.toggle('is-stacked', a > 0 || local > 0.03);
     }
 
