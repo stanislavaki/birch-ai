@@ -15,6 +15,7 @@
 | План/статус переноса use-cases в Webflow (референс гибрид-порта) | `docs/use-cases-webflow-plan.md` |
 | Шрифты сайта, курсив, глобальные типографические правила | `docs/typography-fonts.md` |
 | Git-процесс: цикл ветка → коммит → push → PR → merge, когда что делать, выбор способа merge (скилл `/git-workflow`) | `docs/git-workflow.md` |
+| Слайдер главной (`home-slides.html`): высотный коридор, таблица шагов, лерпы и правила движения, чат и телефон, чек-лист проверки, открытые вопросы | `docs/home-slides.md` |
 
 Индекс для людей — `docs/README.md`.
 
