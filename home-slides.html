@@ -371,8 +371,11 @@
 /* Lit by the chat (--lit 0→1): parked just under the canvas edge, they ride
    up into place over the rules card — a real entrance, no fade needed. */
 .hs__frag--rise {
+  /* opacity without the --lit gate: the card is simply parked under the
+     canvas edge (clipped) until it is called, then flies up */
+  opacity: calc((1 - var(--t)) * var(--o1) + var(--t) * var(--o2));
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
-  transition: translate 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
 .hs__frag--ring { transition: box-shadow 0.35s ease; }
 .hs__frag--ring.is-lit {
@@ -1671,7 +1674,7 @@
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
     { slide: 1 },   /* 2 — the stack folds into "Your automation rules" */
-    { slide: 1, len: 1.8 },   /* 3 — geometry holds still; this segment is the chat, and it gets more scroll */
+    { slide: 1, len: 2.6 },   /* 3 — geometry holds still; this segment is the chat, and it gets more scroll */
     { slide: 1 }    /* 4 — the routine: chat moves aside, the rule takes shape */
   ];
 
@@ -1922,7 +1925,7 @@
   var Q  = 'How healthy is my setup?';
   var A1 = 'Gap found — a creative is about to hit fatigue.';
   var A2 = 'UGC runs longest in your vertical — median 41 days.';
-  var BEATS = [0.14, 0.22, 0.40, 0.58, 0.74];   /* → six states */
+  var BEATS = [0.10, 0.14, 0.36, 0.58, 0.80];   /* → six states */
 
   var ch = {
     bubble: document.getElementById('hsBubble'),
@@ -1998,12 +2001,17 @@
 
   /* The chat lives in the segment where the scene holds still. */
   var CHAT_SEG = 2;
+  var DWELL = 1100, stateAt = 0, dwellTimer = null;
   function driveChat(a, local) {
     var cp = a < CHAT_SEG ? -1 : (a > CHAT_SEG ? 1 : local);
-    if (cp < 0) { setState(-1); return; }
-    var n = 0;
-    while (n < BEATS.length && cp >= BEATS[n]) n++;
-    setState(n);
+    var n = -1;
+    if (cp >= 0) { n = 0; while (n < BEATS.length && cp >= BEATS[n]) n++; }
+    clearTimeout(dwellTimer);
+    if (n <= state) { setState(n); stateAt = performance.now(); return; }   /* backwards: immediate */
+    /* forwards: one state at a time, each held for at least DWELL */
+    var wait = Math.max(0, DWELL - (performance.now() - stateAt));
+    if (wait === 0) { setState(state + 1); stateAt = performance.now(); }
+    if (state < n) dwellTimer = setTimeout(function () { driveChat(a, local); }, wait || DWELL);
   }
 
   addEventListener('scroll', apply, { passive: true });
