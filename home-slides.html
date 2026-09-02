@@ -57,9 +57,10 @@
   /* Tallest top bar across the slides, measured after fonts.ready */
   --bar-h: 6.8125rem;
 
-  /* Air under the card so it does not sit on the viewport edge. Comes out
-     of the canvas budget, so on the 1280×600 reference the canvas drops
-     below 364 by this much and the card runs past the fold instead. */
+  /* Air under the card so it does not sit on the viewport edge. The block
+     script clamps it between 0 and --slide-gap-max from the room actually
+     left, so it never pushes the card past the fold on the floor. */
+  --slide-gap-max: 2rem;
   --slide-gap-bottom: 2rem;
 
   /* Debug override */
@@ -322,10 +323,12 @@
 
 /* The rules card is already on stage when the chat names it, so it gets a
    ring rather than a fade-in like the other two. */
-.hs__frag--fade {
-  /* the chat lights these (--lit 0→1); they rise the last 40 units as they do */
-  translate: 0 calc(40 * var(--u) * (1 - var(--lit, 1)));
-  transition: opacity 0.35s ease, translate 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+.hs__frag--fade { transition: opacity 0.35s ease; }
+/* Lit by the chat (--lit 0→1): parked just under the canvas edge, they ride
+   up into place over the rules card — a real entrance, no fade needed. */
+.hs__frag--rise {
+  translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
+  transition: translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .hs__frag--ring { transition: box-shadow 0.35s ease; }
 .hs__frag--ring.is-lit {
@@ -1476,7 +1479,7 @@
           <img data-frag="platform-google-ads" class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:3">
-          <img data-frag="integrations" class="hs__frag hs__frag--shadow" src="images/slides/01/integrations.webp" alt="Integrations"
+          <img data-frag="integrations" class="hs__frag" src="images/slides/01/integrations.webp" alt="Integrations"
                width="1339" height="227" loading="lazy" decoding="async"
                style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; z-index:4">
           <img data-frag="ad-account" class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
@@ -1519,10 +1522,10 @@
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
 
-          <img data-frag="business-context" class="hs__frag hs__frag--fade" src="images/slides/01/business-context.webp"
+          <img data-frag="business-context" class="hs__frag hs__frag--rise" src="images/slides/01/business-context.webp"
                alt="Your business context" width="466" height="542" loading="lazy" decoding="async"
                style="--x:226; --y:114; --w:194.25; --lit:0; z-index:15">
-          <img data-frag="meta-ads-library" class="hs__frag hs__frag--fade" src="images/slides/01/meta-ads-library.webp"
+          <img data-frag="meta-ads-library" class="hs__frag hs__frag--rise" src="images/slides/01/meta-ads-library.webp"
                alt="Meta ads library" width="807" height="613" loading="lazy" decoding="async"
                style="--x:48; --y:199; --w:336.44; --lit:0; z-index:16">
           <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
@@ -1542,8 +1545,8 @@
                           <div class="hs__tool" data-lights="business-context">Reading your business context</div>
                           <div class="hs__tool" data-lights="meta-ads-library">Checking Meta Ads Library</div>
                         </div></div>
-                        <div class="chat-card__used" id="hsUsed" hidden>Used:</div>
-                        <div class="chat-card__used-row" id="hsUsedRow" hidden>
+                        <div class="chat-card__used" id="hsUsed" style="display:none">Used:</div>
+                        <div class="chat-card__used-row" id="hsUsedRow" style="display:none">
                           <span class="chat-card__used-names">Rules · Business context · Meta Ads Library</span>
                         </div>
                         <p id="hsAnswerA"></p>
@@ -1567,9 +1570,13 @@
           </div>
 
           <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
-          <img data-frag="ads-collage" class="hs__frag hs__frag--fade" src="images/slides/01/ads-collage.webp"
-               alt="Creatives" width="1205" height="1000" loading="lazy" decoding="async"
-               style="--x:723; --y:2; --w:501.98; z-index:9">
+          <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
+          <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
+               width="580" height="583" loading="lazy" decoding="async" style="--x:723; --y:211.4; --w:241.78; z-index:9">
+          <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
+               width="573" height="741" loading="lazy" decoding="async" style="--x:1048.94; --y:74.18; --w:238.94; z-index:9">
+          <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
+               width="643" height="643" loading="lazy" decoding="async" style="--x:1045.87; --y:2; --w:267.98; z-index:8">
           <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
                alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
                style="--x:434; --y:95; --w:371; z-index:18">
@@ -1578,7 +1585,7 @@
                style="--x:881; --y:108; --w:271; z-index:18">
           <img data-frag="folder" class="hs__frag hs__frag--fade" src="images/slides/01/folder.webp"
                alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
-               style="--x:986; --y:287.32; --w:159.47; z-index:19">
+               style="--x:986; --y:287.32; --w:159.47; z-index:12">
 
           <div class="hs__guide" data-label="364 — эталон"></div>
           <div class="hs__core-box" id="coreBox"></div>
@@ -1636,7 +1643,7 @@
     'schedule-cal':       [{x:37,   y:15,  w:364.5,  d:[0,37,0]},      {x:-395, y:146}, {d:[0,0,0]}],
     'actions':            [{x:56,   y:169, w:175.02, d:[0,37,0]},   {x:-376, y:300, o:0}, {d:[0,0,0]}],
     'platform-google-ads':[{x:11,   y:75,  w:62.5,   d:[0,21.375,31.25]},       {x:-192, y:78},  {d:[0,0,0]}],
-    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:371, w:359.857}, {o:0, d:[0,0,0]}],
+    'integrations':       [{x:560,  y:293, w:372,    d:[-73,147.3,186]}, {x:881,  y:371, w:359.857}, {y:600, d:[0,0,0]}],   /* leaves downward */
     'ad-account':         [{x:155,  y:226, w:260.25, d:[0,172,0]},          {x:-320, y:273}, {d:[0,0,0]}],
     'schedule-section':   [{x:999,  y:0,   w:337.5,  d:[0,58,0]},        {x:1274, y:0},   {d:[0,0,0]}],
     'frequency-popover':  [{x:1089, y:89,  w:180,    d:[0,58,0]},   {x:1394, y:89},  {d:[0,0,0]}],
@@ -1647,7 +1654,7 @@
 
     /* The closing window. Wider than the canvas until step 2, so it is
        invisible as a frame and clips nothing. */
-    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {o:0}],
+    'rules-frame':        [{x:-200, y:-100, w:1632, h:800, d:[0,0,0]}, {}, {x:29, y:39, w:276, h:275, d:[0,35,0]}, {}, {x:-340}],   /* leaves left */
     'rules-face':         [{o:0}, {o:0}, {o:1}],
 
     /* The three cards are children of the window, so their coordinates
@@ -1669,18 +1676,22 @@
 
     /* Slide 02. They arrive together for now — lighting them one by one
        is the chat's job, and the chat is not wired yet. */
-    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0]}, {}, {o:1}, {}, {o:0}],
-    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0]}, {}, {o:1}, {}, {o:0}],
+    'business-context':   [{x:226, y:114, w:194.25, o:0, d:[0,66,0]}, {}, {o:1}, {}, {x:-260}],
+    'meta-ads-library':   [{x:48,  y:199, w:336.44, o:0, d:[0,83,0]}, {}, {o:1}, {}, {x:-420}],
     'chat':               [{x:452, y:19+40, w:300, h:352, o:0, d:[0,56,0,48]}, {}, {y:19, o:1}, {}, {x:103}],
 
     /* Step 4 — the routine. Everything arrives in place; the chat slides
        left to make room for it. Both h550 frames move the whole group by
        the same 69, the folder by 75. */
     /* Entrances start 40 units low and rise into place while they fade. */
-    'ads-collage':        [{x:723, y:2+40,      w:501.98, o:0, d:[0,69,0]}, {}, {}, {}, {y:2,      o:1}],
-    'trigger':            [{x:434, y:95+40,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {y:95,     o:1}],
-    'routine':            [{x:881, y:108+40,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {y:108,    o:1}],
-    'folder':             [{x:986, y:287.32+40, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {y:287.32, o:1}]
+    /* The creatives sit inside the folder (its box, scaled down) and fly
+       out one after another — staggered windows inside the same segment. */
+    'ad-1':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:723,    y:211.4, w:241.78, o:1, d:[0,69,0], e:[0.30,0.75], ease:'back'}],
+    'ad-2':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:1048.94,y:74.18, w:238.94, o:1, d:[0,69,0], e:[0.42,0.87], ease:'back'}],
+    'ad-3':               [{x:1010, y:320, w:110, o:0, d:[0,75,0]}, {}, {}, {}, {x:1045.87,y:2,     w:267.98, o:1, d:[0,69,0], e:[0.54,1.00], ease:'back'}],
+    'trigger':            [{x:434, y:95+40,     w:371,    o:0, d:[0,69,0]}, {}, {}, {}, {y:95,     o:1, e:[0.15,0.60]}],
+    'routine':            [{x:881, y:108+40,    w:271,    o:0, d:[0,69,0]}, {}, {}, {}, {y:108,    o:1, e:[0.25,0.70]}],
+    'folder':             [{x:986, y:287.32+40, w:159.47, o:0, d:[0,75,0]}, {}, {}, {}, {y:287.32, o:1, e:[0.05,0.40]}]
   };
 
   /* Flatten the inheritance once, so lookup during scroll is a plain read. */
@@ -1692,6 +1703,9 @@
     for (var i = 0; i < STEPS.length; i++) {
       var raw = K[id][i] || {};
       prev = {
+        /* window inside the arriving segment and the curve applied to it —
+           per keyframe, not inherited: a stagger belongs to one entrance */
+        e: raw.e || null, ease: raw.ease || null,
         x: raw.x !== undefined ? raw.x : prev.x,
         h: raw.h !== undefined ? raw.h : prev.h,
         y: raw.y !== undefined ? raw.y : prev.y,
@@ -1711,10 +1725,20 @@
      twice: once now and once the real font metrics are in, because the
      fallback font wraps the paragraph differently (dev-pages.md). */
   function lockBarHeight() {
-    var rootPx = parseFloat(getComputedStyle(root).fontSize);
+    var cs = getComputedStyle(root), rootPx = parseFloat(cs.fontSize);
     root.style.setProperty('--bar-h', '0rem');
     var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
     root.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
+
+    /* Bottom gap: whatever room is left under the minimum card, capped. */
+    var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;
+    var pad   = parseFloat(cs.getPropertyValue('--pad-card')) * rootPx;
+    var gapMd = parseFloat(cs.getPropertyValue('--gap-md')) * rootPx;
+    var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
+    var u = card.getBoundingClientRect().width / 1232;
+    var minCard = pad + tallest + gapMd + 364 * u;
+    var room = innerHeight - navH - minCard;
+    root.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
   }
 
   /* 0 at the moment the card pins, 1 when the track runs out. */
@@ -1728,11 +1752,35 @@
 
   /* Rest at both ends of every transition — otherwise a step would start
      changing the instant the previous one arrived, and nothing would ever
-     read as a state. */
+     read as a state. A keyframe may narrow or shift its own window (e:)
+     and pick a curve (ease:), which is how a group staggers. */
   var EASE_FROM = 0.25, EASE_TO = 0.75;
-  function smoothstep(a, b, x) {
-    var t = Math.min(1, Math.max(0, (x - a) / (b - a)));
-    return t * t * (3 - 2 * t);
+  var EASES = {
+    smooth: function (t) { return t * t * (3 - 2 * t); },
+    out:    function (t) { return 1 - Math.pow(1 - t, 3); },
+    in:     function (t) { return t * t * t; },
+    back:   function (t) { var c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }
+  };
+  function curve(k, local) {
+    var w = (k && k.e) || [EASE_FROM, EASE_TO];
+    var t = Math.min(1, Math.max(0, (local - w[0]) / (w[1] - w[0])));
+    return EASES[(k && k.ease) || 'smooth'](t);
+  }
+  function smoothstep(a, b, x) { return curve(null, a === EASE_FROM ? x : (x - a) / (b - a) * (EASE_TO - EASE_FROM) + EASE_FROM); }
+
+  /* Viscosity: the scene follows the scroll with a little lag, so a flick
+     of the wheel reads as motion rather than as a cut. Position stays the
+     source of truth — this only delays arriving at it. */
+  var shownP = null, targetP = 0, raf = null;
+  var LAG = 0.14;
+  function follow() {
+    raf = null;
+    if (shownP === null) shownP = targetP;
+    var diff = targetP - shownP;
+    if (Math.abs(diff) < 0.00025) { shownP = targetP; render(shownP); return; }
+    shownP += diff * LAG;
+    render(shownP);
+    raf = requestAnimationFrame(follow);
   }
 
   var wrote = -1;
@@ -1754,16 +1802,26 @@
 
   var slide = -1;
   function apply() {
-    var p    = progress();
+    targetP = progress();
+    if (!raf) raf = requestAnimationFrame(follow);
+  }
+  function render(p) {
     var segs = Math.max(1, STEPS.length - 1);
     var q    = Math.min(segs - 0.000001, p * segs);
     var a    = Math.floor(q);
-    var t    = smoothstep(EASE_FROM, EASE_TO, q - a);
+    var local = q - a;
+    var t    = curve(null, local);
 
     writePair(a);
     card.style.setProperty('--t', t.toFixed(4));
+    /* each fragment gets its own t: same segment, own window and curve */
+    var b = Math.min(STEPS.length - 1, a + 1);
+    Object.keys(FRAGS).forEach(function (id) {
+      var f = FRAGS[id];
+      f.el.style.setProperty('--t', curve(f.k[b], local).toFixed(4));
+    });
 
-    driveChat(a, q - a);
+    driveChat(a, local);
 
     var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
     if (si !== slide) {
@@ -1830,7 +1888,7 @@
     ch.resp.classList.toggle('is-visible', n >= 1);
     ch.tool.forEach(function (el, i) { el.classList.toggle('is-on', n >= 2 + i); });
     ch.tools.classList.toggle('is-done', n >= 5);
-    ch.used.hidden = ch.usedRow.hidden = n < 5;
+    ch.used.style.display = ch.usedRow.style.display = n < 5 ? 'none' : '';
     ch.send.disabled = n !== 0;
 
     LIT.rules.classList.toggle('is-lit', n >= 2 && n < 5);
@@ -1865,7 +1923,7 @@
   }
 
   addEventListener('scroll', apply, { passive: true });
-  addEventListener('resize', apply);
+  addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
   apply();
   window.__hsApply = apply;
 })();

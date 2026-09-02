@@ -164,7 +164,8 @@ var FLOOR = 364;
       var rr = rc.getBoundingClientRect(), cc = canvas.getBoundingClientRect();
       set('g-cx', Math.round((rr.left + rr.width / 2) - (cc.left + cc.width / 2)) + 'px');
     }
-    document.getElementById('g-hd-row').classList.toggle('warn', state !== 'свободно');
+    var hdRow = document.getElementById('g-hd-row');
+    if (hdRow) hdRow.classList.toggle('warn', state !== 'свободно');
 
     var hs = window.__hs || { p: 0, index: 0 };
     set('g-slide', '0' + ((hs.slide || 0) + 1) + '  ·  шаг ' + ((hs.step || 0) + 1) + '/' + (hs.steps || 1));
