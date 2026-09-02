@@ -105,16 +105,56 @@
 /* Only the top bars are stacked — one card, one scene underneath. The
    bars are all absolute over a wrapper whose height is the locked
    --bar-h, so a slide change cannot move the canvas. */
-.hs__bars { position: relative; min-height: var(--bar-h); }
+.hs__bars { position: relative; min-height: var(--bar-h); overflow: hidden; }
 .hs__bar {
   position: absolute;
   inset-inline: 0;
   top: 0;
-  opacity: 0;
-  transition: opacity 0.35s ease;
+  /* parked off to the side; slides in along X on a slide change. The
+     side depends on scroll direction (class from the block script). */
+  translate: 100% 0;
+  visibility: hidden;
+  transition: translate 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s 0.6s;
   pointer-events: none;
 }
-.hs__bar.is-active { opacity: 1; pointer-events: auto; }
+.hs__bar.is-before { translate: -100% 0; }
+.hs__bar.is-active { translate: 0 0; visibility: visible; transition-delay: 0s; pointer-events: auto; }
+
+/* ── Pager — the dots that say "there is more": a translucent pill, the
+   active dot stretched into a capsule that fills with the slide's own
+   scroll progress. Dots are buttons and scroll to their slide. ── */
+.hs__pager {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space);
+  translate: -50% 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-pill);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(0.5rem);
+}
+.hs__dot {
+  --fill: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: width 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.35s ease;
+}
+.hs__dot:hover { background: rgba(255, 255, 255, 0.85); }
+.hs__dot.is-active {
+  width: 2.5rem;
+  background: linear-gradient(90deg, #fff calc(var(--fill) * 100%), rgba(255, 255, 255, 0.35) 0);
+}
+.hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
+
 
 /* ── Card ─────────────────────────────────────────────────── */
 .hs__card {
@@ -1638,6 +1678,11 @@
                style="--x:997; --y:277; --w:137; z-index:12">
 
           <div class="hs__guide" data-label="364 — эталон"></div>
+          <nav class="hs__pager" aria-label="Slides">
+            <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
+            <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
+            <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
+          </nav>
           <div class="hs__core-box" id="coreBox"></div>
         </div>
 
@@ -1872,6 +1917,27 @@
     });
   }
 
+  /* Where each slide starts and ends on the track, in screens. */
+  var SLIDE_RANGE = [];
+  (function () {
+    var first = {};
+    STEPS.forEach(function (st, i) { if (first[st.slide] === undefined) first[st.slide] = i; });
+    Object.keys(first).forEach(function (sl) {
+      var i0 = first[sl], i1 = STEPS.length - 1;
+      for (var j = i0 + 1; j < STEPS.length; j++) if (STEPS[j].slide !== +sl) { i1 = j; break; }
+      SLIDE_RANGE[+sl] = [CUM[i0], CUM[Math.min(i1, CUM.length - 1)]];
+    });
+  })();
+  var dots = [].slice.call(track.querySelectorAll('.hs__dot'));
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () {
+      /* a slide not built yet (no steps) scrolls to the end of the track */
+      var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
+      var cs = getComputedStyle(root), navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);
+      window.scrollTo({ top: track.offsetTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'smooth' });
+    });
+  });
+
   var slide = -1;
   function apply() {
     targetP = progress();
@@ -1957,10 +2023,21 @@
 
     var si = STEPS[t < 0.5 ? a : Math.min(STEPS.length - 1, a + 1)].slide;
     if (si !== slide) {
+      var forwardSlide = si > slide;
       slide = si;
-      bars.forEach(function (b, n) { b.classList.toggle('is-active', n === si); });
+      bars.forEach(function (b, n) {
+        /* bars before the active one park on the left, after it on the right */
+        b.classList.toggle('is-before', n < si);
+        b.classList.toggle('is-active', n === si);
+      });
       card.style.backgroundColor = bars[si].dataset.bg;
+      dots.forEach(function (d, n) { d.classList.toggle('is-active', n === si); });
     }
+    /* the active capsule fills with progress through its own slide;
+       slides already passed read full, slides ahead read empty */
+    var r = SLIDE_RANGE[si] || [0, TOTAL];
+    var fill = Math.min(1, Math.max(0, (pos - r[0]) / Math.max(0.0001, r[1] - r[0])));
+    dots.forEach(function (d, n) { d.style.setProperty('--fill', n < si ? 1 : n > si ? 0 : fill.toFixed(3)); });
     window.__hs = { p: p, step: a, local: local, t: t, slide: si, steps: STEPS.length };
   }
 
