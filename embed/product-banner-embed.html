@@ -322,6 +322,14 @@ body   { padding-top: var(--pub-h) !important; }
   .pub-e__text-tail,
   .pub-e__link-tail { display: none !important; }
 
+  /* The new-tab glyph costs ~15px of link width - the icon plus its leading
+     margin - and on a phone that is the difference between the joined line
+     fitting at 375 and losing its last word. Dropped here for the width, and
+     it costs less than it looks: .pub-e__sr still announces "(opens in a new
+     tab)", so screen readers keep the cue on mobile; only the visual marker
+     goes, and tab semantics are the weakest part of a phone browser anyway. */
+  .pub-e__ext { display: none !important; }
+
   /* ---- .pub-e--joined: label and message read as one line ---- */
 
   .pub-e--joined .pub-e__label { display: block !important; }
