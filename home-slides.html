@@ -439,25 +439,36 @@
    `pop` key — which measures its delay from a fraction of one — cannot
    drive it. The entrance is armed once instead, by an observer on the card.
 
-   The reveal is .hs__pop's hard 120 ms step, the block's reference rhythm,
-   but out of a deeper 0.85 rather than the 0.92 the slide-03 chips use: a
-   dozen pieces landing one after another need the scale to read as its own
-   move, not as a sharpening. What also differs is that it goes through the
-   --in gate rather than setting `opacity` outright, so it composes with
-   whatever the keyframes are doing instead of overriding them. A custom
-   property has to be registered to be transitionable at all — hence
-   @property, as with --ring-angle above.
+   The two channels are deliberately different lengths. Opacity keeps
+   .hs__pop's hard 120 ms step — the block's reference rhythm, and what makes
+   a piece read as landing rather than fading up. The scale runs long
+   underneath it, out of a deeper 0.85 than the 0.92 the slide-03 chips use:
+   at 120 ms a jump that size is a click you cannot follow, so the piece
+   arrives crisply and then settles into size. That settle outlasts the gap
+   between pieces on purpose — several are always still growing, which is
+   what ties twelve separate entrances into one assembly.
+
+   --intro-settle is the one place its length lives: the CSS transition takes
+   it, and the script reads it back to know when the entrance is finally at
+   rest and the markers can come off. Stripping them mid-settle would snap
+   the last piece to full size.
+
+   The opacity goes through the --in gate rather than setting `opacity`
+   outright, so it composes with whatever the keyframes are doing instead of
+   overriding them. A custom property has to be registered to be
+   transitionable at all — hence @property, as with --ring-angle above.
 
    Both the marker attribute and .is-intro are put on by the script, so a
    page whose JS never ran renders the finished collage — the same reason
    step 0 is duplicated inline in the markup. */
 @property --in { syntax: '<number>'; inherits: false; initial-value: 1; }
 
+.hs__card { --intro-settle: 0.42s; }
 .hs__frag[data-intro] {
   /* filter rides along because .hs__frag--nested transitions it and this
      shorthand would otherwise drop that — the three rule cards are nested. */
   transition: --in 0.12s steps(3, end),
-              scale 0.12s cubic-bezier(0.2, 0, 0, 1),
+              scale var(--intro-settle) cubic-bezier(0.16, 0.8, 0.24, 1),
               filter 0.5s ease;
 }
 .hs__card.is-intro .hs__frag[data-intro]:not(.is-in) { --in: 0; scale: 0.85; }
@@ -2531,7 +2542,11 @@
   var INTRO = {
     at:     220,   /* ms — beat of silence once the block is in view */
     step:    90,   /* ms — gap between pieces */
-    breath: 350,   /* ms — the pause before the constructor lands */
+    /* A held beat before the constructor, not a pause: at 350 it read as a
+       separate event bolted onto the end. One step's worth on top of the
+       regular gap is enough to mark it as the last thing to land, and the
+       pieces before it are still settling when it does. */
+    breath: 100,
     order: [
       'schedule-cal', 'actions', 'ad-account',
       'schedule-section', 'frequency-popover', 'filter',
@@ -2542,6 +2557,15 @@
   };
 
   var introRunning = false, introEls = [], introTimers = [];
+
+  /* How long a piece takes to finish growing — read from the stylesheet so
+     --intro-settle stays the only place the number lives. */
+  function introSettle() {
+    var v = getComputedStyle(card).getPropertyValue('--intro-settle').trim();
+    var n = parseFloat(v);
+    if (!n) return 420;
+    return /ms$/.test(v) ? n : n * 1000;
+  }
 
   function introFor(entry) {
     return (Array.isArray(entry) ? entry : [entry]).map(function (id) {
@@ -2559,7 +2583,7 @@
       card.classList.remove('is-intro');
       introEls.forEach(function (el) { el.removeAttribute('data-intro'); el.classList.remove('is-in'); });
       introEls = [];
-    }, 200);
+    }, introSettle() + 60);
   }
 
   function introPlay() {
@@ -2571,7 +2595,7 @@
       introFor(entry).forEach(function (el) {
         introTimers.push(setTimeout(function () { el.classList.add('is-in'); }, at));
       });
-      if (i === last) introTimers.push(setTimeout(introFinish, at + 200));
+      if (i === last) introTimers.push(setTimeout(introFinish, at + introSettle() + 60));
     });
   }
 
