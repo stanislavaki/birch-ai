@@ -63,6 +63,19 @@
   --slide-gap-max: 2rem;
   --slide-gap-bottom: 2rem;
 
+  /* The card is two blocks — the copy above, the scene below — and this is
+     what runs between them. A fixed rem like --pad-card, not a design unit:
+     this is card chrome, not part of the composition, so it must not grow
+     with the canvas. --gap-main is the grid's own 16px gutter. */
+  --slide-split: var(--gap-main);
+
+  /* What the head block costs the canvas vertically, apart from the measured
+     --bar-h: its two paddings plus the split. For the height clamp only —
+     the script measures the same distance off the DOM (canvas.offsetTop)
+     rather than parsing this, so the two cannot drift and nothing depends on
+     @property resolving a calc() for a script to read. */
+  --head-cost: calc(var(--pad-card) * 2 + var(--slide-split));
+
   /* Debug override */
   --canvas-force: 364;
 }
@@ -160,18 +173,34 @@
 .hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
 
 
-/* ── Card ─────────────────────────────────────────────────── */
+/* ── Card — two blocks, not one ───────────────────────────────
+   The copy and the scene are separate surfaces with --slide-split between
+   them; #card is only the wrapper that holds them at one width and carries
+   the step blend. It keeps container-type: inline-size because --u-w — and
+   through it every coordinate in the scene — is measured against THIS
+   width, not the canvas's own. */
 .hs__card {
   /* step blend, written by the block script and inherited by the scene */
   --t: 0;
-  transition: background-color 0.5s ease;
+  /* The colour is written once, by the script, and read by both blocks, so
+     they cannot fall out of step on a slide change. */
+  --slide-bg: var(--color-accent-blue);
   container-type: inline-size;
   position: relative;
-  border-radius: var(--radius-xl);
-  background: var(--color-accent-blue);
-  padding-top: var(--pad-card);
-  overflow: hidden;
 }
+
+/* Both surfaces. overflow is what makes the radius bite, and it is
+   load-bearing on each: the bar columns slide vertically on a slide change,
+   and the scene runs past the canvas on every step. */
+.hs__head,
+.hs__canvas {
+  background: var(--slide-bg);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: background-color 0.5s ease;
+}
+
+.hs__head { padding-block: var(--pad-card); }
 
 /* ── Top bar — three equal columns, as in the Figma frame ──── */
 .hs__bar {
@@ -217,12 +246,12 @@
 
   position: relative;
   container-type: size;
-  margin-top: var(--gap-md);
-  overflow: hidden;
+  margin-top: var(--slide-split);
+  /* background, radius and overflow come from the shared surface rule above */
 
   height: clamp(
     calc(var(--scene-min) * var(--u-w)),
-    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md) - var(--slide-gap-bottom)),
+    calc(100dvh - var(--nav-height) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
     calc(var(--scene-max) * var(--u-w))
   );
 }
@@ -1623,45 +1652,49 @@
            Only the top bar and the card colour change at a boundary. -->
       <article class="hs__card" id="card">
 
-        <div class="hs__bars">
-          <nav class="hs__pager" aria-label="Slides">
-            <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
-            <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
-            <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
-          </nav>
-        <header class="hs__bar is-active" data-slide="0" data-bg="#1877F2">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
-            <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+        <!-- Head block: the copy and the buttons. Its own surface, split
+             from the scene below by --slide-split. -->
+        <div class="hs__head">
+          <div class="hs__bars">
+            <nav class="hs__pager" aria-label="Slides">
+              <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
+              <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
+              <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
+            </nav>
+          <header class="hs__bar is-active" data-slide="0" data-bg="#1877F2">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
+              <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+            </div>
+            <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+              <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+            </div>
+          </header>
+          <header class="hs__bar" data-slide="1" data-bg="#4450F2">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
+              <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
+            </div>
+            <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
+              <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
+            </div>
+          </header>
+          <header class="hs__bar" data-slide="2" data-bg="#5B45CD">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
+              <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
+            </div>
+            <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
+              <a class="btn btn-default btn-xs" href="#">More about MCP</a>
+            </div>
+          </header>
           </div>
-          <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
-            <a class="btn btn-default btn-xs" href="#">More about Rules</a>
-          </div>
-        </header>
-        <header class="hs__bar" data-slide="1" data-bg="#4450F2">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
-            <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
-          </div>
-          <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
-            <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
-          </div>
-        </header>
-        <header class="hs__bar" data-slide="2" data-bg="#5B45CD">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
-            <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
-          </div>
-          <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
-            <a class="btn btn-default btn-xs" href="#">More about MCP</a>
-          </div>
-        </header>
         </div>
 
         <div class="hs__canvas" id="canvas">
@@ -1849,6 +1882,7 @@
   var track  = document.getElementById('hs');
   var sticky = track.querySelector('.hs__sticky');
   var card   = document.getElementById('card');
+  var canvas = document.getElementById('canvas');
   var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
   var root   = document.documentElement;
 
@@ -2003,12 +2037,20 @@
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
     var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;
-    var pad   = parseFloat(cs.getPropertyValue('--pad-card')) * rootPx;
-    var gapMd = parseFloat(cs.getPropertyValue('--gap-md')) * rootPx;
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
-    var minCard = pad + tallest + gapMd + 364 * u;
+    /* Everything above the canvas, measured rather than re-derived: the card
+       has no padding of its own, so the canvas's offset inside it IS the head
+       block plus --slide-split. Reading the DOM instead of parsing --head-cost
+       keeps this honest if the head's padding ever changes, and keeps the
+       number out of reach of a calc() the script cannot evaluate. */
+    var minCard = canvas.offsetTop + 364 * u;
     var room = innerHeight - navH - minCard;
+    /* Never write a value that is not a number: --slide-gap-bottom feeds the
+       canvas height clamp, and one poisoned token there makes the whole
+       declaration invalid — which under container-type: size is a canvas of
+       zero height and no scene at all. */
+    if (!isFinite(room)) return;
     root.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
   }
 
@@ -2311,7 +2353,8 @@
       bars.forEach(function (b, n) {
         b.classList.toggle('is-active', n === si);
       });
-      card.style.backgroundColor = bars[si].dataset.bg;
+      /* one write, both blocks read it — see --slide-bg on .hs__card */
+      card.style.setProperty('--slide-bg', bars[si].dataset.bg);
       dots.forEach(function (d, n) { d.classList.toggle('is-active', n === si); });
     }
     /* the active capsule fills with progress through its own slide;
