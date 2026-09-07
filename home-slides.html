@@ -271,9 +271,12 @@
   height:  auto;
   rotate:  calc(((1 - var(--t)) * var(--r) + var(--t) * var(--r2)) * 1deg);
   transform-origin: center;
-  /* --lit is the chat's own gate: the entities it consults appear as it
-     names them, which is a beat of the dialogue, not a step of the scene. */
-  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1));
+  /* Two gates multiply into the keyframed opacity rather than replacing it,
+     so a fragment a keyframe has dimmed stays dimmed under either of them.
+     --lit is the chat's own gate: the entities it consults appear as it
+     names them, which is a beat of the dialogue, not a step of the scene.
+     --in is the first state's entrance — see "collage assembles" below. */
+  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1) * var(--in, 1));
   /* webflow-env.css rounds every img; these carry their own corners */
   border-radius: 0;
 }
@@ -430,6 +433,38 @@
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
   transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
+
+/* ── First state: the collage assembles ────────────────────────
+   Step 0 is where the scene starts, so it has no arriving segment and the
+   `pop` key — which measures its delay from a fraction of one — cannot
+   drive it. The entrance is armed once instead, by an observer on the card.
+
+   The reveal is .hs__pop's hard 120 ms step, the block's reference rhythm,
+   but out of a deeper 0.85 rather than the 0.92 the slide-03 chips use: a
+   dozen pieces landing one after another need the scale to read as its own
+   move, not as a sharpening. What also differs is that it goes through the
+   --in gate rather than setting `opacity` outright, so it composes with
+   whatever the keyframes are doing instead of overriding them. A custom
+   property has to be registered to be transitionable at all — hence
+   @property, as with --ring-angle above.
+
+   Both the marker attribute and .is-intro are put on by the script, so a
+   page whose JS never ran renders the finished collage — the same reason
+   step 0 is duplicated inline in the markup. */
+@property --in { syntax: '<number>'; inherits: false; initial-value: 1; }
+
+.hs__frag[data-intro] {
+  /* filter rides along because .hs__frag--nested transitions it and this
+     shorthand would otherwise drop that — the three rule cards are nested. */
+  transition: --in 0.12s steps(3, end),
+              scale 0.12s cubic-bezier(0.2, 0, 0, 1),
+              filter 0.5s ease;
+}
+.hs__card.is-intro .hs__frag[data-intro]:not(.is-in) { --in: 0; scale: 0.85; }
+/* One frame with transitions off — see introArm(). Parking a piece that is
+   already on screen would otherwise animate it OUT first: `transition` runs
+   in both directions. */
+.hs__card.hs-no-anim .hs__frag[data-intro] { transition: none; }
 
 /* The integrations bar ships without its shadow (an earlier export baked
    it in, which put 5 units of transparent film under the bar and pushed
@@ -2112,6 +2147,9 @@
   var slide = -1;
   function apply() {
     targetP = progress();
+    /* the entrance runs on its own clock; leaving the first state cuts it
+       short rather than letting pieces stay hidden into the next step */
+    if (introRunning && targetP > 0.02) introFinish();
     if (!raf) raf = requestAnimationFrame(follow);
   }
   function render(p) {
@@ -2469,8 +2507,124 @@
     if (phState === -1) { phPlay(); }
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     FIRST STATE — the collage assembles
+
+     The workspace builds around the edges: the left cluster, then the
+     right one, then the bar and the platform badges that sit on top of
+     them — and the rule constructor lands in the middle last, because it
+     is what the slide is about. Order is identity, so it is written out
+     here rather than derived from z-index or from distance to the centre,
+     both of which put the constructor in the middle of the sequence.
+
+     The three rule cards are one entry: they are stacked on the same spot
+     and only the top one (Duplicate) is ever seen, so if they stepped in
+     one by one the card underneath would show through first.
+
+     Timing is the block's reference rhythm — a hard 120 ms step per piece
+     (in the CSS), 90 ms between them, and one 350 ms breath before the
+     constructor so it reads as the point rather than the twelfth item.
+
+     The markers are set from here, not in the markup: without JS nothing
+     is hidden and the inline step 0 renders as the finished collage.
+     ══════════════════════════════════════════════════════════════ */
+  var INTRO = {
+    at:     220,   /* ms — beat of silence once the block is in view */
+    step:    90,   /* ms — gap between pieces */
+    breath: 350,   /* ms — the pause before the constructor lands */
+    order: [
+      'schedule-cal', 'actions', 'ad-account',
+      'schedule-section', 'frequency-popover', 'filter',
+      'integrations',
+      'platform-google-ads', 'platform-meta', 'platform-tiktok', 'platform-snapchat',
+      ['rule-card-pause', 'rule-card-increase', 'rule-card']
+    ]
+  };
+
+  var introRunning = false, introEls = [], introTimers = [];
+
+  function introFor(entry) {
+    return (Array.isArray(entry) ? entry : [entry]).map(function (id) {
+      return card.querySelector('[data-frag="' + id + '"]');
+    }).filter(Boolean);
+  }
+
+  function introFinish() {
+    introTimers.forEach(clearTimeout); introTimers = [];
+    /* let whatever is still hidden play its own 120 ms step rather than
+       blinking on, then drop every trace of the entrance */
+    introEls.forEach(function (el) { el.classList.add('is-in'); });
+    introRunning = false;
+    setTimeout(function () {
+      card.classList.remove('is-intro');
+      introEls.forEach(function (el) { el.removeAttribute('data-intro'); el.classList.remove('is-in'); });
+      introEls = [];
+    }, 200);
+  }
+
+  function introPlay() {
+    if (introRunning || !introEls.length) return;
+    introRunning = true;
+    var last = INTRO.order.length - 1;
+    INTRO.order.forEach(function (entry, i) {
+      var at = INTRO.at + i * INTRO.step + (i === last ? INTRO.breath : 0);
+      introFor(entry).forEach(function (el) {
+        introTimers.push(setTimeout(function () { el.classList.add('is-in'); }, at));
+      });
+      if (i === last) introTimers.push(setTimeout(introFinish, at + 200));
+    });
+  }
+
+  /* Park every piece in its hidden state, transitions off for the one frame
+     that takes. Without that the pieces animate OUT before stepping back in:
+     `transition` also runs in reverse, and the collage is already on screen
+     both on a replay and on any load where step 0 has painted. Two reflows,
+     the same pattern as the hero page — one to commit the reset, one to
+     commit the re-enabled transitions. */
+  function introArm() {
+    introTimers.forEach(clearTimeout); introTimers = [];
+    introRunning = false; introEls = [];
+
+    card.classList.add('hs-no-anim');
+    card.classList.remove('is-intro');
+    INTRO.order.forEach(function (entry) {
+      introFor(entry).forEach(function (el) {
+        el.classList.remove('is-in');
+        el.setAttribute('data-intro', '');
+        introEls.push(el);
+      });
+    });
+    card.classList.add('is-intro');
+    void card.offsetWidth;
+    card.classList.remove('hs-no-anim');
+    void card.offsetWidth;
+  }
+
+  /* Replay without a reload — the entrance plays once per page, and tuning
+     INTRO by eye is impossible otherwise. Same hook the hero page exposes. */
+  window.__hsIntroReplay = function () { introArm(); introPlay(); };
+
+  function introInit() {
+    /* Past the first state already — a reload deep in the track — or motion
+       turned down: the collage is simply there, the same rule the pop
+       elements follow beyond their own step. */
+    if (progress() > 0.001) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    introArm();
+    if (!introEls.length) { card.classList.remove('is-intro'); return; }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { io.disconnect(); introPlay(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(card);
+  }
+
   addEventListener('scroll', apply, { passive: true });
   addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
+  introInit();
   apply();
   window.__hsApply = apply;
 })();
