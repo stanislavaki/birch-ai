@@ -1345,7 +1345,7 @@
         <tr>
           <td>Webflow only</td>
           <td class="muted">.pub-e</td>
-          <td class="muted">the embed pins itself: <code>position: fixed; top: 0; z-index: 1001</code>, and offsets <code>.nav2</code> / <code>.page-wrapper</code> / <code>.container.intro</code> by <code>--pub-h: 59px</code>. The live nav is <code>position: fixed</code>, so DOM order cannot push it down. This component stays in normal flow &mdash; the pinning is site integration, not part of the component.</td>
+          <td class="muted">the embed pins itself: <code>position: fixed; top: 0; z-index: 1001</code>, and offsets <code>.nav2</code> / <code>.nav2m</code> / <code>body</code> / <code>.container.intro</code> by <code>--pub-h: 59px</code>. The live nav is <code>position: fixed</code>, so DOM order cannot push it down. The flow reserve sits on <strong>body</strong>, not a wrapper class: surveyed live 09.2026, <code>.page-wrapper</code> exists on <code>/</code> and <code>/mcp</code> only &mdash; <code>/pricing</code>, <code>/blog/*</code>, <code>/case-studies/*</code>, <code>/legal/*</code>, <code>/demo</code>, <code>/analyze</code> have none, so padding it reserved the height on two templates out of eight. Because these offsets ship inside the banner's own <code>&lt;style&gt;</code>, a page without the banner keeps the nav at <code>top: 0</code> &mdash; so the banner has to be on <strong>every</strong> page or the header jumps between them. This component stays in normal flow &mdash; the pinning is site integration, not part of the component.</td>
         </tr>
         <tr>
           <td>Off-token</td>

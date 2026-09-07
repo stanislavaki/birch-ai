@@ -5,10 +5,22 @@
 <link rel="stylesheet" href="../design-system/webflow-env.css">
 <style>
   body { margin: 0; background: #0D0D12; }
-  /* Stand-ins for the real bir.ch structure, matching the measured rules:
-     .nav is the static/sticky flow spacer, .nav2 the fixed pill bar. */
-  .nav  { width: 100%; height: var(--nav-height); position: sticky; top: 0; z-index: 999; }
-  .nav2 { position: fixed; top: 0; left: 0; right: 0; height: 87px; z-index: 1000;
+
+  /* Stand-ins for the real bir.ch structure, measured on the live site
+     09.2026 across eight templates:
+
+       nav.nav-v3-root  static, height 6.5rem — the nav's flow reserve
+       .nav2            fixed inside it, z 1000 — the visible pill
+       .page-wrapper    exists on / and /mcp ONLY; every other template
+                        (/pricing, /blog/*, /case-studies/*, /legal/*,
+                        /demo, /analyze) puts sections straight in body
+
+     The legacy `.nav` sticky spacer is gone — it was replaced during the
+     menu v3 port. Default here is the wrapper-less shape, because that is
+     the majority and the one the old .page-wrapper offset got wrong; add
+     ?wrapper=1 to check the / and /mcp shape. */
+  .nav-v3-root { display: block; width: 100%; height: 6.5rem; }
+  .nav2 { position: fixed; top: 0; left: 0; right: 0; height: 5.75rem; z-index: 1000;
           background: #2b2b2b; color: #fff; display: flex; align-items: center;
           justify-content: flex-end; gap: 2rem; padding: 0 2rem;
           font-family: "Tt Commons Pro Variable", Arial, sans-serif; font-size: 0.9rem; }
@@ -17,23 +29,58 @@
                      align-items: center; justify-content: center;
                      font-family: "Tt Commons Pro Variable", Arial, sans-serif; }
   .after { height: 60vh; background: #0D0D12; }
+
+  .probe { position: fixed; right: 0.5rem; bottom: 0.5rem; z-index: 9999;
+           font: 400 11px/1.5 ui-monospace, monospace; color: #8a8a99;
+           background: rgba(0,0,0,0.75); padding: 0.5rem 0.75rem; border-radius: 6px;
+           white-space: pre; }
 </style>
-<div class="page-wrapper">
 
 <!-- The banner is fetched from its source file rather than pasted in. This
      page exists to check the REAL embed against a fixed nav, and a copy goes
      stale the moment the campaign copy changes (it did, once). innerHTML
-     applies an injected <style> but never runs a <script> - the embed has no
+     applies an injected <style> but never runs a <script> — the embed has no
      script, so a plain assignment is enough. -->
 <div id="pub-slot"></div>
+
+<nav class="nav-v3-root">
+  <div class="nav2">Product &nbsp; AI &nbsp; Cases &nbsp; Blog &nbsp; Pricing &nbsp; Get started</div>
+</nav>
+<div class="container intro">intro &mdash; first screen</div>
+<div class="after"></div>
+
+<div class="probe" id="probe"></div>
+
 <script>
+  /* ?wrapper=1 reproduces the / and /mcp shape: the same content inside a
+     .page-wrapper. The offset must land identically either way — that is
+     the whole point of reserving on body instead of on a wrapper class. */
+  if (new URLSearchParams(location.search).get('wrapper') === '1') {
+    var wrap = document.createElement('div');
+    wrap.className = 'page-wrapper';
+    var nodes = [].slice.call(document.querySelectorAll('.nav-v3-root, .container.intro, .after'));
+    document.body.insertBefore(wrap, nodes[0]);
+    nodes.forEach(function (n) { wrap.appendChild(n); });
+  }
+
   fetch('../embed/product-banner-embed.html?v=' + Date.now(), { cache: 'no-store' })
     .then(function (r) { return r.text(); })
-    .then(function (html) { document.getElementById('pub-slot').innerHTML = html; });
-</script>
+    .then(function (html) {
+      document.getElementById('pub-slot').innerHTML = html;
+      requestAnimationFrame(report);
+    });
 
-  <div class="nav2">Product &nbsp; AI &nbsp; Cases &nbsp; Blog &nbsp; Pricing &nbsp; Get started</div>
-  <nav class="nav"></nav>
-  <div class="container intro">intro &mdash; first screen</div>
-  <div class="after"></div>
-</div>
+  /* The three numbers that decide whether the banner sits right: the nav
+     must start exactly where the banner ends, with no gap and no overlap. */
+  function report() {
+    var root = document.querySelector('.nav-v3-root');
+    var pill = document.querySelector('.nav2');
+    var pubH = getComputedStyle(document.documentElement).getPropertyValue('--pub-h').trim();
+    document.getElementById('probe').textContent =
+      'wrapper: ' + (document.querySelector('.page-wrapper') ? 'yes' : 'no') +
+      '\n--pub-h: ' + (pubH || 'unset') +
+      '\nnav reserve top: ' + Math.round(root.getBoundingClientRect().top) +
+      '\nfixed pill top:  ' + Math.round(pill.getBoundingClientRect().top) +
+      '\ngap under banner: ' + (Math.round(pill.getBoundingClientRect().top) - parseInt(pubH || 0, 10));
+  }
+</script>
