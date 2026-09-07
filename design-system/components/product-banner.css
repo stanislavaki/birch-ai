@@ -40,7 +40,14 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--gap-sm);
-  background: var(--color-bg-white);
+  /* Surface grey, not white: on the light templates (blog index, legal,
+     search) the page behind is white, and a white bar has no edge at all —
+     it reads as a stray line of text above the nav rather than a banner.
+     --color-surface is the token for exactly this ("light greys for
+     cards/chips on light pages") and lands next to the nav pill's own
+     composited fill on those pages (#EDECF3), so the two read as one
+     family. On the dark templates it still separates on its own. */
+  background: var(--color-surface);
   border-radius: var(--radius-sm);
   font-family: var(--font);
   /* 13px flat, desktop and mobile, to buy the message more characters.
@@ -252,6 +259,20 @@
   /* 22/14 are desktop-generous insets. Joined, the whole bar is a single
      width budget and the line needs every pixel of them back. */
   .pub--joined { --pub-pad-start: 0.625rem; --pub-pad-link: 0.375rem; }
+
+  /* The bar's two outer insets have to match, and --pub-pad-link cannot do
+     it alone — it sets BOTH sides of the link, and the inner one is a gap
+     between the message and "Register", not an edge. So state them apart:
+     the outer edge takes --pub-pad-start (the same inset the label carries
+     on the left), and the inner side pays for it, because 4px is more than
+     the joined line has spare at 375. Losing it costs nothing until the
+     line truncates — above that the message's auto margin holds the two
+     apart anyway — and below it the bar's own 0.25em column-gap still
+     separates the ellipsis from the link. */
+  .pub--joined .pub__link {
+    padding-inline-end: var(--pub-pad-start);
+    padding-inline-start: 0.1875rem;
+  }
 
   /* Below the width where the short form fits, the message still
      truncates with an ellipsis — fitting the narrowest phone is an

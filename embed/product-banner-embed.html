@@ -19,7 +19,11 @@
   /* Tokens declared on the embed root so nothing leaks in from the site.
      Sizes in px, not rem: the fluid root would stretch every one of them. */
   --pub-font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
-  --pub-white: #FFFFFF;
+  /* Surface grey, not white: on the light templates (blog index, legal,
+     search) the page behind is white and a white bar has no edge at all.
+     Mirrors --color-surface in tokens.css, and lands next to the nav
+     pill's composited fill on those pages (#EDECF3). */
+  --pub-surface: #F1F0F7;
   --pub-radius: 8px;       /* radius-sm */
   --pub-inset: 4px;        /* space-xxs */
   --pub-gap: 8px;          /* gap-sm */
@@ -113,7 +117,7 @@ body   { padding-top: var(--pub-h) !important; }
   justify-content: space-between;
   align-items: center;
   gap: var(--pub-gap);
-  background: var(--pub-white);
+  background: var(--pub-surface);
   border-radius: var(--pub-radius);
   font-family: var(--pub-font);
   /* 13px flat, desktop and mobile, to buy the message more characters.
@@ -359,6 +363,20 @@ body   { padding-top: var(--pub-h) !important; }
   /* 22/14 are desktop-generous insets. Joined, the whole bar is a single
      width budget and the line needs every pixel of them back. */
   .pub-e--joined { --pub-pad-start: 10px; --pub-pad-link: 6px; }
+
+  /* The bar's two outer insets have to match, and --pub-pad-link cannot do
+     it alone - it sets BOTH sides of the link, and the inner one is a gap
+     between the message and "Register", not an edge. So state them apart:
+     the outer edge takes --pub-pad-start (same 10px as the label carries on
+     the left), and the inner side pays for it, because 4px is more than the
+     joined line has spare at 375. Losing it costs nothing until the line
+     truncates - above that the message's auto margin holds the two apart
+     anyway - and below it the bar's own 0.25em column-gap still separates
+     the ellipsis from the link. */
+  .pub-e--joined .pub-e__link {
+    padding-inline-end: var(--pub-pad-start) !important;
+    padding-inline-start: 3px !important;
+  }
 
   /* Below the width where the short form fits, the message still truncates
      with an ellipsis - fitting the narrowest phone is an editing job, not

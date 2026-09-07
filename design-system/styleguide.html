@@ -1300,7 +1300,7 @@
         <tr>
           <td>Bar</td>
           <td class="muted">.pub__bar</td>
-          <td class="muted">flex space-between &middot; bg --color-bg-white &middot; radius --radius-sm (8px)</td>
+          <td class="muted">flex space-between &middot; bg <strong>--color-surface</strong> (#F1F0F7) &middot; radius --radius-sm (8px). Surface grey rather than white: on the light templates the page behind is white and a white bar has no edge, reading as a stray line above the nav. Sits next to the nav pill's composited fill there (#EDECF3)</td>
         </tr>
         <tr>
           <td>Type</td>
@@ -1355,7 +1355,7 @@
         <tr>
           <td>Off-token</td>
           <td class="muted">--pub-pad-*</td>
-          <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring. <code>.pub--joined</code> overrides the two horizontal ones on mobile (0.625 / 0.5rem): joined, the bar is a single width budget and the desktop-generous insets are worth 14px of copy</td>
+          <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring. <code>.pub--joined</code> overrides the two horizontal ones on mobile (0.625 / 0.375rem): joined, the bar is a single width budget and the desktop-generous insets are worth 14px of copy. The link then states its two sides apart, because <code>--pub-pad-link</code> sets both and only the outer one is an edge: the outer edge takes <code>--pub-pad-start</code> so the bar's two outer insets match at 10px, and the inner side drops to 0.1875rem to pay for it &mdash; that side is a gap, invisible until the line truncates (the message's auto margin holds them apart above it, the 0.25em column-gap below it, measured 6.3px at 360)</td>
         </tr>
         <tr>
           <td>Mobile &le;767px</td>
@@ -1375,7 +1375,7 @@
         <tr>
           <td>Copy budget</td>
           <td class="muted">.pub__text</td>
-          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>371px</strong> up &mdash; 375 with 4px to spare, 390, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. The new-tab glyph would cost ~15px of link width and push the threshold to 386, so it is hidden below 768 &mdash; see the New-tab marker row. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
+          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>372px</strong> up &mdash; 375 with 3px to spare, 390, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. The new-tab glyph would cost ~15px of link width and push the threshold to 386, so it is hidden below 768 &mdash; see the New-tab marker row. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
         </tr>
       </tbody>
     </table>
