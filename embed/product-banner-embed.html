@@ -364,6 +364,20 @@ body   { padding-top: var(--pub-h) !important; }
      width budget and the line needs every pixel of them back. */
   .pub-e--joined { --pub-pad-start: 10px; --pub-pad-link: 6px; }
 
+  /* The bar's two outer insets have to match, and --pub-pad-link cannot do
+     it alone - it sets BOTH sides of the link, and the inner one is a gap
+     between the message and "Register", not an edge. So state them apart:
+     the outer edge takes --pub-pad-start (same 10px as the label carries on
+     the left), and the inner side pays for it, because 4px is more than the
+     joined line has spare at 375. Losing it costs nothing until the line
+     truncates - above that the message's auto margin holds the two apart
+     anyway - and below it the bar's own 0.25em column-gap still separates
+     the ellipsis from the link. */
+  .pub-e--joined .pub-e__link {
+    padding-inline-end: var(--pub-pad-start) !important;
+    padding-inline-start: 3px !important;
+  }
+
   /* Below the width where the short form fits, the message still truncates
      with an ellipsis - fitting the narrowest phone is an editing job, not
      a layout one. Measured budget: see the styleguide spec table. */
