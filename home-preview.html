@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home — hero + slides (preview stitch)</title>
+
+<!-- Loaded statically so the page has its ground colour before the stitch
+     lands; both files are also declared by the sources and get deduped. -->
+<link rel="stylesheet" href="design-system/tokens.css" />
+<link rel="stylesheet" href="design-system/webflow-env.css" />
+
+<!-- Moved to the end of <head> once the sources' own styles are in, so these
+     overrides win without needing !important. -->
+<style id="hp-style">
+  /* ═════════════════════════════════════════════════════════
+     HERO INTRO COLUMN — mirrors .container.intro / .intro-group on bir.ch.
+
+     Only the pill lockup is the embed (home-hero.html). The caption and the
+     CTA are Webflow-native elements sitting around it, which is why they are
+     written here and not added to the hero dev page. Values read off the
+     live site on 07.09.2026; it renders on a fluid root font-size, so the
+     rem numbers below land ~3% larger here — irrelevant for a layout feel.
+     ═════════════════════════════════════════════════════════ */
+
+  /* The slides page keeps a 6.5rem .nav-v3-root spacer in the flow, so the
+     hero must not reserve the nav height a second time — that is what pushed
+     it one nav past the fold. bir.ch does the same: 100svh minus the nav. */
+  .hh {
+    min-height: calc(100svh - var(--nav-height));
+    padding-block: 3vh 0;              /* live .container.intro */
+  }
+
+  .hp-intro,
+  .hp-intro-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .hp-intro       { row-gap: var(--space-xl); text-align: center; }  /* live gap-before-cta 5rem */
+  .hp-intro-group { row-gap: var(--space-md); }                      /* live spacing-md 2rem */
+
+  .hp-caption {
+    max-width: 63ch;                   /* live --text--measure, verbatim */
+    margin: 0 auto;
+    color: var(--color-text-grey);
+    letter-spacing: -0.005em;          /* live .paragraph-lg */
+    text-wrap: balance;
+  }
+
+  /* Bespoke on the live site — nothing in components/button.css matches it
+     (those are height-driven). Padding is asymmetric in the source too. */
+  .hp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.875rem 4.375rem 2.0625rem;
+    border-radius: var(--radius-xl);   /* 1.5rem — same value as live */
+    background: #3F3F3F;               /* live --cta-grey; no token for it in tokens.css */
+    color: var(--color-text);
+    font-family: var(--font);
+    font-size: var(--text-para-xl-size);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .hp-cta:hover {
+    background: var(--color-primary);
+    color: var(--color-text-inverted);
+  }
+
+  @media (max-width: 767px) {
+    .hh {
+      min-height: auto;
+      padding-block: 3.25rem var(--space-xl);
+      align-items: flex-start;
+    }
+    .hp-cta { width: 100%; }           /* live: the CTA stretches on mobile */
+  }
+</style>
+</head>
+<body>
+
+<!-- The column the hero is dressed into; #hh-h1 is moved into the slot. -->
+<template id="hp-intro-tpl">
+  <div class="hp-intro">
+    <div class="hp-intro-group">
+      <div data-h1-slot></div>
+      <p class="t-para-lg hp-caption">Automate the repetitive work behind paid socials so your team can launch more, spend smarter, and stop losing nights to campaign execution</p>
+    </div>
+    <a class="hp-cta" href="https://app.bir.ch/signup">Start free trial</a>
+  </div>
+</template>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DEV PREVIEW ONLY — home-hero.html + home-slides.html in one scroll
+
+   Purpose: feel how the word-pill hero and the scroll slider sit together
+   on the page. Nothing is copied: both files are fetched at runtime and
+   stay the single source of truth, so this page can never drift from them.
+   Not an embed candidate — see EMBED-ISSUES.md for the real path.
+
+   Assembly order:
+     1. head — <link>/<style> from slides, then from hero (deduped by href),
+        then this page's own <style> moved back to the end
+     2. body — the whole slides body (nav, track, geo panel, scripts)
+     3. the hero <section class="hh"> is moved in just above #hs, with its
+        <h1> dressed into the caption + CTA column
+     4. every <script> is re-created once the DOM is complete, in document
+        order — scripts parsed by DOMParser never execute on insertion.
+
+   Dropped from the hero: its own nav injection (the slides nav v3 is the
+   current one) and the .hh-dev tuning panel (it would sit on top of the
+   slider's geometry panel — both are fixed bottom-right).
+   ═══════════════════════════════════════════════════════════ */
+(function () {
+  // This script lives in <body>, so reviveScripts() below would otherwise
+  // find it, re-create it and run the whole stitch again — recursively.
+  // Taking it out of the DOM up front is what makes the pass single-shot.
+  if (document.currentScript) document.currentScript.remove();
+
+  // The stitch rebuilds the page from scratch, so a restored scroll offset
+  // would land on content that does not exist yet.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  var HERO   = 'home-hero.html';
+  var SLIDES = 'home-slides.html';
+
+  // Hero scripts that must not come along: the dev tuning panel and the
+  // older nav injection.
+  var HERO_SCRIPT_SKIP = /hh-dev|webflow-env-nav/;
+
+  function get(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(url + ' → ' + r.status);
+      return r.text();
+    }).then(function (html) {
+      return new DOMParser().parseFromString(html, 'text/html');
+    });
+  }
+
+  function adoptHead(doc, seenHref) {
+    doc.head.querySelectorAll('link[rel="stylesheet"], style').forEach(function (n) {
+      if (n.tagName === 'LINK') {
+        var href = n.getAttribute('href');
+        if (seenHref[href]) return;
+        seenHref[href] = 1;
+      }
+      document.head.appendChild(document.adoptNode(n));
+    });
+  }
+
+  // A <script> that came out of DOMParser is inert forever, even after being
+  // adopted — it has to be re-created attribute for attribute. Done in one
+  // pass at the end so every script sees the finished DOM, in document order.
+  function reviveScripts(root) {
+    root.querySelectorAll('script').forEach(function (old) {
+      var s = document.createElement('script');
+      for (var i = 0; i < old.attributes.length; i++) {
+        s.setAttribute(old.attributes[i].name, old.attributes[i].value);
+      }
+      s.textContent = old.textContent;
+      old.parentNode.replaceChild(s, old);
+    });
+  }
+
+  Promise.all([get(SLIDES), get(HERO)]).then(function (docs) {
+    var slides = docs[0], hero = docs[1];
+    var seenHref = {};
+    document.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
+      seenHref[l.getAttribute('href')] = 1;
+    });
+
+    // 1. head, with this page's overrides re-appended last.
+    adoptHead(slides, seenHref);
+    adoptHead(hero, seenHref);
+    document.head.appendChild(document.getElementById('hp-style'));
+
+    // 2. the whole slides body.
+    Array.prototype.slice.call(slides.body.childNodes).forEach(function (n) {
+      document.body.appendChild(document.adoptNode(n));
+    });
+
+    // 3. hero section above the slider track, h1 dressed into the column.
+    var heroSection = hero.querySelector('section.hh');
+    var track = document.getElementById('hs');
+    if (heroSection && track) {
+      document.adoptNode(heroSection);
+      var tpl = document.getElementById('hp-intro-tpl');
+      var h1  = heroSection.querySelector('.hh__h1');
+      if (tpl && h1) {
+        var intro = tpl.content.firstElementChild.cloneNode(true);
+        intro.querySelector('[data-h1-slot]').replaceWith(h1);
+        heroSection.appendChild(intro);
+        tpl.remove();
+      }
+      track.parentNode.insertBefore(heroSection, track);
+    }
+
+    // The hero timeline script rides at the end — it only needs #hh-h1 present.
+    hero.body.querySelectorAll('script').forEach(function (s) {
+      if (HERO_SCRIPT_SKIP.test(s.textContent)) return;
+      document.body.appendChild(document.adoptNode(s));
+    });
+
+    // 4. run everything, in order.
+    reviveScripts(document.body);
+
+    // Twice: TT Commons changes the metrics of both blocks, and the slider
+    // measures its own box on fonts.ready — see the height rule in CLAUDE.md.
+    window.scrollTo(0, 0);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { window.scrollTo(0, 0); });
+    }
+  }).catch(function (err) {
+    document.body.innerHTML =
+      '<pre style="padding:2rem;color:#fff;font:14px/1.5 ui-monospace,monospace">' +
+      'Preview stitch failed: ' + err.message +
+      '\n\nServe the repo root over http:// — file:// blocks fetch.</pre>';
+  });
+})();
+</script>
+
+</body>
+</html>

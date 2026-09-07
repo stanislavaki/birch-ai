@@ -63,6 +63,19 @@
   --slide-gap-max: 2rem;
   --slide-gap-bottom: 2rem;
 
+  /* The card is two blocks — the copy above, the scene below — and this is
+     what runs between them. A fixed rem like --pad-card, not a design unit:
+     this is card chrome, not part of the composition, so it must not grow
+     with the canvas. --gap-main is the grid's own 16px gutter. */
+  --slide-split: var(--gap-main);
+
+  /* What the head block costs the canvas vertically, apart from the measured
+     --bar-h: its two paddings plus the split. For the height clamp only —
+     the script measures the same distance off the DOM (canvas.offsetTop)
+     rather than parsing this, so the two cannot drift and nothing depends on
+     @property resolving a calc() for a script to read. */
+  --head-cost: calc(var(--pad-card) * 2 + var(--slide-split));
+
   /* Debug override */
   --canvas-force: 364;
 }
@@ -160,18 +173,34 @@
 .hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
 
 
-/* ── Card ─────────────────────────────────────────────────── */
+/* ── Card — two blocks, not one ───────────────────────────────
+   The copy and the scene are separate surfaces with --slide-split between
+   them; #card is only the wrapper that holds them at one width and carries
+   the step blend. It keeps container-type: inline-size because --u-w — and
+   through it every coordinate in the scene — is measured against THIS
+   width, not the canvas's own. */
 .hs__card {
   /* step blend, written by the block script and inherited by the scene */
   --t: 0;
-  transition: background-color 0.5s ease;
+  /* The colour is written once, by the script, and read by both blocks, so
+     they cannot fall out of step on a slide change. */
+  --slide-bg: var(--color-accent-blue);
   container-type: inline-size;
   position: relative;
-  border-radius: var(--radius-xl);
-  background: var(--color-accent-blue);
-  padding-top: var(--pad-card);
-  overflow: hidden;
 }
+
+/* Both surfaces. overflow is what makes the radius bite, and it is
+   load-bearing on each: the bar columns slide vertically on a slide change,
+   and the scene runs past the canvas on every step. */
+.hs__head,
+.hs__canvas {
+  background: var(--slide-bg);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: background-color 0.5s ease;
+}
+
+.hs__head { padding-block: var(--pad-card); }
 
 /* ── Top bar — three equal columns, as in the Figma frame ──── */
 .hs__bar {
@@ -217,12 +246,12 @@
 
   position: relative;
   container-type: size;
-  margin-top: var(--gap-md);
-  overflow: hidden;
+  margin-top: var(--slide-split);
+  /* background, radius and overflow come from the shared surface rule above */
 
   height: clamp(
     calc(var(--scene-min) * var(--u-w)),
-    calc(100dvh - var(--nav-height) - var(--pad-card) - var(--bar-h) - var(--gap-md) - var(--slide-gap-bottom)),
+    calc(100dvh - var(--nav-height) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
     calc(var(--scene-max) * var(--u-w))
   );
 }
@@ -271,9 +300,12 @@
   height:  auto;
   rotate:  calc(((1 - var(--t)) * var(--r) + var(--t) * var(--r2)) * 1deg);
   transform-origin: center;
-  /* --lit is the chat's own gate: the entities it consults appear as it
-     names them, which is a beat of the dialogue, not a step of the scene. */
-  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1));
+  /* Two gates multiply into the keyframed opacity rather than replacing it,
+     so a fragment a keyframe has dimmed stays dimmed under either of them.
+     --lit is the chat's own gate: the entities it consults appear as it
+     names them, which is a beat of the dialogue, not a step of the scene.
+     --in is the first state's entrance — see "collage assembles" below. */
+  opacity: calc(((1 - var(--t)) * var(--o1) + var(--t) * var(--o2)) * var(--lit, 1) * var(--in, 1));
   /* webflow-env.css rounds every img; these carry their own corners */
   border-radius: 0;
 }
@@ -430,6 +462,49 @@
   translate: 0 calc((100cqh - var(--y) * var(--u) + 24 * var(--u)) * (1 - var(--lit, 1)));
   transition: translate 1.6s cubic-bezier(0.2, 0.9, 0.25, 1);
 }
+
+/* ── First state: the collage assembles ────────────────────────
+   Step 0 is where the scene starts, so it has no arriving segment and the
+   `pop` key — which measures its delay from a fraction of one — cannot
+   drive it. The entrance is armed once instead, by an observer on the card.
+
+   The two channels are deliberately different lengths. Opacity keeps
+   .hs__pop's hard 120 ms step — the block's reference rhythm, and what makes
+   a piece read as landing rather than fading up. The scale runs long
+   underneath it, out of a deeper 0.85 than the 0.92 the slide-03 chips use:
+   at 120 ms a jump that size is a click you cannot follow, so the piece
+   arrives crisply and then settles into size. That settle outlasts the gap
+   between pieces on purpose — several are always still growing, which is
+   what ties twelve separate entrances into one assembly.
+
+   --intro-settle is the one place its length lives: the CSS transition takes
+   it, and the script reads it back to know when the entrance is finally at
+   rest and the markers can come off. Stripping them mid-settle would snap
+   the last piece to full size.
+
+   The opacity goes through the --in gate rather than setting `opacity`
+   outright, so it composes with whatever the keyframes are doing instead of
+   overriding them. A custom property has to be registered to be
+   transitionable at all — hence @property, as with --ring-angle above.
+
+   Both the marker attribute and .is-intro are put on by the script, so a
+   page whose JS never ran renders the finished collage — the same reason
+   step 0 is duplicated inline in the markup. */
+@property --in { syntax: '<number>'; inherits: false; initial-value: 1; }
+
+.hs__card { --intro-settle: 0.42s; }
+.hs__frag[data-intro] {
+  /* filter rides along because .hs__frag--nested transitions it and this
+     shorthand would otherwise drop that — the three rule cards are nested. */
+  transition: --in 0.12s steps(3, end),
+              scale var(--intro-settle) cubic-bezier(0.16, 0.8, 0.24, 1),
+              filter 0.5s ease;
+}
+.hs__card.is-intro .hs__frag[data-intro]:not(.is-in) { --in: 0; scale: 0.85; }
+/* One frame with transitions off — see introArm(). Parking a piece that is
+   already on screen would otherwise animate it OUT first: `transition` runs
+   in both directions. */
+.hs__card.hs-no-anim .hs__frag[data-intro] { transition: none; }
 
 /* The integrations bar ships without its shadow (an earlier export baked
    it in, which put 5 units of transparent film under the bar and pushed
@@ -1577,45 +1652,49 @@
            Only the top bar and the card colour change at a boundary. -->
       <article class="hs__card" id="card">
 
-        <div class="hs__bars">
-          <nav class="hs__pager" aria-label="Slides">
-            <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
-            <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
-            <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
-          </nav>
-        <header class="hs__bar is-active" data-slide="0" data-bg="#1877F2">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
-            <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+        <!-- Head block: the copy and the buttons. Its own surface, split
+             from the scene below by --slide-split. -->
+        <div class="hs__head">
+          <div class="hs__bars">
+            <nav class="hs__pager" aria-label="Slides">
+              <button class="hs__dot is-active" type="button" data-slide="0" aria-label="Rules"></button>
+              <button class="hs__dot" type="button" data-slide="1" aria-label="AI"></button>
+              <button class="hs__dot" type="button" data-slide="2" aria-label="MCP"></button>
+            </nav>
+          <header class="hs__bar is-active" data-slide="0" data-bg="#1877F2">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">Rules</span></div>
+              <h2 class="hs__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+            </div>
+            <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+              <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+            </div>
+          </header>
+          <header class="hs__bar" data-slide="1" data-bg="#4450F2">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
+              <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
+            </div>
+            <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
+              <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
+            </div>
+          </header>
+          <header class="hs__bar" data-slide="2" data-bg="#5B45CD">
+            <div>
+              <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
+              <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
+            </div>
+            <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
+            <div class="hs__buttons">
+              <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
+              <a class="btn btn-default btn-xs" href="#">More about MCP</a>
+            </div>
+          </header>
           </div>
-          <p class="hs__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
-            <a class="btn btn-default btn-xs" href="#">More about Rules</a>
-          </div>
-        </header>
-        <header class="hs__bar" data-slide="1" data-bg="#4450F2">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
-            <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
-          </div>
-          <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
-            <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
-          </div>
-        </header>
-        <header class="hs__bar" data-slide="2" data-bg="#5B45CD">
-          <div>
-            <div class="hs__pills"><span class="hs__pill t-body">MCP</span></div>
-            <h2 class="hs__title t-h5">Your account, reachable from wherever you already work</h2>
-          </div>
-          <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
-          <div class="hs__buttons">
-            <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
-            <a class="btn btn-default btn-xs" href="#">More about MCP</a>
-          </div>
-        </header>
         </div>
 
         <div class="hs__canvas" id="canvas">
@@ -1803,6 +1882,7 @@
   var track  = document.getElementById('hs');
   var sticky = track.querySelector('.hs__sticky');
   var card   = document.getElementById('card');
+  var canvas = document.getElementById('canvas');
   var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
   var root   = document.documentElement;
 
@@ -1957,12 +2037,20 @@
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
     var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;
-    var pad   = parseFloat(cs.getPropertyValue('--pad-card')) * rootPx;
-    var gapMd = parseFloat(cs.getPropertyValue('--gap-md')) * rootPx;
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
-    var minCard = pad + tallest + gapMd + 364 * u;
+    /* Everything above the canvas, measured rather than re-derived: the card
+       has no padding of its own, so the canvas's offset inside it IS the head
+       block plus --slide-split. Reading the DOM instead of parsing --head-cost
+       keeps this honest if the head's padding ever changes, and keeps the
+       number out of reach of a calc() the script cannot evaluate. */
+    var minCard = canvas.offsetTop + 364 * u;
     var room = innerHeight - navH - minCard;
+    /* Never write a value that is not a number: --slide-gap-bottom feeds the
+       canvas height clamp, and one poisoned token there makes the whole
+       declaration invalid — which under container-type: size is a canvas of
+       zero height and no scene at all. */
+    if (!isFinite(room)) return;
     root.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
   }
 
@@ -2112,6 +2200,9 @@
   var slide = -1;
   function apply() {
     targetP = progress();
+    /* the entrance runs on its own clock; leaving the first state cuts it
+       short rather than letting pieces stay hidden into the next step */
+    if (introRunning && targetP > 0.02) introFinish();
     if (!raf) raf = requestAnimationFrame(follow);
   }
   function render(p) {
@@ -2262,7 +2353,8 @@
       bars.forEach(function (b, n) {
         b.classList.toggle('is-active', n === si);
       });
-      card.style.backgroundColor = bars[si].dataset.bg;
+      /* one write, both blocks read it — see --slide-bg on .hs__card */
+      card.style.setProperty('--slide-bg', bars[si].dataset.bg);
       dots.forEach(function (d, n) { d.classList.toggle('is-active', n === si); });
     }
     /* the active capsule fills with progress through its own slide;
@@ -2469,8 +2561,137 @@
     if (phState === -1) { phPlay(); }
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     FIRST STATE — the collage assembles
+
+     The workspace builds around the edges: the left cluster, then the
+     right one, then the bar and the platform badges that sit on top of
+     them — and the rule constructor lands in the middle last, because it
+     is what the slide is about. Order is identity, so it is written out
+     here rather than derived from z-index or from distance to the centre,
+     both of which put the constructor in the middle of the sequence.
+
+     The three rule cards are one entry: they are stacked on the same spot
+     and only the top one (Duplicate) is ever seen, so if they stepped in
+     one by one the card underneath would show through first.
+
+     Timing is the block's reference rhythm — a hard 120 ms step per piece
+     (in the CSS), 90 ms between them, and one 350 ms breath before the
+     constructor so it reads as the point rather than the twelfth item.
+
+     The markers are set from here, not in the markup: without JS nothing
+     is hidden and the inline step 0 renders as the finished collage.
+     ══════════════════════════════════════════════════════════════ */
+  var INTRO = {
+    at:     220,   /* ms — beat of silence once the block is in view */
+    step:    90,   /* ms — gap between pieces */
+    /* A held beat before the constructor, not a pause: at 350 it read as a
+       separate event bolted onto the end. One step's worth on top of the
+       regular gap is enough to mark it as the last thing to land, and the
+       pieces before it are still settling when it does. */
+    breath: 100,
+    order: [
+      'schedule-cal', 'actions', 'ad-account',
+      'schedule-section', 'frequency-popover', 'filter',
+      'integrations',
+      'platform-google-ads', 'platform-meta', 'platform-tiktok', 'platform-snapchat',
+      ['rule-card-pause', 'rule-card-increase', 'rule-card']
+    ]
+  };
+
+  var introRunning = false, introEls = [], introTimers = [];
+
+  /* How long a piece takes to finish growing — read from the stylesheet so
+     --intro-settle stays the only place the number lives. */
+  function introSettle() {
+    var v = getComputedStyle(card).getPropertyValue('--intro-settle').trim();
+    var n = parseFloat(v);
+    if (!n) return 420;
+    return /ms$/.test(v) ? n : n * 1000;
+  }
+
+  function introFor(entry) {
+    return (Array.isArray(entry) ? entry : [entry]).map(function (id) {
+      return card.querySelector('[data-frag="' + id + '"]');
+    }).filter(Boolean);
+  }
+
+  function introFinish() {
+    introTimers.forEach(clearTimeout); introTimers = [];
+    /* let whatever is still hidden play its own 120 ms step rather than
+       blinking on, then drop every trace of the entrance */
+    introEls.forEach(function (el) { el.classList.add('is-in'); });
+    introRunning = false;
+    setTimeout(function () {
+      card.classList.remove('is-intro');
+      introEls.forEach(function (el) { el.removeAttribute('data-intro'); el.classList.remove('is-in'); });
+      introEls = [];
+    }, introSettle() + 60);
+  }
+
+  function introPlay() {
+    if (introRunning || !introEls.length) return;
+    introRunning = true;
+    var last = INTRO.order.length - 1;
+    INTRO.order.forEach(function (entry, i) {
+      var at = INTRO.at + i * INTRO.step + (i === last ? INTRO.breath : 0);
+      introFor(entry).forEach(function (el) {
+        introTimers.push(setTimeout(function () { el.classList.add('is-in'); }, at));
+      });
+      if (i === last) introTimers.push(setTimeout(introFinish, at + introSettle() + 60));
+    });
+  }
+
+  /* Park every piece in its hidden state, transitions off for the one frame
+     that takes. Without that the pieces animate OUT before stepping back in:
+     `transition` also runs in reverse, and the collage is already on screen
+     both on a replay and on any load where step 0 has painted. Two reflows,
+     the same pattern as the hero page — one to commit the reset, one to
+     commit the re-enabled transitions. */
+  function introArm() {
+    introTimers.forEach(clearTimeout); introTimers = [];
+    introRunning = false; introEls = [];
+
+    card.classList.add('hs-no-anim');
+    card.classList.remove('is-intro');
+    INTRO.order.forEach(function (entry) {
+      introFor(entry).forEach(function (el) {
+        el.classList.remove('is-in');
+        el.setAttribute('data-intro', '');
+        introEls.push(el);
+      });
+    });
+    card.classList.add('is-intro');
+    void card.offsetWidth;
+    card.classList.remove('hs-no-anim');
+    void card.offsetWidth;
+  }
+
+  /* Replay without a reload — the entrance plays once per page, and tuning
+     INTRO by eye is impossible otherwise. Same hook the hero page exposes. */
+  window.__hsIntroReplay = function () { introArm(); introPlay(); };
+
+  function introInit() {
+    /* Past the first state already — a reload deep in the track — or motion
+       turned down: the collage is simply there, the same rule the pop
+       elements follow beyond their own step. */
+    if (progress() > 0.001) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    introArm();
+    if (!introEls.length) { card.classList.remove('is-intro'); return; }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { io.disconnect(); introPlay(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(card);
+  }
+
   addEventListener('scroll', apply, { passive: true });
   addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
+  introInit();
   apply();
   window.__hsApply = apply;
 })();
