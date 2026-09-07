@@ -1199,7 +1199,7 @@
         <div class="pub__message">
           <p class="pub__text">From benchmarks<span class="pub__text-tail"> and creative data</span> to ad automation<span class="pub__text-tail">, with the Ads MCP server</span></p>
         </div>
-        <a class="pub__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register</a>
+        <a class="pub__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register<svg class="pub__ext" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 6.75V9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h2.25"/><path d="M7.75 2H10v2.25"/><path d="M10 2 5.75 6.25"/></svg><span class="pub__sr"> (opens in a new tab)</span></a>
       </div>
     </div>
 
@@ -1340,7 +1340,12 @@
         <tr>
           <td>Link</td>
           <td class="muted">.pub__link</td>
-          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85 &middot; live copy &ldquo;Register&rdquo;, no tail</td>
+          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85 &middot; live copy &ldquo;Register&rdquo;, no tail &middot; the destination is off-site, so <code>target="_blank"</code> with <code>rel="noopener"</code> &mdash; without noopener the destination gets a <code>window.opener</code> handle and can redirect the page behind it. Not <code>noreferrer</code>: the referrer is wanted for attribution alongside the UTMs</td>
+        </tr>
+        <tr>
+          <td>New-tab marker</td>
+          <td class="muted">.pub__ext<br />.pub__sr</td>
+          <td class="muted">the link opens a new tab and says so twice: <code>.pub__ext</code> is the outbound glyph (0.82em, stroked so it stays crisp at ~10.7px), <code>.pub__sr</code> is &ldquo;(opens in a new tab)&rdquo; visually hidden for screen readers, which the icon alone never reaches. A span rather than an <code>aria-label</code> on the link, because aria-label <em>replaces</em> the accessible name &mdash; with a <code>.pub__link-tail</code> in play the visible text changes by breakpoint and a fixed label would stop matching it (WCAG 2.5.3). Sits on the text baseline via <code>vertical-align: 0.02em</code> &mdash; measure the <em>ink</em>, not the box: the glyph has ~1.2px of padding inside its viewBox, so a box flush to the baseline would float visibly high. Measured ink bottom is 0.14px below the baseline. The negative block margins shrink the margin box the line box is measured from, so a glyph taller than the 13px strut cannot grow the bar &mdash; verified: bar stays 51px, <code>--pub-h</code> 59px</td>
         </tr>
         <tr>
           <td>Webflow only</td>
@@ -1370,7 +1375,7 @@
         <tr>
           <td>Copy budget</td>
           <td class="muted">.pub__text</td>
-          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>371px</strong> up &mdash; 375 with 4px to spare, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
+          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>386px</strong> up &mdash; 390, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 375, 26px at 360. The threshold was 371 before the new-tab glyph; the icon plus its leading margin costs ~15px of link width, which is what 375 lost. Buying it back is a one-word trim of the mobile form, or hiding <code>.pub__ext</code> under <code>.pub--joined</code> (the <code>.pub__sr</code> announcement survives either way). Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
         </tr>
       </tbody>
     </table>

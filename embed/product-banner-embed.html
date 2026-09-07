@@ -264,6 +264,43 @@ body   { padding-top: var(--pub-h) !important; }
 }
 .pub-e__link:hover { opacity: 0.85; color: var(--pub-accent); }
 
+/* New-tab marker. The link leaves the site, so it opens in a new tab and
+   says so: this glyph for people who can see it, .pub-e__sr for people who
+   cannot. rel="noopener" is the other half - without it the destination
+   gets a window.opener handle and can redirect the page behind it.
+
+   Sized in em so it tracks the type, and stroke rather than fill so it
+   stays crisp at ~10px. The negative block margins are the same trick as
+   .pub-e__mark: they shrink the margin box the line box is measured from,
+   so a glyph taller than the 13px strut cannot grow the bar - and the bar
+   height is a constant the nav offset is built on. */
+.pub-e__ext {
+  display: inline-block;
+  width: 0.82em;
+  height: 0.82em;
+  margin-inline-start: 0.34em;
+  margin-block: -0.12em;
+  /* 1px up at the 13px kegl, to sit on the text baseline. */
+  vertical-align: 0.02em;
+}
+
+/* Visually hidden, still read aloud. The icon carries the message for
+   sighted users; screen readers get it here. A span rather than an
+   aria-label on the link, because aria-label REPLACES the accessible name:
+   with a .pub-e__link-tail in play the visible text changes by breakpoint,
+   and a fixed label would stop matching it (WCAG 2.5.3). */
+.pub-e__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 767px) {
   /* Two label modes, because the label plays two different parts depending
      on the copy. By default it is a standing tag ("Product update") - dead
@@ -327,6 +364,6 @@ body   { padding-top: var(--pub-h) !important; }
     <div class="pub-e__message">
       <p class="pub-e__text">From benchmarks<span class="pub-e__text-tail"> and creative data</span> to ad automation<span class="pub-e__text-tail">, with the Ads MCP server</span></p>
     </div>
-    <a class="pub-e__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register</a>
+    <a class="pub-e__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register<svg class="pub-e__ext" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 6.75V9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h2.25"/><path d="M7.75 2H10v2.25"/><path d="M10 2 5.75 6.25"/></svg><span class="pub-e__sr"> (opens in a new tab)</span></a>
   </div>
 </div>
