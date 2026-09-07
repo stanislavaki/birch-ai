@@ -1191,7 +1191,71 @@
     <div class="sg-section-label" id="s-product-banner">Product Update Banner</div>
     <hr class="sg-divider" />
 
-    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Default &middot; with product mark</div>
+    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding-bottom: 0.5rem;">Live &middot; sentence label &middot; .pub--joined &middot; no mark</div>
+
+    <div class="pub pub--joined" id="pub-live">
+      <div class="pub__bar">
+        <div class="pub__label">Meta<span class="pub__label-x">&times;</span>B&iuml;rch<span class="pub__label-colon">:</span></div>
+        <div class="pub__message">
+          <p class="pub__text">From benchmarks<span class="pub__text-tail"> and creative data</span> to ad automation<span class="pub__text-tail">, with the Ads MCP server</span></p>
+        </div>
+        <a class="pub__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register</a>
+      </div>
+    </div>
+
+    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding: 2rem 0 0.5rem;">Mobile &middot; &le;767px &middot; label and message join into one line</div>
+
+    <!-- Each frame is a real iframe at a real phone width, because the mobile
+         rules are a media query on the VIEWPORT: a narrow div on a desktop
+         page would still render the desktop banner. The markup is cloned from
+         the live example above rather than copied here, so the preview cannot
+         drift from what ships. -->
+    <style>
+      .pub-mob { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+      .pub-mob__item { margin: 0; }
+      .pub-mob__frame {
+        display: block; height: 3.6875rem; border: 0;
+        border-radius: var(--radius-sm);
+        background: var(--color-bg);
+        max-width: 100%;
+      }
+      .pub-mob__cap {
+        font-family: ui-monospace, monospace; font-size: 0.625rem;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: rgba(255,255,255,0.25); padding-top: 0.5rem;
+      }
+      .pub-mob__cap b { color: rgba(255,255,255,0.45); font-weight: 500; }
+    </style>
+
+    <div class="pub-mob">
+      <figure class="pub-mob__item">
+        <iframe class="pub-mob__frame" style="width: 26.875rem;" data-w="430" title="Product update banner at 430px"></iframe>
+        <figcaption class="pub-mob__cap"><b>430</b> &middot; iPhone Pro Max &middot; fits</figcaption>
+      </figure>
+      <figure class="pub-mob__item">
+        <iframe class="pub-mob__frame" style="width: 23.4375rem;" data-w="375" title="Product update banner at 375px"></iframe>
+        <figcaption class="pub-mob__cap"><b>375</b> &middot; iPhone SE &middot; fits &mdash; 4px to spare</figcaption>
+      </figure>
+      <figure class="pub-mob__item">
+        <iframe class="pub-mob__frame" style="width: 22.5rem;" data-w="360" title="Product update banner at 360px"></iframe>
+        <figcaption class="pub-mob__cap"><b>360</b> &middot; small Android &middot; ellipsis</figcaption>
+      </figure>
+    </div>
+
+    <script>
+      (function () {
+        var live = document.getElementById('pub-live');
+        if (!live) return;
+        var doc = '<!doctype html><meta charset="utf-8">'
+          + '<link rel="stylesheet" href="tokens.css">'
+          + '<link rel="stylesheet" href="components/product-banner.css">'
+          + '<style>body{margin:0;background:var(--color-bg)}</style>'
+          + live.outerHTML;
+        document.querySelectorAll('.pub-mob__frame').forEach(function (f) { f.srcdoc = doc; });
+      })();
+    </script>
+
+    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding: 2rem 0 0.5rem;">Standing label &middot; with product mark &middot; droppable link tail</div>
 
     <div class="pub">
       <div class="pub__bar">
@@ -1212,18 +1276,6 @@
               </defs>
             </svg>
           </span>
-          <p class="pub__text">AI agent in performance marketing: build your flow with B&iuml;rch AI, Meta MCP, business context</p>
-        </div>
-        <a class="pub__link" href="#">Register<span class="pub__link-tail"> to webinar</span></a>
-      </div>
-    </div>
-
-    <div style="font-size: 0.6875rem; color: rgba(255,255,255,0.25); letter-spacing: 0.08em; text-transform: uppercase; font-family: ui-monospace, monospace; padding: 2rem 0 0.5rem;">No product mark &middot; omit .pub__mark and .pub__tag</div>
-
-    <div class="pub">
-      <div class="pub__bar">
-        <div class="pub__label">Product update</div>
-        <div class="pub__message">
           <p class="pub__text">Some text about the product update, can span the whole banner width</p>
         </div>
         <a class="pub__link" href="#">Learn<span class="pub__link-tail"> more...</span></a>
@@ -1258,7 +1310,17 @@
         <tr>
           <td>Label</td>
           <td class="muted">.pub__label</td>
-          <td class="muted">padding 1.125 / 0 / 1.25 / 1.375rem &middot; color --pub-ink</td>
+          <td class="muted">padding 1.125 / 0 / 1.25 / 1.375rem &middot; color --pub-ink &middot; <code>display: block</code>, not flex &mdash; a flex item would not share a line box with the label text and the colon has to sit tight against it</td>
+        </tr>
+        <tr>
+          <td>Label joiner</td>
+          <td class="muted">.pub__label-x</td>
+          <td class="muted"><code>opacity: 0.35</code> &middot; <code>margin-inline: 0.125em</code> (about half a word space) &middot; <code>position: relative; top: 0.077em</code> (1px at the 13px kegl) on the &times; &mdash; a joiner, not a word, so the two brand names carry the line. Opacity, not a grey literal, so it tracks --pub-ink. Relative offset rather than <code>vertical-align</code>, which can grow the line box &mdash; the bar height is a constant the nav offset is built on</td>
+        </tr>
+        <tr>
+          <td>Label colon</td>
+          <td class="muted">.pub__label-colon</td>
+          <td class="muted">hidden by default, shown only where <code>.pub--joined</code> merges the label into the message on mobile. On desktop the label is its own item on the far left of a space-between row, with nothing after it to introduce &mdash; a colon there dangles</td>
         </tr>
         <tr>
           <td>Message</td>
@@ -1268,7 +1330,7 @@
         <tr>
           <td>Mark slot</td>
           <td class="muted">.pub__mark</td>
-          <td class="muted">any svg/img &middot; height <strong>1.125em</strong> &mdash; em so it shrinks with the text (14.6px at 13px) instead of towering over it &middot; optional</td>
+          <td class="muted">any svg/img &middot; height <strong>1.125em</strong> &mdash; em so it shrinks with the text (14.6px at 13px) instead of towering over it &middot; optional, and the live campaign omits it: the label names both brands in words. Hidden under <code>.pub--joined</code> on mobile, where it would sit inside the sentence</td>
         </tr>
         <tr>
           <td>Accent tag</td>
@@ -1278,7 +1340,7 @@
         <tr>
           <td>Link</td>
           <td class="muted">.pub__link</td>
-          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85 &middot; live copy &ldquo;Register to webinar&rdquo;</td>
+          <td class="muted">padding 1.125 / 0.875 / 1.25rem &middot; color --pub-accent &middot; hover opacity 0.85 &middot; live copy &ldquo;Register&rdquo;, no tail</td>
         </tr>
         <tr>
           <td>Webflow only</td>
@@ -1288,22 +1350,27 @@
         <tr>
           <td>Off-token</td>
           <td class="muted">--pub-pad-*</td>
-          <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring</td>
+          <td class="muted">1.125 / 1.25 / 1.375 / 0.875rem &mdash; kept to match Figma optical centring. <code>.pub--joined</code> overrides the two horizontal ones on mobile (0.625 / 0.5rem): joined, the bar is a single width budget and the desktop-generous insets are worth 14px of copy</td>
         </tr>
         <tr>
           <td>Mobile &le;767px</td>
           <td class="muted">.pub__label</td>
-          <td class="muted">hidden &mdash; its left inset moves to .pub__message</td>
+          <td class="muted"><strong>Two modes.</strong> Default: the label is a standing tag (&ldquo;Product update&rdquo;), dead weight on a phone &mdash; hidden, and its left inset moves to .pub__message. With <code>.pub--joined</code>: the label opens the sentence (&ldquo;Meta&times;B&iuml;rch:&rdquo;) and cannot be dropped &mdash; it stays and the message joins it into one line. Which mode a campaign is in is a copy decision, so it is a class, not a breakpoint</td>
         </tr>
         <tr>
           <td>Mobile &le;767px</td>
-          <td class="muted">.pub__link-tail</td>
-          <td class="muted">hidden &rarr; &ldquo;Register to webinar&rdquo; becomes &ldquo;Register&rdquo;. Wrap only the droppable trailing words; the short form is the plain text ahead of them</td>
+          <td class="muted">.pub--joined</td>
+          <td class="muted">bar <code>column-gap</code> drops to <code>0.25em</code> (an 8px gap reads as a pause mid-sentence), the message takes <code>margin-inline-end: auto</code> so the pair hugs the left inset and the link stays hard right, <code>.pub__mark</code> is hidden, <code>.pub__label-colon</code> appears, and <code>.pub__text::first-letter</code> lowercases &mdash; the message opens a fragment here, not a sentence</td>
+        </tr>
+        <tr>
+          <td>Mobile &le;767px</td>
+          <td class="muted">.pub__text-tail<br />.pub__link-tail</td>
+          <td class="muted">both hidden. Only the droppable trailing words are wrapped &mdash; the short form is the plain text ahead of them, so no copy is duplicated. Live message: &ldquo;From benchmarks<em> and creative data</em> to ad automation<em>, with the Ads MCP server</em>&rdquo; &rarr; &ldquo;from benchmarks to ad automation&rdquo;</td>
         </tr>
         <tr>
           <td>Copy budget</td>
           <td class="muted">.pub__text</td>
-          <td class="muted">stays one line and truncates. Live copy is 92 chars / 556px at 13px. Measured in <code>debug/embed-harness.html</code> (fluid root, as on the site): fits <strong>whole down to ~910px</strong>, and again at 767px once the mobile rules drop the label and shorten the link. Between them it dips &mdash; 77 chars at 800px, 72 at 768px. On phones it still truncates: 39 chars at 430px, 30 at 375px, 21 at 320px. Fitting the phone is an editing job, not a layout one.</td>
+          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>371px</strong> up &mdash; 375 with 4px to spare, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
         </tr>
       </tbody>
     </table>

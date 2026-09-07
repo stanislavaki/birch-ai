@@ -61,11 +61,41 @@
 
 /* ── Left label ── */
 .pub__label {
-  display: flex;
-  align-items: center;
+  /* Not a flex container, for the same reason as .pub__link below: a flex
+     item would not share a line box with the label text, and the colon has
+     to sit tight against it. Vertical position comes from the padding. */
+  display: block;
   flex: none;
   padding: var(--pub-pad-top) 0 var(--pub-pad-bottom) var(--pub-pad-start);
   white-space: nowrap;
+}
+
+/* The colon only exists where the label runs into the message, which is
+   the joined mobile line. On desktop the label is its own item on the far
+   left of a space-between row, with nothing after it to introduce — a
+   colon there dangles. Marked up rather than generated so that whoever
+   swaps the campaign copy can see it. */
+.pub__label-colon { display: none; }
+
+/* The × is a joiner, not a word — held back so the two brand names carry
+   the line. Opacity rather than a grey literal, so it keeps tracking
+   --pub-ink if the ink ever changes.
+
+   Spacing as a margin rather than space characters: em, so it scales with
+   the type, and one number to tune. 0.125em is about half a word space at
+   this size (1.6px at 13px) — enough to separate the names without the ×
+   reading as its own word. A full en (0.5em a side) costs 12px, which the
+   joined mobile line at 375 does not have. */
+.pub__label-x {
+  opacity: 0.35;
+  margin-inline: 0.125em;
+  /* Optically 1px down at the 13px kegl: the × sits on the x-height while
+     the caps either side run taller, so a mathematically centred glyph
+     reads high. Relative offset, not vertical-align — vertical-align can
+     grow the line box, and the bar height is a constant the nav offset is
+     built on. em so the nudge scales with the type. */
+  position: relative;
+  top: 0.077em;
 }
 
 /* ── Centre message ── */
@@ -133,23 +163,52 @@
 .pub__link:hover { opacity: 0.85; }
 
 /* ── Mobile <=767px ──
-   Drop the "Product update" label so the message gets the width.
-   The label was carrying the left inset, so hand it to the message,
-   otherwise the text sits flush against the bar edge. */
+   Two label modes, because the label plays two different parts depending
+   on the copy. By default it is a standing tag ("Product update") — dead
+   weight on a phone, so it is dropped and the message takes the width.
+   With .pub--joined it opens the sentence ("Meta × Bïrch:") and cannot be
+   dropped: it stays, and the message joins it into a single line. Which
+   mode a campaign is in is a copy decision, so it rides on a class on the
+   wrapper rather than being baked into the breakpoint. */
 @media (max-width: 767px) {
-  /* Drop the "Product update" label so the message gets the width.
-     The label was carrying the left inset, so hand it to the message,
-     otherwise the text sits flush against the bar edge. */
+  /* Default: drop the label. It was carrying the left inset, so hand that
+     to the message, otherwise the text sits flush against the bar edge. */
   .pub__label { display: none; }
   .pub__message { padding-inline-start: var(--pub-pad-start); }
 
-  /* The link drops its trailing words: "Register to webinar" becomes
-     "Register". Only the droppable tail is marked up — the short form
-     is the plain text ahead of it, so no copy is duplicated. Verbs
-     lead, so what survives is the call to action, not a noun. */
+  /* Message and link both drop their trailing words. Only the droppable
+     tail is marked up — the short form is the plain text ahead of it, so
+     no copy is duplicated. Verbs lead in the link, so what survives is
+     the call to action, not a noun: "Register to webinar" → "Register". */
+  .pub__text-tail,
   .pub__link-tail { display: none; }
 
-  /* The message deliberately stays on one line and truncates with an
-     ellipsis — fitting the phone is an editing job, not a layout one.
-     Measured budget at 375px: see the styleguide spec table. */
+  /* ── .pub--joined — label and message read as one line ── */
+
+  .pub--joined .pub__label { display: block; }
+  .pub--joined .pub__label-colon { display: inline; }
+
+  /* The bar's 8px gap would read as a pause mid-sentence — a word space
+     instead. The message then absorbs the free space, so the pair hugs
+     the left inset the label carries and the link stays hard right. */
+  .pub--joined .pub__bar { column-gap: 0.25em; }
+  .pub--joined .pub__message { padding-inline-start: 0; margin-inline-end: auto; }
+
+  /* The product mark anchors the message on desktop, where the message is
+     its own centred item. Inside the joined sentence it would interrupt
+     the line — and a sentence-opening label already names the product. */
+  .pub--joined .pub__mark { display: none; }
+
+  /* Sentence case: on desktop the message is a separate item and opens
+     with a capital; joined after the label's colon it is a fragment, so
+     it lowercases. Cheaper and safer than a second copy of the string. */
+  .pub--joined .pub__text::first-letter { text-transform: lowercase; }
+
+  /* 22/14 are desktop-generous insets. Joined, the whole bar is a single
+     width budget and the line needs every pixel of them back. */
+  .pub--joined { --pub-pad-start: 0.625rem; --pub-pad-link: 0.375rem; }
+
+  /* Below the width where the short form fits, the message still
+     truncates with an ellipsis — fitting the narrowest phone is an
+     editing job, not a layout one. Measured budget: styleguide spec. */
 }
