@@ -19,7 +19,11 @@
   /* Tokens declared on the embed root so nothing leaks in from the site.
      Sizes in px, not rem: the fluid root would stretch every one of them. */
   --pub-font: "TT Commons Pro Variable", "Inter", Arial, sans-serif;
-  --pub-white: #FFFFFF;
+  /* Surface grey, not white: on the light templates (blog index, legal,
+     search) the page behind is white and a white bar has no edge at all.
+     Mirrors --color-surface in tokens.css, and lands next to the nav
+     pill's composited fill on those pages (#EDECF3). */
+  --pub-surface: #F1F0F7;
   --pub-radius: 8px;       /* radius-sm */
   --pub-inset: 4px;        /* space-xxs */
   --pub-gap: 8px;          /* gap-sm */
@@ -113,7 +117,7 @@ body   { padding-top: var(--pub-h) !important; }
   justify-content: space-between;
   align-items: center;
   gap: var(--pub-gap);
-  background: var(--pub-white);
+  background: var(--pub-surface);
   border-radius: var(--pub-radius);
   font-family: var(--pub-font);
   /* 13px flat, desktop and mobile, to buy the message more characters.

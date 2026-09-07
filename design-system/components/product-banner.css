@@ -40,7 +40,14 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--gap-sm);
-  background: var(--color-bg-white);
+  /* Surface grey, not white: on the light templates (blog index, legal,
+     search) the page behind is white, and a white bar has no edge at all —
+     it reads as a stray line of text above the nav rather than a banner.
+     --color-surface is the token for exactly this ("light greys for
+     cards/chips on light pages") and lands next to the nav pill's own
+     composited fill on those pages (#EDECF3), so the two read as one
+     family. On the dark templates it still separates on its own. */
+  background: var(--color-surface);
   border-radius: var(--radius-sm);
   font-family: var(--font);
   /* 13px flat, desktop and mobile, to buy the message more characters.
