@@ -323,6 +323,7 @@ body   { padding-top: var(--pub-h) !important; }
      tail is marked up - the short form is the plain text ahead of it, so
      no copy is duplicated. Verbs lead in the link, so what survives is the
      call to action, not a noun: "Register to webinar" -> "Register". */
+  .pub-e__text-lead,
   .pub-e__text-tail,
   .pub-e__link-tail { display: none !important; }
 
@@ -355,10 +356,15 @@ body   { padding-top: var(--pub-h) !important; }
      that does.) */
   .pub-e--joined .pub-e__mark { display: none !important; }
 
-  /* Sentence case: on desktop the message is a separate item and opens
-     with a capital; joined after the label's colon it is a fragment, so it
-     lowercases. Cheaper and safer than a second copy of the string. */
-  .pub-e--joined .pub-e__text::first-letter { text-transform: lowercase; }
+  /* Case: on desktop the message is a separate item set in Title Case
+     ("Webinar: From Benchmarks and Creative Data to..."). Joined after the
+     label's colon it is a fragment mid-sentence, so the whole of it
+     lowercases - ::first-letter was enough while the copy was sentence
+     case, but Title Case leaves capitals in the middle. Safe here because
+     everything that survives on mobile is ordinary words: the one acronym
+     (Ads MCP Server) sits inside a tail that is already dropped. A campaign
+     whose SHORT form carries an acronym needs it wrapped, not this rule. */
+  .pub-e--joined .pub-e__text { text-transform: lowercase; }
 
   /* 22/14 are desktop-generous insets. Joined, the whole bar is a single
      width budget and the line needs every pixel of them back. */
@@ -388,7 +394,7 @@ body   { padding-top: var(--pub-h) !important; }
   <div class="pub-e__bar">
     <div class="pub-e__label">Meta<span class="pub-e__label-x">&times;</span>B&iuml;rch<span class="pub-e__label-colon">:</span></div>
     <div class="pub-e__message">
-      <p class="pub-e__text">From benchmarks<span class="pub-e__text-tail"> and creative data</span> to ad automation<span class="pub-e__text-tail">, with the Ads MCP server</span></p>
+      <p class="pub-e__text"><span class="pub-e__text-lead">Webinar: </span>From Benchmarks<span class="pub-e__text-tail"> and Creative Data</span> to Ad Automation<span class="pub-e__text-tail">, with the Ads MCP Server</span></p>
     </div>
     <a class="pub-e__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register<svg class="pub-e__ext" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 6.75V9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h2.25"/><path d="M7.75 2H10v2.25"/><path d="M10 2 5.75 6.25"/></svg><span class="pub-e__sr"> (opens in a new tab)</span></a>
   </div>

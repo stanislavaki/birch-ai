@@ -1197,7 +1197,7 @@
       <div class="pub__bar">
         <div class="pub__label">Meta<span class="pub__label-x">&times;</span>B&iuml;rch<span class="pub__label-colon">:</span></div>
         <div class="pub__message">
-          <p class="pub__text">From benchmarks<span class="pub__text-tail"> and creative data</span> to ad automation<span class="pub__text-tail">, with the Ads MCP server</span></p>
+          <p class="pub__text"><span class="pub__text-lead">Webinar: </span>From Benchmarks<span class="pub__text-tail"> and Creative Data</span> to Ad Automation<span class="pub__text-tail">, with the Ads MCP Server</span></p>
         </div>
         <a class="pub__link" href="https://luma.com/z361px9u?utm_campaign=ai_meta_mcp&amp;utm_source=announcement_bar" target="_blank" rel="noopener">Register<svg class="pub__ext" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.5 6.75V9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h2.25"/><path d="M7.75 2H10v2.25"/><path d="M10 2 5.75 6.25"/></svg><span class="pub__sr"> (opens in a new tab)</span></a>
       </div>
@@ -1370,12 +1370,12 @@
         <tr>
           <td>Mobile &le;767px</td>
           <td class="muted">.pub__text-tail<br />.pub__link-tail</td>
-          <td class="muted">both hidden. Only the droppable trailing words are wrapped &mdash; the short form is the plain text ahead of them, so no copy is duplicated. Live message: &ldquo;From benchmarks<em> and creative data</em> to ad automation<em>, with the Ads MCP server</em>&rdquo; &rarr; &ldquo;from benchmarks to ad automation&rdquo;</td>
+          <td class="muted">both hidden. Only the droppable trailing words are wrapped &mdash; the short form is the plain text ahead of them, so no copy is duplicated. A <strong>lead</strong> drops the same way a tail does: live message is &ldquo;<em>Webinar: </em>From Benchmarks<em> and Creative Data</em> to Ad Automation<em>, with the Ads MCP Server</em>&rdquo; &rarr; &ldquo;from benchmarks to ad automation&rdquo;. The short form lowercases wholesale under <code>.pub--joined</code> because the desktop copy is Title Case &mdash; <code>::first-letter</code> only sufficed while it was sentence case</td>
         </tr>
         <tr>
           <td>Copy budget</td>
           <td class="muted">.pub__text</td>
-          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 76-char message is 474px and fits whole at every width including 768 &mdash; no dip (the previous 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>372px</strong> up &mdash; 375 with 3px to spare, 390, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. The new-tab glyph would cost ~15px of link width and push the threshold to 386, so it is hidden below 768 &mdash; see the New-tab marker row. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
+          <td class="muted">stays one line and truncates. <strong>Desktop:</strong> the full 84-char message is 535px and fits whole at every width including 768 &mdash; no dip (the pre-campaign 92-char copy dipped between 767 and 910). <strong>Mobile:</strong> the joined line fits from <strong>372px</strong> up &mdash; 375 with 3px to spare, 390, 402 (Figma frame) and 430 comfortably. Below that it ellipses: 11px short at 360, 51px at 320. The new-tab glyph would cost ~15px of link width and push the threshold to 386, so it is hidden below 768 &mdash; see the New-tab marker row. Measured with the real font in the preview frames above; fitting the narrowest phone is an editing job, not a layout one &mdash; dropping one word from the mobile form (&ldquo;from&rdquo; or &ldquo;ad&rdquo;) clears 360</td>
         </tr>
       </tbody>
     </table>

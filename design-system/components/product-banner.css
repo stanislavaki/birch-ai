@@ -224,6 +224,7 @@
      tail is marked up — the short form is the plain text ahead of it, so
      no copy is duplicated. Verbs lead in the link, so what survives is
      the call to action, not a noun: "Register to webinar" → "Register". */
+  .pub__text-lead,
   .pub__text-tail,
   .pub__link-tail { display: none; }
 
@@ -251,10 +252,15 @@
      the line — and a sentence-opening label already names the product. */
   .pub--joined .pub__mark { display: none; }
 
-  /* Sentence case: on desktop the message is a separate item and opens
-     with a capital; joined after the label's colon it is a fragment, so
-     it lowercases. Cheaper and safer than a second copy of the string. */
-  .pub--joined .pub__text::first-letter { text-transform: lowercase; }
+  /* Case: on desktop the message is a separate item set in Title Case
+     ("Webinar: From Benchmarks and Creative Data to…"). Joined after the
+     label's colon it is a fragment mid-sentence, so the whole of it
+     lowercases — ::first-letter was enough while the copy was sentence
+     case, but Title Case leaves capitals in the middle. Safe here because
+     everything surviving on mobile is ordinary words: the one acronym
+     (Ads MCP Server) sits inside a tail that is already dropped. A campaign
+     whose SHORT form carries an acronym needs it wrapped, not this rule. */
+  .pub--joined .pub__text { text-transform: lowercase; }
 
   /* 22/14 are desktop-generous insets. Joined, the whole bar is a single
      width budget and the line needs every pixel of them back. */
