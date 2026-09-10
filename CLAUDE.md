@@ -8,7 +8,7 @@
 |---|---|
 | Сборка блоков в Webflow через Data-API MCP | `docs/webflow-mcp.md` |
 | Сборка embed-кода для Webflow | `EMBED-ISSUES.md` |
-| Работа в Figma через `use_figma` | `docs/figma-mcp.md` |
+| Работа в Figma через `use_figma`, включая деки Figma Slides | `docs/figma-mcp.md` |
 | Вёрстка / анимация dev-страницы (раскладка, мобилка, scroll, Debug Panel, ревью-артефакт) | `docs/dev-pages.md` |
 | Что осознанно отложено и почему (перед оценкой задачи — свериться) | `docs/tech-debt.md` |
 | Перенос нового меню (v2) в Webflow — спеки, архитектура, порядок работ | `docs/menu-webflow-plan.md` |
