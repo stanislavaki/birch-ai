@@ -9,3 +9,7 @@ use-cases-review-test.html
 review/cs-compare/pages/
 review/menu/menu-artifact.html
 review/menu/_local_check.html
+
+# Home preview artifact build output (regenerate with review/home-preview/build_artifact.py)
+review/home-preview/home-preview-artifact.html
+review/home-preview/_local_check.html
