@@ -7,6 +7,7 @@
 | Что | Где |
 |---|---|
 | Страница целиком: CSS + разметка + скрипт блока | `home-slides.html` (один файл, ~2500 строк) |
+| Превью в контексте главной: герой + слайдер одним скроллом | `home-preview.html` — склеивает `home-hero.html` и `home-slides.html` на лету, ничего не копируя (оба файла остаются источником истины); только dev, не embed-кандидат |
 | Ассеты слайдов 01–02 | `images/slides/01/*.webp` |
 | Ассеты слайда 03 (чипы, лого, звезда, скриншот телефона) | `images/slides/03/*.svg`, `phone.webp` |
 | Живое меню сайта (копия нава bir.ch) | `design-system/webflow-env-nav-v3.html` — см. `dev-pages.md` |
@@ -15,7 +16,7 @@
 | Кнопка `btn-xs` под бар слайдера | `design-system/components/button.css`, `tokens.css` (`--btn-h-xs`, `--text-btn-xs-size`) |
 | Макет | Figma `Website-2026`, file key `qfwjMYSRMswozcmo3VfLP8`: секция «Animatic draft» (18412:66500), тестовые кадры в секции «for test» (18446:72271) |
 
-Запуск: любой статик-сервер из корня репо. В `.claude/launch.json` есть `static` (порт 8642) и `static-wt` (8651): `python3 -m http.server 8642` и открыть `/home-slides.html`.
+Запуск: любой статик-сервер из корня репо. В `.claude/launch.json` есть `static` (порт 8642) и `static-wt` (8651): `python3 -m http.server 8642` и открыть `/home-slides.html`. Анимацию в контексте главной (как она стартует после героя по скроллу) смотреть на `/home-preview.html`: страница подтягивает оба файла через `fetch`, поэтому нужен именно `http://`, с `file://` склейка не соберётся.
 
 ## Модель — как это устроено
 
