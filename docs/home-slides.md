@@ -7,7 +7,7 @@
 | Что | Где |
 |---|---|
 | Страница целиком: CSS + разметка + скрипт блока | `home-slides.html` (один файл, ~2500 строк) |
-| Webflow-разметка для вставки | `embed/home-slides-embed.html` |
+| Webflow-вставка (3 соседних Code Embed) | `embed/home-slides-style-embed.html`, `embed/home-slides-embed.html`, `embed/home-slides-script-embed.html` |
 | Изолированные стили и скрипт embed | `embed/home-slides-embed.css`, `embed/home-slides-embed.js` |
 | Генератор Webflow-версии | `scripts/build-home-slides-embed.py` |
 | Ассеты слайдов 01–02 | `images/slides/01/*.webp` |
@@ -163,7 +163,7 @@ CSS смешивает ровно два ключа (`--x`…`--x2` через `
 ## Открытые вопросы
 
 - **Мобилка и планшет** — готовы в потоке, без sticky-scroll трека.
-- **Перенос в Webflow** — embed подготовлен и добавлен в `embeds.html`; размещение: сразу после Trusted by. HTML оставлен меньше лимита Webflow Embed, поэтому scoped CSS/JS подключаются отдельными файлами с GitHub Pages и должны публиковаться вместе с HTML.
+- **Перенос в Webflow** — embed подготовлен и добавлен в `embeds.html`; размещение: сразу после Trusted by. Из-за лимита Webflow около 50 KB блок разделён на три соседних Code Embed в строгом порядке: styles → markup → script. Все три части инлайнены и не зависят от публикации GitHub Pages.
 - **Иконки для строки `Used:`** в чате слайда 02 — ассетов нет, сейчас текст.
 - **Бейдж «чёрный на 20%»** — литерал; если заливка пойдёт в другие блоки, завести токен в Figma и синхронизировать.
 - **Длина трека** — около 7,6 экранов скролла на три слайда; проверить на живой главной с соседними блоками.

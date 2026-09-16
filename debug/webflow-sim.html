@@ -417,8 +417,35 @@
         });
     }
 
+    function loadEmbedGroup(files, targetId) {
+      Promise.all(files.map(function(file) {
+        return fetch(file, { cache: 'no-store' }).then(function(r) { return r.text(); });
+      }))
+        .then(function(parts) {
+          var html = parts.join('\n')
+            .replaceAll('https://stanislavaki.github.io/birch-ai/', '../')
+            .trim();
+          var target = document.getElementById(targetId);
+          target.innerHTML = html;
+          target.querySelectorAll('script').forEach(function(s) {
+            var newScript = document.createElement('script');
+            newScript.textContent = s.textContent;
+            document.body.appendChild(newScript);
+            s.remove();
+          });
+        })
+        .catch(function(e) {
+          document.getElementById(targetId).innerHTML =
+            '<p style="color:red;padding:2rem">Ошибка загрузки ' + files.join(', ') + ': ' + e + '</p>';
+        });
+    }
+
     loadEmbed('../embed/customers-embed.html', 'simCustomers');
-    loadEmbed('../embed/home-slides-embed.html?v=' + Date.now(), 'simHomeSlides');
+    loadEmbedGroup([
+      '../embed/home-slides-style-embed.html?v=' + Date.now(),
+      '../embed/home-slides-embed.html?v=' + Date.now(),
+      '../embed/home-slides-script-embed.html?v=' + Date.now()
+    ], 'simHomeSlides');
     loadEmbed('../embed/stage-embed.html', 'simStageHiw');
     loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');

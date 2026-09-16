@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Build the Webflow-safe Home slides embed from home-slides.html.
+"""Build the Webflow-safe Home slides embeds from home-slides.html.
 
-The Webflow Embed element stays below its size limit by loading the generated
-CSS and JavaScript as public GitHub Pages assets. The HTML remains the copyable
-artifact listed in embeds.html.
+Webflow limits each Code Embed element to roughly 50 KB. The component is
+therefore emitted as three neighboring snippets: styles, markup, and script.
+Each part is self-contained and stays below the per-element limit.
 """
 
 from __future__ import annotations
@@ -17,8 +17,10 @@ SOURCE = ROOT / "home-slides.html"
 OUT_HTML = ROOT / "embed/home-slides-embed.html"
 OUT_CSS = ROOT / "embed/home-slides-embed.css"
 OUT_JS = ROOT / "embed/home-slides-embed.js"
+OUT_STYLE_EMBED = ROOT / "embed/home-slides-style-embed.html"
+OUT_SCRIPT_EMBED = ROOT / "embed/home-slides-script-embed.html"
 PUBLIC_BASE = "https://stanislavaki.github.io/birch-ai"
-VERSION = "20260916"
+WEBFLOW_EMBED_LIMIT = 50_000
 
 STATE_CLASSES = (
     "is-active",
@@ -99,6 +101,16 @@ def strip_css_comments(text: str) -> str:
 
 def strip_html_comments(text: str) -> str:
     return re.sub(r"<!--.*?-->", "", text, flags=re.S)
+
+
+def strip_standalone_javascript_comments(text: str) -> str:
+    """Remove only block comments that begin a line.
+
+    This deliberately leaves inline comments alone. Matching comments only at
+    line starts avoids treating comment-like text inside strings or regexes as
+    syntax while removing enough prose to fit Webflow's Code Embed limit.
+    """
+    return re.sub(r"^[ \t]*/\*.*?\*/[ \t]*\n", "", text, flags=re.M | re.S)
 
 
 def ascii_html(text: str) -> str:
@@ -261,16 +273,14 @@ def build_html(source: str) -> str:
     html = strip_html_comments(html)
     html = re.sub(r"\n\s*\n", "\n", html).strip()
 
-    header = f"""<!--
-  BIRCH HOME SLIDES - WEBFLOW EMBED
+    header = """<!--
+  BIRCH HOME SLIDES - PART 2 OF 3: MARKUP
   Placement: Home page, immediately after the Trusted by block.
+  Keep this between the adjacent Styles and Script Code Embeds.
   Webflow owns the outer Section and Container. Keep ancestor overflow visible.
-  CSS and JS are versioned public assets generated from home-slides.html.
 -->
-<link rel="stylesheet" href="{PUBLIC_BASE}/embed/home-slides-embed.css?v={VERSION}">
 """
-    footer = f'\n<script src="{PUBLIC_BASE}/embed/home-slides-embed.js?v={VERSION}"></script>\n'
-    return ascii_html(header + html + footer)
+    return ascii_html(header + html + "\n")
 
 
 def build_js(source: str) -> str:
@@ -373,12 +383,35 @@ def build_js(source: str) -> str:
 
 def main() -> None:
     source = SOURCE.read_text()
-    OUT_CSS.write_text(build_css(source))
-    OUT_JS.write_text(build_js(source))
-    OUT_HTML.write_text(build_html(source))
-    print(f"Wrote {OUT_HTML.relative_to(ROOT)} ({OUT_HTML.stat().st_size} bytes)")
-    print(f"Wrote {OUT_CSS.relative_to(ROOT)} ({OUT_CSS.stat().st_size} bytes)")
-    print(f"Wrote {OUT_JS.relative_to(ROOT)} ({OUT_JS.stat().st_size} bytes)")
+    css = build_css(source)
+    javascript = build_js(source)
+    markup_embed = build_html(source)
+    style_embed = (
+        "<!-- BIRCH HOME SLIDES - PART 1 OF 3: STYLES -->\n"
+        "<style>\n" + css + "</style>\n"
+    )
+    script_embed = (
+        "<!-- BIRCH HOME SLIDES - PART 3 OF 3: SCRIPT -->\n"
+        "<script>\n"
+        + strip_standalone_javascript_comments(javascript)
+        + "</script>\n"
+    )
+
+    snippets = {
+        OUT_STYLE_EMBED: style_embed,
+        OUT_HTML: markup_embed,
+        OUT_SCRIPT_EMBED: script_embed,
+    }
+    for path, snippet in snippets.items():
+        size = len(snippet.encode())
+        if size >= WEBFLOW_EMBED_LIMIT:
+            raise ValueError(f"{path.name} is {size} bytes; Webflow limit is {WEBFLOW_EMBED_LIMIT}")
+        path.write_text(snippet)
+
+    OUT_CSS.write_text(css)
+    OUT_JS.write_text(javascript)
+    for path in (*snippets, OUT_CSS, OUT_JS):
+        print(f"Wrote {path.relative_to(ROOT)} ({path.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":
