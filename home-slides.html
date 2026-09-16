@@ -425,47 +425,25 @@
   .hsm__ai-context { left: 27cqw; top: 13cqw; width: 24cqw; z-index: 4; }
   .hsm__ai-library { left: 6cqw; top: 24cqw; width: 47cqw; z-index: 5; }
   .hsm__ai-icon { left: 47cqw; top: 2cqw; width: 8cqw; z-index: 8; }
-  .hsm__chat-card {
+  .hsm__chat {
     position: absolute;
     left: 55cqw;
     top: 2cqw;
     width: 36cqw;
     height: 41cqw;
     z-index: 6;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 2cqw;
-    border-radius: 2.5cqw;
-    background: #fff;
-    color: #111117;
     box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
   }
-  .hsm__chat-question {
-    align-self: flex-end;
-    max-width: 80%;
-    padding: 1cqw 1.4cqw;
-    border-radius: 999px;
-    background: #efeff3;
-    font-size: clamp(0.6rem, 1.25cqw, 0.85rem);
-    line-height: 1.15;
+  .hsm__chat .chat-card-wrap {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
   }
-  .hsm__chat-answer {
-    display: grid;
-    gap: 1cqw;
-    color: #55545f;
-    font-size: clamp(0.58rem, 1.15cqw, 0.8rem);
-    line-height: 1.25;
+  .hsm__chat .chat-card {
+    border-radius: 6.67cqi;
+    font-size: 4.8cqi;
   }
-  .hsm__chat-answer p { margin: 0; }
-  .hsm__chat-answer strong { color: #111117; }
-  .hsm__chat-input {
-    padding: 1cqw 1.25cqw;
-    border: 1px solid #d6d5db;
-    border-radius: 999px;
-    color: #9b9aa3;
-    font-size: clamp(0.6rem, 1.2cqw, 0.8rem);
-  }
+  .hsm__chat [hidden] { display: none !important; }
 
   /* MCP collage */
   .hsm__mcp-ads { left: 24cqw; top: 7cqw; width: 40cqw; z-index: 2; }
@@ -501,6 +479,14 @@
   }
 }
 
+@media (min-width: 768px) and (max-width: 991px) {
+  .hsm__copy {
+    grid-template-columns: max-content repeat(2, minmax(0, 1fr));
+    grid-template-areas: "pill title lead";
+    align-items: baseline;
+  }
+}
+
 @media (max-width: 767px) {
   .hs { padding-block: var(--space) var(--space-lg); }
   .hsm { gap: var(--space-md); }
@@ -509,46 +495,50 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
-    padding: var(--space-md) var(--pad-card) var(--space);
+    padding: var(--space-sm) var(--space-sm) var(--space-md);
   }
-  .hsm__title { margin-top: var(--space-sm); }
-  .hsm__lead { margin-top: var(--space-lg); }
+  .hsm__pill { margin-left: 0; }
+  .hsm__title,
+  .hsm__lead {
+    width: calc(100% - 0.5rem);
+    margin-left: 0.5rem;
+  }
+  .hsm__title { margin-top: 1.25rem; }
+  .hsm__lead { margin-top: var(--space); }
   .hsm__collage { height: clamp(19rem, 94cqw, 40rem); }
-  .hsm__stage--rules { width: 300cqw; }
+  .hsm__stage { margin-left: var(--space); }
+  .hsm__stage--rules { width: 312cqw; }
   .hsm__stage--ai,
   .hsm__stage--mcp { width: 200cqw; }
 
-  .hsm__rules-schedule { left: 0; top: 0; width: 100cqw; }
-  .hsm__rules-snap { left: 7cqw; top: 20cqw; width: 14cqw; }
-  .hsm__rules-google { left: 38cqw; top: 54cqw; width: 14cqw; }
-  .hsm__rules-account { left: 2cqw; top: 68cqw; width: 68cqw; }
-  .hsm__rules-duplicate { left: 64cqw; top: 11cqw; width: 114cqw; }
-  .hsm__rules-meta { left: 157cqw; top: 4cqw; width: 14cqw; }
-  .hsm__rules-integrations { left: 120cqw; top: 79cqw; width: 68cqw; }
-  .hsm__rules-section { left: 204cqw; top: 0; width: 90cqw; }
-  .hsm__rules-frequency { left: 225cqw; top: 21cqw; width: 43cqw; }
-  .hsm__rules-tiktok { left: 210cqw; top: 53cqw; width: 14cqw; }
-  .hsm__rules-filter { left: 201cqw; top: 61cqw; width: 95cqw; }
+  .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
+  .hsm__rules-snap { left: 6.5cqw; top: 51.5cqw; width: 17.25cqw; }
+  .hsm__rules-google { left: 47.25cqw; top: 64.5cqw; width: 17.25cqw; }
+  .hsm__rules-account { left: 0; top: 73cqw; width: 60.25cqw; }
+  .hsm__rules-duplicate { left: 19.25cqw; top: 10.75cqw; width: 182.75cqw; }
+  .hsm__rules-meta { left: 174cqw; top: 5.5cqw; width: 17.25cqw; }
+  .hsm__rules-integrations { left: 94.5cqw; top: 79.5cqw; width: 111.75cqw; }
+  .hsm__rules-section { left: 217cqw; top: 0; width: 73cqw; }
+  .hsm__rules-frequency { left: 236.5cqw; top: 17.25cqw; width: 38.75cqw; }
+  .hsm__rules-tiktok { left: 221.5cqw; top: 53.75cqw; width: 19.25cqw; }
+  .hsm__rules-filter { left: 193.5cqw; top: 62.25cqw; width: 118.25cqw; }
 
   .hsm__auto-rules { left: 10cqw; top: 10cqw; width: 72cqw; height: 78cqw; border-radius: 6cqw; }
   .hsm__auto-title { left: 5cqw; top: 5cqw; font-size: clamp(0.85rem, 4cqw, 1.5rem); }
   .hsm__ai-context { left: 60cqw; top: 31cqw; width: 50cqw; }
   .hsm__ai-library { left: 15cqw; top: 50cqw; width: 90cqw; }
   .hsm__ai-icon { left: 102cqw; top: 5cqw; width: 16cqw; }
-  .hsm__chat-card { left: 110cqw; top: 5cqw; width: 76cqw; height: 88cqw; padding: 5cqw; border-radius: 5cqw; }
-  .hsm__chat-question { padding: 2cqw 3cqw; font-size: clamp(0.68rem, 2.8cqw, 0.95rem); }
-  .hsm__chat-answer { gap: 2.2cqw; font-size: clamp(0.65rem, 2.6cqw, 0.9rem); }
-  .hsm__chat-input { padding: 2.2cqw 3cqw; font-size: clamp(0.68rem, 2.8cqw, 0.95rem); }
+  .hsm__chat { left: 110cqw; top: 5cqw; width: 76cqw; height: 88cqw; }
 
-  .hsm__mcp-ads { left: 45cqw; top: 13cqw; width: 75cqw; }
-  .hsm__mcp-duplicate { left: 20cqw; top: 6cqw; width: 58cqw; }
-  .hsm__mcp-notify { left: 5cqw; top: 74cqw; width: 45cqw; }
-  .hsm__mcp-budget { left: 26cqw; top: 88cqw; width: 55cqw; }
-  .hsm__mcp-scale { left: -4cqw; top: 48cqw; width: 16cqw; }
-  .hsm__mcp-time { left: 88cqw; top: 11cqw; width: 15cqw; }
-  .hsm__mcp-logo { left: 5cqw; top: 45cqw; width: 95cqw; }
-  .hsm__mcp-line { left: 96cqw; top: 55cqw; width: 18cqw; border-top-width: 0.7cqw; }
-  .hsm__mcp-phone { left: 112cqw; top: 4cqw; width: 72cqw; }
+  .hsm__mcp-ads { left: 48cqw; top: 15cqw; width: 64cqw; }
+  .hsm__mcp-duplicate { left: 20cqw; top: 8cqw; width: 50cqw; }
+  .hsm__mcp-notify { left: 7cqw; top: 72cqw; width: 38cqw; }
+  .hsm__mcp-budget { left: 28cqw; top: 86cqw; width: 46cqw; }
+  .hsm__mcp-scale { left: 2cqw; top: 48cqw; width: 12cqw; }
+  .hsm__mcp-time { left: 84cqw; top: 12cqw; width: 12cqw; }
+  .hsm__mcp-logo { left: 8cqw; top: 45cqw; width: 80cqw; }
+  .hsm__mcp-line { left: 86cqw; top: 54cqw; width: 18cqw; border-top-width: 0.7cqw; }
+  .hsm__mcp-phone { left: 110cqw; top: 6cqw; width: 68cqw; }
   .hsm__actions .btn {
     padding-inline: 0.5rem;
     font-size: clamp(0.75rem, 3.4vw, var(--text-btn-xs-size));
@@ -556,8 +546,6 @@
 }
 
 @media (max-width: 479px) {
-  .hsm__copy { padding: var(--space) var(--space-sm); }
-  .hsm__lead { margin-top: var(--space-md); }
   .hsm__actions { gap: 0.375rem; }
   .hsm__actions .btn { font-size: clamp(0.68rem, 3.2vw, 0.8rem); }
 }
@@ -835,11 +823,22 @@
   transition: clip-path 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .hs__line.is-in { clip-path: inset(0 0 0 0); }
-.hs__phone { overflow: hidden; border-radius: calc(32 * var(--u)); font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
+.hs__phone,
+.hsm__phone { overflow: hidden; border-radius: calc(32 * var(--u)); font-family: -apple-system, system-ui, "Helvetica Neue", sans-serif; }
+.hsm__phone {
+  --u: calc(1cqw / 2.42);
+  position: absolute;
+  display: block;
+  aspect-ratio: 242 / 526;
+  container-type: inline-size;
+  border-radius: 13.22% / 6.08%;
+}
 /* the dev environment sets font-weight 600 on every element; the app is regular */
-.hs__phone, .hs__phone * { font-weight: 400; }
+.hs__phone, .hs__phone *,
+.hsm__phone, .hsm__phone * { font-weight: 400; }
 .hs__phone-shot { display: block; width: 100%; height: auto; border-radius: 0; }
-.hs__phone > * { position: absolute; }
+.hs__phone > *,
+.hsm__phone > * { position: absolute; }
 /* everything inside the phone is measured in its own units off the screenshot */
 .hs__ph-msg { left: calc(18 * var(--u)); right: calc(18 * var(--u)); top: calc(96 * var(--u)); height: calc(154 * var(--u)); color: #1d1d1f;
   display: flex; flex-direction: column; align-items: flex-start; gap: calc(12 * var(--u)); }
@@ -858,6 +857,9 @@
 .hs__ph-scroll { display: inline-block; white-space: nowrap; }
 .hs__ph-caret { display: inline-block; width: calc(1.2 * var(--u)); height: calc(12 * var(--u)); background: #f0742e; vertical-align: -0.15em; margin-left: calc(1 * var(--u)); animation: hs-caret 1s steps(2, end) infinite; }
 @keyframes hs-caret { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hs__ph-caret { animation: none; }
+}
 .hs__ph-floor { left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u)); background: #f9faf7; }
 /* keyboard layer: the same screenshot, clipped to the keys (below the strip), so it can leave */
 .hs__ph-kb {
@@ -2150,7 +2152,7 @@
               <div class="hs__ph-a" id="phA"></div>
             </div>
             <!-- typed text in the input, with a caret -->
-            <div class="hs__ph-typed" id="phTyped"><span class="hs__ph-scroll" id="phScroll"><span id="phTypedText"></span><span class="hs__ph-caret"></span></span></div>
+            <div class="hs__ph-typed" id="phTyped"><span class="hs__ph-scroll" id="phScroll"><span class="hs__ph-typed-text" id="phTypedText"></span><span class="hs__ph-caret"></span></span></div>
             <!-- screen-coloured floor: covers the strip and the keyboard baked into the
                  screenshot, so the keyboard layer above has somewhere to leave to -->
             <div class="hs__ph-floor"></div>
@@ -2215,15 +2217,43 @@
             <img class="hsm__asset hsm__ai-context" src="images/slides/01/business-context.webp" alt="Your business context" width="777" height="903" loading="lazy">
             <img class="hsm__asset hsm__ai-library" src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
             <img class="hsm__asset hsm__ai-icon" src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
-            <div class="hsm__chat-card" aria-label="Birch AI chat">
-              <div class="hsm__chat-question">Why did Meta spend jump yesterday? Check analytics and what we shipped.</div>
-              <div class="hsm__chat-answer">
-                <strong>Used:</strong>
-                <p>Birch MCP · Analytics · Linear</p>
-                <p>Birch — “Scale winners” fired 6× on Q4 Prospecting<br>Analytics — paid sessions +38%, checkout flat<br>Linear — “New PDP layout” shipped Tuesday</p>
-                <p>Your scaler reacted to Tuesday’s launch — conversion’s flat, worth a look.</p>
+            <div class="hsm__chat" data-hsm-chat aria-label="Birch AI chat">
+              <div class="chat-card-wrap">
+                <div class="chat-card">
+                  <div class="chat-card__body">
+                    <div class="chat-card__feed">
+                      <div class="chat-card__messages">
+                        <div class="chat-card__bubble" data-hsm-chat-bubble>How healthy is my setup?</div>
+                      </div>
+                      <div class="chat-card__response" data-hsm-chat-response>
+                        <div class="chat-card__response-content">
+                          <div class="hs__tools" data-hsm-chat-tools><div>
+                            <div class="hs__tool">Analyzed performance trends</div>
+                            <div class="hs__tool">Understood business context</div>
+                            <div class="hs__tool">Searched Meta Ads Library</div>
+                          </div></div>
+                          <div class="chat-card__used" data-hsm-chat-used hidden>Used:</div>
+                          <div class="chat-card__used-row" data-hsm-chat-used-row hidden>
+                            <span class="chat-card__used-names">Rules · Business context · Meta Ads Library</span>
+                          </div>
+                          <p data-hsm-chat-answer-a></p>
+                          <p data-hsm-chat-answer-b></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="chat-card__input-area">
+                    <div class="chat-card__input-wrap">
+                      <div class="chat-card__text-flow">
+                        <span class="chat-card__placeholder" data-hsm-chat-placeholder>Ask anything</span><span class="chat-card__typed" data-hsm-chat-typed></span><span class="chat-card__cursor" data-hsm-chat-cursor></span>
+                      </div>
+                      <button class="chat-card__send" data-hsm-chat-send disabled aria-label="Send">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3L13 8L8 13M3 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="hsm__chat-input">Ask anything</div>
             </div>
           </div>
         </div>
@@ -2251,7 +2281,20 @@
             <img class="hsm__asset hsm__mcp-time" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56" loading="lazy">
             <img class="hsm__asset hsm__mcp-logo" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81" loading="lazy">
             <span class="hsm__mcp-line" aria-hidden="true"></span>
-            <img class="hsm__asset hsm__mcp-phone" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy">
+            <div class="hsm__phone hsm__mcp-phone" data-hsm-phone aria-label="Claude app conversation">
+              <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy">
+              <div class="hs__ph-msg">
+                <div class="hs__ph-greet">
+                  <img class="hs__ph-star" src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
+                  <div class="hs__ph-title">Where should we scale?</div>
+                </div>
+                <div class="hs__ph-q"></div>
+                <div class="hs__ph-a"></div>
+              </div>
+              <div class="hs__ph-typed"><span class="hs__ph-scroll"><span class="hs__ph-typed-text"></span><span class="hs__ph-caret"></span></span></div>
+              <div class="hs__ph-floor"></div>
+              <div class="hs__ph-kb"><div class="hs__ph-keys"></div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2835,7 +2878,7 @@
     bubble: document.getElementById('hsBubble'),
     resp:   document.getElementById('hsResponse'),
     tools:  document.getElementById('hsTools'),
-    tool:   [].slice.call(document.querySelectorAll('.hs__tool')),
+    tool:   [],
     used:   document.getElementById('hsUsed'),
     usedRow:document.getElementById('hsUsedRow'),
     a:      document.getElementById('hsAnswerA'),
@@ -2844,6 +2887,7 @@
     hint:   document.getElementById('hsPlaceholder'),
     send:   document.getElementById('hsSend')
   };
+  ch.tool = [].slice.call(ch.tools.querySelectorAll('.hs__tool'));
   var LIT = { rules: card.querySelector('[data-frag="rules-frame"]') };
   ['business-context', 'meta-ads-library'].forEach(function (id) {
     LIT[id] = card.querySelector('[data-frag="' + id + '"]');
@@ -2935,82 +2979,307 @@
     if (!GATES.story) autoLive = true;                                      /* something may be waiting on the story */
   }
 
+  function createResponsiveChat(root) {
+    if (!root) return null;
+    var chat = {
+      bubble: root.querySelector('[data-hsm-chat-bubble]'),
+      response: root.querySelector('[data-hsm-chat-response]'),
+      tools: root.querySelector('[data-hsm-chat-tools]'),
+      tool: [].slice.call(root.querySelectorAll('.hs__tool')),
+      used: root.querySelector('[data-hsm-chat-used]'),
+      usedRow: root.querySelector('[data-hsm-chat-used-row]'),
+      a: root.querySelector('[data-hsm-chat-answer-a]'),
+      b: root.querySelector('[data-hsm-chat-answer-b]'),
+      placeholder: root.querySelector('[data-hsm-chat-placeholder]'),
+      typed: root.querySelector('[data-hsm-chat-typed]'),
+      cursor: root.querySelector('[data-hsm-chat-cursor]'),
+      send: root.querySelector('[data-hsm-chat-send]')
+    };
+    if (!chat.bubble || !chat.response || !chat.tools || !chat.a || !chat.b || !chat.typed) return null;
+
+    var running = false;
+    var timeouts = [];
+    var intervals = [];
+
+    function later(ms, fn) { timeouts.push(setTimeout(fn, ms)); }
+    function clearTimers() {
+      timeouts.forEach(clearTimeout);
+      intervals.forEach(clearInterval);
+      timeouts = [];
+      intervals = [];
+    }
+    function typeText(el, text, done) {
+      var i = 0;
+      el.textContent = '';
+      var timer = setInterval(function () {
+        el.textContent = text.slice(0, ++i);
+        if (i >= text.length) {
+          clearInterval(timer);
+          if (done) done();
+        }
+      }, 14);
+      intervals.push(timer);
+    }
+    function resetVisual() {
+      chat.bubble.classList.remove('is-visible');
+      chat.response.classList.remove('is-visible');
+      chat.tools.classList.remove('is-done');
+      chat.tool.forEach(function (tool) { tool.classList.remove('is-on', 'is-live'); });
+      chat.used.hidden = true;
+      chat.usedRow.hidden = true;
+      chat.a.textContent = '';
+      chat.b.textContent = '';
+      chat.placeholder.style.display = '';
+      chat.typed.textContent = '';
+      chat.cursor.classList.remove('is-blinking');
+      chat.send.classList.remove('is-active');
+      chat.send.disabled = true;
+    }
+    function showTool(index) {
+      chat.tool.forEach(function (tool, i) {
+        tool.classList.toggle('is-on', i <= index);
+        tool.classList.toggle('is-live', i === index);
+      });
+    }
+    function finalAnswer(done) {
+      chat.tool.forEach(function (tool) { tool.classList.remove('is-live'); });
+      chat.tools.classList.add('is-done');
+      chat.used.hidden = false;
+      chat.usedRow.hidden = false;
+      typeText(chat.a, A1, function () { typeText(chat.b, A2, done); });
+    }
+    function cycle() {
+      if (!running) return;
+      clearTimers();
+      resetVisual();
+      later(350, function () {
+        if (!running) return;
+        chat.placeholder.style.display = 'none';
+        chat.cursor.classList.add('is-blinking');
+        chat.send.disabled = false;
+        chat.send.classList.add('is-active');
+        typeText(chat.typed, Q, function () {
+          later(250, function () {
+            if (!running) return;
+            chat.cursor.classList.remove('is-blinking');
+            chat.send.classList.remove('is-active');
+            chat.send.disabled = true;
+            chat.typed.textContent = '';
+            chat.bubble.classList.add('is-visible');
+            chat.response.classList.add('is-visible');
+            showTool(0);
+            later(850, function () {
+              showTool(1);
+              later(850, function () {
+                showTool(2);
+                later(900, function () {
+                  finalAnswer(function () { later(2500, cycle); });
+                });
+              });
+            });
+          });
+        });
+      });
+    }
+    function start() {
+      if (running) return;
+      running = true;
+      cycle();
+    }
+    function stop() {
+      running = false;
+      clearTimers();
+      resetVisual();
+    }
+    function finish() {
+      stop();
+      chat.placeholder.style.display = 'none';
+      chat.bubble.classList.add('is-visible');
+      chat.response.classList.add('is-visible');
+      chat.tools.classList.add('is-done');
+      chat.used.hidden = false;
+      chat.usedRow.hidden = false;
+      chat.a.textContent = A1;
+      chat.b.textContent = A2;
+    }
+
+    resetVisual();
+    return { finish: finish, start: start, stop: stop };
+  }
+
+  var responsiveChatRoot = document.querySelector('[data-hsm-chat]');
+  var responsiveChat = createResponsiveChat(responsiveChatRoot);
+  if (responsiveChat) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      responsiveChat.finish();
+    } else {
+      var responsiveChatObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.2) responsiveChat.start();
+          else responsiveChat.stop();
+        });
+      }, { threshold: [0, 0.2] });
+      responsiveChatObserver.observe(responsiveChatRoot);
+    }
+  }
+
   /* ── Phone (slide 03) ────────────────────────────────────────
      The screenshot stays; the message area, the typed text and the tap
      plates are DOM laid over it. Key rectangles are measured off the
      screenshot in its own units (242 wide): four rows, pitch ~31. */
-  var ph = {
-    greet: document.getElementById('phGreet'), q: document.getElementById('phQ'), a: document.getElementById('phA'),
-    typed: document.getElementById('phTypedText'), scroll: document.getElementById('phScroll'), kb: document.getElementById('phKb'), keys: document.getElementById('phKeys'),
-    frag: card.querySelector('[data-frag="phone"]')
-  };
-  var KEYMAP = {};
-  (function buildKeys() {
-    if (!ph.keys) return;
-    var rows = [
-      { y: 5,   h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
-      { y: 36,  h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
-      { y: 68,  h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
-    ];
-    function add(ch, x, y, w, h) {
-      var k = document.createElement('div'); k.className = 'hs__ph-key';
-      k.style.left = 'calc(' + x + ' * var(--u))'; k.style.top = 'calc(' + y + ' * var(--u))';
-      k.style.width = 'calc(' + w + ' * var(--u))'; k.style.height = 'calc(' + h + ' * var(--u))';
-      ph.keys.appendChild(k); KEYMAP[ch] = k;
-    }
-    rows.forEach(function (r) { r.keys.split('').forEach(function (ch, i) { add(ch, r.x0 + i * r.pitch, r.y, r.w, r.h); }); });
-    add('shift', 12.1, 68, 25, 25); add('del', 204.9, 68, 25, 25);
-    add('123', 12.5, 99, 23.3, 25); add(' ', 67.5, 99, 107, 25); add('ret', 178.7, 99, 51, 25);
-    var send = document.createElement('div'); send.className = 'hs__ph-send'; ph.frag.appendChild(send); KEYMAP.send = send;
-  })();
-  function tap(ch, ms) {
-    var k = KEYMAP[ch]; if (!k) return;
-    k.classList.add('is-down'); setTimeout(function () { k.classList.remove('is-down'); }, ms || 90);
-  }
   var PHQ = 'How did the weekly UGC launch go?';
   var PHA = 'Weekly UGC launch — Q4. Ran Sunday 03:00 (your time). 6 ads live. No gaps found in your current setup.';
-  var phTimers = [], phState = -1;
-  function phStop() { phTimers.forEach(clearTimeout); phTimers = []; }
-  function phAt(ms, fn) { phTimers.push(setTimeout(fn, ms)); }
-  function phReset() {
-    phStop(); phState = -1;
-    ph.greet.classList.remove('is-gone'); ph.q.classList.remove('is-in'); ph.a.classList.remove('is-in');
-    ph.q.innerHTML = ''; ph.a.textContent = ''; ph.typed.textContent = ''; ph.scroll.style.translate = '';
-  }
-  function phPlay() {
-    if (phState === 1) return;
-    phReset(); phState = 1;
-    var t = 350, PER = 50;
-    PHQ.split('').forEach(function (ch, i) {
-      var lower = ch.toLowerCase(), upper = ch !== lower;
-      if (upper) phAt(t, function () { tap('shift', 110); });
-      if (ch === '?') phAt(t, function () { tap('123', 110); });
-      phAt(t + (upper ? 40 : 0), function () {
-        tap(lower in KEYMAP ? lower : ' ', 90); ph.typed.textContent = PHQ.slice(0, i + 1);
-        /* the caret is always in view: text and caret scroll together, like a real field */
-        var sc = ph.scroll, over = sc.offsetWidth - sc.parentNode.clientWidth;
-        sc.style.translate = (over > 0 ? -over : 0) + 'px 0';
+  function createPhone(root) {
+    if (!root) return null;
+    var ph = {
+      greet: root.querySelector('.hs__ph-greet'),
+      q: root.querySelector('.hs__ph-q'),
+      a: root.querySelector('.hs__ph-a'),
+      typed: root.querySelector('.hs__ph-typed-text'),
+      scroll: root.querySelector('.hs__ph-scroll'),
+      keys: root.querySelector('.hs__ph-keys')
+    };
+    if (!ph.greet || !ph.q || !ph.a || !ph.typed || !ph.scroll || !ph.keys) return null;
+
+    var keymap = {};
+    var timers = [];
+    var state = -1;
+    var rows = [
+      { y: 5,  h: 25, keys: 'qwertyuiop', x0: 12.1, pitch: 22.17, w: 18.4 },
+      { y: 36, h: 25, keys: 'asdfghjkl',  x0: 22.9, pitch: 22.17, w: 18.6 },
+      { y: 68, h: 25, keys: 'zxcvbnm',    x0: 45.4, pitch: 22.17, w: 18.4 }
+    ];
+
+    function addKey(ch, x, y, w, h) {
+      var key = document.createElement('div');
+      key.className = 'hs__ph-key';
+      key.style.left = 'calc(' + x + ' * var(--u))';
+      key.style.top = 'calc(' + y + ' * var(--u))';
+      key.style.width = 'calc(' + w + ' * var(--u))';
+      key.style.height = 'calc(' + h + ' * var(--u))';
+      ph.keys.appendChild(key);
+      keymap[ch] = key;
+    }
+
+    rows.forEach(function (row) {
+      row.keys.split('').forEach(function (ch, i) {
+        addKey(ch, row.x0 + i * row.pitch, row.y, row.w, row.h);
       });
-      t += PER + (ch === ' ' ? 20 : 0);
     });
-    t += 220;
-    phAt(t, function () {
-      tap('send', 140);
+    addKey('shift', 12.1, 68, 25, 25);
+    addKey('del', 204.9, 68, 25, 25);
+    addKey('123', 12.5, 99, 23.3, 25);
+    addKey(' ', 67.5, 99, 107, 25);
+    addKey('ret', 178.7, 99, 51, 25);
+    var send = document.createElement('div');
+    send.className = 'hs__ph-send';
+    root.appendChild(send);
+    keymap.send = send;
+
+    function stop() { timers.forEach(clearTimeout); timers = []; }
+    function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+    function tap(ch, ms) {
+      var key = keymap[ch];
+      if (!key) return;
+      key.classList.add('is-down');
+      at(ms || 90, function () { key.classList.remove('is-down'); });
+    }
+    function reset() {
+      stop();
+      state = -1;
+      Object.keys(keymap).forEach(function (key) { keymap[key].classList.remove('is-down'); });
+      ph.greet.classList.remove('is-gone');
+      ph.q.classList.remove('is-in');
+      ph.a.classList.remove('is-in');
+      ph.q.innerHTML = '';
+      ph.a.textContent = '';
+      ph.typed.textContent = '';
+      ph.scroll.style.translate = '';
+    }
+    function finish() {
+      reset();
+      state = 2;
       ph.greet.classList.add('is-gone');
-      ph.q.innerHTML = '<span></span>'; ph.q.firstChild.textContent = PHQ; ph.q.classList.add('is-in');
-      ph.typed.textContent = ''; ph.scroll.style.translate = '';   /* the keyboard stays, as in the app */
-    });
-    t += 450;
-    var words = PHA.split(' ');
-    words.forEach(function (w, i) {
-      phAt(t + i * 60, function () { ph.a.textContent = words.slice(0, i + 1).join(' '); ph.a.classList.add('is-in'); });
-    });
+      ph.q.innerHTML = '<span></span>';
+      ph.q.firstChild.textContent = PHQ;
+      ph.q.classList.add('is-in');
+      ph.a.textContent = PHA;
+      ph.a.classList.add('is-in');
+    }
+    function play() {
+      if (state === 1) return;
+      reset();
+      state = 1;
+      var t = 350;
+      var per = 50;
+      PHQ.split('').forEach(function (ch, i) {
+        var lower = ch.toLowerCase();
+        var upper = ch !== lower;
+        if (upper) at(t, function () { tap('shift', 110); });
+        if (ch === '?') at(t, function () { tap('123', 110); });
+        at(t + (upper ? 40 : 0), function () {
+          tap(lower in keymap ? lower : ' ', 90);
+          ph.typed.textContent = PHQ.slice(0, i + 1);
+          var over = ph.scroll.offsetWidth - ph.scroll.parentNode.clientWidth;
+          ph.scroll.style.translate = (over > 0 ? -over : 0) + 'px 0';
+        });
+        t += per + (ch === ' ' ? 20 : 0);
+      });
+      t += 220;
+      at(t, function () {
+        tap('send', 140);
+        ph.greet.classList.add('is-gone');
+        ph.q.innerHTML = '<span></span>';
+        ph.q.firstChild.textContent = PHQ;
+        ph.q.classList.add('is-in');
+        ph.typed.textContent = '';
+        ph.scroll.style.translate = '';
+      });
+      t += 450;
+      var words = PHA.split(' ');
+      words.forEach(function (word, i) {
+        at(t + i * 60, function () {
+          ph.a.textContent = words.slice(0, i + 1).join(' ');
+          ph.a.classList.add('is-in');
+        });
+      });
+    }
+
+    reset();
+    return {
+      finish: finish,
+      isActive: function () { return state !== -1; },
+      play: play,
+      reset: reset
+    };
   }
+
+  var phone = createPhone(card.querySelector('[data-frag="phone"]'));
   /* segment 5 is the phone's hold: play once it has arrived, reset when scrolled back before it */
   var PHONE_SEG = 5;
   function drivePhone(a, local) {
-    if (a < PHONE_SEG - 1 || (a === PHONE_SEG - 1 && local < 0.6)) { if (phState !== -1) phReset(); return; }
-    if (phState === -1) { phPlay(); }
+    if (!phone) return;
+    if (a < PHONE_SEG - 1 || (a === PHONE_SEG - 1 && local < 0.6)) {
+      if (phone.isActive()) phone.reset();
+      return;
+    }
+    if (!phone.isActive()) phone.play();
+  }
+
+  var responsivePhoneRoot = document.querySelector('[data-hsm-phone]');
+  var responsivePhone = createPhone(responsivePhoneRoot);
+  if (responsivePhone) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      responsivePhone.finish();
+    } else {
+      var responsivePhoneObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.2) responsivePhone.play();
+          else if (responsivePhone.isActive()) responsivePhone.reset();
+        });
+      }, { threshold: [0, 0.2] });
+      responsivePhoneObserver.observe(responsivePhoneRoot);
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
