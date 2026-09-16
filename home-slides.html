@@ -295,6 +295,273 @@
 /* Debug override — pin the canvas to a fixed design height */
 .is-forced .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
 
+/* ── Responsive static flow ───────────────────────────────────
+   Tablet and mobile use three ordinary page blocks rather than the desktop
+   sticky story. Each scene is a single, horizontally scrollable collage: all
+   of its pieces are present at once and none of the desktop transitions run. */
+.hsm { display: none; }
+
+@media (max-width: 991px) {
+  .hs {
+    height: auto;
+    padding-block: var(--space-md) var(--space-xl);
+  }
+  .hs__sticky { display: none; }
+
+  .hsm {
+    display: grid;
+    gap: var(--space-lg);
+  }
+  .hsm__block { min-width: 0; }
+  .hsm__surface {
+    overflow: hidden;
+    background: var(--hsm-bg);
+    border-radius: var(--radius-xl);
+  }
+  .hsm__copy {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "pill lead"
+      "title lead";
+    column-gap: var(--space-md);
+    row-gap: var(--space-sm);
+    align-items: start;
+    padding: var(--space-md) var(--pad-card) var(--space);
+  }
+  .hsm__pill {
+    grid-area: pill;
+    justify-self: start;
+    margin-left: 20px;
+    padding: 0.12em 0.55em 0.18em;
+    border-radius: var(--radius-pill);
+    background: rgba(0, 0, 0, 0.24);
+    color: var(--color-text);
+    font-size: var(--text-body-size);
+    line-height: var(--text-body-lh);
+  }
+  .hsm__title {
+    grid-area: title;
+    margin: 0;
+    color: var(--color-text);
+    text-wrap: balance;
+  }
+  .hsm__lead {
+    grid-area: lead;
+    margin: 0;
+    color: var(--color-text);
+    text-wrap: pretty;
+  }
+
+  .hsm__collage {
+    position: relative;
+    height: clamp(20rem, 43.7cqw, 34rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    container-type: inline-size;
+    cursor: grab;
+    touch-action: pan-x pan-y;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hsm__collage::-webkit-scrollbar { display: none; }
+  .hsm__collage.is-dragging { cursor: grabbing; }
+  .hsm__stage {
+    position: relative;
+    width: 132cqw;
+    height: 100%;
+  }
+  .hsm__asset {
+    position: absolute;
+    display: block;
+    max-width: none;
+    height: auto;
+    border-radius: 0;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Rules collage */
+  .hsm__rules-schedule { left: -3cqw; top: 1.5cqw; width: 31cqw; z-index: 1; }
+  .hsm__rules-snap { left: -2cqw; top: 24cqw; width: 8cqw; z-index: 5; }
+  .hsm__rules-google { left: 17cqw; top: 30cqw; width: 8cqw; z-index: 5; }
+  .hsm__rules-account { left: -5cqw; top: 34cqw; width: 28cqw; z-index: 6; }
+  .hsm__rules-duplicate { left: 4cqw; top: 5cqw; width: 85cqw; z-index: 4; filter: drop-shadow(0 0.5rem 1.25rem rgba(0,0,0,0.16)); }
+  .hsm__rules-meta { left: 76cqw; top: 2.5cqw; width: 8cqw; z-index: 7; filter: drop-shadow(0 0.35rem 0.7rem rgba(0,0,0,0.16)); }
+  .hsm__rules-integrations { left: 39cqw; top: 37cqw; width: 52cqw; z-index: 3; }
+  .hsm__rules-section { left: 96cqw; top: 0; width: 34cqw; z-index: 2; }
+  .hsm__rules-frequency { left: 105cqw; top: 8cqw; width: 18cqw; z-index: 5; }
+  .hsm__rules-tiktok { left: 98cqw; top: 25cqw; width: 9cqw; z-index: 6; filter: drop-shadow(0 0.35rem 0.7rem rgba(0,0,0,0.16)); }
+  .hsm__rules-filter { left: 85cqw; top: 29cqw; width: 55cqw; z-index: 5; filter: drop-shadow(0 0.4rem 0.8rem rgba(0,0,0,0.12)); }
+
+  /* AI collage */
+  .hsm__auto-rules {
+    position: absolute;
+    left: 3cqw;
+    top: 5cqw;
+    width: 36cqw;
+    height: 36cqw;
+    z-index: 2;
+    overflow: hidden;
+    border-radius: 2.5cqw;
+    background: #1888f7;
+    box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,0.12);
+  }
+  .hsm__auto-title {
+    position: absolute;
+    left: 2.5cqw;
+    top: 2.5cqw;
+    z-index: 6;
+    color: #fff;
+    font-size: clamp(0.75rem, 2cqw, 1.2rem);
+    line-height: 1.15;
+  }
+  .hsm__auto-rules .hsm__asset { left: 28%; width: 96%; filter: drop-shadow(0 0.35rem 0.8rem rgba(0,0,0,0.12)); }
+  .hsm__ai-pause { top: 27%; }
+  .hsm__ai-increase { top: 39%; }
+  .hsm__ai-duplicate { top: 52%; }
+  .hsm__ai-context { left: 27cqw; top: 13cqw; width: 24cqw; z-index: 4; }
+  .hsm__ai-library { left: 6cqw; top: 24cqw; width: 47cqw; z-index: 5; }
+  .hsm__ai-icon { left: 47cqw; top: 2cqw; width: 8cqw; z-index: 8; }
+  .hsm__chat-card {
+    position: absolute;
+    left: 55cqw;
+    top: 2cqw;
+    width: 36cqw;
+    height: 41cqw;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2cqw;
+    border-radius: 2.5cqw;
+    background: #fff;
+    color: #111117;
+    box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+  }
+  .hsm__chat-question {
+    align-self: flex-end;
+    max-width: 80%;
+    padding: 1cqw 1.4cqw;
+    border-radius: 999px;
+    background: #efeff3;
+    font-size: clamp(0.6rem, 1.25cqw, 0.85rem);
+    line-height: 1.15;
+  }
+  .hsm__chat-answer {
+    display: grid;
+    gap: 1cqw;
+    color: #55545f;
+    font-size: clamp(0.58rem, 1.15cqw, 0.8rem);
+    line-height: 1.25;
+  }
+  .hsm__chat-answer p { margin: 0; }
+  .hsm__chat-answer strong { color: #111117; }
+  .hsm__chat-input {
+    padding: 1cqw 1.25cqw;
+    border: 1px solid #d6d5db;
+    border-radius: 999px;
+    color: #9b9aa3;
+    font-size: clamp(0.6rem, 1.2cqw, 0.8rem);
+  }
+
+  /* MCP collage */
+  .hsm__mcp-ads { left: 24cqw; top: 7cqw; width: 40cqw; z-index: 2; }
+  .hsm__mcp-duplicate { left: 8cqw; top: 4cqw; width: 26cqw; z-index: 5; transform: rotate(-15deg); }
+  .hsm__mcp-notify { left: 2cqw; top: 31cqw; width: 20cqw; z-index: 6; transform: rotate(-2deg); }
+  .hsm__mcp-budget { left: 13cqw; top: 39cqw; width: 27cqw; z-index: 6; transform: rotate(-10deg); }
+  .hsm__mcp-scale { left: -2cqw; top: 24cqw; width: 8cqw; z-index: 6; transform: rotate(-8deg); }
+  .hsm__mcp-time { left: 36cqw; top: 5cqw; width: 8cqw; z-index: 6; transform: rotate(8deg); }
+  .hsm__mcp-logo { left: 10cqw; top: 20cqw; width: 43cqw; z-index: 5; }
+  .hsm__mcp-line { position: absolute; left: 49cqw; top: 24cqw; width: 18cqw; border-top: 0.35cqw dotted #fff; z-index: 4; }
+  .hsm__mcp-phone { left: 64cqw; top: 1.5cqw; width: 32cqw; z-index: 3; filter: drop-shadow(0 0.75rem 2rem rgba(0,0,0,0.16)); }
+
+  .hsm__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap-sm);
+    margin-top: var(--gap-main);
+  }
+  .hsm__actions .btn {
+    min-width: 0;
+    width: 100%;
+  }
+  .hsm__actions .btn-stroke {
+    background: rgba(255,255,255,0.3);
+    border-color: transparent;
+    border-style: solid;
+  }
+  .hsm__actions .btn:hover {
+    opacity: 1;
+    background: var(--color-text-inverted);
+    border-color: transparent;
+    color: var(--color-text);
+  }
+}
+
+@media (max-width: 767px) {
+  .hs { padding-block: var(--space) var(--space-lg); }
+  .hsm { gap: var(--space-md); }
+  .hsm__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: var(--space-md) var(--pad-card) var(--space);
+  }
+  .hsm__title { margin-top: var(--space-sm); }
+  .hsm__lead { margin-top: var(--space-lg); }
+  .hsm__collage { height: clamp(19rem, 94cqw, 40rem); }
+  .hsm__stage--rules { width: 300cqw; }
+  .hsm__stage--ai,
+  .hsm__stage--mcp { width: 200cqw; }
+
+  .hsm__rules-schedule { left: 0; top: 0; width: 100cqw; }
+  .hsm__rules-snap { left: 7cqw; top: 20cqw; width: 14cqw; }
+  .hsm__rules-google { left: 38cqw; top: 54cqw; width: 14cqw; }
+  .hsm__rules-account { left: 2cqw; top: 68cqw; width: 68cqw; }
+  .hsm__rules-duplicate { left: 64cqw; top: 11cqw; width: 114cqw; }
+  .hsm__rules-meta { left: 157cqw; top: 4cqw; width: 14cqw; }
+  .hsm__rules-integrations { left: 120cqw; top: 79cqw; width: 68cqw; }
+  .hsm__rules-section { left: 204cqw; top: 0; width: 90cqw; }
+  .hsm__rules-frequency { left: 225cqw; top: 21cqw; width: 43cqw; }
+  .hsm__rules-tiktok { left: 210cqw; top: 53cqw; width: 14cqw; }
+  .hsm__rules-filter { left: 201cqw; top: 61cqw; width: 95cqw; }
+
+  .hsm__auto-rules { left: 10cqw; top: 10cqw; width: 72cqw; height: 78cqw; border-radius: 6cqw; }
+  .hsm__auto-title { left: 5cqw; top: 5cqw; font-size: clamp(0.85rem, 4cqw, 1.5rem); }
+  .hsm__ai-context { left: 60cqw; top: 31cqw; width: 50cqw; }
+  .hsm__ai-library { left: 15cqw; top: 50cqw; width: 90cqw; }
+  .hsm__ai-icon { left: 102cqw; top: 5cqw; width: 16cqw; }
+  .hsm__chat-card { left: 110cqw; top: 5cqw; width: 76cqw; height: 88cqw; padding: 5cqw; border-radius: 5cqw; }
+  .hsm__chat-question { padding: 2cqw 3cqw; font-size: clamp(0.68rem, 2.8cqw, 0.95rem); }
+  .hsm__chat-answer { gap: 2.2cqw; font-size: clamp(0.65rem, 2.6cqw, 0.9rem); }
+  .hsm__chat-input { padding: 2.2cqw 3cqw; font-size: clamp(0.68rem, 2.8cqw, 0.95rem); }
+
+  .hsm__mcp-ads { left: 45cqw; top: 13cqw; width: 75cqw; }
+  .hsm__mcp-duplicate { left: 20cqw; top: 6cqw; width: 58cqw; }
+  .hsm__mcp-notify { left: 5cqw; top: 74cqw; width: 45cqw; }
+  .hsm__mcp-budget { left: 26cqw; top: 88cqw; width: 55cqw; }
+  .hsm__mcp-scale { left: -4cqw; top: 48cqw; width: 16cqw; }
+  .hsm__mcp-time { left: 88cqw; top: 11cqw; width: 15cqw; }
+  .hsm__mcp-logo { left: 5cqw; top: 45cqw; width: 95cqw; }
+  .hsm__mcp-line { left: 96cqw; top: 55cqw; width: 18cqw; border-top-width: 0.7cqw; }
+  .hsm__mcp-phone { left: 112cqw; top: 4cqw; width: 72cqw; }
+  .hsm__actions .btn {
+    padding-inline: 0.5rem;
+    font-size: clamp(0.75rem, 3.4vw, var(--text-btn-xs-size));
+  }
+}
+
+@media (max-width: 479px) {
+  .hsm__copy { padding: var(--space) var(--space-sm); }
+  .hsm__lead { margin-top: var(--space-md); }
+  .hsm__actions { gap: 0.375rem; }
+  .hsm__actions .btn { font-size: clamp(0.68rem, 3.2vw, 0.8rem); }
+}
+
 /* ── Scene fragments ──────────────────────────────────────────
    Two layers of interpolation, applied in this order:
 
@@ -1899,6 +2166,101 @@
 
     </div>
   </div>
+
+  <div class="container hsm">
+    <article class="hsm__block" style="--hsm-bg:#1877F2">
+      <div class="hsm__surface">
+        <header class="hsm__copy">
+          <span class="hsm__pill">Rules</span>
+          <h2 class="hsm__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
+          <p class="hsm__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
+        </header>
+        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Rules interface collage">
+          <div class="hsm__stage hsm__stage--rules">
+            <img class="hsm__asset hsm__rules-schedule" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times" width="875" height="1271" loading="lazy">
+            <img class="hsm__asset hsm__rules-snap" src="images/slides/01/platform-snapchat.webp" alt="Snapchat" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-google" src="images/slides/01/platform-google-ads.webp" alt="Google Ads" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-account" src="images/slides/01/ad-account.webp" alt="Ad account" width="625" height="252" loading="lazy">
+            <img class="hsm__asset hsm__rules-duplicate" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+            <img class="hsm__asset hsm__rules-meta" src="images/slides/01/platform-meta.webp" alt="Meta" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-integrations" src="images/slides/01/integrations.webp" alt="Integrations" width="1339" height="227" loading="lazy">
+            <img class="hsm__asset hsm__rules-section" src="images/slides/01/schedule-section.webp" alt="Schedule" width="810" height="421" loading="lazy">
+            <img class="hsm__asset hsm__rules-frequency" src="images/slides/01/frequency-popover.webp" alt="Frequency" width="432" height="445" loading="lazy">
+            <img class="hsm__asset hsm__rules-tiktok" src="images/slides/01/platform-tiktok.webp" alt="TikTok" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-filter" src="images/slides/01/filter.webp" alt="Filter" width="1474" height="252" loading="lazy">
+          </div>
+        </div>
+      </div>
+      <div class="hsm__actions">
+        <a class="btn btn-stroke btn-xs" href="#">Explore integrations</a>
+        <a class="btn btn-default btn-xs" href="#">More about Rules</a>
+      </div>
+    </article>
+
+    <article class="hsm__block" style="--hsm-bg:#5B45CD">
+      <div class="hsm__surface">
+        <header class="hsm__copy">
+          <span class="hsm__pill">AI</span>
+          <h2 class="hsm__title t-h5">Ask in natural language to get a complex rule built</h2>
+          <p class="hsm__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
+        </header>
+        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Birch AI interface collage">
+          <div class="hsm__stage hsm__stage--ai">
+            <div class="hsm__auto-rules">
+              <span class="hsm__auto-title">Your automated rules</span>
+              <img class="hsm__asset hsm__ai-pause" src="images/slides/01/rule-card-pause.webp" alt="Pause rule" width="1381" height="461" loading="lazy">
+              <img class="hsm__asset hsm__ai-increase" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="1552" height="518" loading="lazy">
+              <img class="hsm__asset hsm__ai-duplicate" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+            </div>
+            <img class="hsm__asset hsm__ai-context" src="images/slides/01/business-context.webp" alt="Your business context" width="777" height="903" loading="lazy">
+            <img class="hsm__asset hsm__ai-library" src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
+            <img class="hsm__asset hsm__ai-icon" src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
+            <div class="hsm__chat-card" aria-label="Birch AI chat">
+              <div class="hsm__chat-question">Why did Meta spend jump yesterday? Check analytics and what we shipped.</div>
+              <div class="hsm__chat-answer">
+                <strong>Used:</strong>
+                <p>Birch MCP · Analytics · Linear</p>
+                <p>Birch — “Scale winners” fired 6× on Q4 Prospecting<br>Analytics — paid sessions +38%, checkout flat<br>Linear — “New PDP layout” shipped Tuesday</p>
+                <p>Your scaler reacted to Tuesday’s launch — conversion’s flat, worth a look.</p>
+              </div>
+              <div class="hsm__chat-input">Ask anything</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hsm__actions">
+        <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
+        <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
+      </div>
+    </article>
+
+    <article class="hsm__block" style="--hsm-bg:#4450F2">
+      <div class="hsm__surface">
+        <header class="hsm__copy">
+          <span class="hsm__pill">MCP</span>
+          <h2 class="hsm__title t-h5">Your account, reachable from wherever you already work</h2>
+          <p class="hsm__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
+        </header>
+        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Birch MCP interface collage">
+          <div class="hsm__stage hsm__stage--mcp">
+            <img class="hsm__asset hsm__mcp-ads" src="images/slides/01/ads-collage.webp" alt="Creative ads" width="1205" height="1000" loading="lazy">
+            <img class="hsm__asset hsm__mcp-duplicate" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-notify" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-budget" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-scale" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56" loading="lazy">
+            <img class="hsm__asset hsm__mcp-time" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56" loading="lazy">
+            <img class="hsm__asset hsm__mcp-logo" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81" loading="lazy">
+            <span class="hsm__mcp-line" aria-hidden="true"></span>
+            <img class="hsm__asset hsm__mcp-phone" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy">
+          </div>
+        </div>
+      </div>
+      <div class="hsm__actions">
+        <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
+        <a class="btn btn-default btn-xs" href="#">More about MCP</a>
+      </div>
+    </article>
+  </div>
 </section>
 
 <script>
@@ -1926,6 +2288,54 @@
   var canvas = document.getElementById('canvas');
   var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
   var root   = document.documentElement;
+
+  /* Responsive collages are ordinary horizontal scrollers on touch screens.
+     Mouse dragging and arrow keys make the same interaction available on
+     laptops without introducing a carousel or transitions between scenes. */
+  [].slice.call(document.querySelectorAll('[data-hsm-drag]')).forEach(function (scroller) {
+    var dragging = false;
+    var startX = 0;
+    var startScroll = 0;
+
+    scroller.addEventListener('dragstart', function (event) {
+      event.preventDefault();
+    });
+
+    scroller.addEventListener('pointerdown', function (event) {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      dragging = true;
+      startX = event.clientX;
+      startScroll = scroller.scrollLeft;
+      scroller.classList.add('is-dragging');
+      scroller.setPointerCapture(event.pointerId);
+    });
+
+    scroller.addEventListener('pointermove', function (event) {
+      if (!dragging) return;
+      scroller.scrollLeft = startScroll - (event.clientX - startX);
+      event.preventDefault();
+    });
+
+    function stopDragging(event) {
+      if (!dragging) return;
+      dragging = false;
+      scroller.classList.remove('is-dragging');
+      if (event && scroller.hasPointerCapture(event.pointerId)) {
+        scroller.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    scroller.addEventListener('pointerup', stopDragging);
+    scroller.addEventListener('pointercancel', stopDragging);
+    scroller.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      scroller.scrollBy({
+        left: (event.key === 'ArrowLeft' ? -1 : 1) * scroller.clientWidth * 0.6,
+        behavior: 'smooth'
+      });
+      event.preventDefault();
+    });
+  });
 
   /* Which slide each step belongs to. */
   var STEPS = [
@@ -2071,6 +2481,7 @@
      twice: once now and once the real font metrics are in, because the
      fallback font wraps the paragraph differently (dev-pages.md). */
   function lockBarHeight() {
+    if (getComputedStyle(sticky).display === 'none') return;
     var cs = getComputedStyle(root), rootPx = parseFloat(cs.fontSize);
     root.style.setProperty('--bar-h', '0rem');
     var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
