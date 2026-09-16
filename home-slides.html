@@ -217,6 +217,7 @@
 }
 @media (min-width: 992px) {
   .hs__bar { --hs-tag-column: calc(3.5rem + 44px); }
+  .hs__pills { translate: 12px 0; }
   .hs__title { translate: -10px 0; }
   .hs__lead { position: relative; left: -44px; }
 }
@@ -372,6 +373,7 @@
     width: 132cqw;
     height: 100%;
   }
+  .hsm__stage--ai { width: 100cqw; }
   .hsm__asset {
     position: absolute;
     display: block;
@@ -386,7 +388,7 @@
   /* Rules collage */
   .hsm__rules-schedule { left: -3cqw; top: 1.5cqw; width: 31cqw; z-index: 1; }
   .hsm__rules-snap { left: -2cqw; top: 24cqw; width: 8cqw; z-index: 5; }
-  .hsm__rules-google { left: 17cqw; top: 30cqw; width: 8cqw; z-index: 5; }
+  .hsm__rules-google { left: 17cqw; top: 30cqw; width: 8cqw; z-index: 20; }
   .hsm__rules-account { left: -5cqw; top: 34cqw; width: 28cqw; z-index: 6; }
   .hsm__rules-duplicate { left: 4cqw; top: 5cqw; width: 85cqw; z-index: 4; filter: drop-shadow(0 0.5rem 1.25rem rgba(0,0,0,0.16)); }
   .hsm__rules-meta { left: 76cqw; top: 2.5cqw; width: 8cqw; z-index: 7; filter: drop-shadow(0 0.35rem 0.7rem rgba(0,0,0,0.16)); }
@@ -399,38 +401,38 @@
   /* AI collage */
   .hsm__auto-rules {
     position: absolute;
-    left: 3cqw;
-    top: 5cqw;
-    width: 36cqw;
-    height: 36cqw;
+    left: 2.31cqw;
+    top: 5.46cqw;
+    width: 22.4cqw;
+    height: 22.32cqw;
     z-index: 2;
     overflow: hidden;
-    border-radius: 2.5cqw;
+    border-radius: 1.3cqw;
     background: #1888f7;
     box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,0.12);
   }
   .hsm__auto-title {
     position: absolute;
-    left: 2.5cqw;
-    top: 2.5cqw;
+    left: 1.7cqw;
+    top: 1.46cqw;
     z-index: 6;
     color: #fff;
-    font-size: clamp(0.75rem, 2cqw, 1.2rem);
+    font-size: clamp(0.65rem, 1.56cqw, 1.2rem);
     line-height: 1.15;
   }
-  .hsm__auto-rules .hsm__asset { left: 28%; width: 96%; filter: drop-shadow(0 0.35rem 0.8rem rgba(0,0,0,0.12)); }
-  .hsm__ai-pause { top: 27%; }
-  .hsm__ai-increase { top: 39%; }
-  .hsm__ai-duplicate { top: 52%; }
-  .hsm__ai-context { left: 27cqw; top: 13cqw; width: 24cqw; z-index: 4; }
-  .hsm__ai-library { left: 6cqw; top: 24cqw; width: 47cqw; z-index: 5; }
-  .hsm__ai-icon { left: 47cqw; top: 2cqw; width: 8cqw; z-index: 8; }
+  .hsm__auto-rules .hsm__asset { filter: drop-shadow(0 0.35rem 0.8rem rgba(0,0,0,0.12)); }
+  .hsm__ai-pause { left: 7.04cqw; top: 5.03cqw; width: 39.99cqw; }
+  .hsm__ai-increase { left: 4.53cqw; top: 8.36cqw; width: 44.95cqw; }
+  .hsm__ai-duplicate { left: 2.35cqw; top: 11.93cqw; width: 49.32cqw; }
+  .hsm__ai-context { left: 18.3cqw; top: 13.59cqw; width: 15.77cqw; z-index: 4; }
+  .hsm__ai-library { left: 3.86cqw; top: 22.1cqw; width: 27.31cqw; z-index: 5; }
+  .hsm__ai-icon { left: 31.21cqw; top: 5.22cqw; width: 5.19cqw; z-index: 8; }
   .hsm__chat {
     position: absolute;
-    left: 55cqw;
-    top: 2cqw;
-    width: 36cqw;
-    height: 41cqw;
+    left: 36.65cqw;
+    top: 5.22cqw;
+    width: 24.35cqw;
+    height: 31.72cqw;
     z-index: 6;
     box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
   }
@@ -485,6 +487,9 @@
     grid-template-areas: "pill title lead";
     align-items: baseline;
   }
+  .hsm__pill { translate: -20px 0; }
+  .hsm__title,
+  .hsm__lead { translate: -28px 0; }
 }
 
 @media (max-width: 767px) {
@@ -508,7 +513,7 @@
   .hsm__collage { height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
   .hsm__stage--rules { width: 312cqw; }
-  .hsm__stage--ai,
+  .hsm__stage--ai { width: 122cqw; }
   .hsm__stage--mcp { width: 200cqw; }
 
   .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
@@ -523,12 +528,15 @@
   .hsm__rules-tiktok { left: 221.5cqw; top: 53.75cqw; width: 19.25cqw; }
   .hsm__rules-filter { left: 193.5cqw; top: 62.25cqw; width: 118.25cqw; }
 
-  .hsm__auto-rules { left: 10cqw; top: 10cqw; width: 72cqw; height: 78cqw; border-radius: 6cqw; }
-  .hsm__auto-title { left: 5cqw; top: 5cqw; font-size: clamp(0.85rem, 4cqw, 1.5rem); }
-  .hsm__ai-context { left: 60cqw; top: 31cqw; width: 50cqw; }
-  .hsm__ai-library { left: 15cqw; top: 50cqw; width: 90cqw; }
-  .hsm__ai-icon { left: 102cqw; top: 5cqw; width: 16cqw; }
-  .hsm__chat { left: 110cqw; top: 5cqw; width: 76cqw; height: 88cqw; }
+  .hsm__auto-rules { left: 4.62cqw; top: 10.92cqw; width: 44.8cqw; height: 44.64cqw; border-radius: 2.6cqw; }
+  .hsm__auto-title { left: 3.4cqw; top: 2.92cqw; font-size: clamp(0.75rem, 3.12cqw, 1.2rem); }
+  .hsm__ai-pause { left: 14.08cqw; top: 10.06cqw; width: 79.98cqw; }
+  .hsm__ai-increase { left: 9.06cqw; top: 16.72cqw; width: 89.9cqw; }
+  .hsm__ai-duplicate { left: 4.7cqw; top: 23.86cqw; width: 98.64cqw; }
+  .hsm__ai-context { left: 36.6cqw; top: 27.18cqw; width: 31.54cqw; }
+  .hsm__ai-library { left: 7.72cqw; top: 44.2cqw; width: 54.62cqw; }
+  .hsm__ai-icon { left: 62.42cqw; top: 10.44cqw; width: 10.38cqw; }
+  .hsm__chat { left: 73.3cqw; top: 10.44cqw; width: 48.7cqw; height: 63.44cqw; }
 
   .hsm__mcp-ads { left: 48cqw; top: 15cqw; width: 64cqw; }
   .hsm__mcp-duplicate { left: 20cqw; top: 8cqw; width: 50cqw; }
@@ -2016,7 +2024,7 @@
                style="--x:56; --y:169; --w:175.02; --dy:37; z-index:2">
           <img data-frag="platform-google-ads" class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:3">
+               style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:40">
           <img data-frag="integrations" class="hs__frag" src="images/slides/01/integrations.webp" alt="Integrations"
                width="1339" height="227" loading="lazy" decoding="async"
                style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; z-index:4">
@@ -2062,7 +2070,7 @@
 
           <div data-frag="business-context" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
                role="img" aria-label="Your business context"
-               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"></div>
+               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.png)"></div>
           <div data-frag="meta-ads-library" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
                role="img" aria-label="Meta ads library"
                style="--ring-r:16; --x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
@@ -2214,7 +2222,7 @@
               <img class="hsm__asset hsm__ai-increase" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="1552" height="518" loading="lazy">
               <img class="hsm__asset hsm__ai-duplicate" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
             </div>
-            <img class="hsm__asset hsm__ai-context" src="images/slides/01/business-context.webp" alt="Your business context" width="777" height="903" loading="lazy">
+            <img class="hsm__asset hsm__ai-context" src="images/slides/01/business-context.png" alt="Your business context" width="619" height="714" loading="lazy">
             <img class="hsm__asset hsm__ai-library" src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
             <img class="hsm__asset hsm__ai-icon" src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
             <div class="hsm__chat" data-hsm-chat aria-label="Birch AI chat">
