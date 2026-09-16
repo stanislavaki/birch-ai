@@ -38,7 +38,7 @@
 
   var brand = document.createElement('span');
   brand.className = 'u-head__brand';
-  brand.textContent = 'Bïrch — internal';
+  brand.textContent = 'Birch Comm Design System';
   head.appendChild(brand);
 
   var nav = document.createElement('nav');

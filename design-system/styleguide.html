@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Birch Design System — Styleguide</title>
+<title>Birch Comm Design System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -214,6 +214,35 @@
   }
   .sg-anchors a:hover { color: rgba(255,255,255,0.75); }
 
+  /* ---- Embed component preview ---- */
+  .sg-embed-frame {
+    container-type: inline-size;
+    overflow: hidden;
+    width: 100%;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg);
+  }
+  .sg-embed-frame iframe {
+    display: block;
+    width: 100%;
+    height: 280px;
+    border: 0;
+  }
+  .sg-embed-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-md);
+    margin-top: var(--space-sm);
+    color: var(--color-text-grey);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.75rem;
+  }
+  .sg-embed-meta code { color: var(--color-text); }
+  @container (max-width: 767px) {
+    .sg-embed-frame iframe { height: 220px; }
+  }
+
   /* ---- Accordion autoplay ---- */
   @keyframes acc-bar {
     from { width: 0%; }
@@ -228,7 +257,7 @@
 <body>
 
 <div class="sg-header">
-  <h1>Birch Design System — Styleguide</h1>
+  <h1>Birch Comm Design System</h1>
   <p>Visual reference for all tokens in <code>tokens.css</code> · Source: Figma "Birch website styleguide"</p>
   <div class="sg-tabs">
     <button class="sg-tab is-active" onclick="switchTab('tokens', this)">Tokens</button>
@@ -253,6 +282,7 @@
     <a href="#s-accordion">Card Accordion</a>
     <a href="#s-chat-card">Chat Card</a>
     <a href="#s-product-banner">Product Update Banner</a>
+    <a href="#s-trusted-by">Trusted by</a>
     <a href="#s-live">Live Usage Demo</a>
   </nav>
 </div>
@@ -1381,6 +1411,29 @@
     </table>
   </section>
 
+  <!-- ============ TRUSTED BY ============ -->
+  <section class="sg-section">
+    <div class="sg-section-label green" id="s-trusted-by">Trusted by</div>
+    <hr class="sg-divider" />
+    <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin: 0 0 2rem;">
+      Customer logo strip for the Webflow home page. Desktop preserves the Figma row; mobile uses a continuous carousel with faded edges.
+    </p>
+
+    <div class="sg-embed-frame">
+      <iframe
+        src="../debug/customers-preview.html?v=trusted-by"
+        title="Trusted by component preview"
+        loading="eager"
+      ></iframe>
+    </div>
+    <div class="sg-embed-meta">
+      <span>Embed: <code>embed/customers-embed.html</code></span>
+      <span>Webflow host: <code>cc-home-top</code></span>
+      <span>Mobile: <code>&le;767px</code></span>
+      <span>Motion: <code>48s linear infinite</code></span>
+    </div>
+  </section>
+
   <!-- ============ LIVE USAGE DEMO ============ -->
   <section class="sg-section">
     <div class="sg-section-label orange" id="s-live">Live Usage Demo</div>
@@ -1435,6 +1488,6 @@
     window.scrollTo({ top: 0 });
   }
 </script>
-<script src="../design-system/utility-header.js?v=2"></script>
+<script src="../design-system/utility-header.js?v=3"></script>
 </body>
 </html>
