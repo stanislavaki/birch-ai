@@ -147,7 +147,7 @@
 .hs__pager {
   position: absolute;
   left: var(--pad-card);
-  top: 0.125rem;
+  inset-block: 0;
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -167,7 +167,8 @@
 }
 .hs__dot:hover { background: rgba(255, 255, 255, 0.8); }
 .hs__dot.is-active {
-  height: 2.25rem;
+  flex: 1 1 0;
+  height: auto;
   background: linear-gradient(180deg, #fff calc(var(--fill) * 100%), rgba(255, 255, 255, 0.3) 0);
 }
 .hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
@@ -202,15 +203,22 @@
 
 .hs__head { padding-block: var(--pad-card); }
 
-/* ── Top bar — tag, equal headline/body copy, then actions ───────── */
+/* ── Top bar — tag plus three matching content columns ───────────── */
 .hs__bar {
+  --hs-tag-column: 3.5rem;
   min-height: var(--bar-h);
   display: grid;
-  /* The tag gets its own track, leaving the headline and body columns equal. */
-  grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.85fr);
+  align-items: baseline;
+  /* A fixed tag track keeps every copy column aligned across all slides. */
+  grid-template-columns: var(--hs-tag-column) repeat(3, minmax(0, 1fr));
   gap: var(--gap-md);
   /* left column starts after the vertical pager */
   padding-inline: calc(var(--pad-card) + 1.5rem) var(--pad-card);
+}
+@media (min-width: 992px) {
+  .hs__bar { --hs-tag-column: calc(3.5rem + 44px); }
+  .hs__title { translate: -10px 0; }
+  .hs__lead { position: relative; left: -44px; }
 }
 
 .hs__heading {
@@ -235,7 +243,13 @@
   padding: 0.058em 0.462em 0.154em;
 }
 
-.hs__title { color: var(--color-text); text-wrap: balance; margin: 0; min-width: 0; }
+.hs__title {
+  color: var(--color-text);
+  text-wrap: balance;
+  margin: 0;
+  min-width: 0;
+}
+.hs__bar[data-slide="1"] .hs__title { text-wrap: wrap; }
 .hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
 
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
@@ -1702,7 +1716,7 @@
           <header class="hs__bar" data-slide="1" data-bg="#4450F2">
             <div class="hs__heading">
               <div class="hs__pills"><span class="hs__pill t-body">AI</span></div>
-              <h2 class="hs__title t-h5">Ask in plain English, get a rule that runs itself</h2>
+              <h2 class="hs__title t-h5">Ask in natural language to get a complex rule built</h2>
             </div>
             <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
             <div class="hs__buttons">
