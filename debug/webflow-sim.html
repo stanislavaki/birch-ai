@@ -302,6 +302,23 @@
     </div>
   </nav>
 
+  <!-- Trusted by embed -->
+  <section class="section">
+    <div class="container">
+      <div class="bento-block" style="padding:1.5rem;border-radius:1.5rem;background:#2A2A2A;">
+        <h2 style="margin:0;color:#fff;">Trusted by</h2>
+        <div id="simCustomers"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Home slides embed — placed immediately after Trusted by -->
+  <section class="section">
+    <div class="container">
+      <div id="simHomeSlides"></div>
+    </div>
+  </section>
+
   <!-- Pills embed -->
   <section class="section" style="min-height:100vh;display:flex;align-items:center;">
     <div class="container">
@@ -372,6 +389,7 @@
         .then(function(r) { return r.text(); })
         .then(function(html) {
           html = html
+            .replaceAll('https://stanislavaki.github.io/birch-ai/', '../')
             .replace(/<!DOCTYPE[^>]*>/i, '')
             .replace(/<html[^>]*>/i, '')
             .replace(/<\/html>/i, '')
@@ -383,7 +401,12 @@
           target.innerHTML = html;
           target.querySelectorAll('script').forEach(function(s) {
             var newScript = document.createElement('script');
-            newScript.textContent = s.textContent;
+            if (s.src) {
+              newScript.src = s.src;
+              newScript.async = false;
+            } else {
+              newScript.textContent = s.textContent;
+            }
             document.body.appendChild(newScript);
             s.remove();
           });
@@ -394,6 +417,8 @@
         });
     }
 
+    loadEmbed('../embed/customers-embed.html', 'simCustomers');
+    loadEmbed('../embed/home-slides-embed.html?v=' + Date.now(), 'simHomeSlides');
     loadEmbed('../embed/stage-embed.html', 'simStageHiw');
     loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
@@ -409,8 +434,8 @@
       document.getElementById('infoVw').textContent = window.innerWidth + 'px';
       document.getElementById('infoFs').textContent = fs + 'px';
       document.getElementById('infoNav').textContent = nav;
-      document.getElementById('simNavInfo').textContent =
-        window.innerWidth + 'px · html=' + fs + 'px';
+      var navInfo = document.getElementById('simNavInfo');
+      if (navInfo) navInfo.textContent = window.innerWidth + 'px · html=' + fs + 'px';
     }
     updateInfo();
     window.addEventListener('resize', updateInfo);
