@@ -514,6 +514,11 @@
 .hs__frag--shadow {
   filter: drop-shadow(0 calc(1.35 * var(--u)) calc(3.65 * var(--u)) rgba(0, 0, 0, 0.42));
 }
+.hs__frag--logo-lift {
+  filter:
+    drop-shadow(0 calc(5 * var(--u)) calc(9 * var(--u)) rgba(0, 0, 0, 0.24))
+    drop-shadow(0 calc(11 * var(--u)) calc(22 * var(--u)) rgba(0, 0, 0, 0.18));
+}
 
 /* ── Slide 03 pieces ──────────────────────────────────────── */
 /* reference-rhythm reveal: a hard 120 ms step-in from a slight scale */
@@ -1725,9 +1730,9 @@
           <img data-frag="platform-tiktok" class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; z-index:12">
-          <img data-frag="platform-meta" class="hs__frag" src="images/slides/01/platform-meta.webp" alt="Meta"
+          <img data-frag="platform-meta" class="hs__frag hs__frag--logo-lift" src="images/slides/01/platform-meta.webp" alt="Meta"
                width="225" height="225" loading="lazy" decoding="async"
-               style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; z-index:13">
+               style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; z-index:30">
           <img data-frag="platform-snapchat" class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; z-index:14">
@@ -1745,8 +1750,8 @@
             <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
                  width="1552" height="518" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:9">
-            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card.webp" alt="Duplicate rule"
-                 width="1793" height="595" loading="lazy" decoding="async"
+            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule"
+                 width="2241" height="744" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
 

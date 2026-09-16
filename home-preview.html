@@ -72,6 +72,22 @@
     color: var(--color-text-inverted);
   }
 
+  .hp-trusted {
+    background: var(--color-bg-grey);
+    border-radius: var(--radius-xl);
+    padding: var(--pad-card);
+    overflow: hidden;
+  }
+  .hp-trusted-wrap {
+    margin-bottom: var(--slide-split);
+  }
+  .hp-trusted > .t-h3 {
+    margin: 0;
+  }
+  .hp-trusted .bc-logos-e {
+    padding-block: var(--space) var(--space-sm);
+  }
+
   @media (max-width: 767px) {
     .hh {
       min-height: auto;
@@ -108,8 +124,9 @@
      1. head — <link>/<style> from slides, then from hero (deduped by href),
         then this page's own <style> moved back to the end
      2. body — the whole slides body (nav, track, geo panel, scripts)
-     3. the hero <section class="hh"> is moved in just above #hs, with its
-        <h1> dressed into the caption + CTA column
+     3. the hero <section class="hh"> is moved in above #hs, with the hero
+        <h1> dressed into the caption + CTA column; Trusted by is inserted
+        before #hs in normal flow, so it does not stick with the slides
      4. every <script> is re-created once the DOM is complete, in document
         order — scripts parsed by DOMParser never execute on insertion.
 
@@ -127,8 +144,10 @@
   // would land on content that does not exist yet.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-  var HERO   = 'home-hero.html';
-  var SLIDES = 'home-slides.html';
+  var cacheQuery = window.location.search || '';
+  var HERO   = 'home-hero.html' + cacheQuery;
+  var SLIDES = 'home-slides.html' + cacheQuery;
+  var CUSTOMERS = 'embed/customers-embed.html' + cacheQuery;
 
   // Hero scripts that must not come along: the dev tuning panel and the
   // older nav injection.
@@ -140,6 +159,13 @@
       return r.text();
     }).then(function (html) {
       return new DOMParser().parseFromString(html, 'text/html');
+    });
+  }
+
+  function getText(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(url + ' → ' + r.status);
+      return r.text();
     });
   }
 
@@ -168,8 +194,25 @@
     });
   }
 
-  Promise.all([get(SLIDES), get(HERO)]).then(function (docs) {
-    var slides = docs[0], hero = docs[1];
+  function trustedBySection(customersHtml) {
+    var section = document.createElement('section');
+    section.className = 'hp-trusted bento-block';
+    section.setAttribute('aria-label', 'Trusted by');
+    section.innerHTML =
+      '<h2 class="t-h3">Trusted by</h2>' +
+      customersHtml;
+    return section;
+  }
+
+  function trustedByWrap(customersHtml) {
+    var wrap = document.createElement('div');
+    wrap.className = 'container hp-trusted-wrap';
+    wrap.appendChild(trustedBySection(customersHtml));
+    return wrap;
+  }
+
+  Promise.all([get(SLIDES), get(HERO), getText(CUSTOMERS)]).then(function (docs) {
+    var slides = docs[0], hero = docs[1], customersHtml = docs[2];
     var seenHref = {};
     document.head.querySelectorAll('link[rel="stylesheet"]').forEach(function (l) {
       seenHref[l.getAttribute('href')] = 1;
@@ -185,7 +228,7 @@
       document.body.appendChild(document.adoptNode(n));
     });
 
-    // 3. hero section above the slider track, h1 dressed into the column.
+    // 3. hero section above the slider track, customer logo strip above slides.
     var heroSection = hero.querySelector('section.hh');
     var track = document.getElementById('hs');
     if (heroSection && track) {
@@ -199,6 +242,7 @@
         tpl.remove();
       }
       track.parentNode.insertBefore(heroSection, track);
+      track.parentNode.insertBefore(trustedByWrap(customersHtml), track);
     }
 
     // The hero timeline script rides at the end — it only needs #hh-h1 present.
