@@ -231,6 +231,18 @@
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
+.hs__buttons .btn-stroke {
+  background: rgba(0, 0, 0, 0.3);
+  border-style: solid;
+  border-color: transparent;
+  color: var(--color-text);
+}
+.hs__buttons .btn:hover {
+  opacity: 1;
+  background: var(--color-text-inverted);
+  border-color: transparent;
+  color: var(--color-text);
+}
 
 /* ── Canvas — the window into the scene ───────────────────── */
 .hs__canvas {
@@ -1738,11 +1750,11 @@
                style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; z-index:14">
 
           <!-- Closing window: holds the three rule cards and becomes the
-               "Your automation rules" card by shrinking around them. -->
+               "Your automated rules" card by shrinking around them. -->
           <div data-frag="rules-frame" class="hs__frag hs__frag--sized hs__frag--clip hs__frag--ring"
                style="--ring-r:16; --x:-200; --y:-100; --w:1632; --h:800; z-index:10">
             <div data-frag="rules-face" class="hs__rules-face">
-              <span class="hs__rules-title">Your automation rules</span>
+              <span class="hs__rules-title">Your automated rules</span>
             </div>
             <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
                  width="1381" height="461" loading="lazy" decoding="async"
@@ -1895,7 +1907,7 @@
   var STEPS = [
     { slide: 0 },   /* 0 — the collage */
     { slide: 0 },   /* 1 — scatter, the rules stack out */
-    { slide: 1, slideAt: 0.22 },   /* 2 — the stack folds into "Your automation rules"; colour and bar switch as the fold starts */
+    { slide: 1, slideAt: 0.22 },   /* 2 — the stack folds into "Your automated rules"; colour and bar switch as the fold starts */
     { slide: 1, len: 1.8 },   /* 3 — geometry holds still; the chat story plays here on its own clock */
     { slide: 1 },   /* 4 — the routine: chat moves aside, the rule takes shape */
     { slide: 2 },   /* 5 — MCP: the creatives regroup on the left, the phone arrives */
