@@ -24,34 +24,64 @@
   var card   = track.querySelector('#hse-card');
   var canvas = track.querySelector('#hse-canvas');
   var bars   = [].slice.call(track.querySelectorAll('.hse-hs__bar'));
-  var docRoot = document.documentElement;
+  var root   = document.documentElement;
   if (!sticky || !card || !canvas) return;
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function rootFontPx() {
-    return parseFloat(getComputedStyle(docRoot).fontSize) || 16;
+    return parseFloat(getComputedStyle(root).fontSize) || 16;
   }
-  function navHeightPx() {
-    var raw = getComputedStyle(docRoot).getPropertyValue('--nav-height').trim();
-    if (!raw) return 0;
+
+  function fallbackNavHeightPx() {
+    var raw = getComputedStyle(root).getPropertyValue('--nav-height').trim();
     var value = parseFloat(raw);
     if (!isFinite(value)) return 0;
     if (/px$/i.test(raw)) return value;
     return value * rootFontPx();
   }
 
+  function chromeHeightPx() {
+    var bottom = 0;
+    [].slice.call(document.querySelectorAll('.nav2, .nav2m, [data-hs-chrome]')).forEach(function (el) {
+      var cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position !== 'fixed') return;
+      bottom = Math.max(bottom, el.getBoundingClientRect().bottom);
+    });
+    var height = Math.max(0, bottom || fallbackNavHeightPx());
+    track.style.setProperty('--hs-chrome-h', height + 'px');
+    return height;
+  }
+
   /* Responsive collages are ordinary horizontal scrollers on touch screens.
      Mouse dragging and arrow keys make the same interaction available on
      laptops without introducing a carousel or transitions between scenes. */
-  [].slice.call(track.querySelectorAll('[data-hsm-drag]')).forEach(function (scroller) {
+  var responsiveScrollers = [].slice.call(track.querySelectorAll('[data-hsm-drag]'));
+  responsiveScrollers.forEach(function (scroller) {
     var dragging = false;
     var startX = 0;
     var startScroll = 0;
+    var userMoved = false;
+    var lastMax = 0;
+
+    scroller._hsmPosition = function () {
+      var max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      if (!max) return;
+      var ratio = userMoved && lastMax ? scroller.scrollLeft / lastMax : parseFloat(scroller.dataset.hsmStart || '0');
+      scroller.scrollLeft = Math.max(0, Math.min(max, max * ratio));
+      lastMax = max;
+    };
+
+    function markMoved() {
+      userMoved = true;
+      scroller.classList.add('has-moved');
+    }
 
     scroller.addEventListener('dragstart', function (event) {
       event.preventDefault();
     });
 
     scroller.addEventListener('pointerdown', function (event) {
+      markMoved();
       if (event.pointerType !== 'mouse' || event.button !== 0) return;
       dragging = true;
       startX = event.clientX;
@@ -77,14 +107,18 @@
 
     scroller.addEventListener('pointerup', stopDragging);
     scroller.addEventListener('pointercancel', stopDragging);
+    scroller.addEventListener('touchstart', markMoved, { passive: true });
+    scroller.addEventListener('wheel', markMoved, { passive: true });
     scroller.addEventListener('keydown', function (event) {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      markMoved();
       scroller.scrollBy({
         left: (event.key === 'ArrowLeft' ? -1 : 1) * scroller.clientWidth * 0.6,
         behavior: 'smooth'
       });
       event.preventDefault();
     });
+    requestAnimationFrame(scroller._hsmPosition);
   });
 
   /* Which slide each step belongs to. */
@@ -238,7 +272,7 @@
     track.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
-    var navH  = navHeightPx();
+    var navH  = chromeHeightPx();
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
     /* Everything above the canvas, measured rather than re-derived: the card
@@ -258,7 +292,7 @@
 
   /* 0 at the moment the card pins, 1 when the track runs out. */
   function progress() {
-    var navH = navHeightPx();
+    var navH = chromeHeightPx();
     var span = track.offsetHeight - sticky.offsetHeight;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
@@ -286,7 +320,7 @@
      of the wheel reads as motion rather than as a cut. Position stays the
      source of truth \u2014 this only delays arriving at it. */
   var shownP = null, targetP = 0, raf = null;
-  var LAG = 0.10;
+  var LAG = reduceMotion ? 1 : 0.10;
   var autoLive = false;
   function follow() {
     raf = null;
@@ -336,17 +370,9 @@
     d.addEventListener('click', function () {
       /* a slide not built yet (no steps) scrolls to the end of the track */
       var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
-      var navH = navHeightPx();
+      var navH = chromeHeightPx();
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
-      var docStyle = docRoot.style;
-      var previous = docStyle.getPropertyValue('scroll-behavior');
-      var priority = docStyle.getPropertyPriority('scroll-behavior');
-      docStyle.setProperty('scroll-behavior', 'auto', 'important');
-      window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'auto' });
-      requestAnimationFrame(function () {
-        if (previous) docStyle.setProperty('scroll-behavior', previous, priority);
-        else docStyle.removeProperty('scroll-behavior');
-      });
+      window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
   });
 
@@ -562,10 +588,16 @@
       slide = si;
       bars.forEach(function (b, n) {
         b.classList.toggle('hse-is-active', n === si);
+        b.toggleAttribute('inert', n !== si);
+        b.setAttribute('aria-hidden', n === si ? 'false' : 'true');
       });
       /* one write, both blocks read it \u2014 see --slide-bg on .hse-hs__card */
       card.style.setProperty('--slide-bg', bars[si].dataset.bg);
-      dots.forEach(function (d, n) { d.classList.toggle('hse-is-active', n === si); });
+      dots.forEach(function (d, n) {
+        d.classList.toggle('hse-is-active', n === si);
+        if (n === si) d.setAttribute('aria-current', 'true');
+        else d.removeAttribute('aria-current');
+      });
     }
     /* the active capsule fills with progress through its own slide;
        slides already passed read full, slides ahead read empty */
@@ -1124,7 +1156,13 @@
   }
 
   window.addEventListener('scroll', apply, { passive: true });
-  window.addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
+  window.addEventListener('resize', function () {
+    chromeHeightPx();
+    responsiveScrollers.forEach(function (scroller) { scroller._hsmPosition(); });
+    shownP = null;
+    lockBarHeight();
+    apply();
+  });
   introInit();
   apply();
   });

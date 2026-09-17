@@ -85,7 +85,7 @@
 /* Site-wide nav height: desktop keeps the legacy 6.5em; mobile
    scopes to 5.5em so sticky pins sit 12px below the pill. */
 :root { --nav-height: 6.5em; }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   :root { --nav-height: 5.5em; }
 }
 
@@ -512,10 +512,10 @@
 }
 .nav2__row.is-active .nav2__row-dot { opacity: 1; }
 
-/* ============ MOBILE (max 767): pill header + sheet ============ */
+/* ============ MOBILE (max 991): pill header + sheet ============ */
 .nav2m { display: none; }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .nav2 { display: none; }
   .nav2m {
     display: block;

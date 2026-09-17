@@ -200,7 +200,11 @@ def build_css(source: str) -> str:
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-pill: 9999px;
-  width: 100%;
+  /* Webflow's outer Container contributes this responsive gutter. Cancel it
+     here so the embed owns its intended edge-to-edge card alignment. */
+  --hse-host-gutter: var(--_responsive---font-size--padding--horizontal, 0px);
+  width: calc(100% + var(--hse-host-gutter) + var(--hse-host-gutter));
+  margin-inline: calc(0px - var(--hse-host-gutter));
   position: relative;
   font-family: var(--font);
   font-weight: 600;
@@ -213,7 +217,7 @@ def build_css(source: str) -> str:
 .home-slides-e *::after { box-sizing: border-box; }
 .home-slides-e img,
 .home-slides-e svg { display: block; max-width: 100%; }
-.home-slides-e a { color: inherit; text-decoration: none; }
+.home-slides-e a:not(.hse-btn) { color: inherit; text-decoration: none; }
 .home-slides-e button { font: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 .home-slides-e .hse-container-e {
   width: 100%;
@@ -303,19 +307,8 @@ def build_js(source: str) -> str:
         "  var card   = track.querySelector('#hse-card');\n"
         "  var canvas = track.querySelector('#hse-canvas');\n"
         "  var bars   = [].slice.call(track.querySelectorAll('.hse-hs__bar'));\n"
-        "  var docRoot = document.documentElement;\n"
-        "  if (!sticky || !card || !canvas) return;\n\n"
-        "  function rootFontPx() {\n"
-        "    return parseFloat(getComputedStyle(docRoot).fontSize) || 16;\n"
-        "  }\n"
-        "  function navHeightPx() {\n"
-        "    var raw = getComputedStyle(docRoot).getPropertyValue('--nav-height').trim();\n"
-        "    if (!raw) return 0;\n"
-        "    var value = parseFloat(raw);\n"
-        "    if (!isFinite(value)) return 0;\n"
-        "    if (/px$/i.test(raw)) return value;\n"
-        "    return value * rootFontPx();\n"
-        "  }",
+        "  var root   = document.documentElement;\n"
+        "  if (!sticky || !card || !canvas) return;",
     )
     script = script.replace("document.querySelectorAll('[data-hsm-drag]')", "track.querySelectorAll('[data-hsm-drag]')")
     script = script.replace("document.querySelector('[data-hsm-chat]')", "track.querySelector('[data-hsm-chat]')")
@@ -326,38 +319,6 @@ def build_js(source: str) -> str:
         script,
     )
 
-    script = script.replace(
-        "    var cs = getComputedStyle(root), rootPx = parseFloat(cs.fontSize);\n"
-        "    root.style.setProperty('--bar-h', '0rem');",
-        "    var cs = getComputedStyle(track), rootPx = rootFontPx();\n"
-        "    track.style.setProperty('--bar-h', '0rem');",
-    )
-    script = script.replace("    root.style.setProperty('--bar-h',", "    track.style.setProperty('--bar-h',")
-    script = script.replace(
-        "    var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;",
-        "    var navH  = navHeightPx();",
-    )
-    script = script.replace("    root.style.setProperty('--slide-gap-bottom',", "    track.style.setProperty('--slide-gap-bottom',")
-    script = script.replace(
-        "    var cs = getComputedStyle(root);\n"
-        "    var navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);",
-        "    var navH = navHeightPx();",
-    )
-    script = script.replace(
-        "      var cs = getComputedStyle(root), navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);\n"
-        "      window.scrollTo({ top: track.offsetTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'smooth' });",
-        "      var navH = navHeightPx();\n"
-        "      var trackTop = track.getBoundingClientRect().top + window.pageYOffset;\n"
-        "      var docStyle = docRoot.style;\n"
-        "      var previous = docStyle.getPropertyValue('scroll-behavior');\n"
-        "      var priority = docStyle.getPropertyPriority('scroll-behavior');\n"
-        "      docStyle.setProperty('scroll-behavior', 'auto', 'important');\n"
-        "      window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'auto' });\n"
-        "      requestAnimationFrame(function () {\n"
-        "        if (previous) docStyle.setProperty('scroll-behavior', previous, priority);\n"
-        "        else docStyle.removeProperty('scroll-behavior');\n"
-        "      });",
-    )
     script = script.replace(
         "  new ResizeObserver(lockBarHeight).observe(document.body);",
         "  new ResizeObserver(lockBarHeight).observe(track);",
