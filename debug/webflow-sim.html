@@ -32,6 +32,23 @@
     /* ── nav-height CSS var (как в реальном Webflow) ── */
     :root { --nav-height: 6.5em; }
 
+    /* ── Simulated site-wide announcement bar (press B to toggle) ── */
+    .sim-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 4.25rem;
+      background: #1877F2;
+      color: #fff;
+      font-family: "Tt Commons Pro Variable", Arial, sans-serif;
+      font-size: 0.95rem;
+    }
+    body.has-banner .sim-banner { display: flex; }
+    body.has-banner .sim-nav { top: 4.25rem; }
+
     /* ── Simulated fixed navbar (matches real bir.ch nav structure) ── */
     .sim-nav {
       position: fixed;
@@ -264,7 +281,9 @@
 <body>
 
   <!-- Simulated Webflow navbar -->
-  <nav class="sim-nav">
+  <div class="sim-banner" data-hs-chrome>Webinar — October 2 — Save your seat</div>
+
+  <nav class="sim-nav" data-hs-chrome>
     <div class="sim-nav__inner">
       <!-- Logo -->
       <a class="sim-nav__logo" href="#">
@@ -312,10 +331,14 @@
     </div>
   </section>
 
-  <!-- Home slides embed — placed immediately after Trusted by -->
+  <!-- Home slides embed — placed immediately after Trusted by.
+       Nested containers on purpose: this is how the block sits on the live
+       Webflow page, and it is what the measured host gutter cancels. -->
   <section class="section">
-    <div class="container">
-      <div id="simHomeSlides"></div>
+    <div class="container cc-bento">
+      <div class="w-layout-blockcontainer container w-container">
+        <div id="simHomeSlides"></div>
+      </div>
     </div>
   </section>
 
@@ -466,6 +489,16 @@
     }
     updateInfo();
     window.addEventListener('resize', updateInfo);
+
+    // ── B toggles the announcement bar, so the measured chrome height can be
+    //    checked against a taller fixed stack without republishing anything.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'b' && e.key !== 'B') return;
+      var tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+      document.body.classList.toggle('has-banner');
+      window.dispatchEvent(new Event('resize'));
+    });
 
   </script>
 

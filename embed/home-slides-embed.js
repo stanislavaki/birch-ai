@@ -52,6 +52,42 @@
     return height;
   }
 
+  /* The host page may wrap the block in a Container that repeats the gutter
+     its own parent already applies, which leaves the card narrower than
+     every neighbouring section. Cancel the inner one, and only then: a
+     single container is the page's own margin and must be kept. Measured
+     rather than re-derived from a token, because the site's gutter is fluid
+     and does not equal any one rem value. */
+  function hostGutterPx() {
+    var parent = track.parentElement;
+    var inner = parent && parent.closest ? parent.closest('.w-container, .container') : null;
+    var outer = inner && inner.parentElement ? inner.parentElement.closest('.w-container, .container') : null;
+    var pad = inner && outer ? parseFloat(getComputedStyle(inner).paddingLeft) || 0 : 0;
+    track.style.setProperty('--hse-host-gutter', pad + 'px');
+    return pad;
+  }
+
+  /* \u2500\u2500 Assets: only the layout on screen pays for its images \u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Both layouts are in the DOM at once and CSS picks one, but a hidden
+     subtree is not a reason for the browser to skip an image: display:none
+     has no box, so loading="lazy" cannot defer it either and a phone was
+     downloading the whole desktop scene as well as its own. The markup
+     therefore ships every source in data-hs-src, and only the active
+     layout's images are given a src \u2014 on load, and again if the layout
+     changes under a resize. Each img carries width/height, so nothing
+     moves when a source finally arrives. */
+  var deferredImages = [].slice.call(track.querySelectorAll('img[data-hs-src]'));
+
+  function hydrateImages() {
+    var wantSticky = !staticMode();
+    deferredImages = deferredImages.filter(function (img) {
+      if (sticky.contains(img) !== wantSticky) return true;
+      img.src = img.getAttribute('data-hs-src');
+      img.removeAttribute('data-hs-src');
+      return false;
+    });
+  }
+
   /* Responsive collages are ordinary horizontal scrollers on touch screens.
      Mouse dragging and arrow keys make the same interaction available on
      laptops without introducing a carousel or transitions between scenes. */
@@ -435,6 +471,7 @@
 
   var slide = -1;
   function apply() {
+    rememberPlace();
     targetP = progress();
     /* the entrance runs on its own clock; leaving the first state cuts it
        short rather than letting pieces stay hidden into the next step */
@@ -1155,14 +1192,66 @@
     io.observe(card);
   }
 
+  /* \u2500\u2500 Keeping the reader's place across the 992 breakpoint \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     The two layouts have different scroll budgets \u2014 the sticky track is
+     several screens long, the static flow is one page \u2014 so rotating a
+     tablet or dragging a window across the breakpoint would otherwise
+     move the reader by thousands of pixels. What carries over is the
+     slide, not the offset: whichever slide was being read is scrolled to
+     in the layout that takes over. */
+  var staticBlocks = [].slice.call(track.querySelectorAll('.hse-hsm__block'));
+  var lastMode = null, lastSlide = 0;
+
+  function staticMode() { return getComputedStyle(sticky).display === 'none'; }
+
+  function slideInStaticView() {
+    var top = chromeHeightPx(), best = 0, bestGap = Infinity;
+    staticBlocks.forEach(function (block, i) {
+      var gap = Math.abs(block.getBoundingClientRect().top - top);
+      if (gap < bestGap) { bestGap = gap; best = i; }
+    });
+    return best;
+  }
+
+  /* Page offset at which slide `i` starts on the sticky track. */
+  function slideTop(i) {
+    var span = track.offsetHeight - sticky.offsetHeight;
+    var r = SLIDE_RANGE[i] || [0, TOTAL];
+    return track.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() + span * (r[0] / TOTAL) + 1;
+  }
+
+  function rememberPlace() {
+    lastSlide = staticMode() ? slideInStaticView() : Math.max(0, slide);
+  }
+
+  function restorePlace() {
+    var mode = staticMode() ? 'static' : 'sticky';
+    if (lastMode === null || mode === lastMode) { lastMode = mode; return; }
+    lastMode = mode;
+    var i = Math.min(staticBlocks.length - 1, Math.max(0, lastSlide));
+    if (mode === 'static') {
+      var block = staticBlocks[i];
+      if (!block) return;
+      window.scrollTo({ top: block.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() - 16, behavior: 'auto' });
+    } else {
+      window.scrollTo({ top: slideTop(i), behavior: 'auto' });
+    }
+  }
+
   window.addEventListener('scroll', apply, { passive: true });
   window.addEventListener('resize', function () {
     chromeHeightPx();
+    hostGutterPx();
     responsiveScrollers.forEach(function (scroller) { scroller._hsmPosition(); });
     shownP = null;
+    hydrateImages();
     lockBarHeight();
+    restorePlace();
     apply();
   });
+  hostGutterPx();
+  hydrateImages();
+  restorePlace();
   introInit();
   apply();
   });

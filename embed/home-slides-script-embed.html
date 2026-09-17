@@ -39,6 +39,27 @@
     return height;
   }
 
+  function hostGutterPx() {
+    var parent = track.parentElement;
+    var inner = parent && parent.closest ? parent.closest('.w-container, .container') : null;
+    var outer = inner && inner.parentElement ? inner.parentElement.closest('.w-container, .container') : null;
+    var pad = inner && outer ? parseFloat(getComputedStyle(inner).paddingLeft) || 0 : 0;
+    track.style.setProperty('--hse-host-gutter', pad + 'px');
+    return pad;
+  }
+
+  var deferredImages = [].slice.call(track.querySelectorAll('img[data-hs-src]'));
+
+  function hydrateImages() {
+    var wantSticky = !staticMode();
+    deferredImages = deferredImages.filter(function (img) {
+      if (sticky.contains(img) !== wantSticky) return true;
+      img.src = img.getAttribute('data-hs-src');
+      img.removeAttribute('data-hs-src');
+      return false;
+    });
+  }
+
   var responsiveScrollers = [].slice.call(track.querySelectorAll('[data-hsm-drag]'));
   responsiveScrollers.forEach(function (scroller) {
     var dragging = false;
@@ -331,6 +352,7 @@
 
   var slide = -1;
   function apply() {
+    rememberPlace();
     targetP = progress();
     if (introRunning && targetP > 0.02) introFinish();
     if (!raf) raf = requestAnimationFrame(follow);
@@ -956,14 +978,58 @@
     io.observe(card);
   }
 
+  var staticBlocks = [].slice.call(track.querySelectorAll('.hse-hsm__block'));
+  var lastMode = null, lastSlide = 0;
+
+  function staticMode() { return getComputedStyle(sticky).display === 'none'; }
+
+  function slideInStaticView() {
+    var top = chromeHeightPx(), best = 0, bestGap = Infinity;
+    staticBlocks.forEach(function (block, i) {
+      var gap = Math.abs(block.getBoundingClientRect().top - top);
+      if (gap < bestGap) { bestGap = gap; best = i; }
+    });
+    return best;
+  }
+
+  function slideTop(i) {
+    var span = track.offsetHeight - sticky.offsetHeight;
+    var r = SLIDE_RANGE[i] || [0, TOTAL];
+    return track.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() + span * (r[0] / TOTAL) + 1;
+  }
+
+  function rememberPlace() {
+    lastSlide = staticMode() ? slideInStaticView() : Math.max(0, slide);
+  }
+
+  function restorePlace() {
+    var mode = staticMode() ? 'static' : 'sticky';
+    if (lastMode === null || mode === lastMode) { lastMode = mode; return; }
+    lastMode = mode;
+    var i = Math.min(staticBlocks.length - 1, Math.max(0, lastSlide));
+    if (mode === 'static') {
+      var block = staticBlocks[i];
+      if (!block) return;
+      window.scrollTo({ top: block.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() - 16, behavior: 'auto' });
+    } else {
+      window.scrollTo({ top: slideTop(i), behavior: 'auto' });
+    }
+  }
+
   window.addEventListener('scroll', apply, { passive: true });
   window.addEventListener('resize', function () {
     chromeHeightPx();
+    hostGutterPx();
     responsiveScrollers.forEach(function (scroller) { scroller._hsmPosition(); });
     shownP = null;
+    hydrateImages();
     lockBarHeight();
+    restorePlace();
     apply();
   });
+  hostGutterPx();
+  hydrateImages();
+  restorePlace();
   introInit();
   apply();
   });

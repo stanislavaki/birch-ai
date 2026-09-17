@@ -35,9 +35,13 @@
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-pill: 9999px;
-  /* Webflow's outer Container contributes this responsive gutter. Cancel it
-     here so the embed owns its intended edge-to-edge card alignment. */
-  --hse-host-gutter: var(--_responsive---font-size--padding--horizontal, 0px);
+  /* Webflow nests this embed inside a Container that repeats the gutter its
+     own parent already applies, so the card ends up narrower than every
+     other block on the page. The block script measures that inner container
+     and writes the amount to cancel here; it stays 0 when the embed is not
+     double-wrapped, so removing the inner Container in Designer needs no
+     change on this side. */
+  --hse-host-gutter: 0px;
   width: calc(100% + var(--hse-host-gutter) + var(--hse-host-gutter));
   margin-inline: calc(0px - var(--hse-host-gutter));
   position: relative;
@@ -456,6 +460,8 @@
 .hse-hs__bar:not(.hse-is-active) > * { translate: 0 -0.5rem; transition-duration: 0.25s, 0.3s; }
 
 .hse-hs__pager {
+
+  --hs-dot-hit: 2.75rem;
   position: absolute;
   left: var(--pad-card);
   inset-block: 0;
@@ -488,6 +494,17 @@
   translate: -50% -50%;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.45);
+}
+
+.hse-hs__dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: var(--hs-dot-hit);
+  height: var(--hs-dot-hit);
+  min-height: 100%;
 }
 .hse-hs__dot:hover::before { background: rgba(255, 255, 255, 0.8); }
 .hse-hs__dot.hse-is-active {
@@ -576,6 +593,11 @@
   border-color: transparent;
   color: var(--color-text);
 }
+.hse-hs__buttons .hse-btn:focus-visible,
+.hse-hsm__actions .hse-btn:focus-visible {
+  outline: 0.1875rem solid var(--color-text);
+  outline-offset: 0.1875rem;
+}
 .hse-hs__buttons .hse-btn:hover {
   opacity: 1;
   background: var(--color-text-inverted);
@@ -603,12 +625,20 @@
 .hse-is-forced .hse-hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
 
 @media (min-width: 992px) and (max-height: 800px) {
+  .hse-hs { --slide-split: 0.5rem; }
+
+  .hse-hs__head { padding-block: 0.75rem; }
   .hse-hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
+}
+
+@media (min-width: 992px) and (max-height: 700px) {
+  .hse-hs { --slide-split: 0.375rem; }
+  .hse-hs__head { padding-block: 0.5rem; }
 }
 
 .hse-hsm { display: none; }
 
-@media (max-width: 991px) {
+@media (max-width: 991px), (prefers-reduced-motion: reduce) {
   .hse-hs {
     height: auto;
     padding-block: 0;
@@ -808,7 +838,7 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (min-width: 820px) and (max-width: 991px) {
   .hse-hsm__copy {
     grid-template-columns: max-content repeat(2, minmax(0, 1fr));
     grid-template-areas: "pill title lead";
@@ -886,7 +916,9 @@
 }
 
 @media (max-width: 359px) {
+
   .hse-hsm__actions { grid-template-columns: 1fr; }
+  .hse-hsm__actions .hse-btn { font-size: var(--text-btn-xs-size); padding-inline: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

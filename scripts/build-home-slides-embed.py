@@ -200,9 +200,13 @@ def build_css(source: str) -> str:
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-pill: 9999px;
-  /* Webflow's outer Container contributes this responsive gutter. Cancel it
-     here so the embed owns its intended edge-to-edge card alignment. */
-  --hse-host-gutter: var(--_responsive---font-size--padding--horizontal, 0px);
+  /* Webflow nests this embed inside a Container that repeats the gutter its
+     own parent already applies, so the card ends up narrower than every
+     other block on the page. The block script measures that inner container
+     and writes the amount to cancel here; it stays 0 when the embed is not
+     double-wrapped, so removing the inner Container in Designer needs no
+     change on this side. */
+  --hse-host-gutter: 0px;
   width: calc(100% + var(--hse-host-gutter) + var(--hse-host-gutter));
   margin-inline: calc(0px - var(--hse-host-gutter));
   position: relative;
