@@ -530,6 +530,8 @@
     position: relative;
     z-index: 20;
     margin: 0.75rem;                 /* 12 all around */
+    /* landscape on a notched phone: keep the pill clear of the cutout */
+    margin-inline: max(0.75rem, env(safe-area-inset-left)) max(0.75rem, env(safe-area-inset-right));
     height: 4rem;                    /* 64 */
     border-radius: 4.0625rem;
     background: var(--nav-surface);
@@ -642,9 +644,14 @@
   /* the open menu: opaque card, flies in from the bottom */
   .nav2m__sheet {
     position: fixed;
-    top: 5.25rem;                    /* pill (12+64) + 8 gap */
-    left: 0.75rem; right: 0.75rem;
-    bottom: 0.75rem;
+    /* Measured off the pill by the nav script rather than assumed: a
+       site-wide announcement bar pushes the whole header down, and a
+       hard-coded top then leaves the first row of the menu hidden behind
+       it. The literal stays as the no-JS fallback: pill (12+64) + 8 gap. */
+    top: var(--nav2m-sheet-top, 5.25rem);
+    left: max(0.75rem, env(safe-area-inset-left));
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
     z-index: 10;
     border-radius: 2.25rem;          /* 36 */
     background: var(--nav-card);
@@ -1001,7 +1008,19 @@
       btn.click();
     });
 
+    /* The sheet is position: fixed, so CSS cannot read the pill's bottom for
+       it. Measure it here — on open, on resize, and once at start — so the
+       menu always begins under the header, whatever is stacked above it. */
+    function syncSheetTop() {
+      var pill = m.querySelector('.nav2m__pill');
+      if (!pill) return;
+      m.style.setProperty('--nav2m-sheet-top', Math.round(pill.getBoundingClientRect().bottom + 8) + 'px');
+    }
+    syncSheetTop();
+    window.addEventListener('resize', syncSheetTop);
+
     function openSheet() {
+      syncSheetTop();
       m.classList.add('is-open');
       burger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
