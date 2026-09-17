@@ -224,8 +224,14 @@ def build_css(source: str) -> str:
 .home-slides-e a:not(.hse-btn) { color: inherit; text-decoration: none; }
 .home-slides-e button { font: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 .home-slides-e .hse-container-e {
+  /* No cap of its own. The host page decides how wide a block is, and this
+     one has to follow its neighbours: a fixed 1280px left the card 99px
+     narrower per side than the blocks above and below it on a 1900px window,
+     and — because the type inside scales with the site's fluid root while the
+     card did not — pushed the second button out past the card's edge. The
+     scene is authored in design units against the card's own width (--u-w),
+     so a wider card scales the whole composition instead of breaking it. */
   width: 100%;
-  max-width: 1280px;
   margin-inline: auto;
   padding-inline: 0;
   font-size: 16px;
