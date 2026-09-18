@@ -52,6 +52,21 @@
     return height;
   }
 
+  /* Air between the header and the card, in px. Read as a plain rem token \u2014
+     never a calc(), which an unregistered custom property does not resolve
+     for a script (see docs/home-slides.md). */
+  function headGapPx() {
+    var raw = getComputedStyle(track).getPropertyValue('--hs-head-gap').trim();
+    var value = parseFloat(raw);
+    if (!isFinite(value)) return 0;
+    return /px$/i.test(raw) ? value : value * rootFontPx();
+  }
+
+  /* The line the card is pinned to: the fixed header plus that air. Every
+     measurement about where the track starts and how much room the card has
+     is taken from here, not from the header alone. */
+  function pinOffsetPx() { return chromeHeightPx() + headGapPx(); }
+
   /* The host page may wrap the block in a Container that repeats the gutter
      its own parent already applies, which leaves the card narrower than
      every neighbouring section. Cancel the inner one, and only then: a
@@ -308,7 +323,7 @@
     track.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
-    var navH  = chromeHeightPx();
+    var navH  = pinOffsetPx();
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
     /* Everything above the canvas, measured rather than re-derived: the card
@@ -328,7 +343,7 @@
 
   /* 0 at the moment the card pins, 1 when the track runs out. */
   function progress() {
-    var navH = chromeHeightPx();
+    var navH = pinOffsetPx();
     var span = track.offsetHeight - sticky.offsetHeight;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
@@ -406,7 +421,7 @@
     d.addEventListener('click', function () {
       /* a slide not built yet (no steps) scrolls to the end of the track */
       var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
-      var navH = chromeHeightPx();
+      var navH = pinOffsetPx();
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
       window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
@@ -1217,7 +1232,7 @@
   function slideTop(i) {
     var span = track.offsetHeight - sticky.offsetHeight;
     var r = SLIDE_RANGE[i] || [0, TOTAL];
-    return track.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() + span * (r[0] / TOTAL) + 1;
+    return track.getBoundingClientRect().top + window.pageYOffset - pinOffsetPx() + span * (r[0] / TOTAL) + 1;
   }
 
   function rememberPlace() {

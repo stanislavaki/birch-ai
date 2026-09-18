@@ -68,6 +68,16 @@
      Webflow page and the isolated embed. */
   --hs-chrome-h: var(--nav-height, 0px);
 
+  /* Air between the fixed header and the top of the card. The card is pinned
+     to this line and never crosses it: on a window too short for the whole
+     card the bottom is what goes past the fold, not the head. */
+  --hs-head-gap: 1.25rem;
+
+  /* The page's own block rhythm. The track carries no padding (see below),
+     so the space after the block has to come from a margin, or the next
+     block starts flush against the last slide. */
+  --hs-block-gap: 1rem;
+
   /* The card is two blocks — the copy above, the scene below — and this is
      what runs between them. A fixed rem like --pad-card, not a design unit:
      this is card chrome, not part of the composition, so it must not grow
@@ -99,8 +109,11 @@
   /* .section brings 5rem top and bottom from the Webflow environment. On a
      scroll track that padding is not spacing, it is 160px of scroll the
      sticky does not cover — the card unpins early and slides under the nav.
-     The air around the card comes from centring inside the sticky instead. */
+     The air above the card comes from --hs-head-gap inside the sticky. */
   padding-block: 0;
+  /* A margin, not padding: padding would extend the sticky's containing
+     block and keep the last slide pinned through the gap. */
+  margin-block-end: var(--hs-block-gap);
 }
 
 /* The card stops growing at the 550 ceiling, so on a tall window there
@@ -111,12 +124,15 @@
    centring would push its head under the nav. */
 .hs__sticky {
   position: sticky;
-  top: var(--hs-chrome-h);
-  height: calc(100dvh - var(--hs-chrome-h));
+  top: calc(var(--hs-chrome-h) + var(--hs-head-gap));
+  height: calc(100dvh - var(--hs-chrome-h) - var(--hs-head-gap));
   padding-bottom: var(--slide-gap-bottom);
   box-sizing: border-box;
   display: flex;
-  align-items: safe center;
+  /* Top-anchored, not centred: the gap under the header is the fixed point
+     of the composition. When the card is taller than the window, it keeps
+     its head in place and the bottom runs past the fold. */
+  align-items: flex-start;
 }
 .hs__sticky > .container { width: 100%; }
 
@@ -332,7 +348,7 @@
 
   height: clamp(
     calc(var(--scene-min) * var(--u-w)),
-    calc(100dvh - var(--hs-chrome-h) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
+    calc(100dvh - var(--hs-chrome-h) - var(--hs-head-gap) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
     calc(var(--scene-max) * var(--u-w))
   );
 }
@@ -2501,6 +2517,21 @@
     return height;
   }
 
+  /* Air between the header and the card, in px. Read as a plain rem token —
+     never a calc(), which an unregistered custom property does not resolve
+     for a script (see docs/home-slides.md). */
+  function headGapPx() {
+    var raw = getComputedStyle(track).getPropertyValue('--hs-head-gap').trim();
+    var value = parseFloat(raw);
+    if (!isFinite(value)) return 0;
+    return /px$/i.test(raw) ? value : value * rootFontPx();
+  }
+
+  /* The line the card is pinned to: the fixed header plus that air. Every
+     measurement about where the track starts and how much room the card has
+     is taken from here, not from the header alone. */
+  function pinOffsetPx() { return chromeHeightPx() + headGapPx(); }
+
   /* The host page may wrap the block in a Container that repeats the gutter
      its own parent already applies, which leaves the card narrower than
      every neighbouring section. Cancel the inner one, and only then: a
@@ -2757,7 +2788,7 @@
     track.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
-    var navH  = chromeHeightPx();
+    var navH  = pinOffsetPx();
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
     /* Everything above the canvas, measured rather than re-derived: the card
@@ -2777,7 +2808,7 @@
 
   /* 0 at the moment the card pins, 1 when the track runs out. */
   function progress() {
-    var navH = chromeHeightPx();
+    var navH = pinOffsetPx();
     var span = track.offsetHeight - sticky.offsetHeight;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
@@ -2855,7 +2886,7 @@
     d.addEventListener('click', function () {
       /* a slide not built yet (no steps) scrolls to the end of the track */
       var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
-      var navH = chromeHeightPx();
+      var navH = pinOffsetPx();
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
       window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
@@ -3668,7 +3699,7 @@
   function slideTop(i) {
     var span = track.offsetHeight - sticky.offsetHeight;
     var r = SLIDE_RANGE[i] || [0, TOTAL];
-    return track.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() + span * (r[0] / TOTAL) + 1;
+    return track.getBoundingClientRect().top + window.pageYOffset - pinOffsetPx() + span * (r[0] / TOTAL) + 1;
   }
 
   function rememberPlace() {

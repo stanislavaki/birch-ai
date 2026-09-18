@@ -39,6 +39,15 @@
     return height;
   }
 
+  function headGapPx() {
+    var raw = getComputedStyle(track).getPropertyValue('--hs-head-gap').trim();
+    var value = parseFloat(raw);
+    if (!isFinite(value)) return 0;
+    return /px$/i.test(raw) ? value : value * rootFontPx();
+  }
+
+  function pinOffsetPx() { return chromeHeightPx() + headGapPx(); }
+
   function hostGutterPx() {
     var parent = track.parentElement;
     var inner = parent && parent.closest ? parent.closest('.w-container, .container') : null;
@@ -221,7 +230,7 @@
     var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
     track.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
 
-    var navH  = chromeHeightPx();
+    var navH  = pinOffsetPx();
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
     var minCard = canvas.offsetTop + 364 * u;
@@ -231,7 +240,7 @@
   }
 
   function progress() {
-    var navH = chromeHeightPx();
+    var navH = pinOffsetPx();
     var span = track.offsetHeight - sticky.offsetHeight;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
@@ -300,7 +309,7 @@
   dots.forEach(function (d) {
     d.addEventListener('click', function () {
       var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
-      var navH = chromeHeightPx();
+      var navH = pinOffsetPx();
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
       window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
@@ -995,7 +1004,7 @@
   function slideTop(i) {
     var span = track.offsetHeight - sticky.offsetHeight;
     var r = SLIDE_RANGE[i] || [0, TOTAL];
-    return track.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() + span * (r[0] / TOTAL) + 1;
+    return track.getBoundingClientRect().top + window.pageYOffset - pinOffsetPx() + span * (r[0] / TOTAL) + 1;
   }
 
   function rememberPlace() {
