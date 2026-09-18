@@ -115,7 +115,12 @@
     var lastMax = 0;
 
     scroller._hsmPosition = function () {
-      var max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      /* Whether the box scrolls at all, not merely whether the scene
+         overflows it: a clipped frame still reports the overflow, and the
+         grab cursor would promise a drag that cannot happen. */
+      var scrolls = /^(auto|scroll)$/.test(getComputedStyle(scroller).overflowX);
+      var max = scrolls ? Math.max(0, scroller.scrollWidth - scroller.clientWidth) : 0;
+      scroller.classList.toggle('has-room', max > 0);
       if (!max) return;
       var ratio = userMoved && lastMax ? scroller.scrollLeft / lastMax : parseFloat(scroller.dataset.hsmStart || '0');
       scroller.scrollLeft = Math.max(0, Math.min(max, max * ratio));
