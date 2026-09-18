@@ -302,26 +302,28 @@
      is space the heading no longer owns: without the matching padding its
      text runs straight into the paragraph — which is exactly what happened
      once the heading went up to t-h4. */
+  /* Copy stacked, not in two columns: the heading takes the wide left area
+     and the paragraph sits under it on the same left edge. The two can no
+     longer meet, so neither the pull-back nor the heading's matching
+     padding is needed — only the ~10px optical shift, which both take so
+     their left edges line up. The widest tag ("Rules") still sets how far
+     that shift can go. */
   .hs__bar {
-    /* The tag column's own width: it holds the pager and the badge and has
-       nothing to do with how far the copy is pulled back. */
     --hs-tag-column: calc(3.5rem + 2.75rem);
-    /* Measured against the page, not chosen: at this pull the paragraph's
-       left edge lands on the second column of the page's bento grid — the
-       same line as the chat card in the scene below it and as the copy in
-       every card further down. */
-    --hs-lead-pull: 4.7rem;
-    /* The heading moves left too, but only by about 10px: the widest tag
-       ("Rules") sets the limit — at 2.5rem the two collided by 8px and
-       "MCP" touched. This leaves the widest tag ~1rem of air. */
     --hs-title-pull: 1.1rem;
+    grid-template-columns: var(--hs-tag-column) minmax(0, 2fr) minmax(0, 1fr);
+    row-gap: var(--gap-main);
   }
   .hs__pills { translate: 12px 0; }
-  .hs__title {
-    translate: calc(0px - var(--hs-title-pull)) 0;
-    padding-right: var(--hs-lead-pull);
+  .hs__heading { grid-column: 1 / 3; }
+  .hs__title { translate: calc(0px - var(--hs-title-pull)) 0; }
+  .hs__lead {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    left: calc(0px - var(--hs-title-pull));
   }
-  .hs__lead { position: relative; left: calc(0px - var(--hs-lead-pull)); }
+  .hs__buttons { grid-column: 3; grid-row: 1; }
 }
 
 .hs__heading {
