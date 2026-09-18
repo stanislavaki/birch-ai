@@ -32,6 +32,23 @@
     /* ── nav-height CSS var (как в реальном Webflow) ── */
     :root { --nav-height: 6.5em; }
 
+    /* ── Simulated site-wide announcement bar (press B to toggle) ── */
+    .sim-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 4.25rem;
+      background: #1877F2;
+      color: #fff;
+      font-family: "Tt Commons Pro Variable", Arial, sans-serif;
+      font-size: 0.95rem;
+    }
+    body.has-banner .sim-banner { display: flex; }
+    body.has-banner .sim-nav { top: 4.25rem; }
+
     /* ── Simulated fixed navbar (matches real bir.ch nav structure) ── */
     .sim-nav {
       position: fixed;
@@ -264,7 +281,9 @@
 <body>
 
   <!-- Simulated Webflow navbar -->
-  <nav class="sim-nav">
+  <div class="sim-banner" data-hs-chrome>Webinar — October 2 — Save your seat</div>
+
+  <nav class="sim-nav" data-hs-chrome>
     <div class="sim-nav__inner">
       <!-- Logo -->
       <a class="sim-nav__logo" href="#">
@@ -301,6 +320,27 @@
       </div>
     </div>
   </nav>
+
+  <!-- Trusted by embed -->
+  <section class="section">
+    <div class="container">
+      <div class="bento-block" style="padding:1.5rem;border-radius:1.5rem;background:#2A2A2A;">
+        <h2 style="margin:0;color:#fff;">Trusted by</h2>
+        <div id="simCustomers"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Home slides embed — placed immediately after Trusted by.
+       Nested containers on purpose: this is how the block sits on the live
+       Webflow page, and it is what the measured host gutter cancels. -->
+  <section class="section">
+    <div class="container cc-bento">
+      <div class="w-layout-blockcontainer container w-container">
+        <div id="simHomeSlides"></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Pills embed -->
   <section class="section" style="min-height:100vh;display:flex;align-items:center;">
@@ -372,12 +412,41 @@
         .then(function(r) { return r.text(); })
         .then(function(html) {
           html = html
+            .replaceAll('https://stanislavaki.github.io/birch-ai/', '../')
             .replace(/<!DOCTYPE[^>]*>/i, '')
             .replace(/<html[^>]*>/i, '')
             .replace(/<\/html>/i, '')
             .replace(/<head>[\s\S]*?<\/head>/i, '')
             .replace(/<body[^>]*>/i, '')
             .replace(/<\/body>/i, '')
+            .trim();
+          var target = document.getElementById(targetId);
+          target.innerHTML = html;
+          target.querySelectorAll('script').forEach(function(s) {
+            var newScript = document.createElement('script');
+            if (s.src) {
+              newScript.src = s.src;
+              newScript.async = false;
+            } else {
+              newScript.textContent = s.textContent;
+            }
+            document.body.appendChild(newScript);
+            s.remove();
+          });
+        })
+        .catch(function(e) {
+          document.getElementById(targetId).innerHTML =
+            '<p style="color:red;padding:2rem">Ошибка загрузки ' + file + ': ' + e + '</p>';
+        });
+    }
+
+    function loadEmbedGroup(files, targetId) {
+      Promise.all(files.map(function(file) {
+        return fetch(file, { cache: 'no-store' }).then(function(r) { return r.text(); });
+      }))
+        .then(function(parts) {
+          var html = parts.join('\n')
+            .replaceAll('https://stanislavaki.github.io/birch-ai/', '../')
             .trim();
           var target = document.getElementById(targetId);
           target.innerHTML = html;
@@ -390,10 +459,16 @@
         })
         .catch(function(e) {
           document.getElementById(targetId).innerHTML =
-            '<p style="color:red;padding:2rem">Ошибка загрузки ' + file + ': ' + e + '</p>';
+            '<p style="color:red;padding:2rem">Ошибка загрузки ' + files.join(', ') + ': ' + e + '</p>';
         });
     }
 
+    loadEmbed('../embed/customers-embed.html', 'simCustomers');
+    loadEmbedGroup([
+      '../embed/home-slides-style-embed.html?v=' + Date.now(),
+      '../embed/home-slides-embed.html?v=' + Date.now(),
+      '../embed/home-slides-script-embed.html?v=' + Date.now()
+    ], 'simHomeSlides');
     loadEmbed('../embed/stage-embed.html', 'simStageHiw');
     loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
@@ -409,11 +484,21 @@
       document.getElementById('infoVw').textContent = window.innerWidth + 'px';
       document.getElementById('infoFs').textContent = fs + 'px';
       document.getElementById('infoNav').textContent = nav;
-      document.getElementById('simNavInfo').textContent =
-        window.innerWidth + 'px · html=' + fs + 'px';
+      var navInfo = document.getElementById('simNavInfo');
+      if (navInfo) navInfo.textContent = window.innerWidth + 'px · html=' + fs + 'px';
     }
     updateInfo();
     window.addEventListener('resize', updateInfo);
+
+    // ── B toggles the announcement bar, so the measured chrome height can be
+    //    checked against a taller fixed stack without republishing anything.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'b' && e.key !== 'B') return;
+      var tag = (e.target && e.target.tagName) || '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+      document.body.classList.toggle('has-banner');
+      window.dispatchEvent(new Event('resize'));
+    });
 
   </script>
 

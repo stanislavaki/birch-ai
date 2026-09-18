@@ -63,6 +63,38 @@
   --slide-gap-max: 2rem;
   --slide-gap-bottom: 2rem;
 
+  /* Measured by the block script from the visible fixed navigation. This
+     includes announcement bars and avoids em/rem disagreements between the
+     Webflow page and the isolated embed. */
+  --hs-chrome-h: var(--nav-height, 0px);
+
+  /* Air between the fixed header and the top of the card. The card is pinned
+     to this line and never crosses it: on a window too short for the whole
+     card the bottom is what goes past the fold, not the head. */
+  --hs-head-gap: 1.25rem;
+
+  /* The page's own block rhythm. The track carries no padding (see below),
+     so the space after the block has to come from a margin, or the next
+     block starts flush against the last slide. */
+  --hs-block-gap: 1rem;
+
+  /* One type pair for the whole block, on both breakpoints — the same two
+     styles the rest of the site uses: t-para-lg / .paragraph-lg for body
+     (1.25rem / 1.1) and t-h4 for the heading (1.5rem, 4px above it at the
+     16px base). The tag reads at the heading's size, not the body's.
+     Tracking is set by size, not by breakpoint (CLAUDE.md), so the same
+     -0.005em applies wherever these sizes appear. */
+  --hs-text-body: 1.25rem;
+  --hs-text-title: 1.5rem;
+  --hs-text-ls: -0.005em;
+
+  /* Half the page's grid gutter. Ten of the thirteen blocks on the home
+     page are cards inside grid columns, and a column's 8px padding is what
+     sets their visible edge — so matching the container is not the same as
+     matching the blocks. This inset is what lines the card, the collages
+     and the buttons up with them. */
+  --hs-col-gutter: 0.5rem;
+
   /* The card is two blocks — the copy above, the scene below — and this is
      what runs between them. A fixed rem like --pad-card, not a design unit:
      this is card chrome, not part of the composition, so it must not grow
@@ -94,8 +126,12 @@
   /* .section brings 5rem top and bottom from the Webflow environment. On a
      scroll track that padding is not spacing, it is 160px of scroll the
      sticky does not cover — the card unpins early and slides under the nav.
-     The air around the card comes from centring inside the sticky instead. */
+     The air above the card comes from --hs-head-gap inside the sticky. */
   padding-block: 0;
+  padding-inline: var(--hs-col-gutter);
+  /* A margin, not padding: padding would extend the sticky's containing
+     block and keep the last slide pinned through the gap. */
+  margin-block-end: var(--hs-block-gap);
 }
 
 /* The card stops growing at the 550 ceiling, so on a tall window there
@@ -106,12 +142,19 @@
    centring would push its head under the nav. */
 .hs__sticky {
   position: sticky;
-  top: var(--nav-height);
-  height: calc(100dvh - var(--nav-height));
-  padding-bottom: var(--slide-gap-bottom);
-  box-sizing: border-box;
+  top: calc(var(--hs-chrome-h) + var(--hs-head-gap));
+  /* The height is the card's, not the window's. A viewport-tall sticky keeps
+     its unused bottom inside the block, and once the card is anchored to the
+     top that empty strip lands between this block and the next one — where it
+     reads as a gap several times the page's own. The air under the pinned
+     card is already reserved by the canvas clamp (--slide-gap-bottom), so it
+     does not have to be padding here as well.
+
+     Top-anchored, not centred: the gap under the header is the fixed point of
+     the composition. When the card is taller than the window it keeps its
+     head in place and the bottom runs past the fold. */
   display: flex;
-  align-items: safe center;
+  align-items: flex-start;
 }
 .hs__sticky > .container { width: 100%; }
 
@@ -145,6 +188,13 @@
    active dot stretched into a capsule that fills top-down with the
    slide's own scroll progress. Dots are buttons and scroll to their slide. ── */
 .hs__pager {
+  /* --hs-dot-hit is the touch target, laid over the dot rather than made of
+     it: the box has to stay small, because the column is only as tall as the
+     top bar and the active dot still has to stretch into a capsule down the
+     rest of it. Three 44px targets do not fit in that height without
+     touching, so neighbours overlap by a few px in the gap and the lower one
+     wins there — deterministic, and every dot keeps a full-size target. */
+  --hs-dot-hit: 2.75rem;
   position: absolute;
   left: var(--pad-card);
   inset-block: 0;
@@ -152,23 +202,53 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  /* Tight: every unit spent on the boxes and the gaps between them is a
+     unit the active capsule does not get, and the capsule is the part that
+     carries the reading. */
+  gap: 0.25rem;
 }
 .hs__dot {
   --fill: 0;
-  width: 0.5rem;
-  height: 0.5rem;
+  position: relative;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: 0 0 1.2rem;
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.45);
+  background: transparent;
   cursor: pointer;
-  transition: height 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.35s ease;
+  transition: flex-basis 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.hs__dot:hover { background: rgba(255, 255, 255, 0.8); }
+.hs__dot::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  translate: -50% -50%;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.45);
+}
+/* the target, centred on the dot and free to overhang its box */
+.hs__dot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: var(--hs-dot-hit);
+  height: var(--hs-dot-hit);
+  min-height: 100%;
+}
+.hs__dot:hover::before { background: rgba(255, 255, 255, 0.8); }
 .hs__dot.is-active {
   flex: 1 1 0;
   height: auto;
+}
+.hs__dot.is-active::before {
+  height: 100%;
   background: linear-gradient(180deg, #fff calc(var(--fill) * 100%), rgba(255, 255, 255, 0.3) 0);
 }
 .hs__dot:focus-visible { outline: 0.125rem solid var(--color-accent-blue); outline-offset: 0.125rem; }
@@ -216,10 +296,18 @@
   padding-inline: calc(var(--pad-card) + 1.5rem) var(--pad-card);
 }
 @media (min-width: 992px) {
-  .hs__bar { --hs-tag-column: calc(3.5rem + 44px); }
+  /* The lead is pulled back into the heading's column so the three copy
+     columns land on the page's grid despite the wider tag column. That pull
+     is space the heading no longer owns: without the matching padding its
+     text runs straight into the paragraph — which is exactly what happened
+     once the heading went up to t-h4. */
+  .hs__bar {
+    --hs-tag-column: calc(3.5rem + var(--hs-lead-pull));
+    --hs-lead-pull: 44px;
+  }
   .hs__pills { translate: 12px 0; }
-  .hs__title { translate: -10px 0; }
-  .hs__lead { position: relative; left: -44px; }
+  .hs__title { translate: -10px 0; padding-right: var(--hs-lead-pull); }
+  .hs__lead { position: relative; left: calc(0px - var(--hs-lead-pull)); }
 }
 
 .hs__heading {
@@ -244,6 +332,19 @@
   padding: 0.058em 0.462em 0.154em;
 }
 
+/* The block's own type, on the desktop bar. The utility classes on these
+   elements are two-class rules, so each selector carries the bar to take.
+   The lead keeps the smaller --text-body-size it always had here: at t-h4
+   the heading alone carries the size, and a 1.25rem paragraph beside it
+   read as a second heading. Mobile still uses the site's body size, where
+   the column is the full width and there is nothing to compete with. */
+.hs__bar .hs__title,
+.hs__bar .hs__pill {
+  font-size: var(--hs-text-title);
+  line-height: 1.1;
+  letter-spacing: var(--hs-text-ls);
+}
+
 .hs__title {
   color: var(--color-text);
   text-wrap: balance;
@@ -251,7 +352,14 @@
   min-width: 0;
 }
 .hs__bar[data-slide="1"] .hs__title { text-wrap: wrap; }
-.hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
+/* The lead is supporting copy, so it sits back from the heading at half
+   strength. Through the colour, not opacity: the bar's entrance animation
+   owns `opacity` on every column and would overwrite it on the way in. */
+.hs__lead  {
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  text-wrap: pretty;
+  margin: 0;
+}
 
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
@@ -261,6 +369,11 @@
   border-style: solid;
   border-color: transparent;
   color: var(--color-text);
+}
+.hs__buttons .btn:focus-visible,
+.hsm__actions .btn:focus-visible {
+  outline: 0.1875rem solid var(--color-text);
+  outline-offset: 0.1875rem;
 }
 .hs__buttons .btn:hover {
   opacity: 1;
@@ -288,7 +401,7 @@
 
   height: clamp(
     calc(var(--scene-min) * var(--u-w)),
-    calc(100dvh - var(--nav-height) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
+    calc(100dvh - var(--hs-chrome-h) - var(--hs-head-gap) - var(--head-cost) - var(--bar-h) - var(--slide-gap-bottom)),
     calc(var(--scene-max) * var(--u-w))
   );
 }
@@ -296,25 +409,63 @@
 /* Debug override — pin the canvas to a fixed design height */
 .is-forced .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
 
+/* Compact desktop state approved for short windows: keep the authored
+   364-unit composition instead of allowing the browser to squeeze it into
+   an accidental intermediate geometry. 364 is also --scene-min, so the
+   canvas cannot give the head any room back — the card only fits on a
+   laptop-height window if its own chrome gives way instead, which is what
+   the tighter card padding and split do here. */
+@media (min-width: 992px) and (max-height: 800px) {
+  .hs { --slide-split: 0.5rem; }
+  /* Vertical only: the horizontal --pad-card still sets the pager offset and
+     the bar's columns, and the composition must not shift sideways just
+     because the window got shorter. */
+  .hs__head { padding-block: 0.75rem; }
+  .hs__canvas { height: calc(var(--canvas-force) * var(--u-w)); }
+}
+/* Below 700 the head has to give up the rest of its air, or the card's
+   bottom edge lands under the fold. */
+@media (min-width: 992px) and (max-height: 700px) {
+  .hs { --slide-split: 0.375rem; }
+  .hs__head { padding-block: 0.5rem; }
+}
+
 /* ── Responsive static flow ───────────────────────────────────
    Tablet and mobile use three ordinary page blocks rather than the desktop
    sticky story. Each scene is a single, horizontally scrollable collage: all
-   of its pieces are present at once and none of the desktop transitions run. */
+   of its pieces are present at once and none of the desktop transitions run.
+
+   A reader who has asked for reduced motion gets this same flow at every
+   width. Damping the scroll-driven scene is not enough — it still moves
+   with the page — and this layout already exists, is authored, and shows
+   the whole of each scene at once, which is what a static alternative
+   has to do. */
 .hsm { display: none; }
 
-@media (max-width: 991px) {
+@media (max-width: 991px), (prefers-reduced-motion: reduce) {
   .hs {
     height: auto;
     padding-block: var(--space-md) var(--space-xl);
   }
   .hs__sticky { display: none; }
 
+  /* All three blocks are the height of the tallest one. Their copy differs
+     by a couple of lines, and without this the shorter blocks read as a
+     mistake next to the first. The slack goes to the collage, which is the
+     one part of the block that can take it without moving anything. */
   .hsm {
     display: grid;
     gap: var(--space-lg);
+    grid-auto-rows: 1fr;
   }
-  .hsm__block { min-width: 0; }
+  .hsm__block {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
   .hsm__surface {
+    display: grid;
+    grid-template-rows: auto 1fr;
     overflow: hidden;
     background: var(--hsm-bg);
     border-radius: var(--radius-xl);
@@ -350,13 +501,14 @@
   .hsm__lead {
     grid-area: lead;
     margin: 0;
-    color: var(--color-text);
+    color: color-mix(in srgb, var(--color-text) 50%, transparent);
     text-wrap: pretty;
   }
 
   .hsm__collage {
     position: relative;
-    height: clamp(20rem, 43.7cqw, 34rem);
+    /* a floor, not a height — the grid row above decides the rest */
+    min-height: clamp(20rem, 43.7cqw, 34rem);
     overflow-x: auto;
     overflow-y: hidden;
     container-type: inline-size;
@@ -366,14 +518,45 @@
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
+  .hsm__collage:focus-visible {
+    outline: 0.1875rem solid var(--color-primary);
+    outline-offset: -0.1875rem;
+  }
   .hsm__collage::-webkit-scrollbar { display: none; }
   .hsm__collage.is-dragging { cursor: grabbing; }
   .hsm__stage {
     position: relative;
     width: 132cqw;
     height: 100%;
+    margin-right: var(--space);
   }
-  .hsm__stage--ai { width: 100cqw; }
+  /* The visible "Swipe to explore" chip is gone — the collages start on
+     their composition point, which is hint enough, and a badge over the
+     scene was covering it. The text stays in the DOM, off-screen, because
+     it is the collage's aria-describedby: a reader who cannot see that the
+     region scrolls still gets told. */
+  .hsm__swipe {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  /* The AI scene is the smallest of the three and sits in the same box as
+     the others, so it gets a zoom of its own. The layout width carries the
+     factor and the height divides it out, so the painted stage still matches
+     its own box exactly — scrolling reaches the end and nothing is clipped. */
+  .hsm__stage--ai {
+    --hsm-zoom: 1.1;
+    width: calc(100cqw * var(--hsm-zoom));
+    height: calc(100% / var(--hsm-zoom));
+    transform: scale(var(--hsm-zoom));
+    transform-origin: 0 0;
+  }
   .hsm__asset {
     position: absolute;
     display: block;
@@ -467,6 +650,7 @@
   .hsm__actions .btn {
     min-width: 0;
     width: 100%;
+    min-height: 3rem;
   }
   .hsm__actions .btn-stroke {
     background: rgba(255,255,255,0.3);
@@ -481,7 +665,10 @@
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+/* One row for pill, heading and lead only where there is room for it: at
+   768 the three columns squeeze the paragraph into a ladder, so below 820
+   the copy falls back to the stacked two-column form. */
+@media (min-width: 820px) and (max-width: 991px) {
   .hsm__copy {
     grid-template-columns: max-content repeat(2, minmax(0, 1fr));
     grid-template-areas: "pill title lead";
@@ -510,10 +697,30 @@
   }
   .hsm__title { margin-top: 1.25rem; }
   .hsm__lead { margin-top: var(--space); }
-  .hsm__collage { height: clamp(19rem, 94cqw, 40rem); }
+
+  /* Same pair as the desktop bar — see --hs-text-body. */
+  .hsm__copy .hsm__lead {
+    font-size: var(--hs-text-body);
+    line-height: 1.1;
+    letter-spacing: var(--hs-text-ls);
+  }
+  .hsm__copy .hsm__title,
+  .hsm__copy .hsm__pill {
+    font-size: var(--hs-text-title);
+    line-height: 1.1;
+    letter-spacing: var(--hs-text-ls);
+  }
+  .hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
   .hsm__stage--rules { width: 312cqw; }
-  .hsm__stage--ai { width: 122cqw; }
+  /* On a phone the AI scene has the whole block's width to itself and the
+     equal-height row leaves it room below, so it takes more of the zoom than
+     the tablet does. Measured against the box: at 1.45 the composition ends
+     ~40px above the bottom edge. */
+  .hsm__stage--ai {
+    --hsm-zoom: 1.45;
+    width: calc(122cqw * var(--hsm-zoom));
+  }
   .hsm__stage--mcp { width: 200cqw; }
 
   .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
@@ -556,6 +763,21 @@
 @media (max-width: 479px) {
   .hsm__actions { gap: 0.375rem; }
   .hsm__actions .btn { font-size: clamp(0.68rem, 3.2vw, 0.8rem); }
+}
+
+@media (max-width: 359px) {
+  /* stacked, so each button has the full width and can keep its own size */
+  .hsm__actions { grid-template-columns: 1fr; }
+  .hsm__actions .btn { font-size: var(--text-btn-xs-size); padding-inline: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs__bar > *,
+  .hs__head,
+  .hs__canvas,
+  .hs__frag,
+  .hs__dot { transition: none !important; animation: none !important; }
+  .hsm__collage { scroll-behavior: auto; }
 }
 
 /* ── Scene fragments ──────────────────────────────────────────
@@ -986,7 +1208,7 @@
 .nav2__rows,.nav2m__subrows{flex-direction:column;display:flex}
 .nav-v3-root{width:100%;height:6.5rem}
 .nav2m__search{width:100%;padding-bottom:.75rem;padding-left:.625rem;padding-right:.625rem}
-@media screen and (max-width:767px){.search-blog{width:80%;display:none}.nav-v3-root{height:5.5rem}}
+@media screen and (max-width:991px){.search-blog{width:80%;display:none}.nav-v3-root{height:5.5rem}}
 </style>
 <nav aria-label="Main" data-cta-type="nav" class="nav-v3-root"><div class="nav-custom-js w-embed w-script"><!-- skip-to-main script omitted: dev pages have no <main> --></div><a id="skip-link" href="#main" class="nav-skip-link">Skip to Main Content</a><div class="nav-inner"><div data-nav-v3="1" class="nav-v3"><div class="w-embed"><style>
 /* ============================================================
@@ -1003,7 +1225,7 @@
 /* Site-wide nav height: desktop keeps the legacy 6.5em; mobile
    scopes to 5.5em so sticky pins sit 12px below the pill. */
 :root { --nav-height: 6.5em; }
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   :root { --nav-height: 5.5em; }
 }
 
@@ -1430,10 +1652,10 @@
 }
 .nav2__row.is-active .nav2__row-dot { opacity: 1; }
 
-/* ============ MOBILE (max 767): pill header + sheet ============ */
+/* ============ MOBILE (max 991): pill header + sheet ============ */
 .nav2m { display: none; }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
   .nav2 { display: none; }
   .nav2m {
     display: block;
@@ -1448,6 +1670,8 @@
     position: relative;
     z-index: 20;
     margin: 0.75rem;                 /* 12 all around */
+    /* landscape on a notched phone: keep the pill clear of the cutout */
+    margin-inline: max(0.75rem, env(safe-area-inset-left)) max(0.75rem, env(safe-area-inset-right));
     height: 4rem;                    /* 64 */
     border-radius: 4.0625rem;
     background: var(--nav-surface);
@@ -1560,9 +1784,14 @@
   /* the open menu: opaque card, flies in from the bottom */
   .nav2m__sheet {
     position: fixed;
-    top: 5.25rem;                    /* pill (12+64) + 8 gap */
-    left: 0.75rem; right: 0.75rem;
-    bottom: 0.75rem;
+    /* Measured off the pill by the nav script rather than assumed: a
+       site-wide announcement bar pushes the whole header down, and a
+       hard-coded top then leaves the first row of the menu hidden behind
+       it. The literal stays as the no-JS fallback: pill (12+64) + 8 gap. */
+    top: var(--nav2m-sheet-top, 5.25rem);
+    left: max(0.75rem, env(safe-area-inset-left));
+    right: max(0.75rem, env(safe-area-inset-right));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
     z-index: 10;
     border-radius: 2.25rem;          /* 36 */
     background: var(--nav-card);
@@ -1919,7 +2148,19 @@
       btn.click();
     });
 
+    /* The sheet is position: fixed, so CSS cannot read the pill's bottom for
+       it. Measure it here — on open, on resize, and once at start — so the
+       menu always begins under the header, whatever is stacked above it. */
+    function syncSheetTop() {
+      var pill = m.querySelector('.nav2m__pill');
+      if (!pill) return;
+      m.style.setProperty('--nav2m-sheet-top', Math.round(pill.getBoundingClientRect().bottom + 8) + 'px');
+    }
+    syncSheetTop();
+    window.addEventListener('resize', syncSheetTop);
+
     function openSheet() {
+      syncSheetTop();
       m.classList.add('is-open');
       burger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';
@@ -2016,37 +2257,37 @@
         </div>
 
         <div class="hs__canvas" id="canvas">
-          <img data-frag="schedule-cal" class="hs__frag" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
+          <img data-frag="schedule-cal" class="hs__frag" data-hs-src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times"
                width="875" height="1271" loading="lazy" decoding="async"
                style="--x:37; --y:15; --w:364.5; --dy:37; z-index:1">
-          <img data-frag="actions" class="hs__frag" src="images/slides/01/actions.webp" alt="General actions"
+          <img data-frag="actions" class="hs__frag" data-hs-src="images/slides/01/actions.webp" alt="General actions"
                width="420" height="905" loading="lazy" decoding="async"
                style="--x:56; --y:169; --w:175.02; --dy:37; z-index:2">
-          <img data-frag="platform-google-ads" class="hs__frag" src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
+          <img data-frag="platform-google-ads" class="hs__frag" data-hs-src="images/slides/01/platform-google-ads.webp" alt="Google Ads"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:11; --y:75; --w:62.5; --dy:21.375; --dw:31.25; z-index:40">
-          <img data-frag="integrations" class="hs__frag" src="images/slides/01/integrations.webp" alt="Integrations"
+          <img data-frag="integrations" class="hs__frag" data-hs-src="images/slides/01/integrations.webp" alt="Integrations"
                width="1339" height="227" loading="lazy" decoding="async"
                style="--x:560; --y:293; --w:372; --dx:-73; --dy:147.3; --dw:186; z-index:4">
-          <img data-frag="ad-account" class="hs__frag" src="images/slides/01/ad-account.webp" alt="Ad account"
+          <img data-frag="ad-account" class="hs__frag" data-hs-src="images/slides/01/ad-account.webp" alt="Ad account"
                width="625" height="252" loading="lazy" decoding="async"
                style="--x:155; --y:226; --w:260.25; --dy:172; z-index:5">
-          <img data-frag="schedule-section" class="hs__frag" src="images/slides/01/schedule-section.webp" alt="Schedule"
+          <img data-frag="schedule-section" class="hs__frag" data-hs-src="images/slides/01/schedule-section.webp" alt="Schedule"
                width="810" height="421" loading="lazy" decoding="async"
                style="--x:999; --y:0; --w:337.5; --dy:58; z-index:6">
-          <img data-frag="frequency-popover" class="hs__frag" src="images/slides/01/frequency-popover.webp" alt="Frequency"
+          <img data-frag="frequency-popover" class="hs__frag" data-hs-src="images/slides/01/frequency-popover.webp" alt="Frequency"
                width="432" height="445" loading="lazy" decoding="async"
                style="--x:1089; --y:89; --w:180; --dy:58; z-index:7">
-          <img data-frag="filter" class="hs__frag" src="images/slides/01/filter.webp" alt="Filter"
+          <img data-frag="filter" class="hs__frag" data-hs-src="images/slides/01/filter.webp" alt="Filter"
                width="1474" height="252" loading="lazy" decoding="async"
                style="--x:921; --y:240; --w:614.25; --dy:111; z-index:11">
-          <img data-frag="platform-tiktok" class="hs__frag" src="images/slides/01/platform-tiktok.webp" alt="TikTok"
+          <img data-frag="platform-tiktok" class="hs__frag" data-hs-src="images/slides/01/platform-tiktok.webp" alt="TikTok"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:1013; --y:207; --w:62.5; --dx:-5.625; --dy:75.375; --dw:31.25; z-index:12">
-          <img data-frag="platform-meta" class="hs__frag hs__frag--logo-lift" src="images/slides/01/platform-meta.webp" alt="Meta"
+          <img data-frag="platform-meta" class="hs__frag hs__frag--logo-lift" data-hs-src="images/slides/01/platform-meta.webp" alt="Meta"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:851; --y:15; --w:62.5; --dx:-15.625; --dy:56.375; --dw:31.25; z-index:30">
-          <img data-frag="platform-snapchat" class="hs__frag" src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
+          <img data-frag="platform-snapchat" class="hs__frag" data-hs-src="images/slides/01/platform-snapchat.webp" alt="Snapchat"
                width="225" height="225" loading="lazy" decoding="async"
                style="--x:444; --y:281; --w:62.5; --dx:-15.625; --dy:117.375; --dw:31.25; z-index:14">
 
@@ -2057,13 +2298,13 @@
             <div data-frag="rules-face" class="hs__rules-face">
               <span class="hs__rules-title">Your automated rules</span>
             </div>
-            <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
+            <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" data-hs-src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
                  width="1381" height="461" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:8">
-            <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
+            <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" data-hs-src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
                  width="1552" height="518" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:9">
-            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule"
+            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule"
                  width="2241" height="744" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
@@ -2076,7 +2317,7 @@
                style="--ring-r:16; --x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
           <div data-frag="chat" class="hs__frag hs__frag--sized hs__chat"
                style="--x:452; --y:19; --w:300; --h:352; z-index:17">
-            <img class="hs__chat-icon" src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
+            <img class="hs__chat-icon" data-hs-src="images/slides/01/app-icon.webp" alt="" width="154" height="154">
             <div class="chat-card-wrap">
               <div class="chat-card">
                 <div class="chat-card__body">
@@ -2117,43 +2358,43 @@
 
           <!-- Step 4 — the routine: trigger, routine card, Drive folder, creatives -->
           <!-- Three creatives; each starts inside the Drive folder and flies out in turn -->
-          <img data-frag="ad-1" class="hs__frag" src="images/slides/01/ad-1.webp" alt="Creative"
+          <img data-frag="ad-1" class="hs__frag" data-hs-src="images/slides/01/ad-1.webp" alt="Creative"
                width="580" height="583" loading="lazy" decoding="async" style="--x:739.3; --y:192.2; --w:209.24; z-index:7; border-radius: calc(12 * var(--u))">
-          <img data-frag="ad-2" class="hs__frag" src="images/slides/01/ad-2.webp" alt="Creative"
+          <img data-frag="ad-2" class="hs__frag" data-hs-src="images/slides/01/ad-2.webp" alt="Creative"
                width="573" height="741" loading="lazy" decoding="async" style="--x:829.5; --y:56.4; --w:199.94; z-index:9; border-radius: calc(24 * var(--u))">
-          <img data-frag="ad-3" class="hs__frag" src="images/slides/01/ad-3.webp" alt="Creative"
+          <img data-frag="ad-3" class="hs__frag" data-hs-src="images/slides/01/ad-3.webp" alt="Creative"
                width="643" height="643" loading="lazy" decoding="async" style="--x:991; --y:36; --w:199.94; z-index:8; border-radius: calc(24 * var(--u))">
-          <img data-frag="trigger" class="hs__frag hs__frag--fade" src="images/slides/01/trigger.webp"
+          <img data-frag="trigger" class="hs__frag hs__frag--fade" data-hs-src="images/slides/01/trigger.webp"
                alt="Trigger" width="890" height="391" loading="lazy" decoding="async"
                style="--x:434; --y:95; --w:371; z-index:18">
-          <img data-frag="routine" class="hs__frag hs__frag--fade" src="images/slides/01/routine.webp"
+          <img data-frag="routine" class="hs__frag hs__frag--fade" data-hs-src="images/slides/01/routine.webp"
                alt="Routine" width="650" height="338" loading="lazy" decoding="async"
                style="--x:881; --y:108; --w:271; z-index:18">
-          <img data-frag="folder" class="hs__frag hs__frag--fade" src="images/slides/01/folder.webp"
+          <img data-frag="folder" class="hs__frag hs__frag--fade" data-hs-src="images/slides/01/folder.webp"
                alt="Google Drive folder" width="383" height="344" loading="lazy" decoding="async"
                style="--x:997; --y:277; --w:137; z-index:12">
 
           <!-- Slide 03 — MCP. Chips and logo are SVG; the phone is a screenshot
                with live regions laid over it (message area, input, keyboard). -->
-          <img data-frag="chip-duplicate" class="hs__frag hs__pop" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
+          <img data-frag="chip-duplicate" class="hs__frag hs__pop" data-hs-src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62"
                style="--x:114.2; --y:46.7; --w:209; z-index:20">
-          <img data-frag="chip-set-budget" class="hs__frag hs__pop" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
+          <img data-frag="chip-set-budget" class="hs__frag hs__pop" data-hs-src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62"
                style="--x:148.2; --y:317.1; --w:228; z-index:20">
-          <img data-frag="chip-notify" class="hs__frag hs__pop" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
+          <img data-frag="chip-notify" class="hs__frag hs__pop" data-hs-src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62"
                style="--x:65.8; --y:265.9; --w:164; z-index:20">
-          <img data-frag="chip-scale" class="hs__frag hs__pop" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
+          <img data-frag="chip-scale" class="hs__frag hs__pop" data-hs-src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56"
                style="--x:53.7; --y:182.3; --w:55; z-index:20">
-          <img data-frag="chip-time" class="hs__frag hs__pop" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
+          <img data-frag="chip-time" class="hs__frag hs__pop" data-hs-src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56"
                style="--x:495.7; --y:49.3; --w:55; z-index:20">
-          <img data-frag="birch-mcp" class="hs__frag hs__pop" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81"
+          <img data-frag="birch-mcp" class="hs__frag hs__pop" data-hs-src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81"
                style="--x:383; --y:156; --w:293; z-index:21">
           <div data-frag="mcp-line" class="hs__frag hs__frag--sized hs__line" style="--x:684; --y:189; --w:134; --h:2; z-index:19"></div>
           <div data-frag="phone" class="hs__frag hs__frag--sized hs__phone" style="--x:1300; --y:24; --w:242; --h:526; z-index:22">
-            <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy" decoding="async">
+            <img class="hs__phone-shot" data-hs-src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy" decoding="async">
             <!-- message area: greeting first, then the exchange -->
             <div class="hs__ph-msg" id="phMsg">
               <div class="hs__ph-greet" id="phGreet">
-                <img class="hs__ph-star" src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
+                <img class="hs__ph-star" data-hs-src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
                 <div class="hs__ph-title">Where should we scale?</div>
               </div>
               <div class="hs__ph-q" id="phQ"></div>
@@ -2185,19 +2426,20 @@
           <h2 class="hsm__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
           <p class="hsm__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Rules interface collage">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Rules interface collage" aria-describedby="hsm-rules-hint">
+          <span class="hsm__swipe" id="hsm-rules-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--rules">
-            <img class="hsm__asset hsm__rules-schedule" src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times" width="875" height="1271" loading="lazy">
-            <img class="hsm__asset hsm__rules-snap" src="images/slides/01/platform-snapchat.webp" alt="Snapchat" width="225" height="225" loading="lazy">
-            <img class="hsm__asset hsm__rules-google" src="images/slides/01/platform-google-ads.webp" alt="Google Ads" width="225" height="225" loading="lazy">
-            <img class="hsm__asset hsm__rules-account" src="images/slides/01/ad-account.webp" alt="Ad account" width="625" height="252" loading="lazy">
-            <img class="hsm__asset hsm__rules-duplicate" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
-            <img class="hsm__asset hsm__rules-meta" src="images/slides/01/platform-meta.webp" alt="Meta" width="225" height="225" loading="lazy">
-            <img class="hsm__asset hsm__rules-integrations" src="images/slides/01/integrations.webp" alt="Integrations" width="1339" height="227" loading="lazy">
-            <img class="hsm__asset hsm__rules-section" src="images/slides/01/schedule-section.webp" alt="Schedule" width="810" height="421" loading="lazy">
-            <img class="hsm__asset hsm__rules-frequency" src="images/slides/01/frequency-popover.webp" alt="Frequency" width="432" height="445" loading="lazy">
-            <img class="hsm__asset hsm__rules-tiktok" src="images/slides/01/platform-tiktok.webp" alt="TikTok" width="225" height="225" loading="lazy">
-            <img class="hsm__asset hsm__rules-filter" src="images/slides/01/filter.webp" alt="Filter" width="1474" height="252" loading="lazy">
+            <img class="hsm__asset hsm__rules-schedule" data-hs-src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times" width="875" height="1271" loading="lazy">
+            <img class="hsm__asset hsm__rules-snap" data-hs-src="images/slides/01/platform-snapchat.webp" alt="Snapchat" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-google" data-hs-src="images/slides/01/platform-google-ads.webp" alt="Google Ads" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-account" data-hs-src="images/slides/01/ad-account.webp" alt="Ad account" width="625" height="252" loading="lazy">
+            <img class="hsm__asset hsm__rules-duplicate" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+            <img class="hsm__asset hsm__rules-meta" data-hs-src="images/slides/01/platform-meta.webp" alt="Meta" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-integrations" data-hs-src="images/slides/01/integrations.webp" alt="Integrations" width="1339" height="227" loading="lazy">
+            <img class="hsm__asset hsm__rules-section" data-hs-src="images/slides/01/schedule-section.webp" alt="Schedule" width="810" height="421" loading="lazy">
+            <img class="hsm__asset hsm__rules-frequency" data-hs-src="images/slides/01/frequency-popover.webp" alt="Frequency" width="432" height="445" loading="lazy">
+            <img class="hsm__asset hsm__rules-tiktok" data-hs-src="images/slides/01/platform-tiktok.webp" alt="TikTok" width="225" height="225" loading="lazy">
+            <img class="hsm__asset hsm__rules-filter" data-hs-src="images/slides/01/filter.webp" alt="Filter" width="1474" height="252" loading="lazy">
           </div>
         </div>
       </div>
@@ -2214,17 +2456,18 @@
           <h2 class="hsm__title t-h5">Ask in natural language to get a complex rule built</h2>
           <p class="hsm__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Birch AI interface collage">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Birch AI interface collage" aria-describedby="hsm-ai-hint">
+          <span class="hsm__swipe" id="hsm-ai-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--ai">
             <div class="hsm__auto-rules">
               <span class="hsm__auto-title">Your automated rules</span>
-              <img class="hsm__asset hsm__ai-pause" src="images/slides/01/rule-card-pause.webp" alt="Pause rule" width="1381" height="461" loading="lazy">
-              <img class="hsm__asset hsm__ai-increase" src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="1552" height="518" loading="lazy">
-              <img class="hsm__asset hsm__ai-duplicate" src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+              <img class="hsm__asset hsm__ai-pause" data-hs-src="images/slides/01/rule-card-pause.webp" alt="Pause rule" width="1381" height="461" loading="lazy">
+              <img class="hsm__asset hsm__ai-increase" data-hs-src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="1552" height="518" loading="lazy">
+              <img class="hsm__asset hsm__ai-duplicate" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
             </div>
-            <img class="hsm__asset hsm__ai-context" src="images/slides/01/business-context.png" alt="Your business context" width="619" height="714" loading="lazy">
-            <img class="hsm__asset hsm__ai-library" src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
-            <img class="hsm__asset hsm__ai-icon" src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
+            <img class="hsm__asset hsm__ai-context" data-hs-src="images/slides/01/business-context.png" alt="Your business context" width="619" height="714" loading="lazy">
+            <img class="hsm__asset hsm__ai-library" data-hs-src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
+            <img class="hsm__asset hsm__ai-icon" data-hs-src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
             <div class="hsm__chat" data-hsm-chat aria-label="Birch AI chat">
               <div class="chat-card-wrap">
                 <div class="chat-card">
@@ -2279,21 +2522,22 @@
           <h2 class="hsm__title t-h5">Your account, reachable from wherever you already work</h2>
           <p class="hsm__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag tabindex="0" aria-label="Birch MCP interface collage">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Birch MCP interface collage" aria-describedby="hsm-mcp-hint">
+          <span class="hsm__swipe" id="hsm-mcp-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--mcp">
-            <img class="hsm__asset hsm__mcp-ads" src="images/slides/01/ads-collage.webp" alt="Creative ads" width="1205" height="1000" loading="lazy">
-            <img class="hsm__asset hsm__mcp-duplicate" src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62" loading="lazy">
-            <img class="hsm__asset hsm__mcp-notify" src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62" loading="lazy">
-            <img class="hsm__asset hsm__mcp-budget" src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62" loading="lazy">
-            <img class="hsm__asset hsm__mcp-scale" src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56" loading="lazy">
-            <img class="hsm__asset hsm__mcp-time" src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56" loading="lazy">
-            <img class="hsm__asset hsm__mcp-logo" src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81" loading="lazy">
+            <img class="hsm__asset hsm__mcp-ads" data-hs-src="images/slides/01/ads-collage.webp" alt="Creative ads" width="1205" height="1000" loading="lazy">
+            <img class="hsm__asset hsm__mcp-duplicate" data-hs-src="images/slides/03/chip-duplicate.svg" alt="Duplicate" width="209" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-notify" data-hs-src="images/slides/03/chip-notify.svg" alt="Notify" width="164" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-budget" data-hs-src="images/slides/03/chip-set-budget.svg" alt="Set budget" width="228" height="62" loading="lazy">
+            <img class="hsm__asset hsm__mcp-scale" data-hs-src="images/slides/03/chip-scale.svg" alt="Scale" width="55" height="56" loading="lazy">
+            <img class="hsm__asset hsm__mcp-time" data-hs-src="images/slides/03/chip-time.svg" alt="Time" width="55" height="56" loading="lazy">
+            <img class="hsm__asset hsm__mcp-logo" data-hs-src="images/slides/03/birch-mcp.svg" alt="Birch MCP" width="293" height="81" loading="lazy">
             <span class="hsm__mcp-line" aria-hidden="true"></span>
             <div class="hsm__phone hsm__mcp-phone" data-hsm-phone aria-label="Claude app conversation">
-              <img class="hs__phone-shot" src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy">
+              <img class="hs__phone-shot" data-hs-src="images/slides/03/phone.webp" alt="Claude app" width="581" height="1218" loading="lazy">
               <div class="hs__ph-msg">
                 <div class="hs__ph-greet">
-                  <img class="hs__ph-star" src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
+                  <img class="hs__ph-star" data-hs-src="images/slides/03/claude-star.svg" alt="" width="48" height="48">
                   <div class="hs__ph-title">Where should we scale?</div>
                 </div>
                 <div class="hs__ph-q"></div>
@@ -2339,20 +2583,113 @@
   var canvas = document.getElementById('canvas');
   var bars   = [].slice.call(track.querySelectorAll('.hs__bar'));
   var root   = document.documentElement;
+  var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function rootFontPx() {
+    return parseFloat(getComputedStyle(root).fontSize) || 16;
+  }
+
+  function fallbackNavHeightPx() {
+    var raw = getComputedStyle(root).getPropertyValue('--nav-height').trim();
+    var value = parseFloat(raw);
+    if (!isFinite(value)) return 0;
+    if (/px$/i.test(raw)) return value;
+    return value * rootFontPx();
+  }
+
+  function chromeHeightPx() {
+    var bottom = 0;
+    [].slice.call(document.querySelectorAll('.nav2, .nav2m, [data-hs-chrome]')).forEach(function (el) {
+      var cs = getComputedStyle(el);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position !== 'fixed') return;
+      bottom = Math.max(bottom, el.getBoundingClientRect().bottom);
+    });
+    var height = Math.max(0, bottom || fallbackNavHeightPx());
+    track.style.setProperty('--hs-chrome-h', height + 'px');
+    return height;
+  }
+
+  /* Air between the header and the card, in px. Read as a plain rem token —
+     never a calc(), which an unregistered custom property does not resolve
+     for a script (see docs/home-slides.md). */
+  function headGapPx() {
+    var raw = getComputedStyle(track).getPropertyValue('--hs-head-gap').trim();
+    var value = parseFloat(raw);
+    if (!isFinite(value)) return 0;
+    return /px$/i.test(raw) ? value : value * rootFontPx();
+  }
+
+  /* The line the card is pinned to: the fixed header plus that air. Every
+     measurement about where the track starts and how much room the card has
+     is taken from here, not from the header alone. */
+  function pinOffsetPx() { return chromeHeightPx() + headGapPx(); }
+
+  /* The host page may wrap the block in a Container that repeats the gutter
+     its own parent already applies, which leaves the card narrower than
+     every neighbouring section. Cancel the inner one, and only then: a
+     single container is the page's own margin and must be kept. Measured
+     rather than re-derived from a token, because the site's gutter is fluid
+     and does not equal any one rem value. */
+  function hostGutterPx() {
+    var parent = track.parentElement;
+    var inner = parent && parent.closest ? parent.closest('.w-container, .container') : null;
+    var outer = inner && inner.parentElement ? inner.parentElement.closest('.w-container, .container') : null;
+    var pad = inner && outer ? parseFloat(getComputedStyle(inner).paddingLeft) || 0 : 0;
+    track.style.setProperty('--hse-host-gutter', pad + 'px');
+    return pad;
+  }
+
+  /* ── Assets: only the layout on screen pays for its images ───────
+     Both layouts are in the DOM at once and CSS picks one, but a hidden
+     subtree is not a reason for the browser to skip an image: display:none
+     has no box, so loading="lazy" cannot defer it either and a phone was
+     downloading the whole desktop scene as well as its own. The markup
+     therefore ships every source in data-hs-src, and only the active
+     layout's images are given a src — on load, and again if the layout
+     changes under a resize. Each img carries width/height, so nothing
+     moves when a source finally arrives. */
+  var deferredImages = [].slice.call(track.querySelectorAll('img[data-hs-src]'));
+
+  function hydrateImages() {
+    var wantSticky = !staticMode();
+    deferredImages = deferredImages.filter(function (img) {
+      if (sticky.contains(img) !== wantSticky) return true;
+      img.src = img.getAttribute('data-hs-src');
+      img.removeAttribute('data-hs-src');
+      return false;
+    });
+  }
 
   /* Responsive collages are ordinary horizontal scrollers on touch screens.
      Mouse dragging and arrow keys make the same interaction available on
      laptops without introducing a carousel or transitions between scenes. */
-  [].slice.call(document.querySelectorAll('[data-hsm-drag]')).forEach(function (scroller) {
+  var responsiveScrollers = [].slice.call(document.querySelectorAll('[data-hsm-drag]'));
+  responsiveScrollers.forEach(function (scroller) {
     var dragging = false;
     var startX = 0;
     var startScroll = 0;
+    var userMoved = false;
+    var lastMax = 0;
+
+    scroller._hsmPosition = function () {
+      var max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      if (!max) return;
+      var ratio = userMoved && lastMax ? scroller.scrollLeft / lastMax : parseFloat(scroller.dataset.hsmStart || '0');
+      scroller.scrollLeft = Math.max(0, Math.min(max, max * ratio));
+      lastMax = max;
+    };
+
+    function markMoved() {
+      userMoved = true;
+      scroller.classList.add('has-moved');
+    }
 
     scroller.addEventListener('dragstart', function (event) {
       event.preventDefault();
     });
 
     scroller.addEventListener('pointerdown', function (event) {
+      markMoved();
       if (event.pointerType !== 'mouse' || event.button !== 0) return;
       dragging = true;
       startX = event.clientX;
@@ -2378,14 +2715,18 @@
 
     scroller.addEventListener('pointerup', stopDragging);
     scroller.addEventListener('pointercancel', stopDragging);
+    scroller.addEventListener('touchstart', markMoved, { passive: true });
+    scroller.addEventListener('wheel', markMoved, { passive: true });
     scroller.addEventListener('keydown', function (event) {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      markMoved();
       scroller.scrollBy({
         left: (event.key === 'ArrowLeft' ? -1 : 1) * scroller.clientWidth * 0.6,
         behavior: 'smooth'
       });
       event.preventDefault();
     });
+    requestAnimationFrame(scroller._hsmPosition);
   });
 
   /* Which slide each step belongs to. */
@@ -2533,13 +2874,13 @@
      fallback font wraps the paragraph differently (dev-pages.md). */
   function lockBarHeight() {
     if (getComputedStyle(sticky).display === 'none') return;
-    var cs = getComputedStyle(root), rootPx = parseFloat(cs.fontSize);
-    root.style.setProperty('--bar-h', '0rem');
+    var cs = getComputedStyle(track), rootPx = rootFontPx();
+    track.style.setProperty('--bar-h', '0rem');
     var tallest = bars.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 0);
-    root.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
+    track.style.setProperty('--bar-h', (tallest / rootPx) + 'rem');
 
     /* Bottom gap: whatever room is left under the minimum card, capped. */
-    var navH  = parseFloat(cs.getPropertyValue('--nav-height')) * rootPx;
+    var navH  = pinOffsetPx();
     var gapMax = parseFloat(cs.getPropertyValue('--slide-gap-max')) * rootPx;
     var u = card.getBoundingClientRect().width / 1232;
     /* Everything above the canvas, measured rather than re-derived: the card
@@ -2554,13 +2895,12 @@
        declaration invalid — which under container-type: size is a canvas of
        zero height and no scene at all. */
     if (!isFinite(room)) return;
-    root.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
+    track.style.setProperty('--slide-gap-bottom', (Math.max(0, Math.min(gapMax, room)) / rootPx) + 'rem');
   }
 
   /* 0 at the moment the card pins, 1 when the track runs out. */
   function progress() {
-    var cs = getComputedStyle(root);
-    var navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);
+    var navH = pinOffsetPx();
     var span = track.offsetHeight - sticky.offsetHeight;
     if (span <= 0) return 0;
     return Math.min(1, Math.max(0, (navH - track.getBoundingClientRect().top) / span));
@@ -2588,7 +2928,7 @@
      of the wheel reads as motion rather than as a cut. Position stays the
      source of truth — this only delays arriving at it. */
   var shownP = null, targetP = 0, raf = null;
-  var LAG = 0.10;
+  var LAG = reduceMotion ? 1 : 0.10;
   var autoLive = false;
   function follow() {
     raf = null;
@@ -2638,8 +2978,9 @@
     d.addEventListener('click', function () {
       /* a slide not built yet (no steps) scrolls to the end of the track */
       var r = SLIDE_RANGE[+d.dataset.slide] || [TOTAL, TOTAL], span = track.offsetHeight - sticky.offsetHeight;
-      var cs = getComputedStyle(root), navH = parseFloat(cs.getPropertyValue('--nav-height')) * parseFloat(cs.fontSize);
-      window.scrollTo({ top: track.offsetTop - navH + span * (r[0] / TOTAL) + 1, behavior: 'smooth' });
+      var navH = pinOffsetPx();
+      var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({ top: trackTop - navH + span * (r[0] / TOTAL) + 1, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
   });
 
@@ -2702,6 +3043,7 @@
 
   var slide = -1;
   function apply() {
+    rememberPlace();
     targetP = progress();
     /* the entrance runs on its own clock; leaving the first state cuts it
        short rather than letting pieces stay hidden into the next step */
@@ -2855,10 +3197,16 @@
       slide = si;
       bars.forEach(function (b, n) {
         b.classList.toggle('is-active', n === si);
+        b.toggleAttribute('inert', n !== si);
+        b.setAttribute('aria-hidden', n === si ? 'false' : 'true');
       });
       /* one write, both blocks read it — see --slide-bg on .hs__card */
       card.style.setProperty('--slide-bg', bars[si].dataset.bg);
-      dots.forEach(function (d, n) { d.classList.toggle('is-active', n === si); });
+      dots.forEach(function (d, n) {
+        d.classList.toggle('is-active', n === si);
+        if (n === si) d.setAttribute('aria-current', 'true');
+        else d.removeAttribute('aria-current');
+      });
     }
     /* the active capsule fills with progress through its own slide;
        slides already passed read full, slides ahead read empty */
@@ -2870,7 +3218,7 @@
 
   lockBarHeight();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(lockBarHeight);
-  new ResizeObserver(lockBarHeight).observe(document.body);
+  new ResizeObserver(lockBarHeight).observe(track);
 
   /* ── Chat ────────────────────────────────────────────────────
      Hybrid, as agreed: scroll picks the beat, time types the letters.
@@ -3418,8 +3766,66 @@
     io.observe(card);
   }
 
+  /* ── Keeping the reader's place across the 992 breakpoint ─────────
+     The two layouts have different scroll budgets — the sticky track is
+     several screens long, the static flow is one page — so rotating a
+     tablet or dragging a window across the breakpoint would otherwise
+     move the reader by thousands of pixels. What carries over is the
+     slide, not the offset: whichever slide was being read is scrolled to
+     in the layout that takes over. */
+  var staticBlocks = [].slice.call(track.querySelectorAll('.hsm__block'));
+  var lastMode = null, lastSlide = 0;
+
+  function staticMode() { return getComputedStyle(sticky).display === 'none'; }
+
+  function slideInStaticView() {
+    var top = chromeHeightPx(), best = 0, bestGap = Infinity;
+    staticBlocks.forEach(function (block, i) {
+      var gap = Math.abs(block.getBoundingClientRect().top - top);
+      if (gap < bestGap) { bestGap = gap; best = i; }
+    });
+    return best;
+  }
+
+  /* Page offset at which slide `i` starts on the sticky track. */
+  function slideTop(i) {
+    var span = track.offsetHeight - sticky.offsetHeight;
+    var r = SLIDE_RANGE[i] || [0, TOTAL];
+    return track.getBoundingClientRect().top + window.pageYOffset - pinOffsetPx() + span * (r[0] / TOTAL) + 1;
+  }
+
+  function rememberPlace() {
+    lastSlide = staticMode() ? slideInStaticView() : Math.max(0, slide);
+  }
+
+  function restorePlace() {
+    var mode = staticMode() ? 'static' : 'sticky';
+    if (lastMode === null || mode === lastMode) { lastMode = mode; return; }
+    lastMode = mode;
+    var i = Math.min(staticBlocks.length - 1, Math.max(0, lastSlide));
+    if (mode === 'static') {
+      var block = staticBlocks[i];
+      if (!block) return;
+      window.scrollTo({ top: block.getBoundingClientRect().top + window.pageYOffset - chromeHeightPx() - 16, behavior: 'auto' });
+    } else {
+      window.scrollTo({ top: slideTop(i), behavior: 'auto' });
+    }
+  }
+
   addEventListener('scroll', apply, { passive: true });
-  addEventListener('resize', function () { shownP = null; apply(); });   /* no lag across a resize */
+  addEventListener('resize', function () {
+    chromeHeightPx();
+    hostGutterPx();
+    responsiveScrollers.forEach(function (scroller) { scroller._hsmPosition(); });
+    shownP = null;
+    hydrateImages();
+    lockBarHeight();
+    restorePlace();
+    apply();
+  });
+  hostGutterPx();
+  hydrateImages();
+  restorePlace();
   introInit();
   apply();
   window.__hsApply = apply;
