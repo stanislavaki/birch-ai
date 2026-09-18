@@ -78,6 +78,13 @@
      block starts flush against the last slide. */
   --hs-block-gap: 1rem;
 
+  /* Half the page's grid gutter. Ten of the thirteen blocks on the home
+     page are cards inside grid columns, and a column's 8px padding is what
+     sets their visible edge — so matching the container is not the same as
+     matching the blocks. This inset is what lines the card, the collages
+     and the buttons up with them. */
+  --hs-col-gutter: 0.5rem;
+
   /* The card is two blocks — the copy above, the scene below — and this is
      what runs between them. A fixed rem like --pad-card, not a design unit:
      this is card chrome, not part of the composition, so it must not grow
@@ -111,6 +118,7 @@
      sticky does not cover — the card unpins early and slides under the nav.
      The air above the card comes from --hs-head-gap inside the sticky. */
   padding-block: 0;
+  padding-inline: var(--hs-col-gutter);
   /* A margin, not padding: padding would extend the sticky's containing
      block and keep the last slide pinned through the gap. */
   margin-block-end: var(--hs-block-gap);
@@ -400,12 +408,23 @@
   }
   .hs__sticky { display: none; }
 
+  /* All three blocks are the height of the tallest one. Their copy differs
+     by a couple of lines, and without this the shorter blocks read as a
+     mistake next to the first. The slack goes to the collage, which is the
+     one part of the block that can take it without moving anything. */
   .hsm {
     display: grid;
     gap: var(--space-lg);
+    grid-auto-rows: 1fr;
   }
-  .hsm__block { min-width: 0; }
+  .hsm__block {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
   .hsm__surface {
+    display: grid;
+    grid-template-rows: auto 1fr;
     overflow: hidden;
     background: var(--hsm-bg);
     border-radius: var(--radius-xl);
@@ -447,7 +466,8 @@
 
   .hsm__collage {
     position: relative;
-    height: clamp(20rem, 43.7cqw, 34rem);
+    /* a floor, not a height — the grid row above decides the rest */
+    min-height: clamp(20rem, 43.7cqw, 34rem);
     overflow-x: auto;
     overflow-y: hidden;
     container-type: inline-size;
@@ -469,25 +489,33 @@
     height: 100%;
     margin-right: var(--space);
   }
+  /* The visible "Swipe to explore" chip is gone — the collages start on
+     their composition point, which is hint enough, and a badge over the
+     scene was covering it. The text stays in the DOM, off-screen, because
+     it is the collage's aria-describedby: a reader who cannot see that the
+     region scrolls still gets told. */
   .hsm__swipe {
     position: absolute;
-    right: var(--space-sm);
-    top: var(--space-sm);
-    z-index: 30;
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0.25rem 0.625rem;
-    border-radius: var(--radius-pill);
-    background: rgba(0, 0, 0, 0.55);
-    color: #fff;
-    font-size: 0.75rem;
-    line-height: 1;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
-  .hsm__collage.has-moved .hsm__swipe { opacity: 0; }
-  .hsm__stage--ai { width: 100cqw; }
+  /* The AI scene is the smallest of the three and sits in the same box as
+     the others, so it gets a zoom of its own. The layout width carries the
+     factor and the height divides it out, so the painted stage still matches
+     its own box exactly — scrolling reaches the end and nothing is clipped. */
+  .hsm__stage--ai {
+    --hsm-zoom: 1.1;
+    width: calc(100cqw * var(--hsm-zoom));
+    height: calc(100% / var(--hsm-zoom));
+    transform: scale(var(--hsm-zoom));
+    transform-origin: 0 0;
+  }
   .hsm__asset {
     position: absolute;
     display: block;
@@ -628,10 +656,10 @@
   }
   .hsm__title { margin-top: 1.25rem; }
   .hsm__lead { margin-top: var(--space); }
-  .hsm__collage { height: clamp(19rem, 94cqw, 40rem); }
+  .hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
   .hsm__stage--rules { width: 312cqw; }
-  .hsm__stage--ai { width: 122cqw; }
+  .hsm__stage--ai { width: calc(122cqw * var(--hsm-zoom)); }
   .hsm__stage--mcp { width: 200cqw; }
 
   .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
@@ -687,8 +715,7 @@
   .hs__head,
   .hs__canvas,
   .hs__frag,
-  .hs__dot,
-  .hsm__swipe { transition: none !important; animation: none !important; }
+  .hs__dot { transition: none !important; animation: none !important; }
   .hsm__collage { scroll-behavior: auto; }
 }
 
@@ -2338,7 +2365,7 @@
           <h2 class="hsm__title t-h5">Nested conditions, custom metrics and 20+ actions, checked every 15 minutes</h2>
           <p class="hsm__lead t-body">Rules are the engine Birch runs on. Compare a metric to itself last week, or to the top 10 for that metric. Trigger on custom metrics and AppsFlyer, Adjust, or Hyros data. Apply one rule across multiple accounts — and set it to run as often as every 15 minutes.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag data-hsm-start="0.31" tabindex="0" aria-label="Rules interface collage" aria-describedby="hsm-rules-hint">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Rules interface collage" aria-describedby="hsm-rules-hint">
           <span class="hsm__swipe" id="hsm-rules-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--rules">
             <img class="hsm__asset hsm__rules-schedule" data-hs-src="images/slides/01/schedule-cal.webp" alt="Run on specific days and times" width="875" height="1271" loading="lazy">
@@ -2368,7 +2395,7 @@
           <h2 class="hsm__title t-h5">Ask in natural language to get a complex rule built</h2>
           <p class="hsm__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag data-hsm-start="0.68" tabindex="0" aria-label="Birch AI interface collage" aria-describedby="hsm-ai-hint">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Birch AI interface collage" aria-describedby="hsm-ai-hint">
           <span class="hsm__swipe" id="hsm-ai-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--ai">
             <div class="hsm__auto-rules">
@@ -2434,7 +2461,7 @@
           <h2 class="hsm__title t-h5">Your account, reachable from wherever you already work</h2>
           <p class="hsm__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
         </header>
-        <div class="hsm__collage" data-hsm-drag data-hsm-start="0.95" tabindex="0" aria-label="Birch MCP interface collage" aria-describedby="hsm-mcp-hint">
+        <div class="hsm__collage" data-hsm-drag data-hsm-start="0" tabindex="0" aria-label="Birch MCP interface collage" aria-describedby="hsm-mcp-hint">
           <span class="hsm__swipe" id="hsm-mcp-hint">Swipe to explore &rarr;</span>
           <div class="hsm__stage hsm__stage--mcp">
             <img class="hsm__asset hsm__mcp-ads" data-hs-src="images/slides/01/ads-collage.webp" alt="Creative ads" width="1205" height="1000" loading="lazy">
