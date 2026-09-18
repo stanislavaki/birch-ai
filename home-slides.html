@@ -303,11 +303,24 @@
      text runs straight into the paragraph — which is exactly what happened
      once the heading went up to t-h4. */
   .hs__bar {
-    --hs-tag-column: calc(3.5rem + var(--hs-lead-pull));
-    --hs-lead-pull: 44px;
+    /* The tag column's own width: it holds the pager and the badge and has
+       nothing to do with how far the copy is pulled back. */
+    --hs-tag-column: calc(3.5rem + 2.75rem);
+    /* Measured against the page, not chosen: at this pull the paragraph's
+       left edge lands on the second column of the page's bento grid — the
+       same line as the chat card in the scene below it and as the copy in
+       every card further down. */
+    --hs-lead-pull: 4.7rem;
+    /* The heading moves left too, but only by about 10px: the widest tag
+       ("Rules") sets the limit — at 2.5rem the two collided by 8px and
+       "MCP" touched. This leaves the widest tag ~1rem of air. */
+    --hs-title-pull: 1.1rem;
   }
   .hs__pills { translate: 12px 0; }
-  .hs__title { translate: -10px 0; padding-right: var(--hs-lead-pull); }
+  .hs__title {
+    translate: calc(0px - var(--hs-title-pull)) 0;
+    padding-right: var(--hs-lead-pull);
+  }
   .hs__lead { position: relative; left: calc(0px - var(--hs-lead-pull)); }
 }
 
@@ -365,9 +378,9 @@
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
-/* Same 1rem as the page's buttons — the component's own --radius-sm is a
-   different family and reads as a different button next to them. */
-.hs__buttons .btn,
+/* The page's own 1rem, but only where the buttons are full-width blocks in
+   the flow — on the mobile card. On the desktop bar they are small inline
+   buttons, and at 1rem they read as pills. */
 .hsm__actions .btn { border-radius: var(--radius-lg); }
 .hs__buttons .btn-stroke {
   background: rgba(0, 0, 0, 0.3);

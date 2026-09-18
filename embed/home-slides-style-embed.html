@@ -571,11 +571,18 @@
 @media (min-width: 992px) {
 
   .hse-hs__bar {
-    --hs-tag-column: calc(3.5rem + var(--hs-lead-pull));
-    --hs-lead-pull: 44px;
+
+    --hs-tag-column: calc(3.5rem + 2.75rem);
+
+    --hs-lead-pull: 4.7rem;
+
+    --hs-title-pull: 1.1rem;
   }
   .hse-hs__pills { translate: 12px 0; }
-  .hse-hs__title { translate: -10px 0; padding-right: var(--hs-lead-pull); }
+  .hse-hs__title {
+    translate: calc(0px - var(--hs-title-pull)) 0;
+    padding-right: var(--hs-lead-pull);
+  }
   .hse-hs__lead { position: relative; left: calc(0px - var(--hs-lead-pull)); }
 }
 
@@ -625,7 +632,6 @@
 
 .hse-hs__buttons .hse-btn { flex: 1; }
 
-.hse-hs__buttons .hse-btn,
 .hse-hsm__actions .hse-btn { border-radius: var(--radius-lg); }
 .hse-hs__buttons .hse-btn-stroke {
   background: rgba(0, 0, 0, 0.3);
