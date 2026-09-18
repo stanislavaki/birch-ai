@@ -78,6 +78,13 @@
      block starts flush against the last slide. */
   --hs-block-gap: 1rem;
 
+  /* Mobile type, matched to the site's own body style (.paragraph-lg on
+     bir.ch: 1.25rem / 1.1 / -0.005em, the same token at every width). The
+     heading sits 4px above it at the 16px base, and the tag reads at the
+     heading's size rather than the body's. */
+  --hs-text-body-m: 1.25rem;
+  --hs-text-title-m: 1.5rem;
+
   /* Half the page's grid gutter. Ten of the thirteen blocks on the home
      page are cards inside grid columns, and a column's 8px padding is what
      sets their visible edge — so matching the container is not the same as
@@ -310,6 +317,11 @@
   letter-spacing: var(--text-h5-ls);
   padding: 0.058em 0.462em 0.154em;
 }
+
+/* The tag belongs to the heading line, so it is set at the heading's size
+   on both breakpoints. `.hse-t-body` on the element is a two-class rule, so
+   this one needs the bar in front of it to take. */
+.hs__bar .hs__pill { font-size: var(--text-h5-size); }
 
 .hs__title {
   color: var(--color-text);
@@ -656,6 +668,19 @@
   }
   .hsm__title { margin-top: 1.25rem; }
   .hsm__lead { margin-top: var(--space); }
+
+  /* Copy at the site's own mobile sizes (see --hs-text-body-m). */
+  .hsm__copy .hsm__lead {
+    font-size: var(--hs-text-body-m);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+  }
+  .hsm__copy .hsm__title,
+  .hsm__copy .hsm__pill {
+    font-size: var(--hs-text-title-m);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+  }
   .hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
   .hsm__stage--rules { width: 312cqw; }

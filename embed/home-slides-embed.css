@@ -420,6 +420,9 @@
 
   --hs-block-gap: 1rem;
 
+  --hs-text-body-m: 1.25rem;
+  --hs-text-title-m: 1.5rem;
+
   --hs-col-gutter: 0.5rem;
 
   --slide-split: var(--gap-main);
@@ -587,6 +590,8 @@
   letter-spacing: var(--text-h5-ls);
   padding: 0.058em 0.462em 0.154em;
 }
+
+.hse-hs__bar .hse-hs__pill { font-size: var(--text-h5-size); }
 
 .hse-hs__title {
   color: var(--color-text);
@@ -889,6 +894,18 @@
   }
   .hse-hsm__title { margin-top: 1.25rem; }
   .hse-hsm__lead { margin-top: var(--space); }
+
+  .hse-hsm__copy .hse-hsm__lead {
+    font-size: var(--hs-text-body-m);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+  }
+  .hse-hsm__copy .hse-hsm__title,
+  .hse-hsm__copy .hse-hsm__pill {
+    font-size: var(--hs-text-title-m);
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+  }
   .hse-hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hse-hsm__stage { margin-left: var(--space); }
   .hse-hsm__stage--rules { width: 312cqw; }
