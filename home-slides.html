@@ -296,10 +296,18 @@
   padding-inline: calc(var(--pad-card) + 1.5rem) var(--pad-card);
 }
 @media (min-width: 992px) {
-  .hs__bar { --hs-tag-column: calc(3.5rem + 44px); }
+  /* The lead is pulled back into the heading's column so the three copy
+     columns land on the page's grid despite the wider tag column. That pull
+     is space the heading no longer owns: without the matching padding its
+     text runs straight into the paragraph — which is exactly what happened
+     once the heading went up to t-h4. */
+  .hs__bar {
+    --hs-tag-column: calc(3.5rem + var(--hs-lead-pull));
+    --hs-lead-pull: 44px;
+  }
   .hs__pills { translate: 12px 0; }
-  .hs__title { translate: -10px 0; }
-  .hs__lead { position: relative; left: -44px; }
+  .hs__title { translate: -10px 0; padding-right: var(--hs-lead-pull); }
+  .hs__lead { position: relative; left: calc(0px - var(--hs-lead-pull)); }
 }
 
 .hs__heading {
@@ -325,12 +333,11 @@
 }
 
 /* The block's own type, on the desktop bar. The utility classes on these
-   elements are two-class rules, so each selector carries the bar to take. */
-.hs__bar .hs__lead {
-  font-size: var(--hs-text-body);
-  line-height: 1.1;
-  letter-spacing: var(--hs-text-ls);
-}
+   elements are two-class rules, so each selector carries the bar to take.
+   The lead keeps the smaller --text-body-size it always had here: at t-h4
+   the heading alone carries the size, and a 1.25rem paragraph beside it
+   read as a second heading. Mobile still uses the site's body size, where
+   the column is the full width and there is nothing to compete with. */
 .hs__bar .hs__title,
 .hs__bar .hs__pill {
   font-size: var(--hs-text-title);
@@ -345,7 +352,14 @@
   min-width: 0;
 }
 .hs__bar[data-slide="1"] .hs__title { text-wrap: wrap; }
-.hs__lead  { color: var(--color-text); text-wrap: pretty; margin: 0; }
+/* The lead is supporting copy, so it sits back from the heading at half
+   strength. Through the colour, not opacity: the bar's entrance animation
+   owns `opacity` on every column and would overwrite it on the way in. */
+.hs__lead  {
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+  text-wrap: pretty;
+  margin: 0;
+}
 
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
@@ -487,7 +501,7 @@
   .hsm__lead {
     grid-area: lead;
     margin: 0;
-    color: var(--color-text);
+    color: color-mix(in srgb, var(--color-text) 50%, transparent);
     text-wrap: pretty;
   }
 
