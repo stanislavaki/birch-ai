@@ -522,15 +522,19 @@
     background: var(--hsm-bg);
     border-radius: var(--radius-lg);
   }
+  /* Same shape as the desktop bar: the badge sits beside the heading, and
+     the paragraph goes under it on the heading's left edge. Side by side
+     the two columns each got half the width and the paragraph turned into a
+     ladder. */
   .hsm__copy {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: max-content minmax(0, 1fr);
     grid-template-areas:
-      "pill lead"
-      "title lead";
+      "pill  title"
+      ".     lead";
     column-gap: var(--space-md);
     row-gap: var(--space-sm);
-    align-items: start;
+    align-items: baseline;
     padding: var(--space-md) var(--pad-card) var(--space);
   }
   .hsm__pill {
@@ -564,7 +568,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     container-type: inline-size;
-    cursor: grab;
     touch-action: pan-x pan-y;
     overscroll-behavior-inline: contain;
     scrollbar-width: none;
@@ -575,7 +578,10 @@
     outline-offset: -0.1875rem;
   }
   .hsm__collage::-webkit-scrollbar { display: none; }
-  .hsm__collage.is-dragging { cursor: grabbing; }
+  /* Only a collage with somewhere to go offers the grab cursor — the script
+     sets .has-room from the actual scroll range. */
+  .hsm__collage.has-room { cursor: grab; }
+  .hsm__collage.has-room.is-dragging { cursor: grabbing; }
   .hsm__stage {
     position: relative;
     width: 132cqw;
@@ -604,7 +610,16 @@
      its own box exactly — scrolling reaches the end and nothing is clipped. */
   .hsm__stage--ai {
     --hsm-zoom: 1.1;
-    width: calc(100cqw * var(--hsm-zoom));
+    /* The width is the composition's own, unscaled: the transform already
+       stretches the box, and the scroller measures the painted one. Passing
+       the factor here too widened the box by the zoom a second time and left
+       that surplus as dead space at the end of the scroll. Only the height
+       divides the factor out, so the painted stage still fills its box. */
+    /* The trailing gutter has to live inside the scaled box: the stage's own
+       margin sits at the edge of the unscaled one, which the painted stage
+       runs straight past, so at the end of the scroll the scene touched the
+       edge. Divided by the zoom, it comes out as exactly --space. */
+    width: calc(100cqw + var(--space) / var(--hsm-zoom));
     height: calc(100% / var(--hsm-zoom));
     transform: scale(var(--hsm-zoom));
     transform-origin: 0 0;
@@ -719,20 +734,6 @@
   }
 }
 
-/* One row for pill, heading and lead only where there is room for it: at
-   768 the three columns squeeze the paragraph into a ladder, so below 820
-   the copy falls back to the stacked two-column form. */
-@media (min-width: 820px) and (max-width: 991px) {
-  .hsm__copy {
-    grid-template-columns: max-content repeat(2, minmax(0, 1fr));
-    grid-template-areas: "pill title lead";
-    align-items: baseline;
-  }
-  .hsm__pill { translate: -20px 0; }
-  .hsm__title,
-  .hsm__lead { translate: -28px 0; }
-}
-
 @media (max-width: 767px) {
   .hs { padding-block: var(--space) var(--space-lg); }
   .hsm__copy {
@@ -772,9 +773,11 @@
      ~40px above the bottom edge. */
   .hsm__stage--ai {
     --hsm-zoom: 1.45;
-    width: calc(122cqw * var(--hsm-zoom));
+    width: calc(122cqw + var(--space) / var(--hsm-zoom));
   }
-  .hsm__stage--mcp { width: 200cqw; }
+  /* 180, not 200: the phone is the rightmost piece and ends at 178cqw, so
+     the rest was dead space the scroll ran into. */
+  .hsm__stage--mcp { width: 180cqw; }
 
   .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
   .hsm__rules-snap { left: 6.5cqw; top: 51.5cqw; width: 17.25cqw; }
@@ -811,6 +814,42 @@
     padding-inline: 0.5rem;
     font-size: clamp(0.75rem, 3.4vw, var(--text-btn-xs-size));
   }
+}
+
+/* ── Tablet ─────────────────────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 991px) {
+  /* No carousel here: at this width each scene is either narrower than its
+     box or close enough that dragging only revealed empty space. The box
+     becomes a frame — what does not fit is cropped by it, the way the
+     desktop canvas crops its own scene. */
+  /* clip, not hidden: hidden leaves a scroll container behind — the script
+     can still move it and the grab cursor still appears. clip removes the
+     scrolling entirely, which is what a framed scene wants. */
+  .hsm__collage { overflow: clip; }
+  /* The AI scene is the only one narrower than its box here — it reaches
+     61cqw where the box is 100 — so it was sitting against the left edge
+     with the surplus piling up on the right. Sizing the stage to the extent
+     the composition actually reaches lets the auto margins centre it. */
+  .hsm__stage--ai {
+    width: 61cqw;
+    margin-inline: auto;
+    /* The scene does not sit flush inside its own box, so centring the box
+       left it 4.3cqw off. Measured and corrected. */
+    translate: -4.32cqw 0;
+  }
+  /* Same for the MCP scene: it reaches 96cqw of a 100cqw box, so the stage
+     was dragging 296px into empty space. Sized to the composition it has
+     nothing left to scroll and sits centred. */
+  .hsm__stage--mcp {
+    width: 96cqw;
+    margin-inline: auto;
+    translate: 1.26cqw 0;
+  }
+  /* The Rules scene is wider than the frame, so it is centred on its own
+     point rather than on its bounding box: the Duplicate card spans
+     4→89cqw, its middle sits at 46.5, and this puts that middle on the
+     frame's centre line. */
+  .hsm__stage--rules { translate: 3.5cqw 0; }
 }
 
 @media (max-width: 479px) {
@@ -2724,7 +2763,12 @@
     var lastMax = 0;
 
     scroller._hsmPosition = function () {
-      var max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      /* Whether the box scrolls at all, not merely whether the scene
+         overflows it: a clipped frame still reports the overflow, and the
+         grab cursor would promise a drag that cannot happen. */
+      var scrolls = /^(auto|scroll)$/.test(getComputedStyle(scroller).overflowX);
+      var max = scrolls ? Math.max(0, scroller.scrollWidth - scroller.clientWidth) : 0;
+      scroller.classList.toggle('has-room', max > 0);
       if (!max) return;
       var ratio = userMoved && lastMax ? scroller.scrollLeft / lastMax : parseFloat(scroller.dataset.hsmStart || '0');
       scroller.scrollLeft = Math.max(0, Math.min(max, max * ratio));
