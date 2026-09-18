@@ -125,13 +125,17 @@
 .hs__sticky {
   position: sticky;
   top: calc(var(--hs-chrome-h) + var(--hs-head-gap));
-  height: calc(100dvh - var(--hs-chrome-h) - var(--hs-head-gap));
-  padding-bottom: var(--slide-gap-bottom);
-  box-sizing: border-box;
+  /* The height is the card's, not the window's. A viewport-tall sticky keeps
+     its unused bottom inside the block, and once the card is anchored to the
+     top that empty strip lands between this block and the next one — where it
+     reads as a gap several times the page's own. The air under the pinned
+     card is already reserved by the canvas clamp (--slide-gap-bottom), so it
+     does not have to be padding here as well.
+
+     Top-anchored, not centred: the gap under the header is the fixed point of
+     the composition. When the card is taller than the window it keeps its
+     head in place and the bottom runs past the fold. */
   display: flex;
-  /* Top-anchored, not centred: the gap under the header is the fixed point
-     of the composition. When the card is taller than the window, it keeps
-     its head in place and the bottom runs past the fold. */
   align-items: flex-start;
 }
 .hs__sticky > .container { width: 100%; }

@@ -441,11 +441,8 @@
 .hse-hs__sticky {
   position: sticky;
   top: calc(var(--hs-chrome-h) + var(--hs-head-gap));
-  height: calc(100dvh - var(--hs-chrome-h) - var(--hs-head-gap));
-  padding-bottom: var(--slide-gap-bottom);
-  box-sizing: border-box;
-  display: flex;
 
+  display: flex;
   align-items: flex-start;
 }
 .hse-hs__sticky > .hse-container-e { width: 100%; }
