@@ -297,33 +297,59 @@
   padding-inline: calc(var(--pad-card) + 1.5rem) var(--pad-card);
 }
 @media (min-width: 992px) {
-  /* The lead is pulled back into the heading's column so the three copy
-     columns land on the page's grid despite the wider tag column. That pull
-     is space the heading no longer owns: without the matching padding its
-     text runs straight into the paragraph — which is exactly what happened
-     once the heading went up to t-h4. */
   /* Copy stacked, not in two columns: the heading takes the wide left area
      and the paragraph sits under it on the same left edge. The two can no
      longer meet, so neither the pull-back nor the heading's matching
-     padding is needed — only the ~10px optical shift, which both take so
-     their left edges line up. The widest tag ("Rules") still sets how far
-     that shift can go. */
+     padding is needed — only one optical shift, which both take. */
   .hs__bar {
     --hs-tag-column: calc(3.5rem + 2.75rem);
-    --hs-title-pull: 1.1rem;
+    /* Optical offset of the copy block, taken by the heading and the
+       paragraph alike so their left edges stay on one line. Positive moves
+       it right, away from the tag. */
+    --hs-copy-shift: 1.15rem;
     grid-template-columns: var(--hs-tag-column) minmax(0, 2fr) minmax(0, 1fr);
-    row-gap: var(--gap-main);
+    row-gap: 0.75rem;
+    /* Baseline alignment is for a row of columns, which this no longer is:
+       with the copy stacked it displaced the heading block and dropped the
+       paragraph another 37px on the slides with a one-line heading. The
+       badge still sits on the heading's baseline — that is .hs__heading's
+       own alignment, and it stays. */
+    align-items: start;
+    /* Every bar is at least --bar-h tall (one locked height for all three,
+       so the canvas cannot move on a slide change). By default that surplus
+       is handed to the rows, and on a slide with a one-line heading it put
+       ~40px between the heading and its paragraph. Start keeps each row at
+       its own height and leaves the surplus below the copy. */
+    align-content: start;
   }
   .hs__pills { translate: 12px 0; }
   .hs__heading { grid-column: 1 / 3; }
-  .hs__title { translate: calc(0px - var(--hs-title-pull)) 0; }
+  .hs__title {
+    translate: var(--hs-copy-shift) 0;
+    padding-right: var(--hs-copy-shift);
+  }
+  /* Not balance here: it evens the lines out rather than filling them, so
+     "20+ actions" was pushed to a second line while the first still had
+     room. Pretty fills the line and still keeps a word from being left alone
+     on the last one. Two classes, because the base .hs__title sits further
+     down the sheet and would otherwise win on order. */
+  .hs__bar .hs__title { text-wrap: pretty; }
   .hs__lead {
     grid-column: 2;
     grid-row: 2;
     position: relative;
-    left: calc(0px - var(--hs-title-pull));
+    left: var(--hs-copy-shift);
+    /* The shift moves the box right without narrowing it, so the text would
+       end up that much closer to the buttons. Giving the same amount back as
+       padding puts the wrap point back on the column's own edge: the copy
+       uses every pixel the column has, and the grid's column gap is what
+       separates it from the buttons. */
+    padding-right: var(--hs-copy-shift);
   }
-  .hs__buttons { grid-column: 3; grid-row: 1; }
+  /* Spanning both rows, so the buttons cannot set the height of the heading's
+     row: on the slides with a one-line heading they were taller than it, and
+     the paragraph dropped 49px below instead of the 16 it kept elsewhere. */
+  .hs__buttons { grid-column: 3; grid-row: 1 / span 2; }
 }
 
 .hs__heading {
