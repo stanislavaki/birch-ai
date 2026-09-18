@@ -422,8 +422,9 @@
 
   --hs-block-gap: 1rem;
 
-  --hs-text-body-m: 1.25rem;
-  --hs-text-title-m: 1.5rem;
+  --hs-text-body: 1.25rem;
+  --hs-text-title: 1.5rem;
+  --hs-text-ls: -0.005em;
 
   --hs-col-gutter: 0.5rem;
 
@@ -487,14 +488,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+
+  gap: 0.25rem;
 }
 .hse-hs__dot {
   --fill: 0;
   position: relative;
-  width: 1.8rem;
-  height: 1.8rem;
-  flex: 0 0 1.8rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: 0 0 1.2rem;
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
@@ -593,7 +595,17 @@
   padding: 0.058em 0.462em 0.154em;
 }
 
-.hse-hs__bar .hse-hs__pill { font-size: var(--text-h5-size); }
+.hse-hs__bar .hse-hs__lead {
+  font-size: var(--hs-text-body);
+  line-height: 1.1;
+  letter-spacing: var(--hs-text-ls);
+}
+.hse-hs__bar .hse-hs__title,
+.hse-hs__bar .hse-hs__pill {
+  font-size: var(--hs-text-title);
+  line-height: 1.1;
+  letter-spacing: var(--hs-text-ls);
+}
 
 .hse-hs__title {
   color: var(--color-text);
@@ -898,15 +910,15 @@
   .hse-hsm__lead { margin-top: var(--space); }
 
   .hse-hsm__copy .hse-hsm__lead {
-    font-size: var(--hs-text-body-m);
+    font-size: var(--hs-text-body);
     line-height: 1.1;
-    letter-spacing: -0.005em;
+    letter-spacing: var(--hs-text-ls);
   }
   .hse-hsm__copy .hse-hsm__title,
   .hse-hsm__copy .hse-hsm__pill {
-    font-size: var(--hs-text-title-m);
+    font-size: var(--hs-text-title);
     line-height: 1.1;
-    letter-spacing: -0.005em;
+    letter-spacing: var(--hs-text-ls);
   }
   .hse-hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hse-hsm__stage { margin-left: var(--space); }

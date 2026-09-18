@@ -78,12 +78,15 @@
      block starts flush against the last slide. */
   --hs-block-gap: 1rem;
 
-  /* Mobile type, matched to the site's own body style (.paragraph-lg on
-     bir.ch: 1.25rem / 1.1 / -0.005em, the same token at every width). The
-     heading sits 4px above it at the 16px base, and the tag reads at the
-     heading's size rather than the body's. */
-  --hs-text-body-m: 1.25rem;
-  --hs-text-title-m: 1.5rem;
+  /* One type pair for the whole block, on both breakpoints — the same two
+     styles the rest of the site uses: t-para-lg / .paragraph-lg for body
+     (1.25rem / 1.1) and t-h4 for the heading (1.5rem, 4px above it at the
+     16px base). The tag reads at the heading's size, not the body's.
+     Tracking is set by size, not by breakpoint (CLAUDE.md), so the same
+     -0.005em applies wherever these sizes appear. */
+  --hs-text-body: 1.25rem;
+  --hs-text-title: 1.5rem;
+  --hs-text-ls: -0.005em;
 
   /* Half the page's grid gutter. Ten of the thirteen blocks on the home
      page are cards inside grid columns, and a column's 8px padding is what
@@ -199,14 +202,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  /* Tight: every unit spent on the boxes and the gaps between them is a
+     unit the active capsule does not get, and the capsule is the part that
+     carries the reading. */
+  gap: 0.25rem;
 }
 .hs__dot {
   --fill: 0;
   position: relative;
-  width: 1.8rem;
-  height: 1.8rem;
-  flex: 0 0 1.8rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: 0 0 1.2rem;
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
@@ -318,10 +324,19 @@
   padding: 0.058em 0.462em 0.154em;
 }
 
-/* The tag belongs to the heading line, so it is set at the heading's size
-   on both breakpoints. `.hse-t-body` on the element is a two-class rule, so
-   this one needs the bar in front of it to take. */
-.hs__bar .hs__pill { font-size: var(--text-h5-size); }
+/* The block's own type, on the desktop bar. The utility classes on these
+   elements are two-class rules, so each selector carries the bar to take. */
+.hs__bar .hs__lead {
+  font-size: var(--hs-text-body);
+  line-height: 1.1;
+  letter-spacing: var(--hs-text-ls);
+}
+.hs__bar .hs__title,
+.hs__bar .hs__pill {
+  font-size: var(--hs-text-title);
+  line-height: 1.1;
+  letter-spacing: var(--hs-text-ls);
+}
 
 .hs__title {
   color: var(--color-text);
@@ -669,17 +684,17 @@
   .hsm__title { margin-top: 1.25rem; }
   .hsm__lead { margin-top: var(--space); }
 
-  /* Copy at the site's own mobile sizes (see --hs-text-body-m). */
+  /* Same pair as the desktop bar — see --hs-text-body. */
   .hsm__copy .hsm__lead {
-    font-size: var(--hs-text-body-m);
+    font-size: var(--hs-text-body);
     line-height: 1.1;
-    letter-spacing: -0.005em;
+    letter-spacing: var(--hs-text-ls);
   }
   .hsm__copy .hsm__title,
   .hsm__copy .hsm__pill {
-    font-size: var(--hs-text-title-m);
+    font-size: var(--hs-text-title);
     line-height: 1.1;
-    letter-spacing: -0.005em;
+    letter-spacing: var(--hs-text-ls);
   }
   .hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
