@@ -925,7 +925,11 @@
   .hse-hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hse-hsm__stage { margin-left: var(--space); }
   .hse-hsm__stage--rules { width: 312cqw; }
-  .hse-hsm__stage--ai { width: calc(122cqw * var(--hsm-zoom)); }
+
+  .hse-hsm__stage--ai {
+    --hsm-zoom: 1.45;
+    width: calc(122cqw * var(--hsm-zoom));
+  }
   .hse-hsm__stage--mcp { width: 200cqw; }
 
   .hse-hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }

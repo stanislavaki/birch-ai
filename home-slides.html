@@ -713,7 +713,14 @@
   .hsm__collage { min-height: clamp(19rem, 94cqw, 40rem); }
   .hsm__stage { margin-left: var(--space); }
   .hsm__stage--rules { width: 312cqw; }
-  .hsm__stage--ai { width: calc(122cqw * var(--hsm-zoom)); }
+  /* On a phone the AI scene has the whole block's width to itself and the
+     equal-height row leaves it room below, so it takes more of the zoom than
+     the tablet does. Measured against the box: at 1.45 the composition ends
+     ~40px above the bottom edge. */
+  .hsm__stage--ai {
+    --hsm-zoom: 1.45;
+    width: calc(122cqw * var(--hsm-zoom));
+  }
   .hsm__stage--mcp { width: 200cqw; }
 
   .hsm__rules-schedule { left: 4.25cqw; top: 3.25cqw; width: 66.75cqw; }
