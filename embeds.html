@@ -23,6 +23,20 @@
       color: #555;
       margin-bottom: 3rem;
     }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .nav-links a {
+      font-size: 0.75rem;
+      color: #444;
+      text-decoration: none;
+      font-family: monospace;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: #888; }
+    .nav-links a.is-active { color: #59DBFF; }
     .page-section {
       margin-bottom: 3.5rem;
     }
@@ -130,6 +144,20 @@
 
   <h1>Webflow Embeds</h1>
   <p class="subtitle">Все embed-блоки проекта. Нажми «copy» и вставляй в Webflow.</p>
+
+  <nav class="nav-links">
+    <a href="pages.html">Pages</a>
+    <a href="embeds.html" class="is-active">Embeds</a>
+    <a href="debug/webflow-sim.html" target="_blank">Simulator</a>
+  </nav>
+
+  <div class="page-section"><div class="page-title">Home</div>
+    <div class="embed-card" data-file="embed/customers-embed.html">
+      <div class="embed-card__header"><div><div class="embed-card__name">Trusted by — Figma logos + mobile carousel</div>
+        <div class="embed-card__meta"><div class="embed-card__file">embed/customers-embed.html</div><div class="embed-card__date">16.09.2026</div><div class="embed-card__placement">Inside the Trusted by bento, below its heading</div></div></div>
+        <div class="embed-card__actions"><button class="btn-toggle">show</button><button class="btn-copy">copy</button></div></div>
+      <div class="embed-card__preview"><textarea class="embed-code" readonly></textarea></div>
+    </div></div>
 
   <!-- ── AI Promo page ── -->
   <div class="page-section">

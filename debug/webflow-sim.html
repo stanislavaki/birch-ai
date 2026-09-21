@@ -320,6 +320,10 @@
     <div id="simPrompts"></div>
   </section>
 
+  <section class="section"><div class="container">
+    <div class="bento-block" style="border-radius:var(--radius-lg,1rem);padding:var(--pad-card,1.5rem) var(--space-md,2rem) var(--space-md,2rem)"><h2 class="t-h3" style="font-family:var(--font,'Tt Commons Pro Variable');font-size:var(--text-h3-size,2rem);line-height:var(--text-h3-lh,1);letter-spacing:var(--text-h3-ls,-.02em);font-weight:600">Our customers</h2><div id="simCustomers"></div></div>
+  </div></section>
+
   <!-- Vision embed -->
   <section class="section">
     <div class="container">
@@ -393,6 +397,7 @@
         });
     }
 
+    loadEmbed('../embed/customers-embed.html', 'simCustomers');
     loadEmbed('../embed/stage-embed.html', 'simStageHiw');
     loadEmbed('../embed/ai-promo-pills-embed.html', 'simPills');
     loadEmbed('../embed/ai-promo-acc-embed.html',  'simAcc');
