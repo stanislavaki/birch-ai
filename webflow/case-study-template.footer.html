@@ -66,6 +66,37 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+// Pro-tip callouts inside case-body: an H4 starting with "Pro-tip:" plus the paragraphs/lists
+// that follow it are wrapped into a .cs-protip box; the prefix becomes an .eyebrow label.
+// Registered after the strategy-card block on purpose: by now strategy markers are already
+// <a> cards, so a marker paragraph right after a tip can't be swallowed into the box.
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.cs-rich');
+  if (!body) return;
+  var RE = /^\s*pro[\s-]?tip\s*[:–—-]?\s*/i;
+  Array.prototype.forEach.call(body.querySelectorAll('h4'), function (h) {
+    if (!RE.test(h.textContent)) return;
+    var box = document.createElement('div');
+    box.className = 'cs-protip';
+    var label = document.createElement('div');
+    label.className = 'eyebrow';
+    label.textContent = 'Pro tip';
+    var next = h.nextElementSibling;
+    h.parentNode.insertBefore(box, h);
+    box.appendChild(label);
+    box.appendChild(h);
+    while (next && /^(P|UL|OL)$/.test(next.tagName)) {
+      var after = next.nextElementSibling;
+      box.appendChild(next);
+      next = after;
+    }
+    // Strip the prefix from the first text node only, so inline markup in the title survives.
+    var first = document.createTreeWalker(h, NodeFilter.SHOW_TEXT).nextNode();
+    if (first) first.nodeValue = first.nodeValue.replace(RE, '');
+    if (!h.textContent.trim()) h.remove();
+  });
+});
+
 // Case-study gallery: direction-aware horizontal-slide slider with pagination dots, a saturated-accent
 // backdrop sampled per slide via canvas. Arrow colour is fixed in CSS, not computed here.
 document.addEventListener('DOMContentLoaded', function () {

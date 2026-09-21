@@ -39,6 +39,18 @@
   .cs-rich .str_frame .str_button div { font-size: 0.875rem; }
 }
 
+/* Pro-tip callout (inside case-body). Authored in the CMS as a plain H4 that starts with */
+/* "Pro-tip:" followed by its paragraph(s); the footer script wraps them into .cs-protip and */
+/* turns the prefix into an .eyebrow label. Without the script it stays a normal H4 + text. */
+/* Padding mirrors the strategy card (.str_frame.case = 20px); background and radius follow */
+/* the company card (light-gray token, 1rem). */
+.cs-rich .cs-protip { margin: 2rem 0; padding: var(--_sizes---1-25rem); border-radius: var(--_sizes---1rem); background-color: var(--_color---secondary--neutral--light-gray); }
+.cs-rich .cs-protip .eyebrow { margin-bottom: 0.75rem; }
+.cs-rich .cs-protip h4 { margin-top: 0; }
+.cs-rich .cs-protip > :last-child { margin-bottom: 0; }
+/* The site-wide `h4 { max-width: 400px }` tag rule would otherwise wrap body H4s early. */
+.cs-rich h4 { max-width: none; }
+
 /* Quote avatar — collapse the wrapper when the avatar field is empty (size is on the real class). */
 .cs-avatar-wrapper:not(:has(img[src]:not([src=""]))) { display: none; }
 
