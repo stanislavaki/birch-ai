@@ -45,7 +45,12 @@
 /* Padding mirrors the strategy card (.str_frame.case = 20px); background and radius follow */
 /* the company card (light-gray token, 1rem). */
 .cs-rich .cs-protip { margin: 2rem 0; padding: var(--_sizes---1-25rem); border-radius: var(--_sizes---1rem); background-color: var(--_color---secondary--neutral--light-gray); }
-.cs-rich .cs-protip .eyebrow { margin-bottom: 0.75rem; }
+.cs-rich .cs-protip .eyebrow { margin-bottom: var(--_sizes---0-25rem); }
+/* Tip copy is one step below the body text: the site's Paragraph SM tokens. Two classes in the */
+/* selector on purpose — it has to outrank `.cs-rich p` including its min-width: 1440px step. */
+.cs-rich .cs-protip p,
+.cs-rich .cs-protip ul,
+.cs-rich .cs-protip ol { font-size: var(--_responsive---font-size--paragraph-sm); line-height: var(--_typography---paragraph-sm--line-height); }
 .cs-rich .cs-protip h4 { margin-top: 0; }
 .cs-rich .cs-protip > :last-child { margin-bottom: 0; }
 /* The site-wide `h4 { max-width: 400px }` tag rule would otherwise wrap body H4s early. */
