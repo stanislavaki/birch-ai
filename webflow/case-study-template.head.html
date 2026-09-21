@@ -1,0 +1,132 @@
+<style>
+/* cs-rich (case-body) child element styles — not settable via the Designer style tool */
+.cs-rich blockquote {
+  font-family: inherit;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin: 2rem 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+}
+/* Figure width/alignment comes from Webflow's native rich-text alignment classes */
+/* (content images are saved with w-richtext-align-fullwidth) — only spacing is set here. */
+.cs-rich figure { margin: 2rem 0; }
+/* Load-bearing, not cosmetic: without a definite width the lazy-loaded img inside the */
+/* inline-block figure wrapper resolves to 0x0 and never loads (same rule the blog uses). */
+.cs-rich figure img { width: 100%; height: auto; display: block; }
+.cs-rich figcaption { margin-top: 0.5rem; font-size: 0.875rem; line-height: 1.4; opacity: 0.7; text-align: left; }
+
+/* Strategy card (inside case-body) — fixed 4.5rem icon box so a large PNG icon can't stretch */
+/* the card; icon pinned to the top; darker, thicker wrapper stroke; consistent 1rem */
+/* icon-to-text gap on both axes; bottom spacing between stacked cards. */
+.cs-rich .str_frame { margin-bottom: 1.5rem; align-items: flex-start; border: 2px solid var(--_color---secondary--neutral--muted-gray); gap: 1rem; }
+.cs-rich .str_frame .img_wrap { width: 4.5rem; height: 4.5rem; flex: 0 0 auto; overflow: hidden; }
+.cs-rich .str_frame .img_wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Card type: title one step below the body h3; description per design spec (secondary text, */
+/* muted); the global .cs-rich h3 margin-top: 2rem is zeroed so the title lines up with the icon. */
+.cs-rich .str_frame .str_h3 { margin-top: 0; font-size: 1.25rem; line-height: 1.3; }
+.cs-rich .str_frame .str_text { font-size: 0.9rem; line-height: 1.25; font-weight: 500; opacity: 0.8; }
+.cs-rich .str_frame .str_button,
+.cs-rich .str_frame .str_button div { font-size: 1rem; }
+/* cs-rich steps its paragraphs down to 1rem from 1440px up (the root font-size grows there); */
+/* the button mirrors that step so it keeps its relation to the body copy. */
+@media screen and (min-width: 1440px) {
+  .cs-rich .str_frame .str_button,
+  .cs-rich .str_frame .str_button div { font-size: 0.875rem; }
+}
+
+/* Quote avatar — collapse the wrapper when the avatar field is empty (size is on the real class). */
+.cs-avatar-wrapper:not(:has(img[src]:not([src=""]))) { display: none; }
+
+/* Company card: the Signal Gateways row only applies to a few cases — collapse it when the */
+/* bound field is empty (Webflow marks empty bindings with .w-dyn-bind-empty). */
+#cs-secondary-row:has(.w-dyn-bind-empty) { display: none; }
+
+/* Metric band. The 300px cap that used to need cancelling here is now cancelled natively
+   on the `large` breakpoint in the .cs-nums-card.relative combo (19.08.2026), so the line
+   that did it was removed. What stays has no native counterpart: below 480px the row
+   stacks and the cards must stop sharing space and size to their content instead. */
+.cs-all-nums { display: flex; flex-wrap: nowrap; }
+@media screen and (max-width: 479px) {
+  .cs-all-nums { flex-direction: column; }
+  .cs-all-nums .cs-nums-card { flex: 0 0 auto; width: auto; }
+}
+
+/* Company-card platform badge — white background on the native square box. */
+.cs-about-client-wrapper .platform { background-color: #fff; }
+
+/* Related-card hover styles moved to site-wide head code — they are shared with the */
+/* /case-studies listing, which renders the same .u-cs-card-cont cards. */
+
+/* Case-study gallery — images come from the `gallery` MultiImage field via a Collection List. */
+/* Panel is full content width and tinted to each slide's saturated accent color by JS (token gray fallback). */
+/* Arrows are a fixed translucent black. Tinting them with the accent made them disappear on */
+/* dark panels — on a deep magenta slide circle and panel differed by 2%. Dots stay black. */
+/* Image frame: 5:4 landscape on desktop (height-capped via vh); 4:5 portrait on mobile. */
+.cs-gallery-panel { transition: background-color 0.4s ease; box-sizing: border-box; padding-left: 4rem; padding-right: 4rem; }
+.cs-gallery-viewport { position: relative; overflow: hidden; min-width: 0; aspect-ratio: 5 / 4; width: min(100%, 60vh); }
+.cs-gallery-arrow-prev, .cs-gallery-arrow-next {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 3rem; height: 3rem; border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2; cursor: pointer; transition: background-color 0.25s ease;
+}
+.cs-gallery-arrow-prev { left: 0.5rem; }
+.cs-gallery-arrow-next { right: 0.5rem; }
+.cs-gallery-arrow-prev img, .cs-gallery-arrow-next img { width: 1.25rem; height: 1.25rem; filter: invert(1); }
+.cs-gallery-arrow-prev img { transform: rotate(225deg); }
+.cs-gallery-arrow-next img { transform: rotate(45deg); }
+.cs-gallery-arrow-prev:hover, .cs-gallery-arrow-next:hover { background-color: #0b0b0b; }
+.cs-gallery-viewport .w-dyn-list,
+.cs-gallery-viewport .w-dyn-items,
+.cs-gallery-viewport .w-dyn-item { position: static; display: block; width: 100%; height: 100%; margin: 0; padding: 0; }
+.cs-gallery-viewport .w-dyn-empty { display: none; }
+/* Each slide hugs its own picture instead of stretching to the frame: absolute + inset: 0 +
+   margin: auto centres any aspect ratio, while max-width/max-height cap it to the frame.
+   This is what makes the corner radius follow the visible picture. With the previous
+   width/height: 100% + object-fit: contain the element box stayed 5:4 whatever the image was,
+   so a radius on it rounded invisible corners outside the letterboxed picture.
+   Because the box is now image-sized, the slide transition can no longer travel in % of the
+   element — the footer script moves slides by the viewport width in px instead. */
+.cs-gallery-viewport img {
+  position: absolute; inset: 0; margin: auto;
+  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  opacity: 0; will-change: transform, opacity;
+}
+/* Gallery pagination dots — one per slide, below the panel; black, active is fully opaque. */
+.cs-gallery-dots { display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+.cs-gallery-dot {
+  width: 0.5rem; height: 0.5rem; padding: 0; border: none; border-radius: 50%;
+  background-color: #0b0b0b;
+  opacity: 0.3; cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.cs-gallery-dot.is-active { opacity: 1; transform: scale(1.15); }
+/* Content image corners. Scoped to figures, which is what makes it safe: the footer script
+   lifts each strategy icon out of its figure into .str_frame, so strategy cards are never
+   matched and keep their own square icon box.
+   The gallery rule is deliberately on the image, not the viewport — see the gallery block
+   above: slides are object-fit: contain inside a fixed 5:4 frame, so this only takes visible
+   effect if a slide ever matches the frame ratio. */
+.cs-rich figure img,
+.cs-gallery-viewport img { border-radius: var(--_sizes---0-5rem); }
+
+/* Mobile: tighter gallery side padding; 4:5 portrait frame; 30% smaller arrows; */
+/* strategy card stacks (icon top-left, text full width below). */
+@media (max-width: 767px) {
+  .cs-rich figure img,
+  .cs-gallery-viewport img { border-radius: var(--_sizes---0-25rem); }
+  .cs-gallery-panel { padding-left: 2rem; padding-right: 2rem; }
+  .cs-gallery-viewport { aspect-ratio: 4 / 5; }
+  .cs-gallery-arrow-prev, .cs-gallery-arrow-next { width: 2.1rem; height: 2.1rem; }
+  .cs-gallery-arrow-prev img, .cs-gallery-arrow-next img { width: 0.875rem; height: 0.875rem; }
+  .cs-rich .str_frame { flex-direction: column; align-items: stretch; }
+  .cs-rich .str_frame .img_wrap { align-self: flex-start; max-width: none; }
+  .cs-rich .str_frame .img_wrap img { max-width: none; }
+}
+</style>
