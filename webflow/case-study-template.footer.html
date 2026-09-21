@@ -85,6 +85,10 @@ document.addEventListener('DOMContentLoaded', function () {
     h.parentNode.insertBefore(box, h);
     box.appendChild(label);
     box.appendChild(h);
+    // Tint the box with the case colour: the metric cards carry it inline (CMS `blue` field).
+    // A case without metrics has no source, so the box keeps the light-gray token from the head CSS.
+    var tinted = document.querySelector('.cs-all-nums [style*="background-color"]');
+    if (tinted) box.style.backgroundColor = tinted.style.backgroundColor;
     while (next && /^(P|UL|OL)$/.test(next.tagName)) {
       var after = next.nextElementSibling;
       box.appendChild(next);
