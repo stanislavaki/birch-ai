@@ -1,0 +1,114 @@
+<script>
+(function () {
+  'use strict';
+
+  /* Removed 22.09.2026 - both of these threw on every homepage load because
+     their markup no longer reaches the browser:
+
+       "Span BOX" - moved each .span-element into the matching .span-wrapper.
+         Neither class exists in the Designer tree any more, so the loop was
+         a silent no-op.
+
+       "Home Toggle Reveal Block" - GSAP accordion driven by #toggle-checkbox,
+         [data-target-reveal] and .reveal-wrap. None of the three exist in the
+         Designer tree any more, so getElementById returned null and the last
+         line threw "Cannot read properties of null (reading
+         'addEventListener')", which also killed everything after it.
+
+     The two blocks kept below are a different case: their markup is still in
+     the Designer, only excluded from publish (visibility: false on the
+     wrapping .row / .col), so unhiding it brings the behaviour back. They now
+     bail out when their elements are absent instead of throwing. */
+
+  /* Looping Headline - cross-fades [data-target-headline] one at a time.
+     Threw "Cannot read properties of undefined (reading 'style')" every
+     2s because the NodeList was empty and headlines[0] was undefined. */
+  function initLoopingHeadline() {
+    var headlines = document.querySelectorAll('[data-target-headline]');
+    if (!headlines.length) return;
+
+    var currentIndex = 0;
+    var changeInterval = 2000;
+    var transitionDuration = 500;
+    var pauseDuration = 1000;
+    var isPaused = false;
+
+    function showNextHeadline() {
+      if (isPaused) return;
+
+      headlines[currentIndex].style.opacity = '0';
+
+      setTimeout(function () {
+        headlines[currentIndex].style.display = 'none';
+
+        currentIndex = (currentIndex + 1) % headlines.length;
+
+        headlines[currentIndex].style.display = 'block';
+        setTimeout(function () {
+          // Small delay so the display change takes effect before the fade in.
+          headlines[currentIndex].style.opacity = '1';
+        }, 10);
+
+        // Hold for a beat once the loop wraps back to the first headline.
+        if (currentIndex === 0) {
+          isPaused = true;
+          setTimeout(function () {
+            isPaused = false;
+          }, pauseDuration);
+        }
+      }, transitionDuration);
+    }
+
+    setTimeout(function () {
+      showNextHeadline();
+      setInterval(showNextHeadline, changeInterval);
+    }, 1500);
+  }
+
+  /* Workspace Filter - swaps .workspace-block panels from the
+     [data-filter-target] buttons and from a scroll trigger. */
+  function initWorkspaceFilter() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    var buttons = document.querySelectorAll('[data-filter-target]');
+    var blocks = document.querySelectorAll('.workspace-block');
+    if (!buttons.length || !blocks.length) return;
+
+    function updateStatus(element, shouldBeActive) {
+      element.setAttribute('data-filter-status', shouldBeActive ? 'active' : 'not-active');
+      element.setAttribute('aria-hidden', shouldBeActive ? 'false' : 'true');
+    }
+
+    function handleFilter(target) {
+      blocks.forEach(function (block) {
+        updateStatus(block, block.getAttribute('data-filter-name') === target);
+      });
+
+      buttons.forEach(function (button) {
+        var isActive = button.getAttribute('data-filter-target') === target;
+        button.setAttribute('data-filter-status', isActive ? 'active' : 'not-active');
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    handleFilter('workspace1');
+
+    ScrollTrigger.create({
+      trigger: '.workspace-group',
+      start: 'top 25%',
+      onEnter: function () { handleFilter('workspace2'); },
+      onEnterBack: function () { handleFilter('workspace1'); }
+    });
+
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        handleFilter(button.getAttribute('data-filter-target'));
+      });
+    });
+  }
+
+  initLoopingHeadline();
+  initWorkspaceFilter();
+})();
+</script>
