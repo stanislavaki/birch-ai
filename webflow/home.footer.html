@@ -1,0 +1,154 @@
+<script>
+// Span BOX
+document.querySelectorAll('.span-wrapper').forEach((wrapper, index) => {
+  const relatedEl = document.querySelectorAll('.span-element')[index];
+  wrapper.appendChild(relatedEl);
+});
+
+/* Looping Headline */
+
+const headlines = document.querySelectorAll('[data-target-headline]');
+let currentIndex = 0;
+const changeInterval = 2000;
+const transitionDuration = 500;
+const pauseDuration = 1000;
+let isPaused = false;
+
+function showNextHeadline() {
+
+  if (isPaused) return;
+
+  headlines[currentIndex].style.opacity = '0';
+
+  setTimeout(() => {
+    headlines[currentIndex].style.display = 'none';
+
+    // Verhoog de index
+    currentIndex = (currentIndex + 1) % headlines.length;
+
+    // Toon de volgende headline
+    headlines[currentIndex].style.display = 'block';
+    setTimeout(() => {
+      headlines[currentIndex].style.opacity = '1'; // Vervaag in de volgende headline
+    }, 10); // Kleine vertraging om de display aanpassing te laten effect hebben
+
+    // Controleer of we de laatste headline hebben bereikt
+    if (currentIndex === 0) {
+      // Zet isPaused op true en wacht een pauze
+      isPaused = true;
+      setTimeout(() => {
+        isPaused = false; // Zet isPaused weer op false na de pauze
+      }, pauseDuration);
+    }
+  }, transitionDuration); // Wacht op de duur van de overgang
+}
+
+setTimeout(() => {
+  showNextHeadline();
+  setInterval(showNextHeadline, changeInterval);
+}, 1500);
+
+/* Workspace Filter*/
+
+gsap.registerPlugin(ScrollTrigger);
+
+function initFilterBasic() {
+  const buttons = document.querySelectorAll('[data-filter-target]');
+  const blocks = document.querySelectorAll('.workspace-block');
+
+  const updateStatus = (element, shouldBeActive) => {
+    element.setAttribute('data-filter-status', shouldBeActive ? 'active' : 'not-active');
+    element.setAttribute('aria-hidden', shouldBeActive ? 'false' : 'true');
+  };
+
+  const handleFilter = (target) => {
+    blocks.forEach((block) => {
+      const shouldBeActive = block.getAttribute('data-filter-name') === target;
+      updateStatus(block, shouldBeActive);
+    });
+
+    buttons.forEach((button) => {
+      const isActive = button.getAttribute('data-filter-target') === target;
+      button.setAttribute('data-filter-status', isActive ? 'active' : 'not-active');
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  };
+
+  handleFilter('workspace1');
+
+  ScrollTrigger.create({
+    trigger: ".workspace-group",
+    start: "top 25%",
+    onEnter: () => handleFilter('workspace2'),
+    onEnterBack: () => handleFilter('workspace1'),
+  });
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button.getAttribute('data-filter-target');
+      handleFilter(target);
+    });
+  });
+}
+
+initFilterBasic();
+
+/* Home Toggle Reveal Block */
+const toggleCheckbox = document.getElementById("toggle-checkbox");
+const revealBlock = document.querySelector("[data-target-reveal]");
+const revealBlockWrap = document.querySelector(".reveal-wrap");
+
+gsap.set(revealBlock, { y: "-101%", opacity: 0 });
+gsap.set(revealBlockWrap, {
+  height: 0,
+  overflow: "hidden",
+  opacity: 0,
+  paddingBottom: "0"
+});
+
+const originalPaddingBottom = "16px";
+
+const toggleRevealBlock = () => {
+  if (toggleCheckbox.checked) {
+    gsap.set(revealBlockWrap, {
+      display: "block",
+      opacity: 1,
+      paddingBottom: originalPaddingBottom
+    });
+    gsap.to(revealBlockWrap, {
+      duration: 0.4,
+      height: revealBlock.scrollHeight + "px",
+      ease: "cubic-bezier(0.35, 1.5, 0.6, 1)"
+    });
+
+    gsap.to(revealBlock, {
+      duration: 0.4,
+      y: "0%",
+      opacity: 1,
+      ease: "cubic-bezier(0.35, 1.5, 0.6, 1)"
+    });
+  } else {
+    gsap.to(revealBlock, {
+      duration: 0.4,
+      y: "-101%",
+      opacity: 0,
+      ease: "cubic-bezier(0.35, 1.5, 0.6, 1)"
+    });
+
+    gsap.to(revealBlockWrap, {
+      duration: 0.4,
+      height: 0,
+      opacity: 0,
+      paddingBottom: "0", // Zet de padding naar 0 om schokkerigheid te voorkomen
+      ease: "cubic-bezier(0.35, 1.5, 0.6, 1)",
+      onComplete: () => {
+        gsap.set(revealBlockWrap, { display: "none" });
+      }
+    });
+  }
+};
+
+toggleCheckbox.addEventListener("change", toggleRevealBlock);
+
+
+</script>
