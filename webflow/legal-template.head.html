@@ -101,6 +101,24 @@
   .legal-ver-item.w--current {
     background-color: #FFFFFF;
   }
+
+  /* A document with a single version has nothing to choose between, so the selector
+     stops pretending to be one: no arrow, no hover, not clickable — it reads as the
+     plain date it is. `:only-child` on the repeated item is the only way to ask "does
+     this list hold more than one row"; Webflow's conditional visibility cannot count.
+
+     Vertical padding is deliberately kept: the label next to it carries the same
+     padding so the two boxes match in height, which is what puts their baselines on
+     one line. Dropping it here would undo that. */
+  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-toggle {
+    pointer-events: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-arrow {
+    display: none;
+  }
 </style>
 
 <!-- The row you are currently reading is marked NOT from here but natively: Webflow adds
