@@ -94,28 +94,10 @@
   }
 </style>
 
-<script>
-  /* Marks the version the reader is currently on.
-
-     Two different things get marked in the selector and they must not be confused:
-       · the dot   — the version currently IN FORCE, driven by the Is current switch
-                     through Webflow's own conditional visibility;
-       · the white — the version being READ right now, i.e. this very page.
-     On the live document they coincide; on an archived one they do not, which is
-     exactly when the distinction earns its keep.
-
-     "This list row is the item this page shows" has no native condition in Webflow,
-     so the match is made against the URL at runtime. It stays inert until the row
-     links resolve to real paths — with href="#" nothing matches and nothing breaks. */
-  document.addEventListener('DOMContentLoaded', function () {
-    var here = location.pathname.replace(/\/+$/, '');
-    var rows = document.querySelectorAll('.legal-ver-list .legal-ver-item');
-    for (var i = 0; i < rows.length; i++) {
-      var href = (rows[i].getAttribute('href') || '').replace(/\/+$/, '');
-      if (href && href !== '#' && href === here) rows[i].classList.add('is-viewing');
-    }
-  });
-</script>
+<!-- The row you are currently reading is marked NOT from here but natively: Webflow adds
+     .w--current to a link whose href matches the open page, so the white background lives on
+     the link's Current state in the Designer. A script used to do this and was removed once
+     the native class turned up in the rendered markup. -->
 
 <!-- TEMPORARY — remove at cutover, when this template moves from /legal-documents to /legal.
      Until then the template answers on a throwaway URL, and a full site publish by anyone on
