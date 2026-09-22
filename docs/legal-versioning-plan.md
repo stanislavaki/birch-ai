@@ -106,6 +106,39 @@
 Первая проверка одна ничего не доказывает: она сверяет отправленное с полученным, а не с оригиналом.
 Потерю на этапе сборки ловит только вторая.
 
+## Шаблон `Legal documents Template`
+
+Страница `6ab28b9f2caaa5ecf2d287c5` (отдаёт `/legal-documents`, на катовере станет `/legal`).
+Собран по образцу статичной `/legal/privacy` — та же обвязка, те же классы.
+
+```
+Body                                    6ab28b9f2caaa5ecf2d287cf
+├ компонент super-navigation-component
+├ Section .section-hero.no-pad          c04d2243-7c1d-c110-7dd6-2e47ece2a4d3
+│   └ Container .old-container.1100.no-pad   5ba88688-4591-091e-b968-07ddd32405dd
+│       ├ компонент legal-menu-tabs
+│       ├ h1 .top100.60                 4cc8e16d-30c6-3793-16f0-0d8b47db55c8   ← bind: name
+│       └ p .14px.grey                  b2d64346-819d-1d77-2109-e07bfa80e2a7   ← сюда селектор редакций
+├ Section .legal-sect                   77e00c47-98de-e1c4-7ddf-be04efd9353d
+│   └ Container                         980eb663-2f65-5f7f-88de-73fbeed44cf5
+│       └ .centered-terms               4955757f-8140-984c-abfc-ba23579879cb
+│           └ RichText .rich-text-base.rt-legal  2447615e-c9f9-e7be-22bf-02520442cc5e  ← bind: body
+├ компонент Global / Footer Black
+└ компонент Fluid Type
+```
+
+**Табы уже компонент** (`legal-menu-tabs`, без пропсов) — ряд не надо собирать из коллекции
+`Legal document types`, он и так в одном месте и ссылается на `/legal/*`, что после катовера верно.
+
+Комбо `.rich-text-base.rt-legal` заведено, несёт только `max-width: 38.6rem` (≈680px при корне 17,6px).
+
+Порядок сборки через MCP: `data_style_tool > create_style` (комбо) → `data_element_builder`
+(секции деревом, `children[]`) → `data_component_builder` (инстансы компонентов по имени).
+Билдер элементов инстансы ставить не умеет — для них отдельный компонентный билдер.
+
+Осталось на шаблоне: биндинги полей, селектор редакций, баннер архивной редакции, вставка
+`webflow/legal-template.head.html` в head страницы, SEO-биндинги и OG.
+
 ## Схема коллекции `Legal documents`
 
 | Поле | Тип | Назначение |
