@@ -69,4 +69,32 @@
       min-width: 38rem;
     }
   }
+
+  /* Version selector, open state.
+
+     Webflow adds .w--open to a dropdown toggle while its list is open, but the
+     Designer style panel has no "open" pseudo state and the MCP style tool does
+     not accept one either — only hover / focus / active and friends. So this one
+     rule lives here rather than natively.
+
+     It matters more than it looks: touch devices have no hover at all, so without
+     it the trigger would never change appearance on a phone, and on desktop the
+     highlight would drop the moment the cursor left an open list. */
+  .legal-ver-toggle.w--open {
+    background-color: #F1F0F7;
+  }
+
+  /* The list itself must stay hidden until opened. Webflow's own .w-dropdown-list
+     does that with display:none, so the selector class must NOT set a display of
+     its own — otherwise the list renders permanently open. Layout goes here, on
+     the open state, instead. */
+  .legal-ver-list.w--open {
+    display: flex;
+    flex-direction: column;
+  }
 </style>
+
+<!-- TEMPORARY — remove at cutover, when this template moves from /legal-documents to /legal.
+     Until then the template answers on a throwaway URL, and a full site publish by anyone on
+     the team would put a second, indexable copy of every legal document on the live site. -->
+<meta name="robots" content="noindex, nofollow">
