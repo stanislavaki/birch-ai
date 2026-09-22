@@ -1,0 +1,209 @@
+<script>
+// Related-card hover tilt moved to site-wide footer code — the same handler serves
+// the /case-studies listing, which renders the same .u-cs-card-cont cards.
+
+// Strategy cards inside case-body: expand each strategy link marker into a native .str_frame card.
+// Marker in the RichText = [figure(icon)] + [p > a(strategy url, text=title)] + [p(description)].
+// Source pages use either /share/ or /my-strategies/ links, so both are matched.
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.cs-rich');
+  if (!body) return;
+  var links = Array.prototype.filter.call(body.querySelectorAll('a[href]'), function (a) {
+    return /\/(share|my-strategies)\//.test(a.getAttribute('href') || '');
+  });
+  links.forEach(function (link) {
+    var titleBlock = link.closest('p,h1,h2,h3,h4,h5,h6') || link;
+    var iconFig = titleBlock.previousElementSibling;
+    var descP = titleBlock.nextElementSibling;
+    var iconImg = iconFig ? iconFig.querySelector('img') : null;
+    var iconSrc = iconImg ? iconImg.getAttribute('src') : '';
+    var desc = (descP && descP.tagName === 'P') ? descP.textContent.trim() : '';
+
+    var card = document.createElement('a');
+    card.className = 'str_frame case';
+    card.setAttribute('href', link.getAttribute('href'));
+    card.setAttribute('target', '_blank');
+
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'img_wrap';
+    if (iconSrc) {
+      var ic = document.createElement('img');
+      ic.className = 'str_icon case';
+      ic.setAttribute('src', iconSrc);
+      ic.setAttribute('alt', '');
+      imgWrap.appendChild(ic);
+    }
+
+    var col = document.createElement('div');
+    var header = document.createElement('div');
+    header.className = 'str_header case';
+    var h3 = document.createElement('h3');
+    h3.className = 'str_h3 case';
+    h3.textContent = link.textContent.trim();
+    var txt = document.createElement('div');
+    txt.className = 'str_text';
+    txt.textContent = desc;
+    header.appendChild(h3);
+    header.appendChild(txt);
+    var content = document.createElement('div');
+    content.className = 'str_content case';
+    var btn = document.createElement('div');
+    btn.className = 'str_button case';
+    var btnInner = document.createElement('div');
+    btnInner.textContent = 'Use this strategy';
+    btn.appendChild(btnInner);
+    content.appendChild(btn);
+    col.appendChild(header);
+    col.appendChild(content);
+
+    card.appendChild(imgWrap);
+    card.appendChild(col);
+
+    titleBlock.parentNode.insertBefore(card, titleBlock);
+    if (iconImg) { iconFig.remove(); }
+    if (descP && descP.tagName === 'P') { descP.remove(); }
+    titleBlock.remove();
+  });
+});
+
+// Pro-tip callouts inside case-body: an H4 starting with "Pro-tip:" plus the paragraphs/lists
+// that follow it are wrapped into a .cs-protip box; the prefix becomes an .eyebrow label.
+// Registered after the strategy-card block on purpose: by now strategy markers are already
+// <a> cards, so a marker paragraph right after a tip can't be swallowed into the box.
+document.addEventListener('DOMContentLoaded', function () {
+  var body = document.querySelector('.cs-rich');
+  if (!body) return;
+  var RE = /^\s*pro[\s-]?tip\s*[:–—-]?\s*/i;
+  Array.prototype.forEach.call(body.querySelectorAll('h4'), function (h) {
+    if (!RE.test(h.textContent)) return;
+    var box = document.createElement('div');
+    box.className = 'cs-protip';
+    var label = document.createElement('div');
+    label.className = 'eyebrow';
+    label.textContent = 'Pro tip';
+    var next = h.nextElementSibling;
+    h.parentNode.insertBefore(box, h);
+    box.appendChild(label);
+    box.appendChild(h);
+    // Tint the box with the case colour: the metric cards carry it inline (CMS `blue` field).
+    // A case without metrics has no source, so the box keeps the light-gray token from the head CSS.
+    var tinted = document.querySelector('.cs-all-nums [style*="background-color"]');
+    if (tinted) box.style.backgroundColor = tinted.style.backgroundColor;
+    while (next && /^(P|UL|OL)$/.test(next.tagName)) {
+      var after = next.nextElementSibling;
+      box.appendChild(next);
+      next = after;
+    }
+    // Strip the prefix from the first text node only, so inline markup in the title survives.
+    var first = document.createTreeWalker(h, NodeFilter.SHOW_TEXT).nextNode();
+    if (first) first.nodeValue = first.nodeValue.replace(RE, '');
+    if (!h.textContent.trim()) h.remove();
+  });
+});
+
+// Case-study gallery: direction-aware horizontal-slide slider with pagination dots, a saturated-accent
+// backdrop sampled per slide via canvas. Arrow colour is fixed in CSS, not computed here.
+document.addEventListener('DOMContentLoaded', function () {
+  var g = document.querySelector('.cs-gallery');
+  if (!g) return;
+  var viewport = g.querySelector('.cs-gallery-viewport');
+  var panel = g.querySelector('.cs-gallery-panel');
+  var imgs = viewport ? Array.prototype.slice.call(viewport.querySelectorAll('img')) : [];
+  if (!imgs.length) { g.style.display = 'none'; return; }
+  var idx = 0, busy = false, DUR = 560;
+  var prev = g.querySelector('.cs-gallery-arrow-prev');
+  var next = g.querySelector('.cs-gallery-arrow-next');
+  function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+
+  var colorCache = [];
+  function setTint(rgb) {
+    var pd = 0.9;
+    panel.style.backgroundColor = 'rgb(' + clamp(rgb[0] * pd) + ',' + clamp(rgb[1] * pd) + ',' + clamp(rgb[2] * pd) + ')';
+  }
+  function applyColor(i) {
+    if (!panel) return;
+    if (colorCache[i]) { if (idx === i) setTint(colorCache[i]); return; }
+    var src = imgs[i].currentSrc || imgs[i].getAttribute('src');
+    if (!src) return;
+    var probe = new Image();
+    probe.crossOrigin = 'anonymous';
+    probe.onload = function () {
+      try {
+        var s = 40, c = document.createElement('canvas'); c.width = s; c.height = s;
+        var ctx = c.getContext('2d'); ctx.drawImage(probe, 0, 0, s, s);
+        var d = ctx.getImageData(0, 0, s, s).data, SAT = 35;
+        var sr = 0, sg = 0, sb = 0, sn = 0, ar = 0, ag = 0, ab = 0, an = 0;
+        for (var p = 0; p < d.length; p += 4) {
+          if (d[p + 3] < 125) continue;
+          var R = d[p], G = d[p + 1], B = d[p + 2], mx = Math.max(R, G, B), mn = Math.min(R, G, B);
+          if (mn < 232) { ar += R; ag += G; ab += B; an++; }
+          if ((mx - mn) > SAT && mx > 30 && mn < 245) { sr += R; sg += G; sb += B; sn++; }
+        }
+        var rgb;
+        if (sn >= 12) {
+          var r = sr / sn, gg = sg / sn, b2 = sb / sn, lo = Math.min(r, gg, b2), hi = Math.max(r, gg, b2), l = (lo + hi) / 2, f = 1.4;
+          rgb = [clamp(l + (r - l) * f), clamp(l + (gg - l) * f), clamp(l + (b2 - l) * f)];
+        } else if (an > 0) {
+          rgb = [Math.round(ar / an), Math.round(ag / an), Math.round(ab / an)];
+        } else { return; }
+        colorCache[i] = rgb;
+        if (idx === i) setTint(rgb);
+      } catch (e) { /* tainted canvas / CORS blocked — keep the token background */ }
+    };
+    probe.src = src;
+  }
+
+  var dots = [];
+  var dotsWrap = document.createElement('div');
+  dotsWrap.className = 'cs-gallery-dots';
+  imgs.forEach(function (im, k) {
+    var dot = document.createElement('button');
+    dot.type = 'button'; dot.className = 'cs-gallery-dot';
+    dot.setAttribute('aria-label', 'Go to slide ' + (k + 1));
+    dot.addEventListener('click', function (e) { e.preventDefault(); if (k !== idx) go(k > idx ? 1 : -1, k); });
+    dotsWrap.appendChild(dot); dots.push(dot);
+  });
+  g.appendChild(dotsWrap);
+
+  imgs.forEach(function (im) { im.style.opacity = '0'; im.style.transform = 'none'; });
+  imgs[0].style.opacity = '1'; imgs[0].style.zIndex = '1';
+  function mark(i) {
+    dots.forEach(function (d, k) { d.classList.toggle('is-active', k === i); });
+    imgs.forEach(function (im, k) { im.classList.toggle('is-active', k === i); });
+  }
+  mark(0); applyColor(0);
+  imgs.forEach(function (im, k) { if (k) applyColor(k); });
+
+  function go(dir, target) {
+    if (busy) return;
+    var nx = (target == null) ? (idx + dir + imgs.length) % imgs.length : target;
+    if (nx === idx) return;
+    busy = true;
+    var inc = imgs[nx], out = imgs[idx];
+    // Slides are sized to their own picture (see the head styles), so a % offset would be
+    // relative to the image and a narrow slide would never clear the frame. Travel the
+    // frame's width in px instead — always enough, whatever the image's aspect ratio.
+    var W = viewport.clientWidth;
+    inc.style.transition = 'none'; inc.style.opacity = '1'; inc.style.zIndex = '2';
+    inc.style.transform = 'translateX(' + (dir > 0 ? W : -W) + 'px)';
+    out.style.transition = 'none'; out.style.opacity = '1'; out.style.zIndex = '1'; out.style.transform = 'translateX(0)';
+    void inc.offsetWidth;
+    var ease = 'transform ' + DUR + 'ms cubic-bezier(.4,0,.2,1)';
+    inc.style.transition = ease; out.style.transition = ease;
+    inc.style.transform = 'translateX(0)';
+    out.style.transform = 'translateX(' + (dir > 0 ? -W : W) + 'px)';
+    idx = nx; mark(idx); applyColor(idx);
+    setTimeout(function () {
+      out.style.transition = 'none'; out.style.opacity = '0'; out.style.transform = 'none'; out.style.zIndex = '0';
+      busy = false;
+    }, DUR + 40);
+  }
+  if (prev) prev.addEventListener('click', function (e) { e.preventDefault(); go(-1); });
+  if (next) next.addEventListener('click', function (e) { e.preventDefault(); go(1); });
+  if (imgs.length < 2) {
+    if (prev) prev.style.display = 'none';
+    if (next) next.style.display = 'none';
+    dotsWrap.style.display = 'none';
+  }
+});
+</script>
