@@ -1,0 +1,72 @@
+<!-- Canonical copy of the <head> custom code on the Legal documents collection template.
+     Edit here first, then paste the whole block into the page's head code in Webflow.
+
+     Why this is custom code and not a Webflow class: tables inside a CMS rich text
+     field live in an HTML embed, and Webflow has no `table` tag style — an attempt to
+     create one produces a combo class (.rich-text-base.table), not a nested selector.
+     See docs/webflow-mcp.md.
+
+     Known cost: page custom code does not run on the Designer canvas or in Preview,
+     so tables look unstyled while editing the template. That is expected — do not
+     "fix" it by pasting CSS back into the CMS records.
+
+     Contract for a table inside a legal document body:
+
+       <div data-rt-embed-type='true'>
+         <div class="rt-table">
+           <table>
+             <colgroup><col style="width:13%"> … </colgroup>
+             <thead>…</thead><tbody>…</tbody>
+           </table>
+         </div>
+       </div>
+
+     The record carries content, structure and column widths only. Everything below is
+     shared, so every table in every legal document (current and archived) stays identical. -->
+
+<style>
+  /* Horizontal scroll container — the one thing that cannot sit on <table> itself. */
+  .rt-table {
+    width: 100%;
+    margin: 1em 0 2em;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Sized in em so the table scales with the surrounding rich text instead of
+     drifting apart from it when the body type changes. */
+  .rt-table table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.82em;
+    line-height: 1.45;
+  }
+
+  .rt-table th,
+  .rt-table td {
+    padding: 0.77em;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--_color---secondary--neutral--light-gray, #e5e5e5);
+    overflow-wrap: break-word;
+  }
+
+  .rt-table thead th {
+    border-bottom: 2px solid currentColor;
+    font-weight: 700;
+  }
+
+  /* First column reads as the row's label. */
+  .rt-table td:first-child {
+    font-weight: 600;
+  }
+
+  /* Below the mobile breakpoint the table keeps its proportions and scrolls
+     sideways rather than squashing columns to unreadable widths. */
+  @media (max-width: 767px) {
+    .rt-table table {
+      min-width: 38rem;
+    }
+  }
+</style>
