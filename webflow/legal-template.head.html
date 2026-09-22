@@ -92,6 +92,15 @@
     display: flex;
     flex-direction: column;
   }
+
+  /* The version being read. Webflow adds .w--current by itself to a link whose href
+     matches the open page — inside a Collection List that lands on exactly one row,
+     which is what the selector needs. Painting it should therefore be a Current state
+     in the style panel, but that state is not offered for this element, so the rule
+     lives here for the same reason .w--open does: there is no native place to put it. */
+  .legal-ver-item.w--current {
+    background-color: #FFFFFF;
+  }
 </style>
 
 <!-- The row you are currently reading is marked NOT from here but natively: Webflow adds
