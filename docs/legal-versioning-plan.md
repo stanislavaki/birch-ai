@@ -109,23 +109,43 @@
 ## Шаблон `Legal documents Template`
 
 Страница `6ab28b9f2caaa5ecf2d287c5` (отдаёт `/legal-documents`, на катовере станет `/legal`).
-Собран по образцу статичной `/legal/privacy` — та же обвязка, те же классы.
+Собран по **новой конвенции сайта** (section → container → row → col, распорки `.divider`),
+а не по образцу статичной `/legal/privacy` — у той классы дореформенные (`old-container`, `_1100`,
+`section-hero`, `_14px.grey`). Схема конвенции — в `webflow-mcp.md`.
 
 ```
-Body                                    6ab28b9f2caaa5ecf2d287cf
-├ компонент super-navigation-component
-├ Section .section-hero.no-pad          c04d2243-7c1d-c110-7dd6-2e47ece2a4d3
-│   └ Container .old-container.1100.no-pad   5ba88688-4591-091e-b968-07ddd32405dd
-│       ├ компонент legal-menu-tabs
-│       ├ h1 .top100.60                 4cc8e16d-30c6-3793-16f0-0d8b47db55c8   ← bind: name
-│       └ p .14px.grey                  b2d64346-819d-1d77-2109-e07bfa80e2a7   ← сюда селектор редакций
-├ Section .legal-sect                   77e00c47-98de-e1c4-7ddf-be04efd9353d
-│   └ Container                         980eb663-2f65-5f7f-88de-73fbeed44cf5
-│       └ .centered-terms               4955757f-8140-984c-abfc-ba23579879cb
-│           └ RichText .rich-text-base.rt-legal  2447615e-c9f9-e7be-22bf-02520442cc5e  ← bind: body
-├ компонент Global / Footer Black
-└ компонент Fluid Type
+Body                                     6ab28b9f2caaa5ecf2d287cf
+├ компонент Fluid Type
+└ .page-wrapper                          f0dcd868-c1ca-ca62-e7f8-c022b8007f4e
+  ├ компонент super-navigation-component
+  ├ main.page-main#main                  6734cac8-7eb1-6f60-f8c5-4123ed0c91cc
+  │ ├ section.section                    58b7dfbc-99d2-4287-132f-126a23aa9486
+  │ │   ├ .divider.s                     32753688-c0c1-a3ee-047a-c81f84778076
+  │ │   ├ .container.centered            9c0ec6ce-8279-64a5-b790-70b1ac27753a
+  │ │   │   ├ компонент legal-menu-tabs
+  │ │   │   ├ h1.h1                      4cc8e16d-30c6-3793-16f0-0d8b47db55c8  → bind text = name
+  │ │   │   └ p.paragraph-sm.u-text-midgray  b2d64346-819d-1d77-2109-e07bfa80e2a7  ← сюда селектор
+  │ │   └ .divider.s                     3eeda614-0e84-87ba-08d7-083c789e097e
+  │ └ section.section                    5b672736-7b41-635e-0a89-fdf5e00d24d7
+  │     ├ .container.centered            e0e345f3-9103-16c1-ceb0-7112a47844e9
+  │     │   └ RichText .rich-text-base.rt-legal  2447615e-c9f9-e7be-22bf-02520442cc5e → bind richText = body
+  │     └ .divider.m                     5f9f5071-4905-a7bd-b608-bf39061c5de1
+  └ компонент Global / Footer Black
 ```
+
+Решения по раскладке (согласовано 22.09.2026):
+
+- **Шапка во всю ширину `.container`** (1408px), текст — своей колонкой. Вариант «всё в одной колонке»
+  отклонён. Прежняя страница держала шапку в 1100px, так что верхний блок стал шире на ~300px.
+- **Ширина колонки текста независима от `u-measure`** — намеренно, чтобы правка системного токена
+  не двигала юр-документы. Значение `34.66rem` (610px): при теле 0,9rem это ~75 знаков в строке.
+  Исходные 680px считались в паре с укрупнением тела до 1rem; кегль решили не трогать, поэтому 610.
+- **Заголовок — дефолтный `.h1`** (4,8rem = 84px против прежних 50px). Взят сознательно, посмотреть
+  в живую и при необходимости поменять.
+- **Ритм — ближайшие распорки из системы**: было 80/60/150px паддингов, стало `.divider.s` (70),
+  `.divider.s` (70), `.divider.m` (154).
+- **`main.page-main#main`** — тег `main` и id проставлены, так что на юр-страницах skip-link наконец
+  работает. На остальном сайте он сломан, заведено отдельной задачей.
 
 **Табы уже компонент** (`legal-menu-tabs`, без пропсов) — ряд не надо собирать из коллекции
 `Legal document types`, он и так в одном месте и ссылается на `/legal/*`, что после катовера верно.

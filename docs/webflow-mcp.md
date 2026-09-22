@@ -88,6 +88,48 @@
 Картинки и видео в рич-тексте кодируются иначе — `<figure class="w-richtext-figure-type-image"
 data-rt-type="image">` (см. `case-studies.md`), это отдельный механизм.
 
+### Конвенция раскладки сайта: section → container → row → col (снято 09.2026 с `/manage`)
+
+Новые страницы сайта собраны так; старые (юр-раздел, `old-container`) — до неё, и при правке их
+приводят к этой схеме.
+
+```
+.page-wrapper                     overflow: clip (вариант .overflow-visible)
+  nav (компонент)
+  main.page-main#main             ← ни одного CSS-правила: это landmark и цель skip-link'а
+    section.section               display:block + position:relative, и всё
+      .divider .s|.m|.xs          ← вертикальный ритм ЭЛЕМЕНТАМИ-распорками, не паддингами
+      .container .centered        ширина
+        .row .row-gap-md|sm|0
+          .col .col-lg-N .col-sm-12
+  footer (компонент)
+```
+
+- **`.divider`** — пустой div-распорка: базовый 140px, `.s` 70px, `.m` 8.75rem (154px), `.xs` 2.75rem,
+  `.stage` 6rem; модификатор `.mobile` = показывается только ≤767. Паддинги секций не используются.
+- **`.container` фактически 80rem (1408px), а не 100rem.** Токен `--_layout---container--large` = 100rem,
+  но инлайновый кастом-код сайта перебивает его правилом `.container { max-width: 80rem }`. Смотреть
+  надо на живую страницу, а не на токен.
+- **`.col`** — флекс с паддингом `gap/2` и `margin-bottom: gap`; ширина комбо-классом `.col-lg-1…12`
+  (плюс `.col-sm-12` под мобилку), `--_layout---grid--gap-main` = 16px.
+- **`.section` дублирует имя тега** и выглядит лишним, но это якорь под модификаторы
+  (`.section.cc-themed`, `.section.u-bg-black`, `.section.text-content`) — без класса их вешать некуда.
+- **`.u-measure`** = `max-width: var(--_typography---text--measure)` = **63ch**. В пикселях зависит от
+  кегля элемента: при 0,9rem ≈ 611px, при 1rem ≈ 679px. Готовая утилита под читаемую колонку текста —
+  прежде чем заводить свою ширину, проверить, не подходит ли она.
+- **Типо-классы**: `.h1` (4,8rem/0,9), `.h2` (3,8em), `.paragraph-xl/-lg/-sm` (1,5 / 1,25 / 0,875rem),
+  цвет — `.u-text-midgray` и родня. `.h1` на сайте применяется редко (из десяти проверенных страниц —
+  только `/how-to-choose-birch-ai-tools`), у большинства свои заголовочные классы.
+- **Skip-link сломан на всём сайте** (на 22.09.2026): в наве лежит
+  `<a id="skip-link" href="#main">Skip to Main Content</a>`, но элемента с `id="main"` нет нигде —
+  `.page-main` завели, а id не проставили. На новых страницах ставить `id="main"` и тег `main`.
+
+Порядок сборки через MCP: `data_style_tool > create_style` (комбо, до применения — `set_style`
+применяет только существующие цепочки) → `data_element_builder` (деревья через `children[]`) →
+`data_component_builder` (инстансы компонентов по имени; элементный билдер их не умеет) →
+`data_element_settings_tool` (`set_dom_id`, `set_tag`, биндинги). Ключи биндинга у заголовка — `text`,
+у рич-текста — `richText`; источник `{source_type: "cms", collection_id, field_id}`.
+
 ### `data_whtml_builder`, `set_style`-комбо, привязка переменных (гибрид-порт, подтверждено 08.2026)
 
 Грабли, всплывшие при переносе `use-cases.html` нативными элементами (вариант B — гибрид).
