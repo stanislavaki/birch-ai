@@ -49,3 +49,32 @@
   window.Webflow.push(markCurrentTab);
 })();
 </script>
+
+<script>
+/* Keep every dated version out of search results.
+
+   Only the five stable addresses — /legal/terms and friends — should be
+   indexable. Every other page this template serves is a specific version and
+   duplicates the text of one of them: the version currently in force says the
+   same thing as the stable address, and archived or upcoming ones must not
+   surface for a query like "birch terms" at all.
+
+   The test is the URL, not a CMS field. A version's slug is always the
+   document's slug plus "-YYYY-MM-DD", and a stable address never carries that
+   suffix, so the page can tell what it is without any binding. Two earlier
+   attempts failed: an attribute bound to the Status field is rejected by the
+   API ("value must be a string or a binding"), and hanging the rule on the
+   archive notice missed the dated version that IS in force — it shows no
+   notice, so it stayed indexable.
+
+   A robots meta only counts in <head>, which is why it is written there.
+   Google evaluates it after rendering. */
+(function () {
+  if (!/-\d{4}-\d{2}-\d{2}$/.test(location.pathname.replace(/\/+$/, ''))) return;
+
+  var m = document.createElement('meta');
+  m.setAttribute('name', 'robots');
+  m.setAttribute('content', 'noindex, follow');
+  document.head.appendChild(m);
+})();
+</script>
