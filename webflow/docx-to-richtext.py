@@ -1,69 +1,137 @@
 """docx -> Webflow rich-text HTML for the Birch legal documents.
 
-Deliberately narrow: it handles exactly what these four files contain
-(paragraphs, headings, bullet lists, bold/italic, external links, one table
-each in Cookie and DPA) and raises on anything it does not recognise, rather
-than silently dropping it. Legal text must not lose a clause to a converter
-being lenient.
+Deliberately narrow: it handles exactly what these four files contain and
+raises on anything it does not recognise, rather than silently dropping it.
+Legal text must not lose a clause to a converter being lenient.
 """
-import zipfile, re, html, sys
+import zipfile, re, html
 import xml.etree.ElementTree as ET
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 R = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
+# A segment that looks like a numbered section title. Short on purpose: body
+# paragraphs also start with "(b)" or "12 months", and only a short segment
+# beginning "<number>. <Word>" is a heading that lost its style.
+HEADING_RE = re.compile(r"^\d+\.\s+\S")
+HEADING_MAX = 90
+
 def rels(z):
-    out = {}
     try:
         root = ET.fromstring(z.read("word/_rels/document.xml.rels"))
     except KeyError:
-        return out
-    for rel in root:
-        out[rel.get("Id")] = rel.get("Target")
-    return out
+        return {}
+    return {rel.get("Id"): rel.get("Target") for rel in root}
 
-def runs_html(node, rel):
-    """Inline HTML for the runs inside a paragraph (or hyperlink)."""
-    parts = []
+def segments(node, rel):
+    """Inline HTML split at every <w:br/>.
+
+    Word uses a line break for two different jobs in these files: separating
+    blocks that were never made into real paragraphs (a section title glued to
+    the end of the paragraph above it), and breaking a line inside one block
+    (an address, or a bold label above its definition). Dropping them — which
+    the first version of this converter did — runs the two together.
+    """
+    segs, cur = [], []
     for child in node:
-        tag = child.tag
-        if tag == W + "hyperlink":
-            inner = runs_html(child, rel)
+        if child.tag == W + "hyperlink":
+            sub = segments(child, rel)
+            if child.get(W + "anchor"):
+                raise SystemExit("внутренний якорь: rich text их не переживёт")
             href = rel.get(child.get(R + "id"), "")
-            anchor = child.get(W + "anchor")
-            if anchor:                      # internal anchors cannot survive rich text
-                raise SystemExit(f"внутренний якорь в документе: {anchor}")
-            parts.append(f'<a href="{html.escape(href)}">{inner}</a>' if href else inner)
-        elif tag == W + "r":
-            text = "".join(t.text or "" for t in child.iter(W + "t"))
-            if child.find(W + "br") is not None and not text:
-                continue
-            if not text:
-                continue
-            pr = child.find(W + "rPr")
-            bold = pr is not None and pr.find(W + "b") is not None
-            ital = pr is not None and pr.find(W + "i") is not None
-            s = html.escape(text)
-            if bold: s = f"<strong>{s}</strong>"
-            if ital: s = f"<em>{s}</em>"
-            parts.append(s)
-    return "".join(parts)
+            inner = "<br>".join(sub)
+            cur.append(f'<a href="{html.escape(href)}">{inner}</a>' if href else inner)
+        elif child.tag == W + "r":
+            for node2 in child:
+                if node2.tag == W + "br":
+                    segs.append("".join(cur)); cur = []
+                elif node2.tag == W + "t":
+                    s = html.escape(node2.text or "")
+                    if not s:
+                        continue
+                    pr = child.find(W + "rPr")
+                    if pr is not None and pr.find(W + "b") is not None:
+                        s = f"<strong>{s}</strong>"
+                    if pr is not None and pr.find(W + "i") is not None:
+                        s = f"<em>{s}</em>"
+                    cur.append(s)
+    segs.append("".join(cur))
+    return segs
 
-def para_info(p, rel):
-    pr = p.find(W + "pPr")
-    style = ""
-    listed = False
-    if pr is not None:
-        st = pr.find(W + "pStyle")
-        if st is not None: style = st.get(W + "val") or ""
-        listed = pr.find(W + "numPr") is not None
-    return style, listed, runs_html(p, rel)
+def plain(h):
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", h))).strip()
+
+def convert(path, heading_map, demote_over=None):
+    z = zipfile.ZipFile(path)
+    rel = rels(z)
+    body = ET.fromstring(z.read("word/document.xml")).find(W + "body")
+
+    out, in_list, dropped, promoted = [], False, [], []
+
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out.append("</ul>"); in_list = False
+
+    for el in body:
+        if el.tag == W + "tbl":
+            close_list(); out.append(table_html(el)); continue
+        if el.tag != W + "p":
+            continue
+
+        pr = el.find(W + "pPr")
+        style, listed = "", False
+        if pr is not None:
+            st = pr.find(W + "pStyle")
+            if st is not None: style = st.get(W + "val") or ""
+            listed = pr.find(W + "numPr") is not None
+
+        segs = [s for s in segments(el, rel) if plain(s)]
+        if not segs:
+            continue
+
+        whole = plain("".join(segs))
+        if style == "Heading1":
+            dropped.append(whole); continue
+        if re.match(r"^effective(\s+date)?\s*:", whole, re.I):
+            dropped.append(whole); continue
+
+        tag = heading_map.get(style)
+        if tag and demote_over and len(whole) > demote_over:
+            tag = None                                   # абзац, ошибочно размеченный заголовком
+
+        # Разбиваем блок только там, где сегмент сам выглядит заголовком;
+        # иначе переносы остаются переносами внутри одного блока.
+        idx = next((i for i, s in enumerate(segs)
+                    if len(plain(s)) <= HEADING_MAX and HEADING_RE.match(plain(s))), None)
+
+        if idx is not None and not listed:
+            before, head, after = segs[:idx], segs[idx], segs[idx+1:]
+            close_list()
+            if before:
+                out.append(f"<p>{'<br>'.join(before)}</p>")
+            out.append(f"<h2>{head}</h2>")
+            promoted.append(plain(head))
+            if after:
+                out.append(f"<p>{'<br>'.join(after)}</p>")
+            continue
+
+        joined = "<br>".join(segs)
+        if listed and not tag:
+            if not in_list: out.append("<ul>"); in_list = True
+            out.append(f"<li>{joined}</li>")
+            continue
+        close_list()
+        out.append(f"<{tag}>{joined}</{tag}>" if tag else f"<p>{joined}</p>")
+
+    close_list()
+    return "".join(out), dropped, promoted
 
 def table_html(tbl):
     grid = [int(g.get(W + "w")) for g in tbl.iter(W + "gridCol")]
     rows = list(tbl.findall(W + "tr"))
     ncols = max(len(r.findall(W + "tc")) for r in rows)
-    if len(grid) > ncols:                   # Word sometimes repeats the grid
+    if len(grid) > ncols:                    # Word sometimes repeats the grid
         grid = grid[:ncols]
     total = sum(grid) or 1
     cols = "".join(f'<col style="width:{g/total*100:.4g}%">' for g in grid)
@@ -71,53 +139,12 @@ def table_html(tbl):
     def cells(tr, tag):
         out = []
         for tc in tr.findall(W + "tc"):
-            inner = " ".join(
-                x for x in (runs_html(p, {}) for p in tc.findall(W + "p")) if x
-            ).strip()
-            out.append(f"<{tag}>{inner}</{tag}>")
+            paras = ["<br>".join(s for s in segments(p, {}) if plain(s))
+                     for p in tc.findall(W + "p")]
+            out.append(f"<{tag}>{'<br>'.join(p for p in paras if plain(p))}</{tag}>")
         return "".join(out)
 
     head = f"<thead><tr>{cells(rows[0], 'th')}</tr></thead>"
-    body = "".join(f"<tr>{cells(r, 'td')}</tr>" for r in rows[1:])
-    table = f"<table><colgroup>{cols}</colgroup>{head}<tbody>{body}</tbody></table>"
-    return f"<div data-rt-embed-type='true'><div class=\"rt-table\">{table}</div></div>"
-
-def convert(path, heading_map, promote, demote_over):
-    z = zipfile.ZipFile(path)
-    rel = rels(z)
-    body = ET.fromstring(z.read("word/document.xml")).find(W + "body")
-
-    out, open_list, dropped = [], False, []
-    for el in body:
-        if el.tag == W + "tbl":
-            if open_list: out.append("</ul>"); open_list = False
-            out.append(table_html(el))
-            continue
-        if el.tag != W + "p":
-            continue
-
-        style, listed, inner = para_info(el, rel)
-        plain = re.sub(r"<[^>]+>", "", inner).strip()
-
-        if not plain:                                   # пустые абзацы и заголовки
-            continue
-        if style == "Heading1":                         # заголовок страницы приходит из поля Name
-            dropped.append(("заголовок документа", plain)); continue
-        if re.match(r"^effective(\s+date)?\s*:", plain, re.I):
-            dropped.append(("строка с датой", plain)); continue
-
-        tag = heading_map.get(style)
-        if tag and demote_over and len(plain) > demote_over:
-            tag = None                                  # абзац, ошибочно размеченный заголовком
-        if tag is None and any(plain.startswith(pfx) for pfx in promote):
-            tag = "h2"                                  # заголовок, потерявший свой стиль
-
-        if listed and not tag:
-            if not open_list: out.append("<ul>"); open_list = True
-            out.append(f"<li>{inner}</li>")
-            continue
-        if open_list: out.append("</ul>"); open_list = False
-        out.append(f"<{tag}>{inner}</{tag}>" if tag else f"<p>{inner}</p>")
-
-    if open_list: out.append("</ul>")
-    return "".join(out), dropped
+    tbody = "".join(f"<tr>{cells(r, 'td')}</tr>" for r in rows[1:])
+    return (f"<div data-rt-embed-type='true'><div class=\"rt-table\">"
+            f"<table><colgroup>{cols}</colgroup>{head}<tbody>{tbody}</tbody></table></div></div>")
