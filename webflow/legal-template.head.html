@@ -1,29 +1,4 @@
-<!-- Canonical copy of the <head> custom code on the Legal documents collection template.
-     Edit here first, then paste the whole block into the page's head code in Webflow.
-
-     Why this is custom code and not a Webflow class: tables inside a CMS rich text
-     field live in an HTML embed, and Webflow has no `table` tag style — an attempt to
-     create one produces a combo class (.rich-text-base.table), not a nested selector.
-     See docs/webflow-mcp.md.
-
-     Known cost: page custom code does not run on the Designer canvas or in Preview,
-     so tables look unstyled while editing the template. That is expected — do not
-     "fix" it by pasting CSS back into the CMS records.
-
-     Contract for a table inside a legal document body:
-
-       <div data-rt-embed-type='true'>
-         <div class="rt-table">
-           <table>
-             <colgroup><col style="width:13%"> … </colgroup>
-             <thead>…</thead><tbody>…</tbody>
-           </table>
-         </div>
-       </div>
-
-     The record carries content, structure and column widths only. Everything below is
-     shared, so every table in every legal document (current and archived) stays identical. -->
-
+<!-- Canonical copy lives in the repo: webflow/legal-template.head.html — edit there first. -->
 <style>
   /* Horizontal scroll container — the one thing that cannot sit on <table> itself. */
   .rt-table {
@@ -33,8 +8,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Sized in em so the table scales with the surrounding rich text instead of
-     drifting apart from it when the body type changes. */
+  /* Sized in em so the table scales with the surrounding rich text. */
   .rt-table table {
     width: 100%;
     border-collapse: collapse;
@@ -57,57 +31,43 @@
     font-weight: 700;
   }
 
-  /* First column reads as the row's label. */
   .rt-table td:first-child {
     font-weight: 600;
   }
 
-  /* Below the mobile breakpoint the table keeps its proportions and scrolls
-     sideways rather than squashing columns to unreadable widths. */
   @media (max-width: 767px) {
     .rt-table table {
       min-width: 38rem;
     }
   }
 
-  /* Version selector, open state.
-
-     Webflow adds .w--open to a dropdown toggle while its list is open, but the
-     Designer style panel has no "open" pseudo state and the MCP style tool does
-     not accept one either — only hover / focus / active and friends. So this one
-     rule lives here rather than natively.
-
-     It matters more than it looks: touch devices have no hover at all, so without
-     it the trigger would never change appearance on a phone, and on desktop the
-     highlight would drop the moment the cursor left an open list. */
+  /* Version selector, open state. Webflow adds .w--open to a dropdown toggle while
+     its list is open, but neither the Designer style panel nor the MCP style tool
+     exposes an "open" pseudo state — so this rule lives here. */
   .legal-ver-toggle.w--open {
     background-color: #F1F0F7;
   }
 
-  /* The list itself must stay hidden until opened. Webflow's own .w-dropdown-list
-     does that with display:none, so the selector class must NOT set a display of
-     its own — otherwise the list renders permanently open. Layout goes here, on
-     the open state, instead. */
+  /* The list must stay hidden until opened: Webflow's own .w-dropdown-list does that
+     with display:none, so the selector class must NOT set a display of its own. */
   .legal-ver-list.w--open {
     display: flex;
     flex-direction: column;
   }
 
   /* The version being read. Webflow adds .w--current by itself to a link whose href
-     matches the open page — inside a Collection List that lands on exactly one row,
-     which is what the selector needs. Painting it should therefore be a Current state
-     in the style panel, but that state is not offered for this element, so the rule
-     lives here for the same reason .w--open does: there is no native place to put it. */
+     matches the open page. The style panel offers no plain Current state for this
+     element, so the rule lives here. */
   .legal-ver-item.w--current {
     background-color: #FFFFFF;
   }
 
   /* A document with a single version has nothing to choose between, so the selector
-     stops pretending to be one: no arrow, no hover, not clickable — it reads as the
-     plain date it is. `:only-child` on the repeated item is the only way to ask "does
-     this list hold more than one row"; Webflow's conditional visibility cannot count.
+     stops pretending to be one: no arrow, no hover, not clickable. `:only-child` on
+     the repeated item is the only way to ask "does this list hold more than one row";
+     Webflow's conditional visibility cannot count.
 
-     Vertical padding is deliberately kept: the label next to it carries the same
+     Vertical padding is deliberately kept: the label beside it carries the same
      padding so the two boxes match in height, which is what puts their baselines on
      one line. Dropping it here would undo that. */
   .legal-ver:has(.w-dyn-item:only-child) .legal-ver-toggle {
@@ -120,13 +80,3 @@
     display: none;
   }
 </style>
-
-<!-- The row you are currently reading is marked NOT from here but natively: Webflow adds
-     .w--current to a link whose href matches the open page, so the white background lives on
-     the link's Current state in the Designer. A script used to do this and was removed once
-     the native class turned up in the rendered markup. -->
-
-<!-- TEMPORARY — remove at cutover, when this template moves from /legal-documents to /legal.
-     Until then the template answers on a throwaway URL, and a full site publish by anyone on
-     the team would put a second, indexable copy of every legal document on the live site. -->
-<meta name="robots" content="noindex, nofollow">
