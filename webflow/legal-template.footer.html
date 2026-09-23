@@ -1,0 +1,44 @@
+<!-- Canonical copy lives in the repo: webflow/legal-template.footer.html — edit there first. -->
+
+<script>
+/* Keep the document tab highlighted on dated versions.
+
+   Webflow adds .w--current only when a link's href matches the page URL
+   exactly. A dated version lives at the document's URL plus "-<date>", so on
+   /legal/cookies-2024-10-15 no tab lights up at all and the row reads as
+   broken rather than as "you are inside Cookie Policy".
+
+   The site navigation solves the same problem with data-match-prefix, but that
+   handler ships inside the navigation component and only looks at nav links,
+   so it cannot be reused here.
+
+   Prefix is derived from the href rather than hardcoded, so renaming a
+   document's slug needs no change here. The separator is "-" specifically:
+   matching on the bare prefix would also light up a sibling whose slug starts
+   with the same letters. No two legal slugs collide under this rule today, and
+   the "-" keeps that true if one is added later. */
+(function () {
+  function markCurrentTab() {
+    var path = location.pathname.replace(/\/+$/, '');
+    var tabs = document.querySelectorAll('.legal-menu-link');
+
+    for (var i = 0; i < tabs.length; i++) {
+      var href = (tabs[i].getAttribute('href') || '').replace(/\/+$/, '');
+      var isCurrent = !!href && (path === href || path.indexOf(href + '-') === 0);
+
+      tabs[i].classList.toggle('w--current', isCurrent);
+      if (isCurrent) {
+        tabs[i].setAttribute('aria-current', 'page');
+      } else {
+        tabs[i].removeAttribute('aria-current');
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', markCurrentTab);
+  } else {
+    markCurrentTab();
+  }
+})();
+</script>
