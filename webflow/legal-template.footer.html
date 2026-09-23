@@ -35,10 +35,17 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', markCurrentTab);
-  } else {
-    markCurrentTab();
-  }
+  /* Must run through Webflow's own queue, not on DOMContentLoaded.
+
+     Webflow's links module re-evaluates every link on ready: it adds
+     .w--current to the ones whose href matches the page exactly and REMOVES it
+     from all the others. A class set before that runs is silently wiped — the
+     first version of this script did exactly that and looked like a no-op while
+     the same code worked when pasted into the console.
+
+     Webflow.push queues a callback that fires after the modules have
+     initialised, so the mark is applied last and survives. */
+  window.Webflow = window.Webflow || [];
+  window.Webflow.push(markCurrentTab);
 })();
 </script>
