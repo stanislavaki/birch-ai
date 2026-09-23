@@ -1,9 +1,23 @@
 <!-- Canonical copy lives in the repo: webflow/legal-template.head.html — edit there first. -->
 <style>
-  /* Horizontal scroll container — the one thing that cannot sit on <table> itself. */
+  /* Horizontal scroll container — the one thing that cannot sit on <table> itself.
+
+     Tables break out wider than the text column. The column is sized for prose
+     (~75 characters); a reference table squeezed into it wraps every cell to
+     five or six lines. Measured on the DPA sub-processor table: 1243px tall at
+     the column width, 935px at this one, with the average row dropping from
+     100px to 75px.
+
+     Centred on the column with margin-left:50% + translateX(-50%) rather than
+     negative margins, so the width is stated once and the table stays centred
+     whatever the column does. min() with the viewport keeps it inside the
+     screen on narrow windows, where it falls back to scrolling sideways. */
   .rt-table {
-    width: 100%;
+    width: min(54rem, calc(100vw - 3rem));
+    max-width: none;
     margin: 1em 0 2em;
+    margin-left: 50%;
+    transform: translateX(-50%);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
