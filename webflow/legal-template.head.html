@@ -98,3 +98,12 @@
     display: none;
   }
 </style>
+
+<!-- TEMPORARY — remove when the collection takes the /legal prefix again.
+
+     The cutover was rolled back on 23.09.2026 so that a site publish would put
+     only the static pages live. While it is rolled back the collection answers
+     on /legal-documents/*, and without this every legal document would have a
+     second, indexable copy there. The URL-based rule in the footer does not
+     cover these: they carry no date suffix. -->
+<meta name="robots" content="noindex, nofollow">
