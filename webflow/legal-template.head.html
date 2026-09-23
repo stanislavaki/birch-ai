@@ -36,7 +36,11 @@
     padding: 0.77em;
     text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid var(--_color---secondary--neutral--light-gray, #e5e5e5);
+    /* `hairline` (black at 12%), not `light-gray`: the latter is a fill colour
+       and lands at 1.17:1 on white, which reads as no rule at all. Thickening a
+       washed-out colour gives a grey band, not a line, so the colour is fixed
+       first and the width stays at 1px. */
+    border-bottom: 1px solid var(--_color---secondary--neutral--hairline, #0d0d0d1f);
     overflow-wrap: break-word;
   }
 
