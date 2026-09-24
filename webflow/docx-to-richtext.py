@@ -50,6 +50,24 @@ def _linkify_plain(text):
     return URL_RE.sub(repl, text)
 
 
+STRONG_RE = re.compile(r"</?strong>")
+
+def unbold(fragment):
+    """Strip <strong> from a heading's own text.
+
+    Word has no notion of "heading" beyond a style, so a heading there is a bold
+    run, and that bold arrives here as <strong> wrapping the whole title. On the
+    page the heading already carries its weight from the design, so the tag adds
+    a second helping — the titles came out at 700 against the body's 500, heavier
+    than anything else on a legal page.
+
+    Only real headings are cleaned. Inside the body <strong> is the lawyers' own
+    emphasis and stays, and so does <em>: the italic subsection labels in the
+    Privacy Policy are theirs, not an artefact of the heading style.
+    """
+    return STRONG_RE.sub("", fragment)
+
+
 def rels(z):
     try:
         root = ET.fromstring(z.read("word/_rels/document.xml.rels"))
@@ -180,7 +198,7 @@ def convert(path, heading_map, demote_over=None):
             close_list()
             if before:
                 out.append(f"<p>{'<br>'.join(before)}</p>")
-            out.append(f"<h2>{head}</h2>")
+            out.append(f"<h2>{unbold(head)}</h2>")
             promoted.append(plain(head))
             if after:
                 out.append(f"<p>{'<br>'.join(after)}</p>")
@@ -192,6 +210,8 @@ def convert(path, heading_map, demote_over=None):
             out.append(f"<li>{joined}</li>")
             continue
         close_list()
+        if tag and tag.startswith("h") and tag != "h6":
+            joined = unbold(joined)
         out.append(f"<{tag}>{joined}</{tag}>" if tag else f"<p>{joined}</p>")
 
     close_list()
