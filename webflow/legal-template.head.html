@@ -4,16 +4,20 @@
 
      Tables break out wider than the text column. The column is sized for prose
      (~75 characters); a reference table squeezed into it wraps every cell to
-     five or six lines. Measured on the DPA sub-processor table: 1243px tall at
-     the column width, 935px at this one, with the average row dropping from
-     100px to 75px.
+     five or six lines.
 
      Centred on the column with margin-left:50% + translateX(-50%) rather than
      negative margins, so the width is stated once and the table stays centred
      whatever the column does. min() with the viewport keeps it inside the
-     screen on narrow windows, where it falls back to scrolling sideways. */
+     screen on narrow windows, where it falls back to scrolling sideways.
+
+     64rem was measured, not guessed: on the cookie table it takes the height
+     from 1212px to 1091px and still leaves 128px of air either side at a 1280
+     window. Wider than that and the table's margins grow narrower than the
+     page's own, at which point it stops reading as an inset and starts
+     competing with the layout. */
   .rt-table {
-    width: min(54rem, calc(100vw - 3rem));
+    width: min(64rem, calc(100vw - 3rem));
     max-width: none;
     margin: 1em 0 2em;
     margin-left: 50%;
