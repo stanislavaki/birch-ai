@@ -108,21 +108,33 @@
     background-color: #FFFFFF;
   }
 
-  /* A document with a single version has nothing to choose between, so the selector
-     stops pretending to be one: no arrow, no hover, not clickable. `:only-child` on
-     the repeated item is the only way to ask "does this list hold more than one row";
-     Webflow's conditional visibility cannot count.
+  /* Two cases where the selector has nothing to offer and stops pretending to be a
+     control: no arrow, no hover, not clickable.
+
+     One is a document with a single version — `:only-child` on the repeated item is
+     the only way to ask "does this list hold more than one row", since Webflow's
+     conditional visibility cannot count.
+
+     The other is a version that is not yet in force. It is deliberately absent from
+     the selector, so a dropdown listing other versions and not itself would be a
+     control that cannot show where you are. Its list is hidden by a condition on
+     Status, and the absence of the list is itself the hook: a dropdown with no list
+     is a dropdown with nothing to open. The date stays and reads as plain text,
+     which is the point — without it the page never says from when the document
+     applies.
 
      Vertical padding is deliberately kept: the label beside it carries the same
      padding so the two boxes match in height, which is what puts their baselines on
      one line. Dropping it here would undo that. */
-  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-toggle {
+  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-toggle,
+  .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-toggle {
     pointer-events: none;
     padding-left: 0;
     padding-right: 0;
   }
 
-  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-arrow {
+  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-arrow,
+  .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-arrow {
     display: none;
   }
 </style>
