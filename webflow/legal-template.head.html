@@ -22,13 +22,18 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Sized in em so the table scales with the surrounding rich text. */
+  /* Same size as the surrounding text, not smaller. A table in a legal document
+     is read, not glanced at: it lists sub-processors, cookies, retention periods —
+     things a reader checks line by line. Shrinking it to 0.82em saved vertical
+     space and cost legibility exactly where it matters, so the cells now sit at
+     the body's own size and leading. Stated in em so both still follow the rich
+     text if its type changes. */
   .rt-table table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 0.82em;
-    line-height: 1.45;
+    font-size: 1em;
+    line-height: 1.4;
   }
 
   .rt-table th,
@@ -113,7 +118,10 @@
 
      One is a document with a single version — `:only-child` on the repeated item is
      the only way to ask "does this list hold more than one row", since Webflow's
-     conditional visibility cannot count.
+     conditional visibility cannot count. The test must name `.legal-ver-list`: the
+     toggle itself contains another one-item Collection List, the one that fetches
+     the in-force date for a pointer page, and an unscoped `:only-child` matched that
+     instead — hiding the arrow on every pointer whose document has several versions.
 
      The other is a version that is not yet in force. It is deliberately absent from
      the selector, so a dropdown listing other versions and not itself would be a
@@ -126,14 +134,14 @@
      Vertical padding is deliberately kept: the label beside it carries the same
      padding so the two boxes match in height, which is what puts their baselines on
      one line. Dropping it here would undo that. */
-  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-toggle,
+  .legal-ver:has(.legal-ver-list .w-dyn-item:only-child) .legal-ver-toggle,
   .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-toggle {
     pointer-events: none;
     padding-left: 0;
     padding-right: 0;
   }
 
-  .legal-ver:has(.w-dyn-item:only-child) .legal-ver-arrow,
+  .legal-ver:has(.legal-ver-list .w-dyn-item:only-child) .legal-ver-arrow,
   .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-arrow {
     display: none;
   }
