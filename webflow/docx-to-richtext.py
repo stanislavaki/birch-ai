@@ -16,6 +16,40 @@ R = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 HEADING_RE = re.compile(r"^\d+\.\s+\S")
 HEADING_MAX = 90
 
+# A bare address in the text is still an address. The lawyers mark only some of
+# them as links in Word — in the 23.09 set, 8 out of roughly a dozen — and the
+# ones they miss are the cross-references between these very documents, so a
+# reader of the Terms cannot click through to the Privacy Policy. Linking them
+# here changes no character of the text: the address stays exactly as written
+# and merely becomes clickable, which is presentation, not content.
+URL_RE = re.compile(r"(?<![\w@/])(https?://[^\s<>\"]+)")
+ANCHOR_RE = re.compile(r"<a\b[^>]*>.*?</a>", re.S)
+
+def linkify(fragment):
+    """Wrap bare URLs in anchors, leaving text already inside an anchor alone."""
+    out, last = [], 0
+    for m in ANCHOR_RE.finditer(fragment):
+        out.append(_linkify_plain(fragment[last:m.start()]))
+        out.append(m.group(0))
+        last = m.end()
+    out.append(_linkify_plain(fragment[last:]))
+    return "".join(out)
+
+def _linkify_plain(text):
+    def repl(m):
+        url = m.group(1)
+        # A sentence ends after the address far more often than an address ends
+        # in punctuation, so trailing marks are given back to the sentence.
+        trail = ""
+        while url and url[-1] in ".,;:!?)]»”\u0022'":
+            trail = url[-1] + trail
+            url = url[:-1]
+        if not url:
+            return m.group(0)
+        return f'<a href="{url}">{url}</a>{trail}'
+    return URL_RE.sub(repl, text)
+
+
 def rels(z):
     try:
         root = ET.fromstring(z.read("word/_rels/document.xml.rels"))
@@ -42,6 +76,18 @@ def segments(node, rel):
             inner = "<br>".join(sub)
             cur.append(f'<a href="{html.escape(href)}">{inner}</a>' if href else inner)
         elif child.tag == W + "r":
+            # A section title left inside a paragraph instead of being made one.
+            # In these files it is always a bold run of the form "N. Title", set
+            # at roughly twice the body size; the 23.09 Terms carries exactly one
+            # ("4. Disclaimer and limitation of liability" glued to the end of the
+            # paragraph above it). Split before such a run so the title can become
+            # a heading of its own.
+            rt = "".join(t.text or "" for t in child.iter(W + "t")).strip()
+            rpr = child.find(W + "rPr")
+            bold = rpr is not None and rpr.find(W + "b") is not None
+            if bold and len(rt) <= HEADING_MAX and HEADING_RE.match(rt) and (cur or segs):
+                segs.append("".join(cur)); cur = []
+
             for node2 in child:
                 if node2.tag == W + "br":
                     segs.append("".join(cur)); cur = []
@@ -56,7 +102,7 @@ def segments(node, rel):
                         s = f"<em>{s}</em>"
                     cur.append(s)
     segs.append("".join(cur))
-    return segs
+    return [linkify(x) for x in segs]
 
 def plain(h):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", h))).strip()
@@ -93,8 +139,32 @@ def convert(path, heading_map, demote_over=None):
         whole = plain("".join(segs))
         if style == "Heading1":
             dropped.append(whole); continue
+        # The page prints the effective date in its own header, so a line that is
+        # nothing but that date is chrome and gets dropped. From 23.09.2026 Terms
+        # and the DPA continue the same paragraph with the amendment rule ("For
+        # accounts open on that date, the changes take effect 30 days after the
+        # notice given under Section 13..."), which is substantive text and stays.
+        # Cutting only the first sentence is worse than keeping it: the next one
+        # opens with "on that date" and would refer to nothing.
+        # The opening "Effective date ..." line.
+        #
+        # When it is nothing but the date (Privacy, Cookie) it is chrome: the page
+        # header already prints that date from the CMS field, so it is dropped.
+        #
+        # When it continues into the applicability rule (Terms, DPA: "For accounts
+        # open on that date, the changes take effect 30 days after the notice given
+        # under Section 13...") it is the lawyers' own text and stays in the body —
+        # tagged h6, which is the one block type a content editor can pick in the
+        # CMS rich text toolbar and which these documents never use as a real
+        # heading. `.rt-legal h6` renders it as the grey applicability note, and the
+        # template footer swaps the tag for a paragraph so the published document
+        # outline carries no sentence-long level-six heading.
         if re.match(r"^effective(\s+date)?\s*:", whole, re.I):
-            dropped.append(whole); continue
+            if len(whole) <= 60:
+                dropped.append(whole); continue
+            close_list()
+            out.append(f"<h6>{'<br>'.join(segs)}</h6>")
+            continue
 
         tag = heading_map.get(style)
         if tag and demote_over and len(whole) > demote_over:
