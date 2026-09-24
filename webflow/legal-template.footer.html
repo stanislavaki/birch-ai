@@ -78,3 +78,33 @@
   document.head.appendChild(m);
 })();
 </script>
+
+<script>
+/* Take the applicability clause out of the heading outline.
+
+   The clause is tagged h6 in the CMS because that is the only block type a
+   content editor can choose there, and these documents use no real sixth-level
+   heading. Left as an h6 it would sit in the document outline as a
+   sentence-long heading, two levels below its neighbours — a skipped level that
+   screen readers announce as a heading and that no reader means.
+
+   So the tag is rewritten to a paragraph carrying the same style. If this never
+   runs, the clause is still visible and still grey; only the outline suffers.
+   That is the safe direction for the failure to go. */
+(function () {
+  function unheadClause() {
+    var body = document.querySelector('.rt-legal');
+    if (!body) return;
+
+    body.querySelectorAll('h6').forEach(function (h) {
+      var p = document.createElement('p');
+      p.className = 'legal-applies-note';
+      p.innerHTML = h.innerHTML;
+      h.replaceWith(p);
+    });
+  }
+
+  window.Webflow = window.Webflow || [];
+  window.Webflow.push(unheadClause);
+})();
+</script>

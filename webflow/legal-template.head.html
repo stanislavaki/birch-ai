@@ -59,6 +59,34 @@
     }
   }
 
+  /* The applicability clause — the document's own opening line about when this
+     version takes effect and for whom ("Effective date: 09.28.2026. For accounts
+     open on that date, the changes take effect 30 days after the notice given
+     under Section 13...").
+
+     It stays inside the body, because it is the lawyers' text and the document
+     has to remain whole: the stable address renders the body of the version in
+     force, so keeping the clause there is what carries it to /legal/terms.
+
+     It is tagged h6 because that is the one block type a content editor can pick
+     in the CMS rich text toolbar, and these documents never use a sixth-level
+     heading for anything real — sections are h2, subsections h3. The convention
+     is written into the Body field's help text in the CMS, where the lawyer sees
+     it, not only here.
+
+     The footer script rewrites the tag to <p class="legal-applies-note"> so the
+     published outline carries no sentence-long heading; both selectors are styled
+     so nothing shifts while that runs. Styling lives here rather than on a class
+     because a class cannot be attached to a child of a bound rich text. */
+  .rt-legal h6,
+  .rt-legal p.legal-applies-note {
+    margin: 0 0 1.25rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--_color---secondary--neutral--mid-gray, #909090);
+  }
+
   /* Version selector, open state. Webflow adds .w--open to a dropdown toggle while
      its list is open, but neither the Designer style panel nor the MCP style tool
      exposes an "open" pseudo state — so this rule lives here. */
