@@ -45,11 +45,20 @@
     padding: 0.77em;
     text-align: left;
     vertical-align: top;
-    /* `hairline` (black at 12%), not `light-gray`: the latter is a fill colour
-       and lands at 1.17:1 on white, which reads as no rule at all. Thickening a
-       washed-out colour gives a grey band, not a line, so the colour is fixed
-       first and the width stays at 1px. */
-    border-bottom: 1px solid var(--_color---secondary--neutral--hairline, #0d0d0d1f);
+    /* HARDCODED ON PURPOSE, 24.09.2026 — the palette has no divider for a table.
+       `light-gray` #edecf2 lands at 1.17:1 on white and reads as no rule at all;
+       `hairline` at 12% black reaches only 1.3; the next step, `mid-gray`, jumps to
+       3.19 and stripes a fourteen-row table. The gap between them is where a table
+       rule belongs, so this value sits in it: 1.74:1, cool to match the palette's
+       blue-leaning greys.
+
+       Thickening instead of darkening was considered and rejected: 2px of a
+       washed-out colour is a grey band, not a line.
+
+       The right fix is a `divider` token added through /figma-sync so Figma and the
+       system agree; until then this literal is the honest version of the same
+       decision, and it is one line to replace. */
+    border-bottom: 1px solid #c4c3ce;
     overflow-wrap: break-word;
   }
 
