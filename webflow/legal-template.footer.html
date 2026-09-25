@@ -108,3 +108,42 @@
   window.Webflow.push(unheadClause);
 })();
 </script>
+<script>
+/* Bring the current document's tab into view on mobile.
+
+   The tab row scrolls sideways below 768px: five tabs measure 771px against a
+   375px screen. It always starts at scrollLeft 0, so opening Data Processing or
+   Affiliate Program on a phone showed a row with no tab highlighted anywhere in
+   sight — the reader cannot tell which document they are in, and the row reads
+   as decoration rather than navigation.
+
+   Deliberately NOT in Webflow.push, and deliberately not scrollIntoView:
+
+   - the ready queue fires after the row has painted, so the strip would visibly
+     slide from 0 to its target; running here, at the end of <body>, the tabs are
+     already parsed and the position is set before first paint;
+   - scrollIntoView walks up the ancestor chain and would scroll the PAGE as well,
+     dropping the reader below the heading.
+
+   Current tab is matched the same way as in the highlighting script above, by
+   href prefix, because .w--current is not on the element yet at this point on a
+   dated version — the server only sets it on an exact URL match. */
+(function () {
+  var strip = document.querySelector('.tabs-cont');
+  if (!strip) return;
+  if (strip.scrollWidth <= strip.clientWidth) return;
+
+  var path = location.pathname.replace(/\/+$/, '');
+  var tabs = strip.querySelectorAll('.legal-menu-link');
+
+  for (var i = 0; i < tabs.length; i++) {
+    var href = (tabs[i].getAttribute('href') || '').replace(/\/+$/, '');
+    if (!href || (path !== href && path.indexOf(href + '-') !== 0)) continue;
+
+    var centred = tabs[i].offsetLeft - (strip.clientWidth - tabs[i].offsetWidth) / 2;
+    var max = strip.scrollWidth - strip.clientWidth;
+    strip.scrollLeft = Math.max(0, Math.min(centred, max));
+    return;
+  }
+})();
+</script>
