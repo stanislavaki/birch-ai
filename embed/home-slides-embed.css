@@ -1008,11 +1008,12 @@
     translate: -4.32cqw 0;
   }
 
-  .hse-hsm__stage--mcp {
-    width: 96cqw;
-    margin-inline: auto;
-    translate: 1.26cqw 0;
-  }
+  .hse-hsm__stage--mcp { width: 100cqw; }
+  .hse-hsm__mcp-logo { left: 11cqw; top: 18.7cqw; width: 35.1cqw; }
+  .hse-hsm__mcp-line { left: 47.1cqw; top: 22.7cqw; width: 16.1cqw; }
+  .hse-hsm__mcp-phone { left: 65.3cqw; top: 2.9cqw; width: 29cqw; }
+  .hse-hsm__mcp-time { left: 36.2cqw; top: 5.4cqw; width: 7.7cqw; }
+  .hse-hsm__mcp-scale { left: -16.8cqw; top: 21.3cqw; }
 
   .hse-hsm__stage--rules { translate: 3.5cqw 0; }
 }
