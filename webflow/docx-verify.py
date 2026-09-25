@@ -9,6 +9,26 @@ DOCS={"terms":"2026-09-21 Birch Terms of Use Redline (IK).docx",
       "cookies":"2026-09-21 Birch Cookie Policy Redline (IK).docx",
       "dpa":"2026-09-21 Birch DPA Redline (IK).docx"}
 
+def docx_footnotes(path):
+    """Footnote text, which does NOT live in word/document.xml.
+
+    The line-by-line check below reads document.xml, so a real Word footnote is
+    invisible to it by construction — exactly how the DPA payment-data note was
+    lost on 23.09.2026 and only noticed two days later. Checked separately: the
+    note must appear somewhere in the imported body.
+    """
+    z = zipfile.ZipFile(path)
+    if "word/footnotes.xml" not in z.namelist():
+        return []
+    root = ET.fromstring(z.read("word/footnotes.xml"))
+    out = []
+    for fn in root.iter(W + "footnote"):
+        text = " ".join(t.text or "" for t in fn.iter(W + "t")).strip()
+        if text:
+            out.append(re.sub(r"\s+", " ", text))
+    return out
+
+
 def docx_lines(path):
     """Строки исходника: абзац, ячейка и <w:br/> дают новую строку.
     Дети обходятся в порядке документа, иначе текст ссылки уезжает в конец абзаца."""

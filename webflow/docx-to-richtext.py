@@ -125,10 +125,42 @@ def segments(node, rel):
 def plain(h):
     return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", h))).strip()
 
+def footnotes(z):
+    """Real Word footnotes, which live outside word/document.xml entirely.
+
+    Lost silently on the 23.09.2026 DPA import: the converter read only
+    document.xml, so a footnote the lawyers had attached to the payment-data
+    paragraph never reached the site, and the line-by-line check missed it
+    because it compared against document.xml too — the same blind spot that
+    swallowed the <w:br/> line breaks. Separators and continuation notices carry
+    no text and are skipped; anything with text is a real note.
+
+    Returns [(id, text)] so the caller can refuse to import silently.
+    """
+    if "word/footnotes.xml" not in z.namelist():
+        return []
+    root = ET.fromstring(z.read("word/footnotes.xml"))
+    found = []
+    for fn in root.iter(W + "footnote"):
+        text = " ".join(t.text or "" for t in fn.iter(W + "t")).strip()
+        if text:
+            found.append((fn.get(W + "id"), re.sub(r"\s+", " ", text)))
+    return found
+
+
 def convert(path, heading_map, demote_over=None):
     z = zipfile.ZipFile(path)
     rel = rels(z)
     body = ET.fromstring(z.read("word/document.xml")).find(W + "body")
+
+    # Stop rather than drop: a footnote has to be placed by hand (marker at the
+    # anchor, note at the end of the body), and silence is how one went missing.
+    notes = footnotes(z)
+    if notes:
+        raise SystemExit(
+            "В документе есть сноски Word — их надо разместить вручную, "
+            "конвертер их не переносит:\n" +
+            "\n".join(f"  #{i}: {t}" for i, t in notes))
 
     out, in_list, dropped, promoted = [], False, [], []
 
