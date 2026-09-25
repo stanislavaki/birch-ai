@@ -1,0 +1,161 @@
+<!-- Canonical copy lives in the repo: webflow/legal-template.head.html — edit there first. -->
+<style>
+  /* Horizontal scroll container — the one thing that cannot sit on <table> itself.
+
+     Tables break out wider than the text column. The column is sized for prose
+     (~75 characters); a reference table squeezed into it wraps every cell to
+     five or six lines.
+
+     Centred on the column with margin-left:50% + translateX(-50%) rather than
+     negative margins, so the width is stated once and the table stays centred
+     whatever the column does. min() with the viewport keeps it inside the
+     screen on narrow windows, where it falls back to scrolling sideways.
+
+     64rem was measured, not guessed: on the cookie table it takes the height
+     from 1212px to 1091px and still leaves 128px of air either side at a 1280
+     window. Wider than that and the table's margins grow narrower than the
+     page's own, at which point it stops reading as an inset and starts
+     competing with the layout. */
+  .rt-table {
+    width: min(64rem, calc(100vw - 3rem));
+    max-width: none;
+    margin: 1em 0 2em;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Same size as the surrounding text, not smaller. A table in a legal document
+     is read, not glanced at: it lists sub-processors, cookies, retention periods —
+     things a reader checks line by line. Shrinking it to 0.82em saved vertical
+     space and cost legibility exactly where it matters, so the cells now sit at
+     the body's own size and leading. Stated in em so both still follow the rich
+     text if its type changes. */
+  .rt-table table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 1em;
+    line-height: 1.4;
+  }
+
+  .rt-table th,
+  .rt-table td {
+    padding: 0.77em;
+    text-align: left;
+    vertical-align: top;
+    /* HARDCODED ON PURPOSE, 24.09.2026 — the palette has no divider for a table.
+       `light-gray` #edecf2 lands at 1.17:1 on white and reads as no rule at all;
+       `hairline` at 12% black reaches only 1.3; the next step, `mid-gray`, jumps to
+       3.19 and stripes a fourteen-row table. The gap between them is where a table
+       rule belongs, so this value sits in it: 1.74:1, cool to match the palette's
+       blue-leaning greys.
+
+       Thickening instead of darkening was considered and rejected: 2px of a
+       washed-out colour is a grey band, not a line.
+
+       The right fix is a `divider` token added through /figma-sync so Figma and the
+       system agree; until then this literal is the honest version of the same
+       decision, and it is one line to replace. */
+    border-bottom: 1px solid #c4c3ce;
+    overflow-wrap: break-word;
+  }
+
+  .rt-table thead th {
+    border-bottom: 2px solid currentColor;
+    font-weight: 700;
+  }
+
+  .rt-table td:first-child {
+    font-weight: 600;
+  }
+
+  @media (max-width: 767px) {
+    .rt-table table {
+      min-width: 38rem;
+    }
+  }
+
+  /* The applicability clause — the document's own opening line about when this
+     version takes effect and for whom ("Effective date: 09.28.2026. For accounts
+     open on that date, the changes take effect 30 days after the notice given
+     under Section 13...").
+
+     It stays inside the body, because it is the lawyers' text and the document
+     has to remain whole: the stable address renders the body of the version in
+     force, so keeping the clause there is what carries it to /legal/terms.
+
+     It is tagged h6 because that is the one block type a content editor can pick
+     in the CMS rich text toolbar, and these documents never use a sixth-level
+     heading for anything real — sections are h2, subsections h3. The convention
+     is written into the Body field's help text in the CMS, where the lawyer sees
+     it, not only here.
+
+     The footer script rewrites the tag to <p class="legal-applies-note"> so the
+     published outline carries no sentence-long heading; both selectors are styled
+     so nothing shifts while that runs. Styling lives here rather than on a class
+     because a class cannot be attached to a child of a bound rich text. */
+  .rt-legal h6,
+  .rt-legal p.legal-applies-note {
+    margin: 0 0 1.25rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 500;
+    color: var(--_color---secondary--neutral--mid-gray, #909090);
+  }
+
+  /* Version selector, open state. Webflow adds .w--open to a dropdown toggle while
+     its list is open, but neither the Designer style panel nor the MCP style tool
+     exposes an "open" pseudo state — so this rule lives here. */
+  .legal-ver-toggle.w--open {
+    background-color: #F1F0F7;
+  }
+
+  /* The list must stay hidden until opened: Webflow's own .w-dropdown-list does that
+     with display:none, so the selector class must NOT set a display of its own. */
+  .legal-ver-list.w--open {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* The version being read. Webflow adds .w--current by itself to a link whose href
+     matches the open page. The style panel offers no plain Current state for this
+     element, so the rule lives here. */
+  .legal-ver-item.w--current {
+    background-color: #FFFFFF;
+  }
+
+  /* Two cases where the selector has nothing to offer and stops pretending to be a
+     control: no arrow, no hover, not clickable.
+
+     One is a document with a single version — `:only-child` on the repeated item is
+     the only way to ask "does this list hold more than one row", since Webflow's
+     conditional visibility cannot count. The test must name `.legal-ver-list`: the
+     toggle itself contains another one-item Collection List, the one that fetches
+     the in-force date for a pointer page, and an unscoped `:only-child` matched that
+     instead — hiding the arrow on every pointer whose document has several versions.
+
+     The other is a version that is not yet in force. It is deliberately absent from
+     the selector, so a dropdown listing other versions and not itself would be a
+     control that cannot show where you are. Its list is hidden by a condition on
+     Status, and the absence of the list is itself the hook: a dropdown with no list
+     is a dropdown with nothing to open. The date stays and reads as plain text,
+     which is the point — without it the page never says from when the document
+     applies.
+
+     Vertical padding is deliberately kept: the label beside it carries the same
+     padding so the two boxes match in height, which is what puts their baselines on
+     one line. Dropping it here would undo that. */
+  .legal-ver:has(.legal-ver-list .w-dyn-item:only-child) .legal-ver-toggle,
+  .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-toggle {
+    pointer-events: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .legal-ver:has(.legal-ver-list .w-dyn-item:only-child) .legal-ver-arrow,
+  .legal-ver:not(:has(.w-dropdown-list)) .legal-ver-arrow {
+    display: none;
+  }
+</style>
