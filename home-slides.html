@@ -411,6 +411,13 @@
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
+/* A slide whose two links would lead to the same page carries one button.
+   It keeps the size and right-edge spot of a button in a pair, so the
+   primary CTA does not jump in width or place between slides. */
+.hs__buttons .btn:only-child {
+  flex: 0 1 calc((100% - var(--gap-sm)) / 2);
+  margin-left: auto;
+}
 /* The page's own 1rem, but only where the buttons are full-width blocks in
    the flow — on the mobile card. On the desktop bar they are small inline
    buttons, and at 1rem they read as pills. */
@@ -721,6 +728,9 @@
     width: 100%;
     min-height: 3rem;
   }
+  /* A lone button is a full-width block in the flow, like the card above it:
+     half a row with an empty half reads as a missing button. */
+  .hsm__actions .btn:only-child { grid-column: 1 / -1; }
   .hsm__actions .btn-stroke {
     background: rgba(255,255,255,0.3);
     border-color: transparent;
@@ -2329,7 +2339,6 @@
             </div>
             <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
             <div class="hs__buttons">
-              <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
               <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
             </div>
           </header>
@@ -2340,7 +2349,6 @@
             </div>
             <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
             <div class="hs__buttons">
-              <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
               <a class="btn btn-default btn-xs" href="#">More about MCP</a>
             </div>
           </header>
@@ -2601,7 +2609,6 @@
         </div>
       </div>
       <div class="hsm__actions">
-        <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
         <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
       </div>
     </article>
@@ -2642,7 +2649,6 @@
         </div>
       </div>
       <div class="hsm__actions">
-        <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
         <a class="btn btn-default btn-xs" href="#">More about MCP</a>
       </div>
     </article>

@@ -647,6 +647,11 @@
 
 .hse-hs__buttons .hse-btn { flex: 1; }
 
+.hse-hs__buttons .hse-btn:only-child {
+  flex: 0 1 calc((100% - var(--gap-sm)) / 2);
+  margin-left: auto;
+}
+
 .hse-hsm__actions .hse-btn { border-radius: var(--radius-lg); }
 .hse-hs__buttons .hse-btn-stroke {
   background: rgba(0, 0, 0, 0.3);
@@ -900,6 +905,8 @@
     width: 100%;
     min-height: 3rem;
   }
+
+  .hse-hsm__actions .hse-btn:only-child { grid-column: 1 / -1; }
   .hse-hsm__actions .hse-btn-stroke {
     background: rgba(255,255,255,0.3);
     border-color: transparent;
