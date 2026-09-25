@@ -129,21 +129,35 @@
    href prefix, because .w--current is not on the element yet at this point on a
    dated version — the server only sets it on an exact URL match. */
 (function () {
-  var strip = document.querySelector('.tabs-cont');
-  if (!strip) return;
-  if (strip.scrollWidth <= strip.clientWidth) return;
+  function place() {
+    var strip = document.querySelector('.tabs-cont');
+    if (!strip) return;
+    if (strip.scrollWidth <= strip.clientWidth) return;
 
-  var path = location.pathname.replace(/\/+$/, '');
-  var tabs = strip.querySelectorAll('.legal-menu-link');
+    var path = location.pathname.replace(/\/+$/, '');
+    var tabs = strip.querySelectorAll('.legal-menu-link');
 
-  for (var i = 0; i < tabs.length; i++) {
-    var href = (tabs[i].getAttribute('href') || '').replace(/\/+$/, '');
-    if (!href || (path !== href && path.indexOf(href + '-') !== 0)) continue;
+    for (var i = 0; i < tabs.length; i++) {
+      var href = (tabs[i].getAttribute('href') || '').replace(/\/+$/, '');
+      if (!href || (path !== href && path.indexOf(href + '-') !== 0)) continue;
 
-    var centred = tabs[i].offsetLeft - (strip.clientWidth - tabs[i].offsetWidth) / 2;
-    var max = strip.scrollWidth - strip.clientWidth;
-    strip.scrollLeft = Math.max(0, Math.min(centred, max));
-    return;
+      var centred = tabs[i].offsetLeft - (strip.clientWidth - tabs[i].offsetWidth) / 2;
+      var max = strip.scrollWidth - strip.clientWidth;
+      strip.scrollLeft = Math.max(0, Math.min(centred, max));
+      return;
+    }
+  }
+
+  place();
+
+  /* Run again once the web font is in. The row is first laid out in the Arial
+     fallback, where the five labels together are 41px wider than in TT Commons
+     Pro; positioning from those metrics lands the active tab about 20px off.
+     The second pass rides along with the reflow the font swap causes anyway, so
+     it adds no jump of its own. Same reason as the fonts.ready rule in
+     CLAUDE.md for anything that measures rendered text. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(place);
   }
 })();
 </script>
