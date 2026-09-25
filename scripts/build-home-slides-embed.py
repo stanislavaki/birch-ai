@@ -8,6 +8,7 @@ Each part is self-contained and stays below the per-element limit.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -19,7 +20,10 @@ OUT_CSS = ROOT / "embed/home-slides-embed.css"
 OUT_JS = ROOT / "embed/home-slides-embed.js"
 OUT_STYLE_EMBED = ROOT / "embed/home-slides-style-embed.html"
 OUT_SCRIPT_EMBED = ROOT / "embed/home-slides-script-embed.html"
-PUBLIC_BASE = "https://stanislavaki.github.io/birch-ai"
+# Every image the block uses is a Webflow asset (folder home-slides-sept-26).
+# Repo paths map to CDN file names here; a path missing from the map fails the
+# build instead of shipping a broken or externally hosted link.
+ASSET_MAP = ROOT / "scripts/home-slides-webflow-assets.json"
 WEBFLOW_EMBED_LIMIT = 50_000
 
 STATE_CLASSES = (
@@ -68,6 +72,20 @@ ID_MAP = {
     "phTypedText": "hse-phone-typed-text",
 }
 
+
+
+def webflow_asset_urls(text: str) -> str:
+    """Point every local images/ path at its Webflow CDN copy."""
+    assets = json.loads(ASSET_MAP.read_text())
+    cdn, files = assets["cdn"], assets["files"]
+
+    def swap(match: re.Match) -> str:
+        path = match.group(0)
+        if path not in files:
+            raise SystemExit(f"{path} is not in {ASSET_MAP.name}: upload it to Webflow Assets and add it to the map")
+        return cdn + files[path]
+
+    return re.sub(r"(?<![\w/.])images/slides/[\w./-]+\.(?:webp|png|svg|jpg)", swap, text)
 
 def extract_between(text: str, start: str, end: str, offset: int = 0) -> str:
     start_index = text.index(start, offset) + len(start)
@@ -145,7 +163,7 @@ def build_css(source: str) -> str:
     source_css = source_css.replace(".container.hse-hsm", ".hse-container-e.hse-hsm")
     source_css = re.sub(r"\.btn\b", ".hse-btn", source_css)
     source_css = source_css.replace("var(--nav-height)", "var(--nav-height, 0px)")
-    source_css = source_css.replace("url(images/", f"url({PUBLIC_BASE}/images/")
+    source_css = webflow_asset_urls(source_css)
     source_css = re.sub(
         r"(\.hse-hs\s*\{[^{}]*?)padding-block:\s*var\([^;]+;",
         r"\1padding-block: 0;",
@@ -278,12 +296,9 @@ def build_html(source: str) -> str:
         html = html.replace(f'id="{old}"', f'id="{new}"')
     html = html.replace('href="#">Explore integrations', 'href="/integrations">Explore integrations')
     html = html.replace('href="#">More about Rules', 'href="/manage">More about Rules')
-    html = html.replace('href="#">See how it thinks', 'href="/ai">See how it thinks')
     html = html.replace('href="#">More about Birch AI', 'href="/ai">More about Birch AI')
-    html = html.replace('href="#">Explore MCP', 'href="/mcp">Explore MCP')
     html = html.replace('href="#">More about MCP', 'href="/mcp">More about MCP')
-    html = re.sub(r'(?<=src=")images/', f"{PUBLIC_BASE}/images/", html)
-    html = html.replace("url(images/", f"url({PUBLIC_BASE}/images/")
+    html = webflow_asset_urls(html)
     html = strip_html_comments(html)
     html = re.sub(r"\n\s*\n", "\n", html).strip()
 

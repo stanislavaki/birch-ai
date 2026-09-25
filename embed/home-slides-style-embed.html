@@ -649,6 +649,11 @@
 
 .hse-hs__buttons .hse-btn { flex: 1; }
 
+.hse-hs__buttons .hse-btn:only-child {
+  flex: 0 1 calc((100% - var(--gap-sm)) / 2);
+  margin-left: auto;
+}
+
 .hse-hsm__actions .hse-btn { border-radius: var(--radius-lg); }
 .hse-hs__buttons .hse-btn-stroke {
   background: rgba(0, 0, 0, 0.3);
@@ -902,6 +907,8 @@
     width: 100%;
     min-height: 3rem;
   }
+
+  .hse-hsm__actions .hse-btn:only-child { grid-column: 1 / -1; }
   .hse-hsm__actions .hse-btn-stroke {
     background: rgba(255,255,255,0.3);
     border-color: transparent;
@@ -1261,7 +1268,7 @@
 
 .hse-hs__ph-kb {
   left: 0; right: 0; top: calc(300 * var(--u)); height: calc(210 * var(--u));
-  background: #e0e2e4 url(https://stanislavaki.github.io/birch-ai/images/slides/03/phone.webp) 0 calc(-330 * var(--u)) / 100% auto no-repeat;
+  background: #e0e2e4 url(https://cdn.prod.website-files.com/6716718ea408f53194adf9a9/6ab6991b7fe37d8181e3eee6_hs-03-phone.webp) 0 calc(-330 * var(--u)) / 100% auto no-repeat;
 }
 .hse-hs__ph-keys { position: absolute; inset: 0; }
 .hse-hs__ph-key { position: absolute; border-radius: calc(4 * var(--u)); background: rgba(0, 0, 0, 0); transition: background-color 0.09s ease, scale 0.09s ease; }

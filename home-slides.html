@@ -411,6 +411,13 @@
 .hs__buttons { display: flex; gap: var(--gap-sm); align-items: center; align-self: start; }   /* buttons sit on the top edge of the bar, level with the badge */
 
 .hs__buttons .btn { flex: 1; }
+/* A slide whose two links would lead to the same page carries one button.
+   It keeps the size and right-edge spot of a button in a pair, so the
+   primary CTA does not jump in width or place between slides. */
+.hs__buttons .btn:only-child {
+  flex: 0 1 calc((100% - var(--gap-sm)) / 2);
+  margin-left: auto;
+}
 /* The page's own 1rem, but only where the buttons are full-width blocks in
    the flow — on the mobile card. On the desktop bar they are small inline
    buttons, and at 1rem they read as pills. */
@@ -721,6 +728,9 @@
     width: 100%;
     min-height: 3rem;
   }
+  /* A lone button is a full-width block in the flow, like the card above it:
+     half a row with an empty half reads as a missing button. */
+  .hsm__actions .btn:only-child { grid-column: 1 / -1; }
   .hsm__actions .btn-stroke {
     background: rgba(255,255,255,0.3);
     border-color: transparent;
@@ -2329,7 +2339,6 @@
             </div>
             <p class="hs__lead t-body">Birch AI turns a sentence into a working rule: it reads your business context, picks the metrics that matter, and hands back something you can check before it ever goes live.</p>
             <div class="hs__buttons">
-              <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
               <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
             </div>
           </header>
@@ -2340,7 +2349,6 @@
             </div>
             <p class="hs__lead t-body">Birch MCP opens your account to any assistant that speaks the protocol — ask it from Claude, from a script, from your own tooling, without opening the dashboard at all.</p>
             <div class="hs__buttons">
-              <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
               <a class="btn btn-default btn-xs" href="#">More about MCP</a>
             </div>
           </header>
@@ -2390,19 +2398,19 @@
               <span class="hs__rules-title">Your automated rules</span>
             </div>
             <img data-frag="rule-card-pause" class="hs__frag hs__frag--nested" data-hs-src="images/slides/01/rule-card-pause.webp" alt="Pause rule"
-                 width="1381" height="461" loading="lazy" decoding="async"
+                 width="2241" height="744" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:8">
             <img data-frag="rule-card-increase" class="hs__frag hs__frag--nested" data-hs-src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule"
-                 width="1552" height="518" loading="lazy" decoding="async"
+                 width="2241" height="744" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:9">
-            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule"
+            <img data-frag="rule-card" class="hs__frag hs__frag--nested hs__frag--core" data-hs-src="images/slides/01/rule-card.webp" alt="Duplicate rule"
                  width="2241" height="744" loading="lazy" decoding="async"
                  style="--x:243; --y:38; --w:747; --dy:93; z-index:10" data-core>
           </div>
 
           <div data-frag="business-context" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
                role="img" aria-label="Your business context"
-               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.png)"></div>
+               style="--ring-r:16; --x:226; --y:114; --w:194.25; --h:225.75; --lit:0; z-index:15; background-image:url(images/slides/01/business-context.webp)"></div>
           <div data-frag="meta-ads-library" class="hs__frag hs__frag--sized hs__frag--rise hs__frag--ring hs__pic"
                role="img" aria-label="Meta ads library"
                style="--ring-r:16; --x:48; --y:199; --w:336.44; --h:255.53; --lit:0; z-index:16; background-image:url(images/slides/01/meta-ads-library.webp)"></div>
@@ -2524,7 +2532,7 @@
             <img class="hsm__asset hsm__rules-snap" data-hs-src="images/slides/01/platform-snapchat.webp" alt="Snapchat" width="225" height="225" loading="lazy">
             <img class="hsm__asset hsm__rules-google" data-hs-src="images/slides/01/platform-google-ads.webp" alt="Google Ads" width="225" height="225" loading="lazy">
             <img class="hsm__asset hsm__rules-account" data-hs-src="images/slides/01/ad-account.webp" alt="Ad account" width="625" height="252" loading="lazy">
-            <img class="hsm__asset hsm__rules-duplicate" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+            <img class="hsm__asset hsm__rules-duplicate" data-hs-src="images/slides/01/rule-card.webp" alt="Duplicate rule" width="2241" height="744" loading="lazy">
             <img class="hsm__asset hsm__rules-meta" data-hs-src="images/slides/01/platform-meta.webp" alt="Meta" width="225" height="225" loading="lazy">
             <img class="hsm__asset hsm__rules-integrations" data-hs-src="images/slides/01/integrations.webp" alt="Integrations" width="1339" height="227" loading="lazy">
             <img class="hsm__asset hsm__rules-section" data-hs-src="images/slides/01/schedule-section.webp" alt="Schedule" width="810" height="421" loading="lazy">
@@ -2552,11 +2560,11 @@
           <div class="hsm__stage hsm__stage--ai">
             <div class="hsm__auto-rules">
               <span class="hsm__auto-title">Your automated rules</span>
-              <img class="hsm__asset hsm__ai-pause" data-hs-src="images/slides/01/rule-card-pause.webp" alt="Pause rule" width="1381" height="461" loading="lazy">
-              <img class="hsm__asset hsm__ai-increase" data-hs-src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="1552" height="518" loading="lazy">
-              <img class="hsm__asset hsm__ai-duplicate" data-hs-src="images/slides/01/rule-card-3x.png" alt="Duplicate rule" width="2241" height="744" loading="lazy">
+              <img class="hsm__asset hsm__ai-pause" data-hs-src="images/slides/01/rule-card-pause.webp" alt="Pause rule" width="2241" height="744" loading="lazy">
+              <img class="hsm__asset hsm__ai-increase" data-hs-src="images/slides/01/rule-card-increase.webp" alt="Increase budget rule" width="2241" height="744" loading="lazy">
+              <img class="hsm__asset hsm__ai-duplicate" data-hs-src="images/slides/01/rule-card.webp" alt="Duplicate rule" width="2241" height="744" loading="lazy">
             </div>
-            <img class="hsm__asset hsm__ai-context" data-hs-src="images/slides/01/business-context.png" alt="Your business context" width="619" height="714" loading="lazy">
+            <img class="hsm__asset hsm__ai-context" data-hs-src="images/slides/01/business-context.webp" alt="Your business context" width="777" height="903" loading="lazy">
             <img class="hsm__asset hsm__ai-library" data-hs-src="images/slides/01/meta-ads-library.webp" alt="Meta Ads Library" width="1346" height="1022" loading="lazy">
             <img class="hsm__asset hsm__ai-icon" data-hs-src="images/slides/01/app-icon.webp" alt="Birch AI" width="154" height="154" loading="lazy">
             <div class="hsm__chat" data-hsm-chat aria-label="Birch AI chat">
@@ -2601,7 +2609,6 @@
         </div>
       </div>
       <div class="hsm__actions">
-        <a class="btn btn-stroke btn-xs" href="#">See how it thinks</a>
         <a class="btn btn-default btn-xs" href="#">More about Birch AI</a>
       </div>
     </article>
@@ -2642,7 +2649,6 @@
         </div>
       </div>
       <div class="hsm__actions">
-        <a class="btn btn-stroke btn-xs" href="#">Explore MCP</a>
         <a class="btn btn-default btn-xs" href="#">More about MCP</a>
       </div>
     </article>
