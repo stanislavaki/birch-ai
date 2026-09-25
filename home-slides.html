@@ -847,18 +847,14 @@
        left it 4.3cqw off. Measured and corrected. */
     translate: -4.32cqw 0;
   }
-  /* The MCP scene follows the Figma tablet frame (Tablet → MCP, 834 wide):
-     the stage is the frame itself, so every left/top/width below is the
-     layer's Figma value / 834. The shared collage coordinates are the
-     phone's, and on this width they drew the logo 23% and the phone 10%
-     larger than the tablet frame, with the scale chip inside the frame
-     where the design keeps it past the left edge. */
-  .hsm__stage--mcp { width: 100cqw; }
-  .hsm__mcp-logo { left: 11cqw; top: 18.7cqw; width: 35.1cqw; }
-  .hsm__mcp-line { left: 47.1cqw; top: 22.7cqw; width: 16.1cqw; }
-  .hsm__mcp-phone { left: 65.3cqw; top: 2.9cqw; width: 29cqw; }
-  .hsm__mcp-time { left: 36.2cqw; top: 5.4cqw; width: 7.7cqw; }
-  .hsm__mcp-scale { left: -16.8cqw; top: 21.3cqw; }
+  /* Same for the MCP scene: it reaches 96cqw of a 100cqw box, so the stage
+     was dragging 296px into empty space. Sized to the composition it has
+     nothing left to scroll and sits centred. */
+  .hsm__stage--mcp {
+    width: 96cqw;
+    margin-inline: auto;
+    translate: 1.26cqw 0;
+  }
   /* The Rules scene is wider than the frame, so it is centred on its own
      point rather than on its bounding box: the Duplicate card spans
      4→89cqw, its middle sits at 46.5, and this puts that middle on the
