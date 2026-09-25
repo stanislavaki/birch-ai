@@ -199,8 +199,21 @@
   }
 
   function markUp() {
+    /* Three places render the date, not two — found the hard way on 25.09.2026,
+       when a format change landed on the pointer pages and missed the dated ones.
+
+       - `.legal-ver-toggle .w-dyn-item > div`  pointer page: a one-item Collection
+         List fetches the in-force version's date;
+       - `.legal-ver-item > div`                a row of the dropdown;
+       - `.legal-ver-toggle > div`              dated page: bound straight to the
+         current item, shown by a condition on Status.
+
+       The third selector has to exclude two siblings that are also direct div
+       children of the toggle: the arrow, and the Collection List above — wrapping
+       the list's whole textContent would flatten the markup inside it. */
     var els = document.querySelectorAll(
-      '.legal-ver-toggle .w-dyn-item > div, .legal-ver-item > div');
+      '.legal-ver-toggle .w-dyn-item > div, .legal-ver-item > div, ' +
+      '.legal-ver-toggle > div:not(.legal-ver-arrow):not(.w-dyn-list)');
 
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
