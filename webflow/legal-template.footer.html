@@ -161,3 +161,62 @@
   }
 })();
 </script>
+
+<script>
+/* Give the effective date a machine-readable form.
+
+   The lawyers' original brief asked for the date to be readable programmatically,
+   because the frontend stores it alongside the user's consent at registration.
+   That path goes through the CMS API and works. What the PAGE exposed, though,
+   was nothing structured at all: no <time>, no ISO value anywhere in the markup.
+
+   The native route is closed. A date field can be bound to an element's text but
+   not to a `datetime` attribute: Webflow rejects it with "datetime is a reserved
+   attribute name". So the element stays as it is and the TEXT inside it gets
+   wrapped, which also avoids a layout question — turning the div itself into a
+   <time> would make it inline inside .w-dyn-item, which is a block.
+
+   Both rendered formats are accepted on purpose: the binding currently emits
+   "September 28, 2026" and is due to be switched to "28 September 2026" in the
+   Designer. Parsing both means the switch needs no change here.
+
+   Fails safe: if nothing matches, the visible date is left exactly as it was. */
+(function () {
+  var MONTHS = {january:1,february:2,march:3,april:4,may:5,june:6,july:7,
+                august:8,september:9,october:10,november:11,december:12};
+
+  function iso(text) {
+    var t = text.trim().replace(/,/g, ' ').replace(/\s+/g, ' ');
+    var m = /^([A-Za-z]+) (\d{1,2}) (\d{4})$/.exec(t);          /* September 28 2026 */
+    if (!m) {
+      m = /^(\d{1,2}) ([A-Za-z]+) (\d{4})$/.exec(t);            /* 28 September 2026 */
+      if (m) m = [m[0], m[2], m[1], m[3]];
+    }
+    if (!m) return null;
+    var mo = MONTHS[m[1].toLowerCase()];
+    if (!mo) return null;
+    return m[3] + '-' + String(mo).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0');
+  }
+
+  function markUp() {
+    var els = document.querySelectorAll(
+      '.legal-ver-toggle .w-dyn-item > div, .legal-ver-item > div');
+
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el.querySelector('time')) continue;                    /* already done */
+      var value = iso(el.textContent);
+      if (!value) continue;
+
+      var t = document.createElement('time');
+      t.setAttribute('datetime', value);
+      t.textContent = el.textContent.trim();
+      el.textContent = '';
+      el.appendChild(t);
+    }
+  }
+
+  window.Webflow = window.Webflow || [];
+  window.Webflow.push(markUp);
+})();
+</script>
